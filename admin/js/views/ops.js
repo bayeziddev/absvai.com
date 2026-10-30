@@ -1,4 +1,5 @@
 import { api, badge, busy, can, confirmBox, date, esc, qs, slideOver, taka, toast } from '../app.js';
+import { bannerEditor, linkOptions } from './banners.js';
 
 // ───────────── Seasons ─────────────
 
@@ -12,23 +13,21 @@ export async function seasons(v) {
       <td>${badge(s.state)} ${s.daysUntil !== null ? `<span class="small muted">in ${s.daysUntil} day(s)</span>` : s.daysLeft !== null ? `<span class="small muted">${s.daysLeft} day(s) left</span>` : ''}</td><td class="right">${s.product_count}</td><td class="right">${s.category_count}</td><td>${s.banners.length}</td></tr>`).join('')}
     </tbody></table></div>
     <p class="small muted">Add products to a season from the product form (step 6). Show a category only in season from the category form.</p>`;
-  const open = s => {
+  const open = async s => {
     const so = slideOver(s ? `Season · ${s.name}` : 'New season', { wide: true });
-    const banners = [...(s?.banners ?? []), { headline: '' }];
     so.body.innerHTML = `<div class="grid-2"><label class="f">Name<input id="name" value="${esc(s?.name ?? '')}"></label>${s ? '' : '<label class="f">Web address<input id="slug" placeholder="made from the name"></label>'}</div>
       <div class="grid-3"><label class="f">Starts (Bangladesh date)<input type="date" id="st" value="${esc(s?.starts_on ?? '')}"></label><label class="f">Ends<input type="date" id="en" value="${esc(s?.ends_on ?? '')}"></label><label class="check"><input type="checkbox" id="on" ${s?.is_enabled !== 0 ? 'checked' : ''}> Enabled</label></div>
       <div class="grid-3"><label class="f">Badge text<input id="al" value="${esc(s?.accent_label ?? '')}" placeholder="Winter special"></label><label class="f">Accent colour<input type="color" id="ac" value="${esc(s?.accent_color ?? '#B3261E')}"></label><label class="f">“Back in season from …”<input id="back" value="${esc(s?.back_in_season_text ?? '')}" placeholder="November"></label></div>
       <label class="f">Landing page intro<input id="intro" value="${esc(s?.landing_intro ?? '')}"></label>
-      <h3>Hero banners</h3><p class="small muted">Shown first on the homepage while the season is live. Use your own photo URL or a product photo.</p>
-      <div id="banners">${banners.map(b => `<div class="card banner"><div class="grid-2"><label class="f">Headline<input data-b="headline" value="${esc(b.headline ?? '')}"></label><label class="f">Sub-line<input data-b="subline" value="${esc(b.subline ?? '')}"></label>
-        <label class="f">Button text<input data-b="cta_text" value="${esc(b.cta_text ?? 'Shop now')}"></label><label class="f">Button link<input data-b="cta_href" value="${esc(b.cta_href ?? (s ? `/season/${s.slug}` : '/'))}"></label>
-        <label class="f">Image URL<input data-b="image" value="${esc(b.image ?? '')}"></label><label class="f">Colour<select data-b="theme">${['chili', 'turmeric', 'clove', 'leaf'].map(t => `<option ${b.theme === t ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div></div>`).join('')}</div>`;
+      <h3>Banners while the season is live</h3><p class="small muted">Shown first on the homepage during the season. Add a picture, a headline and where the button goes.</p>
+      <div id="season-banners" class="bn-list"></div>`;
     so.foot.innerHTML = `${s && can('seasons:write') ? '<button class="btn btn-ghost" id="del">Delete</button>' : '<span></span>'}${can('seasons:write') ? '<button class="btn btn-primary" id="save">Save season</button>' : ''}`;
     const g = id => so.body.querySelector(`#${id}`);
+    const editor = bannerEditor(g('season-banners'), s?.banners ?? [], { max: 5, links: await linkOptions(), readOnly: !can('seasons:write') });
     if (!can('seasons:write')) return;
     busy(so.foot.querySelector('#save'), async () => {
       const body = { name: g('name').value, slug: g('slug')?.value, startsOn: g('st').value, endsOn: g('en').value, isEnabled: g('on').checked, accentLabel: g('al').value, accentColor: g('ac').value, backInSeasonText: g('back').value, landingIntro: g('intro').value,
-        banners: [...so.body.querySelectorAll('.banner')].map(el => Object.fromEntries([...el.querySelectorAll('[data-b]')].map(i => [i.dataset.b, i.value]))).filter(x => x.headline) };
+        banners: editor.value() };
       await api(s ? `/seasons/${s.id}` : '/seasons', s ? 'PUT' : 'POST', body);
       toast('Season saved.'); so.close(); seasons(v);
     });

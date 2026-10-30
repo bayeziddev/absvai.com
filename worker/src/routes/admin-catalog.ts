@@ -11,7 +11,7 @@ import { clearTemplateCache, getSeasons, rowToVariant } from '../repo/catalog';
 import * as cat from '../repo/catalog-admin';
 import { nextSkuSequence } from '../repo/numbering';
 import { loadTemplate } from '../repo/templates';
-import { allowed, audit, need, refresh } from './admin-helpers';
+import { allowed, audit, need, needAny, refresh } from './admin-helpers';
 
 export const adminCatalog = new Hono<AppEnv>();
 
@@ -332,18 +332,33 @@ adminCatalog.post('/categories', need('catalog:write'), c => saveCategory(c, nul
 
 const CATEGORY_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/svg+xml': 'svg' };
 
-/** Category picture (menu and category tiles). Returns the URL for the category form to save. */
-adminCatalog.post('/category-image', need('catalog:write'), async c => {
+/** Stores an uploaded picture in R2 under `prefix/` and returns its public URL. */
+async function storeImage(c: Context<AppEnv>, prefix: 'c' | 'b', types: Record<string, string>, maxMb: number): Promise<string> {
   const file = (await c.req.formData()).get('file');
   if (!(file instanceof File)) throw bad('Choose a picture.');
-  const ext = CATEGORY_IMAGE_TYPES[file.type];
-  if (!ext) throw bad('Upload the picture as JPG, PNG, WebP or SVG.');
-  if (file.size > 2 * 1024 * 1024) throw bad('The picture must be under 2 MB.');
+  const ext = types[file.type];
+  if (!ext) throw bad(`Upload the picture as ${Object.values(types).map(x => x.toUpperCase()).join(', ')}.`);
+  if (file.size > maxMb * 1024 * 1024) throw bad(`The picture must be under ${maxMb} MB.`);
   const media = mediaBucket(c.env);
-  const key = `c/${crypto.randomUUID()}.${ext}`;
+  const key = `${prefix}/${crypto.randomUUID()}.${ext}`;
   await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
-  await audit(c, 'category.image', 'category', null, { key });
-  return c.json({ url: `/media/${key}` }, 201);
+  return `/media/${key}`;
+}
+
+/** Category picture (menu and category tiles). Returns the URL for the category form to save. */
+adminCatalog.post('/category-image', need('catalog:write'), async c => {
+  const url = await storeImage(c, 'c', CATEGORY_IMAGE_TYPES, 2);
+  await audit(c, 'category.image', 'category', null, { url });
+  return c.json({ url }, 201);
+});
+
+const BANNER_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg' };
+
+/** Banner picture (homepage, second banner, season banners). The browser resizes it to WebP first. */
+adminCatalog.post('/banner-image', needAny('settings:write', 'seasons:write'), async c => {
+  const url = await storeImage(c, 'b', BANNER_IMAGE_TYPES, 3);
+  await audit(c, 'banner.image', 'settings', null, { url });
+  return c.json({ url }, 201);
 });
 adminCatalog.put('/categories/:id', need('catalog:write'), c => saveCategory(c, posInt(c.req.param('id'))));
 
@@ -813,4 +828,4 @@ adminCatalog.post('/products/import', need('catalog:write'), async c => {
 });
 
 // Seasons list for the product form's season picker.
-adminCatalog.get('/season-options', need('catalog:read'), async c => c.json((await getSeasons(c.env.DB)).map(s => ({ id: s.id, name: s.name, starts_on: s.starts_on, ends_on: s.ends_on }))));
+adminCatalog.get('/season-options', need('catalog:read'), async c => c.json((await getSeasons(c.env.DB)).map(s => ({ id: s.id, name: s.name, slug: s.slug, starts_on: s.starts_on, ends_on: s.ends_on }))));

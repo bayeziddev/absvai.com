@@ -16,6 +16,47 @@ export interface SettingDef {
 
 const re = (pattern: RegExp, message: string) => (v: string) => (!v || pattern.test(v) ? null : message);
 
+export const SOCIAL_NETWORKS = { facebook: 'Facebook page', instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok' } as const;
+const SOCIAL_HOSTS: Record<string, RegExp> = {
+  facebook: /^https:\/\/(www\.|m\.|web\.)?(facebook|fb)\.com\//, instagram: /^https:\/\/(www\.)?instagram\.com\//,
+  youtube: /^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//, tiktok: /^https:\/\/(www\.)?tiktok\.com\//,
+};
+
+/** Social links: plain https links to the four networks the footer shows. */
+function validateSocial(v: string): string | null {
+  const o = JSON.parse(v || '{}') as Record<string, unknown>;
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return 'Social links are not valid.';
+  for (const [k, x] of Object.entries(o)) {
+    if (!(k in SOCIAL_HOSTS)) return `Unknown social network "${k}".`;
+    if (x && (typeof x !== 'string' || !SOCIAL_HOSTS[k].test(x))) return `The ${SOCIAL_NETWORKS[k as keyof typeof SOCIAL_NETWORKS]} link should start with https:// and the ${k} address, e.g. https://www.${k === 'youtube' ? 'youtube' : k}.com/absvai`;
+  }
+  return null;
+}
+
+export const BANNER_THEMES = ['chili', 'turmeric', 'clove', 'leaf'] as const;
+/** One banner: text fields, an uploaded or built-in picture, a link inside the store (or https), a known colour theme. */
+export function bannerProblem(b: unknown, n: string): string | null {
+  if (!b || typeof b !== 'object' || Array.isArray(b)) return `${n} is not valid.`;
+  const x = b as Record<string, unknown>;
+  if (typeof x.headline !== 'string' || !x.headline.trim()) return `${n}: add a headline.`;
+  for (const k of ['headline', 'subline', 'cta_text', 'kicker']) if (x[k] !== undefined && (typeof x[k] !== 'string' || (x[k] as string).length > 160)) return `${n}: the text is too long.`;
+  if (x.image !== undefined && x.image !== '' && (typeof x.image !== 'string' || !/^(\/media\/b\/[\w-]+\.(png|jpg|webp)|\/img\/[\w/.-]+|https:\/\/\S+)$/.test(x.image))) return `${n}: upload the picture again.`;
+  if (x.cta_href !== undefined && x.cta_href !== '' && (typeof x.cta_href !== 'string' || !/^(\/[\w/?=&.-]*|https:\/\/\S+)$/.test(x.cta_href))) return `${n}: the button link should be a page of the store (starting with /) or an https:// link.`;
+  if (x.theme !== undefined && !(BANNER_THEMES as readonly unknown[]).includes(x.theme)) return `${n}: choose one of the colours.`;
+  return null;
+}
+function validateBanners(v: string): string | null {
+  const list = JSON.parse(v || '[]') as unknown;
+  if (!Array.isArray(list)) return 'Banners are not valid.';
+  if (list.length > 6) return 'Use at most 6 homepage banners.';
+  for (const [i, b] of list.entries()) { const e = bannerProblem(b, `Banner ${i + 1}`); if (e) return e; }
+  return null;
+}
+function validatePromo(v: string): string | null {
+  const b = JSON.parse(v || 'null') as unknown;
+  return b === null ? null : bannerProblem(b, 'The second banner');
+}
+
 export const TRACKING_FORMATS = {
   gtm_id: /^GTM-[A-Z0-9]{4,10}$/,
   pixel_id: /^\d{10,20}$/,
@@ -30,11 +71,11 @@ export const SETTINGS: SettingDef[] = [
   { key: 'support_phone', group: 'store', label: 'Support phone', kind: 'text' },
   { key: 'whatsapp_number', group: 'store', label: 'WhatsApp number', kind: 'text', validate: re(/^8801[3-9]\d{8}$/, 'WhatsApp number must look like 8801712345678.') },
   { key: 'messenger_page', group: 'store', label: 'Facebook page / Messenger username', kind: 'text', validate: re(/^[\w.-]{2,80}$/, 'Use the page username only, e.g. absvai.') },
-  { key: 'social_links', group: 'store', label: 'Social links', kind: 'json', help: '{"facebook":"https://…","instagram":"https://…","youtube":"https://…"}' },
+  { key: 'social_links', group: 'store', label: 'Social links', kind: 'json', validate: validateSocial },
   { key: 'company_name', group: 'store', label: 'Company name (invoices)', kind: 'text' },
   { key: 'company_address', group: 'store', label: 'Company address (invoices)', kind: 'longtext' },
-  { key: 'default_banners', group: 'store', label: 'Default hero banners', kind: 'json' },
-  { key: 'promo_banner', group: 'store', label: 'Second promo banner', kind: 'json' },
+  { key: 'default_banners', group: 'store', label: 'Homepage banners', kind: 'json', validate: validateBanners },
+  { key: 'promo_banner', group: 'store', label: 'Second banner', kind: 'json', validate: validatePromo },
 
   { key: 'brand_logo_url', group: 'branding', label: 'Logo', kind: 'url', validate: re(/^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/, 'Upload the logo here instead of pasting a link.') },
   { key: 'brand_colors', group: 'branding', label: 'Brand colours', kind: 'json' },

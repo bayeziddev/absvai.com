@@ -343,6 +343,49 @@ describe('owner-friendly admin: charts and easy categories', () => {
   });
 });
 
+describe('settings without code: banners with pictures and social links', () => {
+  const upload = async (path: string, name: string) => {
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], name, { type: 'image/png' }));
+    return t.fetch(path, { method: 'POST', body: form, headers: { cookie: t.admin.cookie, 'x-csrf-token': t.admin.csrf, origin: 'https://absvai.test' } });
+  };
+
+  it('uploads a banner picture and shows the banner on the homepage', async () => {
+    const up = await upload('/api/admin/banner-image', 'gur.png');
+    expect(up.status).toBe(201);
+    const { url } = (await up.json()) as { url: string };
+    expect(url).toMatch(/^\/media\/b\/[\w-]+\.png$/);
+    expect((await t.fetch(url)).status).toBe(200);
+    const promo = { headline: 'Pitha week', subline: 'Rice flour and gur', cta_text: 'See deals', cta_href: '/deals', theme: 'leaf', image: url };
+    const r = await t.adminJson('/settings', 'PUT', { promo_banner: JSON.stringify(promo), default_banners: JSON.stringify([{ ...promo, headline: 'Gur is here' }]) });
+    expect(r.status).toBe(200);
+    const html = await (await t.fetch('/')).text();
+    expect(html).toContain('Pitha week');
+    expect(html).toContain(url);
+  });
+
+  it('refuses unsafe or broken banners with a plain message', async () => {
+    const put = (b: object) => t.adminJson('/settings', 'PUT', { default_banners: JSON.stringify([b]) });
+    expect((await put({ headline: 'X', cta_href: 'javascript:alert(1)' })).body.error).toMatch(/button link should be a page of the store/);
+    expect((await put({ headline: 'X', image: '/media/../secret.png' })).body.error).toMatch(/upload the picture again/);
+    expect((await put({ headline: '' })).body.error).toBe('Banner 1: add a headline.');
+    expect((await put({ headline: 'X', theme: 'neon' })).body.error).toMatch(/choose one of the colours/);
+    const [season] = await t.sql<{ id: number; name: string }>('SELECT id, name FROM seasons ORDER BY id LIMIT 1');
+    const bad = await t.adminJson(`/seasons/${season.id}`, 'PUT', { name: season.name, banners: [{ headline: 'Y', cta_href: 'javascript:alert(1)' }] });
+    expect(bad.status).toBe(400);
+  });
+
+  it('saves social links from plain fields and shows them in the footer', async () => {
+    expect((await t.adminJson('/settings', 'PUT', { social_links: JSON.stringify({ facebook: 'http://facebook.com/absvai' }) })).status).toBe(400);
+    expect((await t.adminJson('/settings', 'PUT', { social_links: JSON.stringify({ facebook: 'https://evil.example/absvai' }) })).status).toBe(400);
+    expect((await t.adminJson('/settings', 'PUT', { social_links: JSON.stringify({ myspace: 'https://myspace.com/x' }) })).status).toBe(400);
+    const ok = await t.adminJson('/settings', 'PUT', { social_links: JSON.stringify({ facebook: 'https://www.facebook.com/absvai', tiktok: 'https://www.tiktok.com/@absvai' }) });
+    expect(ok.status).toBe(200);
+    const html = await (await t.fetch('/shop')).text();
+    expect(html).toMatch(/class="footer-social"[\s\S]*href="https:\/\/www\.facebook\.com\/absvai"[\s\S]*href="https:\/\/www\.tiktok\.com\/@absvai"/);
+  });
+});
+
 describe('deploying before R2 is switched on', () => {
   it('keeps the store working and explains uploads are off', async () => {
     const media = t.env.MEDIA;

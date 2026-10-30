@@ -1,6 +1,6 @@
 import type { Child } from 'hono/jsx';
 import type { CategoryNode } from '../repo/catalog';
-import { DEFAULT_COLORS, parseBrandColors, TRACKING_FORMATS } from '../lib/settings-schema';
+import { DEFAULT_COLORS, parseBrandColors, SOCIAL_NETWORKS, TRACKING_FORMATS } from '../lib/settings-schema';
 import { Icon } from './icons';
 
 export interface LayoutProps {
@@ -49,6 +49,8 @@ export function Layout(p: LayoutProps) {
   const canonical = `${p.siteUrl}${p.path}`;
   const image = p.image ? (p.image.startsWith('http') ? p.image : `${p.siteUrl}${p.image}`) : `${p.siteUrl}/img/og-default.png`;
   const wa = s.whatsapp_number?.replace(/\D/g, '');
+  // Social links saved in Settings (validated https links to the four networks).
+  const social = (() => { try { return Object.entries(JSON.parse(s.social_links || '{}') as Record<string, string>).filter(([k, v]) => k in SOCIAL_NETWORKS && /^https:\/\//.test(v)); } catch { return []; } })();
   const announce = s.announcement || '';
   const logo = /^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/.test(s.brand_logo_url ?? '') ? s.brand_logo_url : null;
   const colors = parseBrandColors(JSON.parse(s.brand_colors || '{}'));
@@ -171,6 +173,11 @@ export function Layout(p: LayoutProps) {
               <li><a href="/policies/credits">Credits</a></li>
             </ul>
           </div>
+          {social.length > 0 && (
+            <ul class="footer-social" aria-label="Follow us">
+              {social.map(([k, v]) => <li><a href={v} target="_blank" rel="noopener">{SOCIAL_NETWORKS[k as keyof typeof SOCIAL_NETWORKS].replace(' page', '')}</a></li>)}
+            </ul>
+          )}
           <p class="footer-copy">© {new Date().getFullYear()} {s.company_name || 'ABS VAI LTD'}. Prices in Bangladeshi taka.</p>
         </footer>
 

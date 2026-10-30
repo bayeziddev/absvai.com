@@ -6,7 +6,7 @@ Plain steps for running the store from `absvai.com/admin/`. No coding needed.
 
 1. Open `absvai.com/admin/`. The first time, it asks for the **setup token** (your developer gives it to you once), your name,
    email and a password (10+ characters with a number). This creates the **Super Admin**.
-2. Go to **Settings** and fill in: support phone, WhatsApp number, Facebook page, **bKash/Nagad/Rocket numbers** (for advances),
+2. Go to **Settings** and fill in: support phone, WhatsApp number, social media links, **bKash/Nagad/Rocket numbers** (for advances),
    company address (printed on invoices), the free-delivery amount and the announcement bar text. Under **Branding**, upload your
    logo and (if you like) change the colours; the page warns you if a colour would make text hard to read. Under **Tracking**, paste
    only the ID (for example `GTM-AB12CD3`), never script code. Credentials (SMS, courier, payment) show as `••••1234` once saved.
@@ -50,6 +50,28 @@ everything else: SEO, seasons, wholesale prices, barcodes, video.
 **Categories → + Add category**: type the name, add a picture, choose whether it sits inside another category, and what kind of
 products it holds (a subcategory uses its main category's kind). Press **Save**. The short code is made for you.
 
+## Homepage banners and social media
+
+![Homepage banners](screenshots/admin-banners.png)
+
+**Settings → Homepage banners**: each banner shows a live preview while you type.
+
+1. Press **+ Add picture** and choose a photo from your phone or computer (wide photos look best; it is made smaller for you).
+2. Type a **headline**, and if you like a short line under it and the button text.
+3. Under **Button opens**, pick the page: the shop, deals, new arrivals, any category or season. **Another link…** lets you paste
+   your own.
+4. Pick a colour. Use **Move up / Move down** to change the order, **Remove** to delete one.
+5. Press **Save** at the bottom of the screen.
+
+The **second banner** sits further down the homepage. While a season is live, the season's own banners show at the top instead
+(the page tells you so); change those in **Seasons**, which uses the same banner editor.
+
+**Settings → Store → Social media**: paste the full link of your Facebook page, Instagram, YouTube or TikTok (for example
+`https://www.facebook.com/absvai`). Leave a box empty to hide it. They show in the footer of every page.
+
+Tracking, fraud protection, SMS, couriers and incomplete orders are under **Advanced settings** at the bottom. You only need them
+once, while setting up.
+
 ## Add a product (full editor, every detail)
 
 ![Options and prices](screenshots/admin-form-options.png)
@@ -88,7 +110,7 @@ Everything comes in as a draft for you to check.
 
 1. **Seasons** → open the season → set this year's **start and end dates**. Ramadan and Eid move every year, so check the dates
    every year. The dashboard reminds you when dates are missing.
-2. Add one or two **banners** (headline, sub-line, button, photo).
+2. Add one or two **banners**: a photo, a headline and the page the button opens (same editor as the homepage banners).
 3. Make sure the season's products are ticked in step 6 of their form, and seasonal categories are set to "Only during these
    seasons" in **Categories**.
 4. On the start date, by itself: the homepage shows the season's banners and "In Season Now", the categories move to the front, and

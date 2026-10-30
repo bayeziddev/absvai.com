@@ -1,5 +1,6 @@
 /** Admin operations: dashboard, customers, seasons, delivery zones & geo, couriers, synonyms, inventory, outbox, audit. */
 import { Hono, type Context } from 'hono';
+import { bannerProblem } from '../lib/settings-schema';
 import type { AppEnv } from '../env';
 import { TAG } from '../lib/cache-tags';
 import { bdDate, daysBetween, isIsoDate } from '../lib/dates';
@@ -179,6 +180,7 @@ async function saveSeason(c: Context<AppEnv>, id: number | null) {
     headline: str(x.headline, 80), subline: str(x.subline, 160), cta_text: str(x.cta_text, 30) || 'Shop now', cta_href: str(x.cta_href, 200) || '/',
     theme: ['chili', 'turmeric', 'clove', 'leaf'].includes(String(x.theme)) ? String(x.theme) : 'chili', image: str(x.image, 300),
   })).filter(x => x.headline) : [];
+  for (const [i, x] of banners.entries()) { const e = bannerProblem(x, `Banner ${i + 1}`); if (e) throw bad(e); }
   const input = {
     name, startsOn: starts, endsOn: ends, accentLabel: str(b.accentLabel, 40) || null, accentColor: /^#[0-9a-fA-F]{6}$/.test(str(b.accentColor)) ? str(b.accentColor) : null,
     banners, landingIntro: str(b.landingIntro, 300) || null, backInSeasonText: str(b.backInSeasonText, 40) || null, isEnabled: b.isEnabled !== false,
