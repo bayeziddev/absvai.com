@@ -10,10 +10,10 @@ applies the migrations, uploads the Worker together with its secrets, and checks
 |---|---|
 | Pull request | Tests only (typecheck, generated-file drift, unit + integration, production dry run, Playwright) |
 | Push to `main` | Tests, then deploy |
-| Push to the build branch `claude/abs-vai-design-review-dt6sk6` | Tests, then deploy (until it is merged; remove the branch from `ci.yml` afterwards) |
 | **Actions → Test and deploy → Run workflow** | Tests, then deploy from the branch you pick; tick *Load the demo catalog* to fill an empty store with the 17 demo products |
 
-Manual runs appear in the Actions tab once `ci.yml` is on the default branch (`main`).
+Live now at **https://absvai.absvai.workers.dev** (admin: **https://absvai.absvai.workers.dev/admin/**). Once `absvai.com` is added
+to the Cloudflare account, the next deploy attaches `absvai.com` and `www.absvai.com` by itself.
 
 ## One-time setup (about 10 minutes)
 

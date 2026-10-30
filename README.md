@@ -7,6 +7,17 @@ One **Cloudflare Worker** (Hono + TypeScript) serves the server-rendered storefr
 backed by **D1** (catalog, orders, geo), **KV** (rate limits), **R2** (photos, logo, manuals, claim documents) and the **Workers
 Cache**: public pages are answered at the edge and refreshed by tag when an admin saves (the ISR equivalent).
 
+## Live
+
+| | URL |
+|---|---|
+| **Store** | https://absvai.absvai.workers.dev |
+| **Admin dashboard** | https://absvai.absvai.workers.dev/admin/ (first visit: enter the `SETUP_TOKEN` once to create the Super Admin) |
+| After the domain is connected | https://absvai.com and https://absvai.com/admin/ (the next deploy switches over by itself) |
+
+Every push to `main` runs the tests and, when they pass, updates the live site on Cloudflare through GitHub Actions
+(`.github/workflows/ci.yml`). The run summary in the **Actions** tab shows the live and admin URLs and the smoke-test results.
+
 | | |
 |---|---|
 | Full A–Z specification, v2 (all 34 sections, data model, Mermaid diagrams, what is built vs planned) | [docs/SPEC.md](docs/SPEC.md) |

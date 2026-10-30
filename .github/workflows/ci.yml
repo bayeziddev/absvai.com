@@ -3,8 +3,8 @@ name: Test and deploy
 on:
   pull_request:
   push:
-    # The build branch deploys too until it is merged (the owner asked for the site to go live from it); remove it after merging.
-    branches: [main, claude/abs-vai-design-review-dt6sk6]
+    # Every push to main tests, then updates the live site on Cloudflare.
+    branches: [main]
   # Manual deploy from the Actions tab (any branch), e.g. to put a feature branch live before it is merged.
   workflow_dispatch:
     inputs:
@@ -141,7 +141,8 @@ jobs:
           echo "Live site: $base · Admin: $base/admin/"
           for path in /robots.txt / /admin/ /api/geo/version; do
             ok=""
-            for i in 1 2 3 4 5 6 7 8 9; do
+            # A brand-new workers.dev address can take a few minutes to answer (DNS and certificate), so allow up to ~5 minutes.
+            for i in $(seq 1 30); do
               code=$(curl -s -o /dev/null -w '%{http_code}' "$base$path") && [ "$code" = "200" ] && ok=1 && break
               sleep 10
             done
