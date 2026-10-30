@@ -32,15 +32,14 @@ GitHub → the repository → **Settings → Secrets and variables → Actions �
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN` | yes | the token from step 1 |
 | `CLOUDFLARE_ACCOUNT_ID` | yes | dashboard → Workers & Pages → Account ID (right side) |
-| `SETUP_TOKEN` | yes | any long random text; used once at `/admin/` to create the Super Admin |
-| `OTP_PEPPER` | yes | `openssl rand -base64 32` |
-| `SIGNING_KEY` | yes | `openssl rand -base64 32` (checkout tokens and salted device/IP/phone hashes) |
-| `SETTINGS_KEY` | yes | `openssl rand -base64 32` (must be exactly 32 bytes; encrypts credentials saved in Settings) |
+| `SETUP_TOKEN` | yes | any long random text you choose (like a password); you type it once at `/admin/` to create the Super Admin |
+| `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY` | **no, created for you** | internal random keys nobody types (they hash SMS codes, sign checkout sessions and encrypt passwords saved in Settings). The first deploy creates them and keeps them on Cloudflare; later deploys keep the same ones. Add your own only if you want a copy (`openssl rand -base64 32` each) |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | Cloudflare → Turnstile → add a widget for `absvai.com` |
 | `SMS_PROVIDER`, `SMS_API_KEY` | later | once the SMS gateway is chosen; until then messages are logged in Admin → SMS outbox |
 
-Keep a private copy of `SIGNING_KEY` and `SETTINGS_KEY`. Changing `SETTINGS_KEY` makes saved credentials unreadable (re-enter them in
-Settings); changing `SIGNING_KEY` logs out open checkouts and resets device/IP block matching.
+The deploy never replaces those three keys once they exist: if it can't read the Worker's secrets it stops instead. If you ever
+delete the Worker or change `SETTINGS_KEY`, credentials saved in Settings must be entered again; a new `SIGNING_KEY` logs out open
+checkouts and resets device/IP block matching.
 
 ### 3. The domain
 The Worker attaches `absvai.com` and `www.absvai.com` as custom domains when the **absvai.com zone is in the same Cloudflare

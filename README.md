@@ -77,8 +77,9 @@ OTP codes) is written to **Admin → SMS outbox** with status `logged`.
 
 GitHub Actions deploys on every push to `main` (and, until it is merged, to the build branch), or from **Actions → Run workflow**.
 The job finds or creates D1, KV and R2, applies migrations, deploys the Worker with its secrets in one step and smoke-tests the
-live site. Add the repository secrets listed in [docs/DEPLOY.md](docs/DEPLOY.md) (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
-`SETUP_TOKEN`, `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY`, optional Turnstile and SMS). `absvai.com` and `www.absvai.com` attach
+live site. Add the repository secrets listed in [docs/DEPLOY.md](docs/DEPLOY.md): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and
+`SETUP_TOKEN` (optional: Turnstile and SMS). The internal keys `OTP_PEPPER`, `SIGNING_KEY` and `SETTINGS_KEY` are created on the
+first deploy and kept on Cloudflare. `absvai.com` and `www.absvai.com` attach
 as custom domains once the zone is in the Cloudflare account; until then the deploy goes to `workers.dev`.
 
 ## Folder structure
