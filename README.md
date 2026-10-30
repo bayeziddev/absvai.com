@@ -4,13 +4,15 @@ Seasonal multi-category marketplace for **ABS VAI LTD**: households buying gur, 
 small food businesses buying presses, sealers, tools, packaging and bulk Master Masala. English only, mobile-first, Bangladesh.
 
 One **Cloudflare Worker** (Hono + TypeScript) serves the server-rendered storefront, the admin app and every `/api/*` route,
-backed by **D1** (catalog, orders, geo), **KV** (sessions, cached geo JSON, rate limits) and **R2** (photos, manuals, claim documents).
+backed by **D1** (catalog, orders, geo), **KV** (rate limits), **R2** (photos, logo, manuals, claim documents) and the **Workers
+Cache**: public pages are answered at the edge and refreshed by tag when an admin saves (the ISR equivalent).
 
 | | |
 |---|---|
-| Full A–Z specification (all 24 sections, data model, diagrams, what is built vs planned) | [docs/SPEC.md](docs/SPEC.md) |
+| Full A–Z specification, v2 (all 34 sections, data model, Mermaid diagrams, what is built vs planned) | [docs/SPEC.md](docs/SPEC.md) |
+| Deploy with GitHub Actions to Cloudflare: secrets, token permissions, domain | [docs/DEPLOY.md](docs/DEPLOY.md) |
 | Review of the reference site and the Facebook ad creatives | [docs/DESIGN-REVIEW.md](docs/DESIGN-REVIEW.md) |
-| Owner guide: add a product, start a season, confirm orders, fix postcodes | [docs/OWNER-GUIDE.md](docs/OWNER-GUIDE.md) |
+| Owner guide: products, seasons, the 8 order stages, incomplete and manual orders, returns, block list | [docs/OWNER-GUIDE.md](docs/OWNER-GUIDE.md) |
 | Geo data sources, pinned commit and licensing note | [data/geo/SOURCES.md](data/geo/SOURCES.md) |
 | Postcode → area match report | [data/geo/reports/postcode-match-summary.md](data/geo/reports/postcode-match-summary.md) |
 
@@ -23,37 +25,36 @@ backed by **D1** (catalog, orders, geo), **KV** (sessions, cached geo JSON, rate
 
 ## What is in Phase 1 (this build)
 
-- **Product templates** (Section 3): 10 launch templates as data. They drive the upload form, the product-page info panels,
-  the card key-spec line and the listing filters. Admins can create new templates and categories with no code. "Customers choose this"
-  promotes a spec to an option for one product only.
-- **Smart upload form** (Section 4): 9 steps, variant table with bulk fill, automatic unique SKUs (`ORG-PTGR-500G-0001`), photos
-  compressed in the browser and stored in R2, a plain-language publish checklist (e.g. *"Add a best-before date. Required for food
-  products."*), draft / schedule / publish, duplicate, and a CSV layout per template for bulk import.
-- **Storefront** (Section 2): an ad-continuity design (chili, turmeric, cream), season-aware hero, category carousel, In Season Now,
-  Abs Vai Originals, Hot Deals, a band for food businesses, a trust strip, bottom tabs, a chat channel picker, an option-picker sheet,
-  Add to Cart + Order Now, and `Product` / `BreadcrumbList` JSON-LD.
-- **Seasons** (Section 5): automatic switching of the hero, rails and category visibility. Out-of-season pages stay live with
-  "Back in season from …" and Notify me. Pre-orders take an advance. A cron sends back-in-season SMS and publishes scheduled products.
-- **Checkout with address detection** (Section 6): a 4-digit postcode auto-fills Division/District/Area with a post-office picker;
-  "Use my location" works at district level only (point-in-polygon on district outlines, nearest centre as fallback) and says so;
-  manual cascading dropdowns always work. The lazy-loaded Leaflet map card shows the district outline. Delivery charge and ETA are
-  live by zone, packed weight, bulky rule and free-delivery rules. The server re-validates everything. No GPS is stored.
-- **Orders**: COD can't be confirmed without the SMS code (OTP) or a logged confirmation call. Advances are verified by transaction ID.
-  Sequential `INV-YYYYMMDD-####` invoices are generated as PDFs. Risk signals cover postcode mismatch, short address, double taps,
-  velocity and returns. Abandoned checkouts are captured. Stock changes are atomic.
-- **Admin**: dashboard with "needs your attention", health strip and season card; orders pipeline with bulk actions; delivery zones;
-  postcode fixing with bulk assign; courier area mapping; seasons; inventory with a batch log; synonyms; staff roles enforced on the
-  server; audit log; SMS outbox.
+- **Zero-loading storefront** (Section 2): edge-cached pages with `Cache-Tag` purges on every admin save, ad-click parameters
+  dropped from the cache key, live price/stock from `/api/live`, prefetch/prerender with Speculation Rules (no tracking fires for a
+  prerendered page until it is shown), cross-document view transitions, self-hosted fonts, a service worker, and JS budgets that are
+  tested (home ≈ 7 KB, product ≈ 9 KB gzipped).
+- **Product templates and smart upload** (Sections 4–5): templates as data drive the form, the product page, card specs and filters.
+  Weight, volume, metre, size, colour and model options; three-level categories with drag-and-drop; cost price (Owner/Accountant
+  only), GTIN, shelf location, "show on the homepage"; automatic unique SKUs with Code 128 barcodes and printable labels.
+- **Checkout with address detection** (Section 7): postcode auto-fill, district-level "Use my location", manual dropdowns, live
+  delivery charge by zone and packed weight. No GPS is stored.
+- **Incomplete-order engine** (Section 8): one record per checkout session once the phone is valid, converted when the order is
+  placed, a recovery queue with assignment and a recovery report, deleted after 60 days.
+- **8-stage pipeline** (Section 9): New → Confirmed → Packed → In Courier → Delivered / Partial Delivered / Cancelled / Returned,
+  enforced by a state machine. Stock is held at confirmation, leaves with the courier and comes back only on the warehouse
+  **returns scan**. Bulk moves, A4 or 4×6 invoices and slips, picking list by shelf.
+- **Manual / social orders** (Section 12): Facebook, Messenger, WhatsApp and phone orders with a required source, a paste-chat phone
+  finder, barcode-scanner product search, the same pipeline and fraud checks, credited to the staff member.
+- **Baseline fraud** (Section 11): Turnstile + signed checkout token, honeypot and timing check, phone/device/IP block list (IP blocks
+  expire), repeat-order and 24-hour holds (held for review, never silently rejected), OTP caps, and a reviewable blocked-attempts log.
+- **Admin**: stage cards and "needs your attention", six roles enforced on the server, grouped settings with validated tracking IDs,
+  encrypted and masked credentials, logo and brand colours with a contrast check, audit log with before/after values.
 
-Phase 2 (payment gateways, courier APIs, fraud lookup, Pixel + CAPI, landing pages, coupons, reviews) and Phase 3 (starter kits,
-recipes hub, AI chat, planning report, offline PWA) are specified in [docs/SPEC.md](docs/SPEC.md#22-phased-roadmap). Their tables
-already exist, so no destructive migration is needed later.
+Phase 2 (payment gateways, courier APIs via Queues with verified webhooks, COD reconciliation, leaderboard, suppliers, segments and
+bulk SMS, coupons, landing pages, Pixel + CAPI, analytics) and Phase 3 (POS, accounting, starter kits, recipes, AI chat) are
+specified in [docs/SPEC.md](docs/SPEC.md#32-phased-roadmap).
 
 ## Quick start (local)
 
 ```bash
 npm ci
-cp .dev.vars.example worker/.dev.vars          # local-only secrets (SETUP_TOKEN, OTP_PEPPER)
+cp .dev.vars.example worker/.dev.vars          # local-only values (ENVIRONMENT=development, SETUP_TOKEN, OTP_PEPPER)
 npm run db:migrate:local                        # schema + geo data + launch configuration
 npm run db:seed:demo:local                      # optional demo catalog (never run in production)
 npm run dev                                     # http://localhost:8787 and http://localhost:8787/admin/
@@ -65,29 +66,20 @@ OTP codes) is written to **Admin → SMS outbox** with status `logged`.
 | Script | What it does |
 |---|---|
 | `npm run typecheck` | TypeScript build check for the Worker, scripts and tests |
-| `npm test` | 115 unit + integration tests (integration runs the real app on local D1/KV/R2 through workerd) |
-| `npm run test:e2e` | Playwright: weighed food, size + colour clothing, machine with models, pre-order with advance, notify-me, admin upload form |
+| `npm test` | 181 unit + integration tests (integration runs the real app on local D1/KV/R2 through workerd) |
+| `npm run test:e2e` | Playwright: four checkout flows with incomplete capture, notify-me, admin upload form, manual Messenger order to courier |
+| `npm run scale:check` | Seeds 1,000,000 orders into SQLite from the real migrations and times every admin order query |
 | `npm run gen:geo` | Re-imports geo data and rewrites the match report (before the first production migration only) |
 | `npm run gen:seed` | Regenerates the launch configuration and demo SQL from `scripts/seed-defs.ts` |
 | `npm run deploy` | Build assets and deploy the Worker |
 
 ## Deploying to Cloudflare
 
-```bash
-npx wrangler login
-npx wrangler d1 create absvai                  # put the id in worker/wrangler.toml
-npx wrangler kv namespace create absvai        # put the id in worker/wrangler.toml
-npx wrangler r2 bucket create absvai-media
-npx wrangler secret put SETUP_TOKEN -c worker/wrangler.toml
-npx wrangler secret put OTP_PEPPER -c worker/wrangler.toml
-npx wrangler secret put TURNSTILE_SECRET -c worker/wrangler.toml   # optional; also set TURNSTILE_SITE_KEY as a var
-npm run db:migrate:remote
-npm run deploy
-```
-
-`absvai.com` and `www.absvai.com` are attached as custom domains in `worker/wrangler.toml`; `www` redirects to the apex.
-GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, generated-file drift, tests and E2E on every PR, and on `main` applies
-D1 migrations and deploys. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
+GitHub Actions deploys on every push to `main` (and, until it is merged, to the build branch), or from **Actions → Run workflow**.
+The job finds or creates D1, KV and R2, applies migrations, deploys the Worker with its secrets in one step and smoke-tests the
+live site. Add the repository secrets listed in [docs/DEPLOY.md](docs/DEPLOY.md) (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
+`SETUP_TOKEN`, `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY`, optional Turnstile and SMS). `absvai.com` and `www.absvai.com` attach
+as custom domains once the zone is in the Cloudflare account; until then the deploy goes to `workers.dev`.
 
 ## Folder structure
 
@@ -95,18 +87,19 @@ D1 migrations and deploys. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_A
 absvai.com/
 ├── worker/
 │   ├── src/
+│   │   ├── worker.ts      gateway + cached Storefront entrypoint + scheduled handler
+│   │   ├── index.ts       Hono app, security headers, CSP from enabled integrations
 │   │   ├── routes/        api.ts (public JSON) · pages.tsx (SSR storefront) · admin*.ts (admin API)
-│   │   ├── lib/           templates · sku · delivery-charge · geo · risk · seasons · search · invoice/pdf · auth · sms · …
-│   │   ├── services/      cart pricing · checkout quote + advance rules · order placement, OTP, status changes
-│   │   ├── data/          catalog + settings queries
+│   │   ├── lib/           state-machine · barcode · crypto · csp · cache-tags · settings-schema · templates · delivery-charge · pdf · …
+│   │   ├── repo/          every SQL statement (enforced by a test)
+│   │   ├── services/      orders · checkout · cart · fraud · incomplete · cache purge · sms
 │   │   ├── views/         Hono JSX layout, components and pages
-│   │   ├── cron/          scheduled publish, season start notifications
-│   │   ├── generated/     geo-version.ts (written by the geo import)
-│   │   └── index.ts
+│   │   ├── cron/          season switching, scheduled publish, purge retry, incomplete-order cleanup
+│   │   └── generated/     geo-version.ts (written by the geo import)
 │   ├── migrations/        0001 schema · 0002 geo data (generated) · 0003 launch configuration (generated)
 │   ├── seed/demo.sql      demo catalog for local use and tests
 │   └── wrangler.toml
-├── scripts/               import-geo.ts · gen-seed.ts + seed-defs.ts · build-assets.mjs
+├── scripts/               import-geo.ts · gen-seed.ts + seed-defs.ts · build-assets.mjs · ensure-cloudflare-resources.mjs · scale-check.ts
 ├── data/geo/              pinned source files · generated outlines · match report
 ├── public/                storefront CSS, JS, images, manifest
 ├── admin/                 admin single-page app (vanilla JS modules)
@@ -123,5 +116,6 @@ absvai.com/
 4. Advance rules (which products, how much).
 5. Which seasons to set up first, with this year's exact dates (Ramadan and Eid move every year; the seasons ship without dates).
 6. BSTI / licence numbers and label details for the Master Masala line, checked with BSTI and the Bangladesh Food Safety Authority.
-7. The preferred courier(s) and SMS gateway.
+7. Which courier accounts exist (Steadfast, Pathao, RedX, Carrybee) and their API credentials, and the SMS gateway and sender ID.
 8. Real product photos: the demo uses original placeholder drawings. No photo from any other shop or reference site is in this repository.
+9. Whether a shop counter needs the POS, staff count and roles, and how deep the accounting should go.

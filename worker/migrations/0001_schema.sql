@@ -508,13 +508,20 @@ CREATE TABLE orders (
 -- Composite indexes for the admin's top queries (checked with EXPLAIN QUERY PLAN in tests/integration/scale.test.ts).
 CREATE INDEX idx_orders_status_created  ON orders (status, created_at DESC);
 CREATE INDEX idx_orders_phone_created   ON orders (phone, created_at DESC);
-CREATE INDEX idx_orders_agent_status    ON orders (assigned_to, status, created_at DESC);
+CREATE INDEX idx_orders_assigned_created ON orders (assigned_to, created_at DESC);  -- "Mine" and "Unassigned" tabs
 CREATE INDEX idx_orders_ip_created      ON orders (ip_hash, created_at);
 CREATE INDEX idx_orders_device_created  ON orders (device_hash, created_at);
 CREATE INDEX idx_orders_source_created  ON orders (source, created_at);
 CREATE INDEX idx_orders_created         ON orders (created_at DESC);
 CREATE INDEX idx_orders_tracking        ON orders (tracking_id) WHERE tracking_id IS NOT NULL;
 CREATE INDEX idx_orders_held            ON orders (created_at) WHERE hold_reason IS NOT NULL;
+CREATE INDEX idx_orders_risk_created    ON orders (risk_level, created_at DESC);
+CREATE INDEX idx_orders_advance_created ON orders (advance_status, created_at DESC);
+CREATE INDEX idx_orders_preorder        ON orders (status, created_at DESC) WHERE fulfilment_type = 'pre_order';
+-- Dashboard stage cards count from the index alone (status, test flag, last change).
+CREATE INDEX idx_orders_stage_counts    ON orders (status, is_test, updated_at);
+-- "Returned parcels not scanned in yet": only the few rows waiting at the warehouse are indexed.
+CREATE INDEX idx_orders_return_scan     ON orders (status) WHERE status IN ('returned','partial_delivered') AND return_received_at IS NULL;
 CREATE UNIQUE INDEX idx_orders_consignment ON orders (courier, consignment_id) WHERE consignment_id IS NOT NULL;
 
 CREATE TABLE order_items (

@@ -348,6 +348,11 @@ describe('scale: the order list uses indexes, never a full scan (Section 21)', (
     ['a phone prefix', { phoneRange: ['88017', '88018'] as [string, string] }],
     ['an order number', { numberPrefix: ['AV-2610', 'AV-2610￿', 'order_no'] as [string, string, 'order_no'] }],
     ['my orders', { assignedTo: 'x' }],
+    ['unassigned', { assignedTo: '' }],
+    ['high risk', { risk: 'high' }],
+    ['advances to verify', { advance: 'submitted' }],
+    ['pre-orders', { preOrder: true }],
+    ['on hold', { status: 'held' as const }],
   ])('%s', async (_name, f) => {
     const details = await plan(f as never, { createdAt: '2026-10-30T00:00:00Z', id: 999 });
     expect(details.filter(d => /^SCAN o\b/.test(d) && !/USING (COVERING )?INDEX/.test(d))).toEqual([]);

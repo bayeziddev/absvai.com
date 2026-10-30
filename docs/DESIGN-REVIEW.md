@@ -6,6 +6,12 @@ Inputs: six phone screenshots of the reference marketplace (ecom.appbyte.net), e
 > **The YouTube video could not be reviewed.** The build environment blocks YouTube's domains, so its title, description and
 > content were not accessible and nothing here is based on it. If it shows features that should be in the build, send a short list
 > of them (or a screen recording/notes), and they will be checked against [SPEC.md](SPEC.md).
+>
+> **v2 update:** the v2 build prompt lists the features to take from that material (edge-cached "zero-loading" pages, the
+> incomplete-order engine, the 8-stage pipeline with returns scan, manual social orders, block list and OTP caps, barcodes and
+> bulk printing, dynamic settings). Those are built from the prompt's text, not from the video, and are mapped section by section in
+> [SPEC.md](SPEC.md). Eight v2 admin screens were added to `screenshots/` (dashboard, orders, incomplete orders, manual order, returns
+> scan, categories, security, settings).
 
 ## 1. Reference marketplace: what we kept
 

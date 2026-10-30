@@ -32,11 +32,11 @@ export async function incomplete(v) {
       <td class="right">${taka(a.subtotal_paisa)}</td>
       <td class="small">${esc(a.source?.utm?.utm_source ?? (a.source?.landingPageId ? 'Landing page' : 'Direct'))}</td>
       <td>${badge(a.risk_level)}${(a.risk_reasons ?? []).map(r => `<br><span class="small muted">${esc(r)}</span>`).join('')}</td>
-      <td>${can('orders:write') ? `<select class="i" data-assign="${a.id}"><option value="">Nobody</option>${staff.map(s => `<option value="${esc(s.id)}" ${a.assigned_to === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>` : esc(a.assignee_name ?? '—')}</td>
-      <td class="nowrap">${a.status === 'converted' ? `${badge('converted')} ${a.converted_order_id ? `<a href="#/orders/${a.converted_order_id}">${esc(a.converted_order_no ?? 'Order')}</a>` : ''}` : `
-        ${a.phone.includes('X') ? '' : `<a class="btn btn-sm btn-outline" href="tel:${esc(a.phone)}">Call</a> <a class="btn btn-sm btn-outline" href="https://wa.me/88${esc(a.phone)}" target="_blank" rel="noopener">WhatsApp</a>`}
-        ${can('orders:write') ? `<select class="i" data-status="${a.id}">${STATUSES.filter(([s]) => s !== 'converted').map(([s, l]) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${l}</option>`).join('')}</select>
-        <a class="btn btn-sm btn-primary" href="#/manual?from=${a.id}">Convert to order</a>` : ''}`}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">Nothing here.</td></tr>'}
+      <td>${can('orders:write') ? `<select class="i" data-assign="${a.id}" aria-label="Assigned to" style="min-width:110px"><option value="">Nobody</option>${staff.map(s => `<option value="${esc(s.id)}" ${a.assigned_to === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>` : esc(a.assignee_name ?? '—')}</td>
+      <td>${a.status === 'converted' ? `${badge('converted')} ${a.converted_order_id ? `<a href="#/orders/${a.converted_order_id}">${esc(a.converted_order_no ?? 'Order')}</a>` : ''}` : `<div class="row" style="gap:6px;min-width:220px">
+        ${a.phone.includes('X') ? '' : `<a class="btn btn-sm btn-outline" href="tel:${esc(a.phone)}">Call</a><a class="btn btn-sm btn-outline" href="https://wa.me/88${esc(a.phone)}" target="_blank" rel="noopener">WhatsApp</a>`}
+        ${can('orders:write') ? `<a class="btn btn-sm btn-primary" href="#/manual?from=${a.id}">Convert to order</a>
+        <select class="i" data-status="${a.id}" aria-label="Status">${STATUSES.filter(([s]) => s !== 'converted').map(([s, l]) => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div>`}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">Nothing here.</td></tr>'}
     </tbody></table></div>
     <div class="split" style="margin-top:16px">
       <div class="card"><h2>By source (30 days)</h2><table><thead><tr><th>Source</th><th class="right">Captured</th><th class="right">Recovered</th></tr></thead><tbody>${report.bySource.map(s => `<tr><td>${esc(s.source)}</td><td class="right">${s.captured}</td><td class="right">${s.recovered ?? 0}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No data yet.</td></tr>'}</tbody></table></div>
