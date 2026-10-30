@@ -312,6 +312,25 @@ describe('edge cache (Section 2.1)', () => {
   });
 });
 
+describe('deploying before R2 is switched on', () => {
+  it('keeps the store working and explains uploads are off', async () => {
+    const media = t.env.MEDIA;
+    delete (t.env as { MEDIA?: unknown }).MEDIA;
+    try {
+      const form = new FormData();
+      form.append('file', new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], 'logo.png', { type: 'image/png' }));
+      const r = await t.fetch('/api/admin/brand-asset', { method: 'POST', body: form, headers: { cookie: t.admin.cookie, 'x-csrf-token': t.admin.csrf, origin: 'https://absvai.test' } });
+      expect(r.status).toBe(503);
+      expect(((await r.json()) as { error: string }).error).toMatch(/R2 Object Storage/);
+      expect((await t.fetch('/media/brand/logo-x.png')).status).toBe(404);
+      expect((await t.fetch('/')).status).toBe(200);
+      expect((await t.adminJson('/dashboard')).body.health.find((h: { label: string }) => h.label === 'Photo storage').ok).toBe(false);
+    } finally {
+      (t.env as { MEDIA?: unknown }).MEDIA = media;
+    }
+  });
+});
+
 describe('settings: tracking IDs, encrypted credentials, audit (Section 19)', () => {
   it('rejects script in a tracking ID and accepts a well-formed one, which then opens the CSP', async () => {
     expect((await t.adminJson('/settings', 'PUT', { gtm_id: '<script>alert(1)</script>' })).status).toBe(400);

@@ -61,31 +61,52 @@ if (!kv) {
   created.push(`KV ${KV_TITLE}`);
 }
 
-// R2 bucket.
+// R2 bucket (photos, logo, manuals). R2 has to be switched on once per account in the dashboard; until then the store deploys
+// without photo storage (uploads say so) instead of not deploying at all.
+const r2Off = r => (r.body.errors ?? []).some(e => e.code === 10042);
+let hasR2 = true;
 res = await cf(`/accounts/${account}/r2/buckets/${bucket}`);
-if (res.status === 404) {
+if (r2Off(res)) hasR2 = false;
+else if (res.status === 404) {
   res = await cf(`/accounts/${account}/r2/buckets`, { method: 'POST', body: JSON.stringify({ name: bucket, locationHint: 'apac' }) });
-  if (!res.ok) fail('Creating the R2 bucket', res, 'R2 must be enabled once in the dashboard (R2 → Get started), and the token needs Workers R2 Storage → Edit.');
-  created.push(`R2 ${bucket}`);
-} else if (!res.ok) fail('Reading the R2 bucket', res, 'R2 must be enabled once in the dashboard (R2 → Get started).');
+  if (r2Off(res)) hasR2 = false;
+  else if (!res.ok) fail('Creating the R2 bucket', res, 'The token needs Workers R2 Storage → Edit.');
+  else created.push(`R2 ${bucket}`);
+} else if (!res.ok) fail('Reading the R2 bucket', res, 'The token needs Workers R2 Storage → Edit.');
+if (!hasR2 && GITHUB_OUTPUT) console.log('::warning::R2 is not switched on for this Cloudflare account, so photo and logo uploads are off for now. Dashboard → R2 Object Storage → Get started (or Purchase R2 Plan, the free tier is enough), then deploy again.');
 
 // Custom domains only when the zone is in this account; otherwise deploy to workers.dev for now.
 res = await cf(`/zones?name=${ZONE}&account.id=${account}`);
 const hasZone = res.ok && (res.body.result ?? []).length > 0;
 
+// Without the zone the Worker is reached at <name>.<subdomain>.workers.dev, which needs the account's workers.dev subdomain.
+let subdomain = null;
+if (!hasZone) {
+  res = await cf(`/accounts/${account}/workers/subdomain`);
+  subdomain = res.ok ? res.body.result?.subdomain ?? null : null;
+  if (!subdomain) {
+    // First Worker on this account: register one (it can be renamed later in Workers & Pages → Your subdomain).
+    res = await cf(`/accounts/${account}/workers/subdomain`, { method: 'PUT', body: JSON.stringify({ subdomain: 'absvai' }) });
+    if (!res.ok) fail('Registering a workers.dev subdomain', res, 'Open Workers & Pages in the Cloudflare dashboard once to choose your workers.dev subdomain, or add the absvai.com zone, then deploy again.');
+    subdomain = res.body.result?.subdomain ?? 'absvai';
+    created.push(`workers.dev subdomain ${subdomain}`);
+  }
+}
+
 toml = toml
   .replace(/database_id\s*=\s*"[^"]*"/, `database_id = "${db.uuid}"`)
   .replace(/(\[\[kv_namespaces\]\][^[]*?)id\s*=\s*"[^"]*"/, `$1id = "${kv.id}"`);
 if (!hasZone) toml = toml.replace(/^routes\s*=\s*\[[\s\S]*?^\]\n/m, '');
+if (!hasR2) toml = toml.replace(/^\[\[r2_buckets\]\]\n(?:[^\n[]*\n)*/m, '');
 writeFileSync(CONFIG, toml);
 
 const lines = [
   `D1 ${dbName}: ${db.uuid}`,
   `KV ${KV_TITLE}: ${kv.id}`,
-  `R2 ${bucket}: ready`,
+  hasR2 ? `R2 ${bucket}: ready` : `R2: not switched on for this account yet, so photo and logo uploads are off. Dashboard → R2 Object Storage → Get started, then deploy again.`,
   created.length ? `Created this run: ${created.join(', ')}` : 'All resources already existed.',
-  hasZone ? `Custom domains: ${ZONE} and www.${ZONE}` : `The ${ZONE} zone is not in this Cloudflare account yet, so this deploy goes to workers.dev only. Add the zone (and point the domain's nameservers to Cloudflare), then deploy again.`,
+  hasZone ? `Custom domains: ${ZONE} and www.${ZONE}` : `The ${ZONE} zone is not in this Cloudflare account yet, so this deploy goes to https://absvai.${subdomain}.workers.dev only. Add the zone (and point the domain's nameservers to Cloudflare), then deploy again.`,
 ];
 console.log(lines.join('\n'));
-if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `has_zone=${hasZone}\nd1_id=${db.uuid}\n`);
+if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `has_zone=${hasZone}\nhas_r2=${hasR2}\nworkers_dev_url=${subdomain ? `https://absvai.${subdomain}.workers.dev` : ''}\nd1_id=${db.uuid}\n`);
 if (GITHUB_STEP_SUMMARY) appendFileSync(GITHUB_STEP_SUMMARY, `### Cloudflare resources\n\n${lines.map(l => `- ${l}`).join('\n')}\n`);

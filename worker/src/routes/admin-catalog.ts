@@ -4,7 +4,7 @@ import type { AppEnv } from '../env';
 import { validGtin } from '../lib/barcode';
 import { TAG } from '../lib/cache-tags';
 import { CLAIM_BADGES, healthClaimIn } from '../lib/claims';
-import { bad, HttpError, int, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
+import { bad, HttpError, int, mediaBucket, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
 import { attributesKey, formatSku, productCodeFromName, SKU_PATTERN, variantCode } from '../lib/sku';
 import { effectiveSpecFields, effectiveVariantAttributes, parseNetQuantity, publishChecklist, validateSpecValue, type ProductTemplate } from '../lib/templates';
 import { clearTemplateCache, getSeasons, rowToVariant } from '../repo/catalog';
@@ -671,9 +671,10 @@ adminCatalog.post('/media', need('catalog:write'), async c => {
   if (file.size > 8 * 1024 * 1024) throw bad('That file is over 8 MB. Photos are compressed in the browser; PDFs must be under 8 MB.');
   const p = await cat.productRow(c.env.DB, productId);
   if (!p) throw notFound();
+  const media = mediaBucket(c.env);
   const key = `p/${productId}/${crypto.randomUUID()}.${ext}`;
   // R2 needs a known length; a FormData file stream has none, so read it (files are capped at 8 MB above).
-  await c.env.MEDIA.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
+  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
   const r = await cat.insertMedia(c.env.DB, { productId, kind, key, url: `/media/${key}`, alt: str(form.get('alt'), 200) || null, width: int(form.get('width')), height: int(form.get('height')), sortOrder: await cat.nextMediaSort(c.env.DB, productId) });
   await audit(c, 'media.upload', 'product', productId, { kind, key });
   await catalogChanged(c, await productTags(c.env.DB, productId, Number(p.category_id)));
@@ -686,7 +687,7 @@ adminCatalog.delete('/media/:id', need('catalog:write'), async c => {
   if (!m) throw notFound();
   if (await cat.mediaSupportsClaim(c.env.DB, id)) throw bad('This document supports a claim badge. Remove the badge first.');
   await cat.deleteMedia(c.env.DB, id);
-  if (m.r2_key && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete(m.r2_key);
+  if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete(m.r2_key);
   await audit(c, 'media.delete', 'product', m.product_id, { id });
   await catalogChanged(c, await productTags(c.env.DB, m.product_id, null));
   return c.json({ ok: true });

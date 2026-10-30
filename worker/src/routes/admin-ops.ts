@@ -87,6 +87,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
     { label: 'SMS', ok: Boolean(c.env.SMS_PROVIDER && c.env.SMS_API_KEY), text: c.env.SMS_PROVIDER ? 'SMS provider connected' : 'SMS provider not connected (messages are logged only)' },
     { label: 'Bot check', ok: Boolean(c.env.TURNSTILE_SECRET), text: c.env.TURNSTILE_SECRET ? 'Turnstile on checkout' : 'Turnstile not configured' },
     { label: 'Edge cache', ok: backlog < 50, text: backlog ? `${backlog} page tag(s) waiting to refresh` : 'Pages up to date at the edge' },
+    { label: 'Photo storage', ok: Boolean(c.env.MEDIA), text: c.env.MEDIA ? 'Photo storage (R2) on' : 'Photo storage off: switch on R2 in Cloudflare' },
     { label: 'Courier', ok: false, text: 'Courier API not connected yet (Phase 2)' },
   ];
 

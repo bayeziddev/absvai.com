@@ -50,7 +50,7 @@ app.route('/api', api);
 app.get('/media/*', async c => {
   const key = c.req.path.slice('/media/'.length);
   if (!/^(p\/\d+|brand)\/[\w-]+\.(webp|jpg|png|avif|pdf|svg)$/.test(key)) return c.notFound();
-  const obj = await c.env.MEDIA.get(key);
+  const obj = c.env.MEDIA ? await c.env.MEDIA.get(key) : null;
   if (!obj) return c.notFound();
   const headers = new Headers();
   obj.writeHttpMetadata(headers);

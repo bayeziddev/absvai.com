@@ -3,7 +3,8 @@ import type { Session } from './lib/auth';
 export interface Env {
   DB: D1Database;
   KV: KVNamespace;
-  MEDIA: R2Bucket;
+  /** Photos, logo, manuals. Missing until R2 is switched on for the Cloudflare account; uploads then say so. */
+  MEDIA?: R2Bucket;
   ASSETS: Fetcher;
   SITE_URL: string;
   ENVIRONMENT: string;

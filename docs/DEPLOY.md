@@ -22,8 +22,12 @@ Cloudflare dashboard → **My Profile → API Tokens → Create Token → "Edit 
 **Account → D1 → Edit**. Scope it to your account and, under Zone Resources, to the `absvai.com` zone. The template includes
 Workers Scripts, Workers KV Storage, Workers R2 Storage, Workers Routes and Account Settings.
 
-Enable R2 once (dashboard → R2 → Get started) if the account has never used it, and register a `workers.dev` subdomain (Workers &
-Pages → overview) so the first deploy has an address even before the domain is connected.
+**Photo storage (R2)**: switch R2 on once (dashboard → R2 Object Storage → Get started; the free tier is enough, Cloudflare asks
+for a payment method). Until then the store still deploys and works, but photo and logo uploads say *"Photo storage is not
+switched on yet"* and the dashboard health strip shows it. The next deploy after you switch it on creates the bucket by itself.
+
+The `workers.dev` address is set up automatically on the first deploy (`absvai.<subdomain>.workers.dev`) when the domain isn't
+connected yet.
 
 ### 2. Repository secrets
 GitHub → the repository → **Settings → Secrets and variables → Actions → New repository secret**:

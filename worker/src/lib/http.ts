@@ -5,6 +5,12 @@ export class HttpError extends Error {
 }
 
 export const bad = (message: string, details?: unknown) => new HttpError(400, message, details);
+
+/** The R2 bucket, or a plain-language 503 while R2 is not switched on for the Cloudflare account. */
+export function mediaBucket(env: { MEDIA?: R2Bucket }): R2Bucket {
+  if (!env.MEDIA) throw new HttpError(503, 'Photo storage is not switched on yet. In the Cloudflare dashboard open R2 Object Storage and press Get started, then deploy again.');
+  return env.MEDIA;
+}
 export const notFound = (message = 'Not found') => new HttpError(404, message);
 export const forbidden = (message = 'You do not have permission to do that.') => new HttpError(403, message);
 
