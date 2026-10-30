@@ -110,20 +110,43 @@ function editCategory(c, cats, templates, seasons, done) {
   const inside = (id, anc) => { let n = cats.find(x => x.id === id); while (n?.parent_id) { if (n.parent_id === anc) return true; n = cats.find(x => x.id === n.parent_id); } return false; };
   const parents = cats.filter(x => x.id !== c?.id && !(c && inside(x.id, c.id)) && x.depth + 1 + (c ? height(c.id) : 0) <= MAX_DEPTH);
   const label = x => { const p = cats.find(y => y.id === x.parent_id); const g = p && cats.find(y => y.id === p.parent_id); return [g, p, x].filter(Boolean).map(y => y.name).join(' › '); };
-  so.body.innerHTML = `<form id="f">
-    <label class="f">Name<input name="name" value="${esc(c?.name ?? '')}" required></label>
-    <div class="grid-2"><label class="f">Web address (slug)<input name="slug" value="${esc(c?.slug ?? '')}" placeholder="made from the name"></label>
-      <label class="f">SKU code <span class="help">2–5 letters, starts every SKU, e.g. ORG.</span><input name="code" value="${esc(c?.code ?? '')}" maxlength="5" required></label></div>
-    <label class="f">Parent category<select name="parentId"><option value="">None (top level)</option>${parents.map(x => `<option value="${x.id}" ${x.id === c?.parent_id ? 'selected' : ''}>${esc(label(x))}</option>`).join('')}</select></label>
-    <label class="f">Product template <span class="help">Decides the options and details every product here needs.</span><select name="templateId"><option value="">Use the parent’s template</option>${active.map(t => `<option value="${esc(t.id)}" ${t.id === c?.template_id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-    <label class="f">Show in the menu<select name="seasonVisibility"><option value="always">Always</option><option value="seasons" ${c?.season_visibility === 'seasons' ? 'selected' : ''}>Only during these seasons…</option></select></label>
-    <div id="sv" ${c?.season_visibility === 'seasons' ? '' : 'hidden'}>${seasons.map(s => `<label class="check" style="margin-right:12px"><input type="checkbox" name="season" value="${s.id}" ${c?.season_ids?.includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}</div>
-    <label class="f" style="margin-top:12px">Icon / image URL<input name="iconUrl" value="${esc(c?.icon_url ?? '')}" placeholder="/img/placeholders/gur.svg"></label>
-    <label class="f">Description<textarea name="description" rows="2">${esc(c?.description ?? '')}</textarea></label>
-    <label class="check"><input type="checkbox" name="isActive" ${c?.is_active !== 0 ? 'checked' : ''}> Active</label>
-    <div class="grid-2"><label class="f">SEO title<input name="metaTitle" value="${esc(c?.meta_title ?? '')}"></label><label class="f">SEO description<input name="metaDescription" value="${esc(c?.meta_description ?? '')}"></label></div></form>`;
+  // Kinds of products, in plain words, so the owner picks "Clothing" rather than a template id.
+  const kind = t => `${esc(t.name)}${t.explanation ? ` — ${esc(t.explanation)}` : ''}`;
+  so.body.innerHTML = `<form id="f" class="qp">
+    <section class="qp-card"><h3><span class="qp-n">1</span> Name and picture</h3>
+      <label class="f">Category name <span class="req">*</span><input name="name" value="${esc(c?.name ?? '')}" required placeholder="e.g. Winter Shawls"></label>
+      <input type="hidden" name="iconUrl" value="${esc(c?.icon_url ?? '')}">
+      <div class="qp-photos" id="cat-pic">${c?.icon_url ? `<figure><img src="${esc(c.icon_url)}" alt=""><figcaption>Picture</figcaption></figure>` : ''}
+        <label class="qp-add"><input type="file" id="cat-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden><span>${c?.icon_url ? 'Change picture' : '+ Add picture'}</span><small>Shown in the menu and category tiles</small></label></div></section>
+    <section class="qp-card"><h3><span class="qp-n">2</span> Where it goes</h3>
+      <label class="f">Inside another category?<select name="parentId"><option value="">No, it is a main category</option>${parents.map(x => `<option value="${x.id}" ${x.id === c?.parent_id ? 'selected' : ''}>Inside ${esc(label(x))}</option>`).join('')}</select></label>
+      <label class="f">What kind of products? <span class="help">Decides what the “Add product” form asks for (sizes, weights, warranty…).</span><select name="templateId"><option value="">Same as the main category</option>${active.map(t => `<option value="${esc(t.id)}" ${t.id === c?.template_id ? 'selected' : ''}>${kind(t)}</option>`).join('')}</select></label>
+      <label class="f">When should it show in the menu?<select name="seasonVisibility"><option value="always">All year</option><option value="seasons" ${c?.season_visibility === 'seasons' ? 'selected' : ''}>Only during a season…</option></select></label>
+      <div id="sv" ${c?.season_visibility === 'seasons' ? '' : 'hidden'}>${seasons.map(s => `<label class="check" style="margin-right:12px"><input type="checkbox" name="season" value="${s.id}" ${c?.season_ids?.includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}</div>
+      <label class="check" style="margin-top:8px"><input type="checkbox" name="isActive" ${c?.is_active !== 0 ? 'checked' : ''}> Show this category in the store</label></section>
+    <details class="qp-more"><summary>More options (web address, code, description, search engines)</summary>
+      <div class="grid-2"><label class="f">Web address<input name="slug" value="${esc(c?.slug ?? '')}" placeholder="made from the name"></label>
+        <label class="f">Short code <span class="help">Starts every SKU. Leave empty to make one automatically.</span><input name="code" value="${esc(c?.code ?? '')}" maxlength="5" placeholder="auto"></label></div>
+      <label class="f">Description<textarea name="description" rows="2">${esc(c?.description ?? '')}</textarea></label>
+      <div class="grid-2"><label class="f">Search engine title<input name="metaTitle" value="${esc(c?.meta_title ?? '')}"></label><label class="f">Search engine description<input name="metaDescription" value="${esc(c?.meta_description ?? '')}"></label></div></details></form>`;
   const form = so.body.querySelector('#f');
-  if (!c) form.templateId.value = active[0]?.id ?? '';
+  const syncKind = () => { if (!c && !form.parentId.value && !form.templateId.value) form.templateId.value = active[0]?.id ?? ''; if (!c && form.parentId.value) form.templateId.value = ''; };
+  form.parentId.addEventListener('change', syncKind);
+  syncKind();
+  so.body.querySelector('#cat-file').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const r = await api('/category-image', 'POST', fd);
+      form.iconUrl.value = r.url;
+      so.body.querySelector('#cat-pic .qp-add span').textContent = 'Change picture';
+      so.body.querySelector('#cat-pic figure')?.remove();
+      so.body.querySelector('#cat-pic').insertAdjacentHTML('afterbegin', `<figure><img src="${esc(r.url)}" alt=""><figcaption>Picture</figcaption></figure>`);
+      toast('Picture added. Press Save to keep it.');
+    } catch (err) { toast(err.message, true); }
+  });
   form.seasonVisibility.addEventListener('change', () => { so.body.querySelector('#sv').hidden = form.seasonVisibility.value !== 'seasons'; });
   so.foot.innerHTML = `${c && can('catalog:write') ? '<button class="btn btn-ghost" id="del">Delete</button>' : '<span></span>'}${can('catalog:write') ? '<button class="btn btn-primary" id="save">Save</button>' : ''}`;
   if (!can('catalog:write')) return;

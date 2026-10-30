@@ -312,6 +312,37 @@ describe('edge cache (Section 2.1)', () => {
   });
 });
 
+describe('owner-friendly admin: charts and easy categories', () => {
+  it('returns 30-day charts from real orders: sales per day, funnel, districts, customers, channels', async () => {
+    const ch = (await t.adminJson('/dashboard')).body.charts;
+    expect(ch.daily.length).toBeGreaterThan(0);
+    expect(ch.daily[0]).toEqual(expect.objectContaining({ day: expect.stringMatching(/^\d{4}-\d\d-\d\d$/), orders: expect.any(Number), revenue: expect.any(Number) }));
+    expect(ch.funnel.started).toBeGreaterThanOrEqual(ch.funnel.placed);
+    expect(ch.funnel.placed).toBeGreaterThanOrEqual(ch.funnel.confirmed);
+    expect(ch.funnel.confirmed).toBeGreaterThanOrEqual(ch.funnel.shipped);
+    expect(ch.places[0]).toMatchObject({ district: 'Tangail' }); // every test order ships to Kalihati, Tangail
+    expect(ch.customers[0].phone).toMatch(/^01\d{9}$/);
+    expect(ch.channels.map((c: { label: string }) => c.label)).toEqual(expect.arrayContaining(['Website', 'Messenger']));
+  });
+
+  it('creates a category with just a name and a picture; the short code is made for you', async () => {
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], 'shawl.png', { type: 'image/png' }));
+    const up = await t.fetch('/api/admin/category-image', { method: 'POST', body: form, headers: { cookie: t.admin.cookie, 'x-csrf-token': t.admin.csrf, origin: 'https://absvai.test' } });
+    expect(up.status).toBe(201);
+    const { url } = (await up.json()) as { url: string };
+    expect(url).toMatch(/^\/media\/c\/[\w-]+\.png$/);
+    expect((await t.fetch(url)).status).toBe(200);
+    const top = await t.adminJson('/categories', 'POST', { name: 'Organic Baby Care', templateId: 'simple', iconUrl: url });
+    expect(top.status).toBe(201);
+    const [parent] = await t.sql('SELECT id, code, icon_url FROM categories WHERE id = ?', top.body.id);
+    expect(parent).toMatchObject({ code: 'OBC', icon_url: url });
+    const sub = await t.adminJson('/categories', 'POST', { name: 'Baby Soap', parentId: parent.id });
+    expect(sub.status).toBe(201);
+    expect((await t.sql('SELECT code, template_id, depth FROM categories WHERE id = ?', sub.body.id))[0]).toEqual({ code: 'OBC', template_id: null, depth: 2 });
+  });
+});
+
 describe('deploying before R2 is switched on', () => {
   it('keeps the store working and explains uploads are off', async () => {
     const media = t.env.MEDIA;

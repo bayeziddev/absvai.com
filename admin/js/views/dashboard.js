@@ -1,18 +1,5 @@
 import { api, badge, can, date, esc, taka } from '../app.js';
-
-function chart(rows) {
-  // 14 fixed day slots ending today (Bangladesh date), so one busy day doesn't fill the whole chart.
-  const byDay = new Map(rows.map(r => [r.day, r]));
-  const today = new Date(Date.now() + 6 * 3600000);
-  const days = Array.from({ length: 14 }, (_, i) => new Date(today.getTime() - (13 - i) * 86400000).toISOString().slice(0, 10));
-  const max = Math.max(...rows.map(r => Number(r.revenue) || 0), 1);
-  const total = rows.reduce((s, r) => s + Number(r.revenue || 0), 0);
-  const w = 100 / 14;
-  return `<svg class="chart" viewBox="0 0 100 60" preserveAspectRatio="none" role="img" aria-label="Revenue per day, last 14 days">
-    ${days.map((day, i) => { const r = byDay.get(day); const h = r ? Math.max(1, (Number(r.revenue) / max) * 50) : 0.6; return `<rect x="${i * w + w * 0.18}" y="${55 - h}" width="${w * 0.64}" height="${h}" rx="0.8" fill="${r ? '#B3261E' : '#E9DCC6'}"><title>${esc(day)}: ${r ? `${taka(r.revenue)} (${r.orders} orders)` : 'no sales'}</title></rect>`; }).join('')}
-    <line x1="0" y1="55" x2="100" y2="55" stroke="#E9DCC6" stroke-width=".5"/></svg>
-    <p class="small muted">${esc(days[0])} → ${esc(days[13])} · ${taka(total)} in total · best day ${rows.length ? taka(max) : '—'}</p>`;
-}
+import { barChart, compactTaka, fillDays, funnel, hBars, lineChart, tableView } from './charts.js';
 
 export async function dashboard(v) {
   const d = await api('/dashboard');
@@ -33,11 +20,11 @@ export async function dashboard(v) {
       <div class="kpi"><span>Low stock options</span><b>${k.lowStock}</b></div>
       ${k.stockValuePaisa !== undefined ? `<div class="kpi"><span>Stock value at cost</span><b>${taka(k.stockValuePaisa)}</b></div>` : ''}
     </div>
+    ${chartsSection(d.charts)}
     <div class="split">
       <div>
         <div class="card"><h2>Needs your attention today</h2>
           <ul class="attention">${d.attention.map(a => `<li><a href="${a.href}"><span class="dot ${a.level}"></span>${esc(a.text)}</a></li>`).join('') || '<li class="muted">Nothing urgent. Nice.</li>'}</ul></div>
-        <div class="card"><h2>Sales, last 14 days</h2>${chart(d.chart)}</div>
         <div class="card"><h2>Recent orders <a class="btn btn-sm btn-outline" href="#/orders">All orders</a></h2>
           <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Risk</th></tr></thead><tbody>
           ${d.recentOrders.map(o => `<tr class="clickable" data-href="#/orders/${o.id}"><td><b>${esc(o.order_no)}</b><br><span class="small muted">${date(o.created_at)}</span></td><td>${esc(o.customer_name)}<br><span class="small muted">${esc(o.district_name)}</span></td><td>${taka(o.total_paisa)}</td><td>${badge(o.status)}</td><td>${badge(o.risk_level)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No orders yet.</td></tr>'}
@@ -54,4 +41,48 @@ export async function dashboard(v) {
       </div>
     </div>`;
   v.querySelectorAll('[data-href]').forEach(r => r.addEventListener('click', () => { location.hash = r.dataset.href; }));
+  drawCharts(v, d.charts);
+}
+
+function chartsSection(ch) {
+  const days = fillDays(ch.daily);
+  const revenue = days.reduce((s, x) => s + x.revenue, 0);
+  const orders = days.reduce((s, x) => s + x.orders, 0);
+  const f = ch.funnel;
+  return `<h2 class="section-title">Last 30 days</h2>
+    <div class="ch-grid">
+      <div class="card ch-card ch-wide"><div class="ch-head"><h2>Sales per day</h2><b class="ch-total">${taka(revenue)}</b></div><p class="ch-sub">Orders that were not cancelled or returned, by the day they were placed.</p>
+        <div class="ch" id="ch-sales" data-label="Sales per day, last 30 days"></div>${tableView(['Day', 'Sales'], days.map(x => [x.day, taka(x.revenue)]))}</div>
+      <div class="card ch-card"><div class="ch-head"><h2>Orders per day</h2><b class="ch-total">${orders}</b></div><p class="ch-sub">Every channel, test orders left out.</p>
+        <div class="ch" id="ch-orders" data-label="Orders per day, last 30 days"></div>${tableView(['Day', 'Orders'], days.map(x => [x.day, String(x.orders)]))}</div>
+      <div class="card ch-card"><div class="ch-head"><h2>From checkout to delivery</h2></div><p class="ch-sub">Website orders: how many customers reach each step.</p>
+        <div id="ch-funnel"></div>${tableView(['Step', 'Customers'], [['Started checkout', f.started], ['Placed the order', f.placed], ['Confirmed', f.confirmed], ['Sent to courier', f.shipped], ['Delivered', f.delivered]].map(([a, b]) => [a, String(b)]))}</div>
+      <div class="card ch-card"><div class="ch-head"><h2>Top delivery areas</h2></div><p class="ch-sub">Districts with the most orders, from delivery addresses.</p>
+        <div id="ch-places"></div>${tableView(['District', 'Orders', 'Sales'], ch.places.map(x => [x.district, String(x.orders), taka(x.revenue)]))}</div>
+      <div class="card ch-card"><div class="ch-head"><h2>Best customers</h2></div><p class="ch-sub">By money spent (cancelled and returned orders left out).</p>
+        ${ch.customers.length ? `<ul class="ch-people">${ch.customers.map((x, i) => `<li><span class="ch-rank">${i + 1}</span><div><b>${esc(x.name)}</b><br><span class="small muted">${esc(x.district)} · ${esc(x.phone)}</span></div><div class="right"><b>${taka(x.spent)}</b><br><span class="small muted">${x.orders} order(s)</span></div></li>`).join('')}</ul>` : '<p class="muted small">No orders in the last 30 days yet.</p>'}</div>
+      <div class="card ch-card"><div class="ch-head"><h2>Orders by channel</h2></div><p class="ch-sub">Where orders came from: website, Messenger, phone…</p>
+        <div id="ch-channels"></div>${tableView(['Channel', 'Orders'], ch.channels.map(x => [x.label, String(x.orders)]))}</div>
+    </div>`;
+}
+
+let resizeTimer;
+function drawCharts(v, ch) {
+  const days = fillDays(ch.daily);
+  const draw = () => {
+    const sales = v.querySelector('#ch-sales');
+    if (!sales || !document.body.contains(sales)) { removeEventListener('resize', onResize); return; }
+    lineChart(sales, days, { value: x => x.revenue, fmt: compactTaka, tipFmt: x => `${taka(x.revenue)} · ${x.orders} order(s)` });
+    barChart(v.querySelector('#ch-orders'), days, { value: x => x.orders, fmt: n => String(Math.round(n)), tipFmt: x => `${x.orders} order(s)` });
+  };
+  const onResize = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(draw, 150); };
+  draw();
+  addEventListener('resize', onResize);
+  const f = ch.funnel;
+  funnel(v.querySelector('#ch-funnel'), [
+    { label: 'Started checkout', value: f.started }, { label: 'Placed the order', value: f.placed }, { label: 'Confirmed', value: f.confirmed },
+    { label: 'Sent to courier', value: f.shipped }, { label: 'Delivered', value: f.delivered },
+  ]);
+  hBars(v.querySelector('#ch-places'), ch.places.map(x => ({ label: x.district, value: Number(x.orders), revenue: Number(x.revenue) })), { fmt: n => `${n} order(s)`, sub: x => taka(x.revenue) });
+  hBars(v.querySelector('#ch-channels'), ch.channels.map(x => ({ label: x.label, value: Number(x.orders) })), { fmt: n => `${n} order(s)` });
 }

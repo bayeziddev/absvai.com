@@ -140,14 +140,23 @@ async function renderLogin(message = '') {
 }
 
 // ── Shell ──
+// Simple mode (default) shows the everyday screens only; the full menu is one tap away and remembered per device.
+const simpleMode = () => { try { return localStorage.getItem('absvai.admin.simple') !== '0'; } catch { return true; } };
+function visibleNav() {
+  const items = simpleMode() ? NAV.filter(i => i.group || i.simple) : NAV;
+  // Drop group headings with nothing under them.
+  return items.filter((it, i) => !it.group || (items[i + 1] && !items[i + 1].group));
+}
+
 function renderShell() {
   const collapsed = localStorage.getItem('absvai.admin.collapsed') === '1';
   app.innerHTML = `
     <div class="shell${collapsed ? ' collapsed' : ''}">
       <aside class="side" id="side">
         <div class="side-head"><a class="wordmark" href="#/dashboard">Abs<span>Vai</span><small>Admin</small></a><button class="icon-btn" id="collapse" aria-label="Collapse menu">«</button></div>
-        <ul class="nav">${NAV.map(item => item.group ? `<li class="nav-group">${esc(item.group)}</li>` : `
+        <ul class="nav">${visibleNav().map(item => item.group ? `<li class="nav-group">${esc(item.group)}</li>` : `
           <li><a href="${item.soon ? '#/soon?m=' + encodeURIComponent(item.label) : '#/' + item.route}" data-route="${item.route ?? ''}" ${item.soon ? 'aria-disabled="true"' : ''} title="${esc(item.label)}">${icon(item.icon)}<span>${esc(item.label)}</span>${item.soon ? `<span class="soon">${esc(item.soon)}</span>` : ''}</a></li>`).join('')}</ul>
+        <button class="nav-mode" id="nav-mode" type="button">${simpleMode() ? 'Show all tools' : 'Simple menu'}</button>
       </aside>
       <div class="main">
         <header class="topbar">
@@ -162,6 +171,7 @@ function renderShell() {
     </div>`;
   document.getElementById('collapse').onclick = () => { const s = document.querySelector('.shell'); s.classList.toggle('collapsed'); localStorage.setItem('absvai.admin.collapsed', s.classList.contains('collapsed') ? '1' : '0'); };
   document.getElementById('menu').onclick = () => document.getElementById('side').classList.toggle('open');
+  document.getElementById('nav-mode').onclick = () => { try { localStorage.setItem('absvai.admin.simple', simpleMode() ? '0' : '1'); } catch { /* private mode */ } renderShell(); };
   document.getElementById('logout').onclick = async () => { await api('/logout', 'POST').catch(() => {}); state.user = null; renderLogin('Signed out.'); };
   document.getElementById('gsearch').addEventListener('submit', e => { e.preventDefault(); const q = e.target.q.value.trim(); location.hash = /^(AV|PRE|INV)-|^01\d/i.test(q) || /^\d+$/.test(q) ? `#/orders?q=${encodeURIComponent(q)}` : `#/products?q=${encodeURIComponent(q)}`; });
   renderRightbar();

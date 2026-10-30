@@ -20,11 +20,41 @@ Plain steps for running the store from `absvai.com/admin/`. No coding needed.
 
 ![Overview](screenshots/admin-dashboard.png)
 
-## Add a product
+## The menu
+
+The admin opens in a **simple menu** with the everyday screens: Overview, Orders, Products, Categories, Inventory, Customers,
+Seasons and Settings. Press **Show all tools** at the bottom of the menu for everything else (delivery zones, templates, security,
+audit log…), and **Simple menu** to go back. The Overview shows the last 30 days: sales and orders per day, how many website
+customers go from checkout to delivery, the districts that order most, your best customers and where orders come from.
+
+## Add a product (the quick way)
+
+![Add a product](screenshots/admin-quick-product.png)
+
+**Products → + Add product** opens one page:
+
+1. **Photos**: press *+ Add photos* and pick them from your phone or computer. The first one is the main photo.
+2. **What is it?**: choose the category, type the name and one line about it.
+3. **Sizes, prices and stock**: tap the sizes or weights you sell (*+ Other* for an odd one), then type the price and how many you
+   have. *Same price for all* fills every row. Type the **parcel weight with the box** once.
+4. **Required details**: only what this category needs (food: origin, batch, best-before, ingredients, storage).
+5. Press **Save and publish**. If something is missing, it tells you in plain words and keeps it as a draft.
+
+To change a price, stock or photo later, tap the product in the list: the same page opens. **Full editor** (on each row) has
+everything else: SEO, seasons, wholesale prices, barcodes, video.
+
+## Add a category
+
+![New category](screenshots/admin-category-simple.png)
+
+**Categories → + Add category**: type the name, add a picture, choose whether it sits inside another category, and what kind of
+products it holds (a subcategory uses its main category's kind). Press **Save**. The short code is made for you.
+
+## Add a product (full editor, every detail)
 
 ![Options and prices](screenshots/admin-form-options.png)
 
-1. **Products → + Add product.** Pick the **category first**: it decides what the form asks for. Food asks for weight, origin,
+1. **Products → Full editor** (or open the full editor from the quick page). Pick the **category first**: it decides what the form asks for. Food asks for weight, origin,
    batch and best-before. Machines ask for model, warranty and what's in the box. Clothing asks for size, colour and a size chart.
 2. **Basics**: name, a one-line short description (shown on cards), the full description, and up to 4 benefit chips (real facts
    only, like "5 dies included").

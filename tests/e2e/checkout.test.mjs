@@ -150,7 +150,7 @@ describe('storefront checkout', () => {
 });
 
 describe('admin smart upload form', () => {
-  it('sets up the owner, then blocks publishing a food product until best-before is added', async () => {
+  it('sets up the owner, adds a food product on one page, and only publishes it once best-before is filled in', async () => {
     const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
     const page = await ctx.newPage();
     const errors = [];
@@ -162,60 +162,45 @@ describe('admin smart upload form', () => {
     await page.fill('input[name=email]', 'owner@absvai.test');
     await page.fill('input[name=password]', 'correct-horse-42');
     await page.click('#auth button');
-    await page.waitForSelector('.kpis');
+    await page.waitForSelector('.stages');
+    // Simple menu by default, with charts on the overview.
+    const menu = await page.$$eval('.nav a', a => a.map(x => x.textContent.trim()));
+    assert.ok(menu.includes('Products') && menu.includes('Categories') && !menu.includes('Audit log'));
+    await page.waitForSelector('#ch-sales svg');
 
     await page.goto(`${server.base}/admin/#/products?new=1`);
-    await page.waitForSelector('.over #cat');
-    await page.selectOption('.over #cat', { label: 'Organic & Seasonal Food (Weighed food)' });
-    await page.waitForSelector('.over #why:not([hidden])');
-    assert.match(await page.textContent('.over #why'), /weight \(or volume for liquids\) options/);
-    await page.fill('.over #name', 'Sundarban Honey');
-    await page.click('.over-foot #go');
-    await page.waitForSelector('.steps');
+    await page.waitForSelector('.over #q-cat');
+    await page.selectOption('.over #q-cat', { label: 'Organic & Seasonal Food' });
+    await page.waitForSelector('.over [data-attr="weight"] .chip');
+    await page.setInputFiles('.over #q-files', { name: 'honey.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') });
+    await page.fill('.over #q-name', 'Sundarban Honey');
+    await page.fill('.over #q-short', 'Raw mangrove honey from the Sundarbans.');
+    await page.click('.over [data-attr="weight"] .chip[data-val="500g"]');
+    await page.click('.over [data-attr="weight"] [data-custom]'); // the prompt answers "750g"
+    assert.equal(await page.$$eval('.over tr[data-row]', r => r.length), 2);
+    await page.fill('.over #q-same', '550');
+    await page.click('.over #q-same-go');
+    for (const i of [0, 1]) await page.fill(`.over tr[data-row] [data-r=stock] >> nth=${i}`, '10');
+    await page.fill('.over #q-parcel', '700');
+    // Only the details food needs, never Size, Colour or Warranty.
+    const asked = await page.$$eval('.over [data-spec]', x => x.map(i => i.dataset.spec));
+    assert.deepEqual(asked.sort(), ['batch_no', 'best_before', 'ingredients', 'origin', 'storage']);
+    await page.fill('.over [data-spec="origin"]', 'Sundarbans');
+    await page.fill('.over [data-spec="batch_no"]', 'Batch S-1');
+    await page.fill('.over [data-spec="ingredients"]', '100% raw honey');
+    await page.fill('.over [data-spec="storage"]', 'Keep the lid closed.');
 
-    await page.click('.steps button:has-text("Basics")');
-    await page.fill('[data-k="shortDescription"]', 'Raw mangrove honey from the Sundarbans.');
-    await page.click('.steps button:has-text("Details")');
-    const labels = await page.$$eval('.over-body label.f', ls => ls.map(l => l.textContent));
-    assert.ok(labels.some(l => /Origin/.test(l)) && labels.some(l => /Best-before date/.test(l)));
-    assert.ok(!labels.some(l => /Warranty|Size chart/.test(l)));
-    await page.fill('[data-k="spec.origin"]', 'Sundarbans');
-    await page.fill('[data-k="spec.batch_no"]', 'Batch S-1');
-    await page.fill('[data-k="spec.ingredients"]', '100% raw honey');
-    await page.fill('[data-k="spec.storage"]', 'Keep the lid closed.');
+    await page.click('.over-foot #q-pub');
+    await page.waitForFunction(() => /best-before/.test(document.getElementById('toast').textContent));
+    assert.match(await page.textContent('#q-status'), /draft/);
+    await page.fill('.over [data-spec="best_before"]', '2027-12-31');
+    await page.click('.over-foot #q-pub');
+    await page.waitForFunction(() => /published/.test(document.getElementById('q-status').textContent));
 
-    await page.click('.steps button:has-text("Options")');
-    await page.click('[data-attr="weight"] .chip[data-val="500g"]');
-    await page.click('[data-attr="weight"] [data-custom]'); // the prompt answers "750g"
-    await page.click('#gen');
-    assert.equal(await page.$$eval('#vt tr[data-i]', r => r.length), 2);
-    await page.fill('#bulk-v', '550');
-    await page.click('[data-bulk="price"]');
-    await page.fill('#bulk-v', '700');
-    await page.click('[data-bulk="packed"]');
-
-    await page.click('.steps button:has-text("Photos")');
-    await page.setInputFiles('#files', { name: 'honey.png', mimeType: 'image/png', buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') });
-    await page.waitForSelector('.media-grid img');
-
-    await page.click('.steps button:has-text("Publish")');
-    await page.click('.over-foot #save');
-    await page.waitForSelector('.checklist');
-    assert.match(await page.textContent('.checklist'), /Add a best-before date\. Required for food products\./);
-    assert.equal(await page.isDisabled('.over-foot #pub'), true);
-
-    await page.click('.steps button:has-text("Details")');
-    await page.fill('[data-k="spec.best_before"]', '2027-12-31');
-    await page.click('.steps button:has-text("Publish")');
-    await page.click('.over-foot #save');
-    await page.waitForSelector('.notice.ok');
-    await page.click('.over-foot #pub');
-    await page.waitForSelector('.over-head .badge:has-text("published")');
-
-    const skus = server.sql("SELECT sku FROM product_variants v JOIN products p ON p.id = v.product_id WHERE p.slug = 'sundarban-honey' ORDER BY v.sort_order").map(r => r.sku);
-    assert.equal(skus.length, 2);
-    assert.match(skus[0], /^ORG-SHNY-500G-\d{4}$/);
-    assert.match(skus[1], /^ORG-SHNY-750G-\d{4}$/);
+    const rows = server.sql("SELECT v.sku, v.price_paisa, v.packed_weight_grams FROM product_variants v JOIN products p ON p.id = v.product_id WHERE p.slug = 'sundarban-honey' ORDER BY v.sort_order");
+    assert.equal(rows.length, 2);
+    assert.match(rows[0].sku, /^ORG-SHNY-500G-\d{4}$/);
+    assert.deepEqual(rows.map(r => [r.price_paisa, r.packed_weight_grams]), [[55000, 700], [55000, 700]]);
     const pdp = await (await fetch(`${server.base}/p/sundarban-honey`)).text();
     assert.match(pdp, /৳1,100 \/ kg/);
     assert.deepEqual(errors, []);

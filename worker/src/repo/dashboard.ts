@@ -34,3 +34,37 @@ export async function dashboardFigures(db: D1Database, a: { todayStartIso: strin
     codWithCourierPaisa: Number((codOut.results[0] as { v: number }).v), expiredFood: n(expired),
   };
 }
+
+/**
+ * Overview charts (last N days): sales per day, the website checkout funnel, top districts and customers, orders by channel.
+ * Locations come from order addresses, not visitor IPs (Section 16 honesty correction).
+ */
+export async function dashboardCharts(db: D1Database, sinceIso: string) {
+  const real = "is_test = 0 AND status NOT IN ('cancelled')";
+  const [daily, funnel, started, places, customers, channels] = await db.batch([
+    db.prepare(`SELECT substr(datetime(created_at, '+6 hours'), 1, 10) AS day, COUNT(*) AS orders,
+                       COALESCE(SUM(CASE WHEN status != 'returned' THEN total_paisa END), 0) AS revenue
+                  FROM orders WHERE created_at >= ? AND ${real} GROUP BY day ORDER BY day`).bind(sinceIso),
+    db.prepare(`SELECT COUNT(*) AS placed,
+                       SUM(status IN ('confirmed','packed','in_courier','delivered','partial_delivered','returned')) AS confirmed,
+                       SUM(status IN ('in_courier','delivered','partial_delivered','returned')) AS shipped,
+                       SUM(status IN ('delivered','partial_delivered')) AS delivered
+                  FROM orders WHERE created_at >= ? AND is_test = 0 AND source IN ('web','landing')`).bind(sinceIso),
+    db.prepare('SELECT COUNT(*) AS n FROM abandoned_checkouts WHERE created_at >= ?').bind(sinceIso),
+    db.prepare(`SELECT district_name AS district, division_name AS division, COUNT(*) AS orders, COALESCE(SUM(total_paisa), 0) AS revenue
+                  FROM orders WHERE created_at >= ? AND ${real} GROUP BY district_name ORDER BY orders DESC, revenue DESC LIMIT 8`).bind(sinceIso),
+    db.prepare(`SELECT phone, MAX(customer_name) AS name, MAX(district_name) AS district, COUNT(*) AS orders, COALESCE(SUM(total_paisa), 0) AS spent
+                  FROM orders WHERE created_at >= ? AND ${real} AND status != 'returned' GROUP BY phone ORDER BY spent DESC LIMIT 5`).bind(sinceIso),
+    db.prepare(`SELECT source, COUNT(*) AS orders FROM orders WHERE created_at >= ? AND ${real} GROUP BY source ORDER BY orders DESC`).bind(sinceIso),
+  ]);
+  const f = funnel.results[0] as Record<string, number>;
+  const placed = Number(f.placed ?? 0);
+  return {
+    daily: daily.results as Array<{ day: string; orders: number; revenue: number }>,
+    // Every website order starts as a captured checkout; the max() keeps the funnel honest if a capture was missed.
+    funnel: { started: Math.max(Number((started.results[0] as { n: number }).n ?? 0), placed), placed, confirmed: Number(f.confirmed ?? 0), shipped: Number(f.shipped ?? 0), delivered: Number(f.delivered ?? 0) },
+    places: places.results as Array<{ district: string; division: string; orders: number; revenue: number }>,
+    customers: customers.results as Array<{ phone: string; name: string; district: string; orders: number; spent: number }>,
+    channels: channels.results as Array<{ source: string; orders: number }>,
+  };
+}

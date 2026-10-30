@@ -1,4 +1,5 @@
 import { api, badge, busy, can, confirmBox, date, esc, fromPaisa, qs, slideOver, taka, toast, toPaisa } from '../app.js';
+import { quickProduct } from './quick-product.js';
 
 // ───────────── Product list ─────────────
 
@@ -7,7 +8,7 @@ export async function products(v, [id]) {
   const status = p.get('status') ?? '';
   const [rows, cats] = await Promise.all([api(`/products?${new URLSearchParams([...p.entries()].filter(([k]) => ['status', 'q', 'category'].includes(k)))}`), api('/categories')]);
   v.innerHTML = `
-    <div class="page-head"><div><h1>Products</h1><p>Each category’s template decides which options and details a product needs.</p></div>
+    <div class="page-head"><div><h1>Products</h1><p>Tap a product to change its photos, prices or stock. “+ Add product” asks only what the category needs.</p></div>
       <div class="row">${can('catalog:write') ? '<button class="btn btn-outline" id="csv">CSV import</button><button class="btn btn-primary" id="new">+ Add product</button>' : ''}</div></div>
     <nav class="tabs">${[['', 'All'], ['published', 'Live'], ['draft', 'Drafts'], ['scheduled', 'Scheduled']].map(([s, l]) => `<a href="#/products${s ? `?status=${s}` : ''}" aria-current="${status === s}">${l}</a>`).join('')}</nav>
     <form class="filters" id="pf"><input class="i" name="q" value="${esc(p.get('q') ?? '')}" placeholder="Name, slug or SKU">
@@ -17,19 +18,21 @@ export async function products(v, [id]) {
       <td><b>${esc(r.name)}</b>${r.is_original ? ' <span class="badge b-green">Original</span>' : ''}<br><span class="small muted">${r.variant_count} option(s) · updated ${date(r.updated_at)}</span></td>
       <td>${esc(r.category_name)}<br><span class="small muted">${esc(r.template_name)}</span></td><td class="right">${taka(r.min_price)}</td><td class="right">${r.fulfilment_mode === 'made_to_order' ? 'made to order' : r.stock ?? 0}</td>
       <td>${badge(r.status)}${r.fulfilment_mode === 'pre_order' ? ' <span class="badge b-yellow">pre-order</span>' : ''}</td>
-      <td class="nowrap">${can('catalog:write') ? `<button class="btn btn-sm btn-outline" data-dup="${r.id}">Duplicate</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">No products yet. Add your first one.</td></tr>'}
+      <td class="nowrap">${can('catalog:write') ? `<button class="btn btn-sm btn-outline" data-dup="${r.id}">Duplicate</button> ` : ''}<button class="btn btn-sm btn-ghost" data-full="${r.id}" title="Every detail: SEO, seasons, wholesale, barcodes">Full editor</button></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No products yet. Add your first one.</td></tr>'}
     </tbody></table></div>`;
   v.querySelector('#pf').addEventListener('submit', e => { e.preventDefault(); const f = new URLSearchParams(new FormData(e.target)); for (const [k, x] of [...f]) if (!x) f.delete(k); location.hash = `#/products?${f}`; });
-  v.querySelectorAll('tr[data-id]').forEach(r => r.addEventListener('click', e => { if (!e.target.closest('button')) openProduct(Number(r.dataset.id), () => products(v, [])); }));
+  const refresh = () => products(v, []);
+  v.querySelectorAll('tr[data-id]').forEach(r => r.addEventListener('click', e => { if (!e.target.closest('button')) quickProduct(Number(r.dataset.id), { cats, done: refresh }); }));
+  v.querySelectorAll('[data-full]').forEach(b => b.addEventListener('click', () => openProduct(Number(b.dataset.full), refresh)));
   v.querySelectorAll('[data-dup]').forEach(b => busy(b, async () => {
     const r = await api(`/products/${b.dataset.dup}/duplicate`, 'POST', {});
     toast('Copied as a draft. SKUs are new and stock is 0.');
     openProduct(r.id, () => products(v, []));
   }));
-  v.querySelector('#new')?.addEventListener('click', () => newProduct(cats, () => products(v, [])));
+  v.querySelector('#new')?.addEventListener('click', () => quickProduct(null, { cats, categoryId: Number(p.get('category')) || null, done: refresh }));
   v.querySelector('#csv')?.addEventListener('click', () => csvImport(cats, () => products(v, [])));
-  if (p.get('new')) newProduct(cats, () => products(v, []));
-  if (id) openProduct(Number(id), () => products(v, []));
+  if (p.get('new')) quickProduct(null, { cats, categoryId: Number(p.get('category')) || null, done: refresh });
+  if (id) quickProduct(Number(id), { cats, done: refresh });
 }
 
 function categoryOptions(cats, selected) {
@@ -39,31 +42,6 @@ function categoryOptions(cats, selected) {
   const tName = c => c.template_name ?? cats.find(x => x.template_id === c.effective_template_id)?.template_name ?? c.effective_template_id;
   return walk(null)
     .map(c => `<option value="${c.id}" data-template="${esc(c.effective_template_id ?? c.template_id)}" ${c.id === selected ? 'selected' : ''}>${'— '.repeat((c.depth ?? 1) - 1)}${esc(c.name)} (${esc(tName(c))}${c.inherits_template ? ', inherited' : ''})</option>`).join('');
-}
-
-function newProduct(cats, done) {
-  const so = slideOver('Add a product');
-  so.body.innerHTML = `
-    <p class="muted">Step 1 of 9 · Pick the category first. Its template decides which options and details the form asks for.</p>
-    <label class="f">Category<select id="cat"><option value="">Choose…</option>${categoryOptions(cats)}</select></label>
-    <p class="explain" id="why" hidden></p>
-    <label class="f">Product name<input id="name" placeholder="e.g. Khejur Patali Gur (foil tray)"></label>
-    <label class="check"><input type="checkbox" id="orig"> Abs Vai Original (we make or pack it ourselves)</label>`;
-  so.foot.innerHTML = '<span></span><button class="btn btn-primary" id="go">Continue</button>';
-  so.body.querySelector('#cat').addEventListener('change', async e => {
-    const t = e.target.selectedOptions[0]?.dataset.template;
-    const why = so.body.querySelector('#why');
-    if (!t) { why.hidden = true; return; }
-    const tpl = await api(`/templates/${t}`);
-    why.textContent = tpl.explanation; why.hidden = false;
-  });
-  busy(so.foot.querySelector('#go'), async () => {
-    const categoryId = Number(so.body.querySelector('#cat').value);
-    if (!categoryId) throw new Error('Pick a category first.');
-    const r = await api('/products', 'POST', { categoryId, name: so.body.querySelector('#name').value, isOriginal: so.body.querySelector('#orig').checked });
-    so.close();
-    openProduct(r.id, done, 1);
-  });
 }
 
 function csvImport(cats, done) {
@@ -94,7 +72,8 @@ const FULFIL = { in_stock: 'In stock', pre_order: 'Pre-order (seasonal)', made_t
 const keyOf = a => Object.keys(a).filter(k => a[k]).sort().map(k => `${k}=${String(a[k]).toLowerCase()}`).join('|');
 const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 
-async function compressImage(file) {
+/** Photos are resized to 1600 px and saved as WebP in the browser before upload. */
+export async function compressImage(file) {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return { file, width: null, height: null };
   const bmp = await createImageBitmap(file);
   const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
@@ -107,12 +86,10 @@ async function compressImage(file) {
   return { file: new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' }), width: w, height: h };
 }
 
-export async function openProduct(id, done, startStep = 1) {
-  const [data, cats, seasons, attrTypes] = await Promise.all([api(`/products/${id}`), api('/categories'), api('/season-options'), api('/attribute-types')]);
-  let d = data;
-  let step = startStep;
+/** The full save payload for a product as loaded from the API (both editors start from it, so nothing is lost on save). */
+export function productForm(d) {
   const pr = d.product;
-  const f = {
+  return {
     categoryId: pr.category_id, name: pr.name, slug: pr.slug, code: pr.code, shortDescription: pr.short_description ?? '', description: pr.description ?? '', brand: pr.brand ?? '',
     isOriginal: Boolean(pr.is_original), showOnHome: Boolean(pr.show_on_home), benefitChips: pr.benefit_chips ?? [], specs: { ...d.specs }, promotedSpecKeys: pr.promoted_spec_keys ?? [], seasonIds: d.seasonIds,
     fulfilmentMode: pr.fulfilment_mode, preorderDispatchDate: pr.preorder_dispatch_date ?? '', preorderAdvanceType: pr.preorder_advance_type ?? 'delivery_charge', preorderAdvancePaisa: pr.preorder_advance_paisa,
@@ -120,6 +97,14 @@ export async function openProduct(id, done, startStep = 1) {
     sizeChart: pr.size_chart ?? { columns: d.template.sizeChartColumns, rows: [] }, metaTitle: pr.meta_title ?? '', metaDescription: pr.meta_description ?? '', searchKeywords: pr.search_keywords ?? '',
     variants: d.variants.filter(x => x.isActive).map(x => ({ ...x })),
   };
+}
+
+export async function openProduct(id, done, startStep = 1) {
+  const [data, cats, seasons, attrTypes] = await Promise.all([api(`/products/${id}`), api('/categories'), api('/season-options'), api('/attribute-types')]);
+  let d = data;
+  let step = startStep;
+  const pr = d.product;
+  const f = productForm(d);
   let dirty = false;
   const so = slideOver(`Product · ${pr.name}`, { wide: true, onClose: done });
   const write = can('catalog:write');

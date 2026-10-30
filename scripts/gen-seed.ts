@@ -341,7 +341,7 @@ for (const p of DEMO) {
     demo.push(`INSERT INTO stock_movements (variant_id, change, kind, reason, batch_no, note) SELECT id, stock, 'initial', 'received', ${q(p.specs.batch_no ?? null)}, 'Demo opening stock' FROM product_variants WHERE sku = ${q(sku)};`);
   });
 }
-for (const [code, n] of seq) demo.push(`INSERT INTO counters (name, value) VALUES (${q(`sku:${code}`)}, ${n}) ON CONFLICT(name) DO UPDATE SET value = excluded.value;`);
+for (const [code, n] of seq) demo.push(`INSERT INTO counters (name, value) VALUES (${q(`sku:${code}`)}, ${n}) ON CONFLICT(name) DO UPDATE SET value = MAX(value, excluded.value);`);
 
 writeFileSync(join(ROOT, 'worker/seed/demo.sql'), demo.join('\n') + '\n');
 console.log(`config: ${cfg.length} statements; demo: ${DEMO.length} products`);

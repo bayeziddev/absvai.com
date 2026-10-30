@@ -265,15 +265,25 @@ function subtreeHeight(rows: cat.CategoryRow[], id: number): number {
   return kids.length ? 1 + Math.max(...kids.map(k => subtreeHeight(rows, k.id))) : 0;
 }
 
+/** "Organic & Seasonal Food" → "OSF", "Shoes" → "SHO". */
+function autoCode(name: string): string {
+  const words = name.toUpperCase().replace(/[^A-Z ]/g, ' ').split(/\s+/).filter(w => w && !['AND', 'THE', 'OF', 'FOR'].includes(w));
+  const code = words.length >= 2 ? words.slice(0, 3).map(w => w[0]).join('') : (words[0] ?? '').slice(0, 3);
+  return code.length >= 2 ? code : 'CAT';
+}
+
 async function saveCategory(c: Context<AppEnv>, id: number | null) {
   const db = c.env.DB;
   const b = await readJson(c);
   const name = str(b.name, 80);
   if (!name) throw bad('Give the category a name.');
   const slug = str(b.slug, 80) ? slugify(str(b.slug, 80)) : slugify(name);
-  const code = str(b.code, 5).toUpperCase();
-  if (!/^[A-Z]{2,5}$/.test(code)) throw bad('Category code is 2–5 capital letters, e.g. ORG. It starts every SKU in this category.');
   const rows = await cat.categoryRows(db);
+  // The short code starts every SKU. Left empty, a subcategory reuses its parent's and a new top-level category gets one
+  // from its name (Organic Food → ORF), so the owner never has to think about it.
+  const parentForCode = posInt(b.parentId) ? rows.find(r => r.id === posInt(b.parentId)) : null;
+  const code = (str(b.code, 5) || (parentForCode ? '' : autoCode(name)) || (await cat.categoryCode(db, parentForCode?.id ?? 0)) || autoCode(name)).toUpperCase();
+  if (!/^[A-Z]{2,5}$/.test(code)) throw bad('Category code is 2–5 capital letters, e.g. ORG. It starts every SKU in this category.');
   const current = id ? rows.find(r => r.id === id) : null;
   if (id && !current) throw notFound();
   const parentId = posInt(b.parentId);
@@ -319,6 +329,22 @@ async function saveCategory(c: Context<AppEnv>, id: number | null) {
 }
 
 adminCatalog.post('/categories', need('catalog:write'), c => saveCategory(c, null));
+
+const CATEGORY_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/svg+xml': 'svg' };
+
+/** Category picture (menu and category tiles). Returns the URL for the category form to save. */
+adminCatalog.post('/category-image', need('catalog:write'), async c => {
+  const file = (await c.req.formData()).get('file');
+  if (!(file instanceof File)) throw bad('Choose a picture.');
+  const ext = CATEGORY_IMAGE_TYPES[file.type];
+  if (!ext) throw bad('Upload the picture as JPG, PNG, WebP or SVG.');
+  if (file.size > 2 * 1024 * 1024) throw bad('The picture must be under 2 MB.');
+  const media = mediaBucket(c.env);
+  const key = `c/${crypto.randomUUID()}.${ext}`;
+  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
+  await audit(c, 'category.image', 'category', null, { key });
+  return c.json({ url: `/media/${key}` }, 201);
+});
 adminCatalog.put('/categories/:id', need('catalog:write'), c => saveCategory(c, posInt(c.req.param('id'))));
 
 /**

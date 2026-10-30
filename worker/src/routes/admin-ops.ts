@@ -4,7 +4,7 @@ import type { AppEnv } from '../env';
 import { TAG } from '../lib/cache-tags';
 import { bdDate, daysBetween, isIsoDate } from '../lib/dates';
 import { bad, HttpError, int, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
-import { localPhone, phonePrefixRange } from '../lib/phone';
+import { localPhone, maskPhone, phonePrefixRange } from '../lib/phone';
 import { isSeasonActive, nextSeason, productAvailability } from '../lib/seasons';
 import { STAGE_MEANING, STAGES, STATUS_LABELS } from '../lib/state-machine';
 import { SMS } from '../lib/sms';
@@ -12,7 +12,7 @@ import { listAudit } from '../repo/admins';
 import { purgeBacklog } from '../repo/cache';
 import { getSeasons } from '../repo/catalog';
 import { listCustomers, setTrusted } from '../repo/customers';
-import { dashboardFigures, stageCounts } from '../repo/dashboard';
+import { dashboardCharts, dashboardFigures, stageCounts } from '../repo/dashboard';
 import { attemptsToday } from '../repo/fraud';
 import {
   addPostcode, assignDistrictZone, assignUpazilaZone, bulkAssignPostcodes, courierAreas, deleteZone, districtById, fixPostcode, listPostcodes, postcodeDistrict, postcodeSummary,
@@ -26,7 +26,7 @@ import { bumpGeoVersion, loadSettings } from '../repo/settings';
 import { listOutbox } from '../repo/sms';
 import { productRow } from '../repo/catalog-admin';
 import { sendSms } from '../services/sms';
-import { COURIERS } from '../services/orders';
+import { COURIERS, ORDER_SOURCES } from '../services/orders';
 import { allowed, audit, need, refresh } from './admin-helpers';
 
 export const adminOps = new Hono<AppEnv>();
@@ -46,7 +46,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
   const [start, end] = bdDayRange(today);
   const chartStart = bdDayRange(new Date(Date.now() - 13 * 86_400_000 + 6 * 3_600_000).toISOString().slice(0, 10))[0];
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const [stages, fig, low, geo, attempts, incomplete, backlog] = await Promise.all([
+  const [stages, fig, low, geo, attempts, incomplete, backlog, charts] = await Promise.all([
     stageCounts(db, new Date(Date.now() - 30 * 86_400_000).toISOString()),
     dashboardFigures(db, { todayStartIso: start, todayEndIso: end, chartStartIso: chartStart, weekAgoIso: weekAgo, todayBd: today }),
     lowStock(db),
@@ -54,6 +54,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
     attemptsToday(db, start),
     newIncompleteCount(db, weekAgo),
     purgeBacklog(db),
+    dashboardCharts(db, bdDayRange(new Date(Date.now() - 29 * 86_400_000 + 6 * 3_600_000).toISOString().slice(0, 10))[0]),
   ]);
 
   const seasons = await getSeasons(db);
@@ -100,6 +101,12 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
     },
     seasons: { active, next: next ? { name: next.season.name, startsOn: next.season.starts_on, daysUntil: next.daysUntil } : null, undated },
     chart: fig.chart, recentOrders: fig.recent, lowStock: low, attention, health, fuzzyPostcodes: geo.fuzzy,
+    charts: {
+      ...charts,
+      // Sales Agents see masked numbers, as everywhere else.
+      customers: charts.customers.map(x => ({ ...x, phone: c.var.session.role === 'order_processor' ? maskPhone(String(x.phone)) : localPhone(String(x.phone)) })),
+      channels: charts.channels.map(x => ({ ...x, label: ORDER_SOURCES[x.source] ?? x.source })),
+    },
   });
 });
 

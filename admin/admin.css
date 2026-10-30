@@ -184,3 +184,50 @@ td img.thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
 .tree-row.drop-inside { outline: 2px solid var(--chili); }
 .tree-row.drop-after { box-shadow: 0 3px 0 var(--chili); }
 .tree-row .name { flex: 1; font-weight: 600; }
+.nav-mode { margin: 10px 12px 18px; width: calc(100% - 24px); background: transparent; border: 1px dashed var(--line); border-radius: 10px; padding: 8px; font: 600 .8rem var(--body); color: var(--muted); cursor: pointer; }
+.nav-mode:hover { border-color: var(--clove); color: var(--clove); }
+.collapsed .nav-mode { display: none; }
+
+/* Overview charts */
+.ch-grid { display: grid; gap: 14px; grid-template-columns: 1fr; margin-bottom: 16px; }
+@media (min-width: 1000px) { .ch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ch-wide { grid-column: 1 / -1; } }
+.ch-card { margin: 0; }
+.ch-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.ch-head h2 { margin: 0; }
+.ch-total { font: 800 1.25rem var(--display); }
+.ch-sub { color: var(--muted); font-size: .8rem; margin: 2px 0 10px; }
+.ch { position: relative; min-height: 220px; }
+.ch svg { display: block; overflow: visible; }
+.ch-tip { position: absolute; pointer-events: none; background: var(--clove); color: #fff; font-size: .78rem; line-height: 1.35; padding: 6px 9px; border-radius: 8px; white-space: nowrap; box-shadow: var(--shadow); z-index: 2; }
+.ch-table { margin-top: 8px; font-size: .8rem; }
+.ch-table summary { color: var(--muted); cursor: pointer; }
+.ch-hbars, .ch-funnel, .ch-people { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ch-hbar-label, .ch-funnel-head { display: flex; justify-content: space-between; gap: 10px; font-size: .86rem; margin-bottom: 4px; }
+.ch-hbar-track, .ch-funnel-track { height: 10px; background: var(--cream); border-radius: 999px; overflow: hidden; }
+.ch-hbar, .ch-funnel-bar { height: 100%; background: var(--chili); border-radius: 0 999px 999px 0; }
+.ch-hbar-sub, .ch-funnel-rate { color: var(--muted); font-size: .75rem; margin-top: 2px; }
+.ch-funnel-track { height: 14px; }
+.ch-people li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.ch-people li:last-child { border-bottom: 0; }
+.ch-rank { width: 26px; height: 26px; border-radius: 50%; background: var(--cream); display: grid; place-items: center; font: 700 .8rem var(--display); }
+
+/* Simple product and category forms */
+.qp { display: grid; gap: 14px; }
+.qp-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+.qp-card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.qp-n { width: 24px; height: 24px; border-radius: 50%; background: var(--chili); color: #fff; display: grid; place-items: center; font-size: .8rem; flex: none; }
+.qp .req { color: var(--chili); }
+.qp-photos { display: flex; flex-wrap: wrap; gap: 10px; }
+.qp-photos figure { position: relative; margin: 0; width: 104px; }
+.qp-photos img { width: 104px; height: 104px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); background: var(--cream); display: block; }
+.qp-photos figcaption { font-size: .72rem; color: var(--muted); text-align: center; min-height: 1em; }
+.qp-x { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: var(--clove); color: #fff; cursor: pointer; line-height: 1; }
+.qp-add { width: 104px; height: 104px; border: 2px dashed var(--husk); border-radius: 12px; display: grid; place-content: center; text-align: center; cursor: pointer; color: var(--chili); font-weight: 700; padding: 6px; }
+.qp-add small { display: block; color: var(--muted); font-weight: 400; font-size: .68rem; margin-top: 4px; }
+.qp-add:hover { border-color: var(--chili); background: #FFF5F4; }
+.qp-attr { margin-bottom: 12px; }
+.qp-attr .chips { margin-top: 6px; }
+.qp-more { margin-bottom: 10px; }
+.qp-more summary { color: var(--chili); cursor: pointer; font-weight: 600; font-size: .86rem; }
+.qp-rows input { width: 100%; min-width: 80px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+details.qp-more > .grid-2, details.qp-more > label { margin-top: 10px; }
