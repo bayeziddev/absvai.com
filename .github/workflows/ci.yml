@@ -1,0 +1,151 @@
+name: Test and deploy
+
+on:
+  pull_request:
+  push:
+    # The build branch deploys too until it is merged (the owner asked for the site to go live from it); remove it after merging.
+    branches: [main, claude/abs-vai-design-review-dt6sk6]
+  # Manual deploy from the Actions tab (any branch), e.g. to put a feature branch live before it is merged.
+  workflow_dispatch:
+    inputs:
+      load_demo_catalog:
+        description: Load the demo catalog (17 products) if the store has no products yet
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: TypeScript build check
+        run: npm run typecheck
+      - name: Generated files are up to date
+        run: |
+          npm run gen:seed
+          npm run gen:geo
+          git diff --exit-code -- worker/migrations worker/seed data/geo worker/src/generated
+      - name: Unit and integration tests (real D1/KV/R2 via local workerd)
+        run: npm test
+      - name: Production config builds (dry run)
+        run: npm run build && npx wrangler deploy --dry-run -c worker/wrangler.toml
+      - name: Install Chromium for end-to-end tests
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end tests (Playwright)
+        run: npm run test:e2e
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Check repository secrets
+        env:
+          SETUP_TOKEN: ${{ secrets.SETUP_TOKEN }}
+          OTP_PEPPER: ${{ secrets.OTP_PEPPER }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SETTINGS_KEY: ${{ secrets.SETTINGS_KEY }}
+        run: |
+          missing=()
+          for s in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID SETUP_TOKEN OTP_PEPPER SIGNING_KEY SETTINGS_KEY; do
+            [ -n "${!s}" ] || missing+=("$s")
+          done
+          if (( ${#missing[@]} )); then
+            echo "::error::Add these repository secrets (Settings → Secrets and variables → Actions): ${missing[*]}. See docs/DEPLOY.md."
+            exit 1
+          fi
+          # SETTINGS_KEY must be 32 random bytes, base64 (openssl rand -base64 32).
+          if [ "$(printf %s "$SETTINGS_KEY" | base64 -d 2>/dev/null | wc -c)" -ne 32 ]; then
+            echo "::error::SETTINGS_KEY must be 32 random bytes in base64. Create one with: openssl rand -base64 32"
+            exit 1
+          fi
+
+      - name: Find or create D1, KV and R2 (ids written into wrangler.toml for this run)
+        id: resources
+        run: node scripts/ensure-cloudflare-resources.mjs
+
+      - name: Build static assets
+        run: npm run build
+
+      - name: Apply D1 migrations
+        run: npx wrangler d1 migrations apply DB --remote -c worker/wrangler.toml
+
+      - name: Load the demo catalog into an empty store
+        if: github.event_name == 'workflow_dispatch' && inputs.load_demo_catalog
+        run: |
+          n=$(npx wrangler d1 execute DB --remote -c worker/wrangler.toml --json --command "SELECT COUNT(*) AS n FROM products" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s)[0].results[0].n))')
+          if [ "$n" = "0" ]; then
+            npx wrangler d1 execute DB --remote -c worker/wrangler.toml --file worker/seed/demo.sql
+            echo "Demo catalog loaded." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The store already has $n product(s); demo catalog not loaded." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Deploy the Worker with its secrets
+        env:
+          SETUP_TOKEN: ${{ secrets.SETUP_TOKEN }}
+          OTP_PEPPER: ${{ secrets.OTP_PEPPER }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SETTINGS_KEY: ${{ secrets.SETTINGS_KEY }}
+          TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+          TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
+          SMS_PROVIDER: ${{ secrets.SMS_PROVIDER }}
+          SMS_API_KEY: ${{ secrets.SMS_API_KEY }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
+        run: |
+          secrets_file="$RUNNER_TEMP/worker-secrets.json"
+          trap 'rm -f "$secrets_file"' EXIT
+          # Only secrets that are set; omitted ones keep their current value on the Worker.
+          node -e '
+            const keys = ["SETUP_TOKEN","OTP_PEPPER","SIGNING_KEY","SETTINGS_KEY","TURNSTILE_SITE_KEY","TURNSTILE_SECRET","SMS_PROVIDER","SMS_API_KEY"];
+            process.stdout.write(JSON.stringify(Object.fromEntries(keys.filter(k => process.env[k]).map(k => [k, process.env[k]]))));
+          ' > "$secrets_file"
+          npx wrangler deploy -c worker/wrangler.toml --secrets-file "$secrets_file"
+
+      - name: Smoke test the live site
+        env:
+          HAS_ZONE: ${{ steps.resources.outputs.has_zone }}
+        run: |
+          if [ "$HAS_ZONE" = "true" ]; then base="https://absvai.com"; else
+            base=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/wrangler-output.json" | head -1)
+          fi
+          if [ -z "$base" ]; then echo "::warning::Could not find the deployed URL; skipping the smoke test."; exit 0; fi
+          echo "Live at $base" | tee -a "$GITHUB_STEP_SUMMARY"
+          for path in /robots.txt / /admin/ /api/geo/version; do
+            ok=""
+            for i in 1 2 3 4 5 6; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$base$path") && [ "$code" = "200" ] && ok=1 && break
+              sleep 10
+            done
+            [ -n "$ok" ] || { echo "::error::$base$path answered $code"; exit 1; }
+            echo "- $path: 200" >> "$GITHUB_STEP_SUMMARY"
+          done

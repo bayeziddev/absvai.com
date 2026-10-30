@@ -1,0 +1,1350 @@
+postcode,post_office,source_district,source_thana,district_id,district,upazila_id,upazila,match_status,note
+8710,Amtali,Barguna,Amtali,35,Barguna,266,Amtali,exact,
+8730,Bamna,Barguna,Bamna,35,Barguna,269,Bamna,exact,
+8700,Barguna Sadar,Barguna,Barguna Sadar,35,Barguna,267,Barguna Sadar,exact,
+8701,Nali Bandar,Barguna,Barguna Sadar,35,Barguna,267,Barguna Sadar,exact,
+8740,Betagi,Barguna,Betagi,35,Barguna,268,Betagi,exact,
+8741,Darul Ulam,Barguna,Betagi,35,Barguna,268,Betagi,exact,
+8721,Kakchira,Barguna,Patharghata,35,Barguna,270,Pathorghata,fuzzy,"""Patharghata"" → ""Pathorghata"" (edit distance 1, please review)"
+8720,Patharghata,Barguna,Patharghata,35,Barguna,270,Pathorghata,fuzzy,"""Patharghata"" → ""Pathorghata"" (edit distance 1, please review)"
+8240,Agailzhara,Barishal,Agailzhara,33,Barisal,255,Agailjhara,fuzzy,"""Agailzhara"" → ""Agailjhara"" (edit distance 1, please review)"
+8241,Gaila,Barishal,Agailzhara,33,Barisal,255,Agailjhara,fuzzy,"""Agailzhara"" → ""Agailjhara"" (edit distance 1, please review)"
+8242,Paisarhat,Barishal,Agailzhara,33,Barisal,255,Agailjhara,fuzzy,"""Agailzhara"" → ""Agailjhara"" (edit distance 1, please review)"
+8210,Babuganj,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8216,Barishal Cadet,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8212,Chandpasha,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8213,Madhabpasha,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8215,Nizamuddin College,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8211,Rahamatpur,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8214,Thakur Mallik,Barishal,Babuganj,33,Barisal,251,Babuganj,exact,
+8260,Barajalia,Barishal,Barajalia,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8261,Osman Manjil,Barishal,Barajalia,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8200,Barishal Sadar,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8201,Bukhainagar,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8206,Jaguarhat,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8205,Kashipur,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8204,Patang,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8202,Saheberhat,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8203,Sugandia,Barishal,Barishal Sadar,33,Barisal,249,Barisal Sadar,alias,"""Barishal Sadar"" → ""Barisal Sadar"" (district sadar)"
+8233,Batajor,Barishal,Gouranadi,33,Barisal,254,Gournadi,fuzzy,"""Gouranadi"" → ""Gournadi"" (edit distance 1, please review)"
+8230,Gouranadi,Barishal,Gouranadi,33,Barisal,254,Gournadi,fuzzy,"""Gouranadi"" → ""Gournadi"" (edit distance 1, please review)"
+8232,Kashemabad,Barishal,Gouranadi,33,Barisal,254,Gournadi,fuzzy,"""Gouranadi"" → ""Gournadi"" (edit distance 1, please review)"
+8231,Tarki Bandar,Barishal,Gouranadi,33,Barisal,254,Gournadi,fuzzy,"""Gouranadi"" → ""Gournadi"" (edit distance 1, please review)"
+8274,Langutia,Barishal,Mahendiganj,33,Barisal,256,Mehendiganj,fuzzy,"""Mahendiganj"" → ""Mehendiganj"" (edit distance 1, please review)"
+8271,Laskarpur,Barishal,Mahendiganj,33,Barisal,256,Mehendiganj,fuzzy,"""Mahendiganj"" → ""Mehendiganj"" (edit distance 1, please review)"
+8270,Mahendiganj,Barishal,Mahendiganj,33,Barisal,256,Mehendiganj,fuzzy,"""Mahendiganj"" → ""Mehendiganj"" (edit distance 1, please review)"
+8273,Nalgora,Barishal,Mahendiganj,33,Barisal,256,Mehendiganj,fuzzy,"""Mahendiganj"" → ""Mehendiganj"" (edit distance 1, please review)"
+8272,Ulania,Barishal,Mahendiganj,33,Barisal,256,Mehendiganj,fuzzy,"""Mahendiganj"" → ""Mehendiganj"" (edit distance 1, please review)"
+8252,Charkalekhan,Barishal,Muladi,33,Barisal,257,Muladi,exact,
+8251,Kazirchar,Barishal,Muladi,33,Barisal,257,Muladi,exact,
+8250,Muladi,Barishal,Muladi,33,Barisal,257,Muladi,exact,
+8281,Charamandi,Barishal,Sahebganj,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8284,kalaskati,Barishal,Sahebganj,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8282,Padri Shibpur,Barishal,Sahebganj,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8280,Sahebganj,Barishal,Sahebganj,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8283,Shialguni,Barishal,Sahebganj,33,Barisal,,,unmatched,no upazila with a similar name in this district
+8223,Dakuarhat,Barishal,Uzirpur,33,Barisal,252,Wazirpur,fuzzy,"""Uzirpur"" → ""Wazirpur"" (edit distance 1, please review)"
+8221,Dhamura,Barishal,Uzirpur,33,Barisal,252,Wazirpur,fuzzy,"""Uzirpur"" → ""Wazirpur"" (edit distance 1, please review)"
+8222,Jugirkanda,Barishal,Uzirpur,33,Barisal,252,Wazirpur,fuzzy,"""Uzirpur"" → ""Wazirpur"" (edit distance 1, please review)"
+8224,Shikarpur,Barishal,Uzirpur,33,Barisal,252,Wazirpur,fuzzy,"""Uzirpur"" → ""Wazirpur"" (edit distance 1, please review)"
+8220,Uzirpur,Barishal,Uzirpur,33,Barisal,252,Wazirpur,fuzzy,"""Uzirpur"" → ""Wazirpur"" (edit distance 1, please review)"
+8300,Bhola Sadar,Bhola,Bhola Sadar,34,Bhola,259,Bhola Sadar,exact,
+8301,Joynagar,Bhola,Bhola Sadar,34,Bhola,259,Bhola Sadar,exact,
+8320,Borhanuddin UPO,Bhola,Borhanuddin UPO,34,Bhola,260,Borhan Sddin,fuzzy,"""Borhanuddin UPO"" → ""Borhan Sddin"" (edit distance 1, please review)"
+8321,Mirzakalu,Bhola,Borhanuddin UPO,34,Bhola,260,Borhan Sddin,fuzzy,"""Borhanuddin UPO"" → ""Borhan Sddin"" (edit distance 1, please review)"
+8340,Charfashion,Bhola,Charfashion,34,Bhola,261,Charfesson,fuzzy,"""Charfashion"" → ""Charfesson"" (edit distance 2, please review)"
+8341,Dularhat,Bhola,Charfashion,34,Bhola,261,Charfesson,fuzzy,"""Charfashion"" → ""Charfesson"" (edit distance 2, please review)"
+8342,Keramatganj,Bhola,Charfashion,34,Bhola,261,Charfesson,fuzzy,"""Charfashion"" → ""Charfesson"" (edit distance 2, please review)"
+8310,Doulatkhan,Bhola,Doulatkhan,34,Bhola,262,Doulatkhan,exact,
+8311,Hajipur,Bhola,Doulatkhan,34,Bhola,262,Doulatkhan,exact,
+8360,Hajirhat,Bhola,Hajirhat,34,Bhola,,,unmatched,no upazila with a similar name in this district
+8350,Hatshoshiganj,Bhola,Hatshoshiganj,34,Bhola,,,unmatched,no upazila with a similar name in this district
+8331,Daurihat,Bhola,Lalmohan UPO,34,Bhola,265,Lalmohan,fuzzy,"""Lalmohan UPO"" → ""Lalmohan"" (spelling variant)"
+8332,Gazaria,Bhola,Lalmohan UPO,34,Bhola,265,Lalmohan,fuzzy,"""Lalmohan UPO"" → ""Lalmohan"" (spelling variant)"
+8330,Lalmohan UPO,Bhola,Lalmohan UPO,34,Bhola,265,Lalmohan,fuzzy,"""Lalmohan UPO"" → ""Lalmohan"" (spelling variant)"
+8402,Baukathi,Jhalokathi,Jhalokathi Sadar,30,Jhalakathi,230,Jhalakathi Sadar,alias,"""Jhalokathi Sadar"" → ""Jhalakathi Sadar"" (district sadar)"
+8403,Gabha,Jhalokathi,Jhalokathi Sadar,30,Jhalakathi,230,Jhalakathi Sadar,alias,"""Jhalokathi Sadar"" → ""Jhalakathi Sadar"" (district sadar)"
+8400,Jhalokathi Sadar,Jhalokathi,Jhalokathi Sadar,30,Jhalakathi,230,Jhalakathi Sadar,alias,"""Jhalokathi Sadar"" → ""Jhalakathi Sadar"" (district sadar)"
+8401,Nabagram,Jhalokathi,Jhalokathi Sadar,30,Jhalakathi,230,Jhalakathi Sadar,alias,"""Jhalokathi Sadar"" → ""Jhalakathi Sadar"" (district sadar)"
+8404,Shekherhat,Jhalokathi,Jhalokathi Sadar,30,Jhalakathi,230,Jhalakathi Sadar,alias,"""Jhalokathi Sadar"" → ""Jhalakathi Sadar"" (district sadar)"
+8431,Amua,Jhalokathi,Kathalia,30,Jhalakathi,231,Kathalia,exact,
+8430,Kathalia,Jhalokathi,Kathalia,30,Jhalakathi,231,Kathalia,exact,
+8432,Niamatee,Jhalokathi,Kathalia,30,Jhalakathi,231,Kathalia,exact,
+8433,Shoulajalia,Jhalokathi,Kathalia,30,Jhalakathi,231,Kathalia,exact,
+8421,Beerkathi,Jhalokathi,Nalchhiti,30,Jhalakathi,232,Nalchity,fuzzy,"""Nalchhiti"" → ""Nalchity"" (spelling variant)"
+8420,Nalchhiti,Jhalokathi,Nalchhiti,30,Jhalakathi,232,Nalchity,fuzzy,"""Nalchhiti"" → ""Nalchity"" (spelling variant)"
+8410,Rajapur,Jhalokathi,Rajapur,30,Jhalakathi,233,Rajapur,exact,
+8621,Bagabandar,Patuakhali,Bauphal,31,Patuakhali,234,Bauphal,exact,
+8620,Bauphal,Patuakhali,Bauphal,31,Patuakhali,234,Bauphal,exact,
+8622,Birpasha,Patuakhali,Bauphal,31,Patuakhali,234,Bauphal,exact,
+8624,Kalaia,Patuakhali,Bauphal,31,Patuakhali,234,Bauphal,exact,
+8623,Kalishari,Patuakhali,Bauphal,31,Patuakhali,234,Bauphal,exact,
+8630,Dashmina,Patuakhali,Dashmina,31,Patuakhali,237,Dashmina,exact,
+8640,Galachipa,Patuakhali,Galachipa,31,Patuakhali,240,Galachipa,exact,
+8641,Gazipur Bandar,Patuakhali,Galachipa,31,Patuakhali,240,Galachipa,exact,
+8650,Khepupara,Patuakhali,Khepupara,31,Patuakhali,,,unmatched,no upazila with a similar name in this district
+8651,Mahipur,Patuakhali,Khepupara,31,Patuakhali,,,unmatched,no upazila with a similar name in this district
+8602,Dumkee,Patuakhali,Patuakhali Sadar,31,Patuakhali,235,Patuakhali Sadar,exact,
+8601,Moukaran,Patuakhali,Patuakhali Sadar,31,Patuakhali,235,Patuakhali Sadar,exact,
+8600,Patuakhali Sadar,Patuakhali,Patuakhali Sadar,31,Patuakhali,235,Patuakhali Sadar,exact,
+8603,Rahimabad,Patuakhali,Patuakhali Sadar,31,Patuakhali,235,Patuakhali Sadar,exact,
+8610,Subidkhali,Patuakhali,Subidkhali,31,Patuakhali,,,unmatched,no upazila with a similar name in this district
+8530,Banaripara,Pirojpur,Banaripara,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+8531,Chakhar,Pirojpur,Banaripara,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+8550,Bhandaria,Pirojpur,Bhandaria,32,Pirojpur,246,Bhandaria,exact,
+8552,Dhaoa,Pirojpur,Bhandaria,32,Pirojpur,246,Bhandaria,exact,
+8551,Kanudashkathi,Pirojpur,Bhandaria,32,Pirojpur,246,Bhandaria,exact,
+8513,Jolagati,Pirojpur,kaukhali,32,Pirojpur,244,Kawkhali,fuzzy,"""kaukhali"" → ""Kawkhali"" (spelling variant)"
+8512,Joykul,Pirojpur,kaukhali,32,Pirojpur,244,Kawkhali,fuzzy,"""kaukhali"" → ""Kawkhali"" (spelling variant)"
+8510,Kaukhali,Pirojpur,kaukhali,32,Pirojpur,244,Kawkhali,fuzzy,"""kaukhali"" → ""Kawkhali"" (spelling variant)"
+8511,Keundia,Pirojpur,kaukhali,32,Pirojpur,244,Kawkhali,fuzzy,"""kaukhali"" → ""Kawkhali"" (spelling variant)"
+8565,Betmor Natun Hat,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8563,Gulishakhali,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8562,Halta,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8560,Mathbaria,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8566,Shilarganj,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8564,Tiarkhali,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8561,Tushkhali,Pirojpur,Mathbaria,32,Pirojpur,247,Mathbaria,exact,
+8540,Nazirpur,Pirojpur,Nazirpur,32,Pirojpur,243,Nazirpur,exact,
+8541,Sriramkathi,Pirojpur,Nazirpur,32,Pirojpur,243,Nazirpur,exact,
+8501,Hularhat,Pirojpur,Pirojpur Sadar,32,Pirojpur,242,Pirojpur Sadar,exact,
+8502,Parerhat,Pirojpur,Pirojpur Sadar,32,Pirojpur,242,Pirojpur Sadar,exact,
+8500,Pirojpur Sadar,Pirojpur,Pirojpur Sadar,32,Pirojpur,242,Pirojpur Sadar,exact,
+8521,Darus Sunnat,Pirojpur,Swarupkathi,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+8523,Jalabari,Pirojpur,Swarupkathi,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+8522,Kaurikhara,Pirojpur,Swarupkathi,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+8520,Swarupkathi,Pirojpur,Swarupkathi,32,Pirojpur,,,unmatched,no upazila with a similar name in this district
+4650,Alikadam,Bandarban,Alikadam,11,Bandarban,98,Alikadam,exact,
+4600,Bandarban Sadar,Bandarban,Bandarban Sadar,11,Bandarban,97,Bandarban Sadar,exact,
+4660,Naikhong,Bandarban,Naikhong,11,Bandarban,,,unmatched,no upazila with a similar name in this district
+4610,Roanchhari,Bandarban,Roanchhari,11,Bandarban,100,Rowangchhari,fuzzy,"""Roanchhari"" → ""Rowangchhari"" (edit distance 2, please review)"
+4620,Ruma,Bandarban,Ruma,11,Bandarban,102,Ruma,exact,
+4641,Lama,Bandarban,Thanchi,11,Bandarban,103,Thanchi,exact,
+4630,Thanchi,Bandarban,Thanchi,11,Bandarban,103,Thanchi,exact,
+3450,Akhaura,Brahmanbaria,Akhaura,3,Brahmanbaria,29,Akhaura,exact,
+3451,Azampur,Brahmanbaria,Akhaura,3,Brahmanbaria,29,Akhaura,exact,
+3452,Gangasagar,Brahmanbaria,Akhaura,3,Brahmanbaria,29,Akhaura,exact,
+3420,Banchharampur,Brahmanbaria,Banchharampur,3,Brahmanbaria,31,Bancharampur,fuzzy,"""Banchharampur"" → ""Bancharampur"" (spelling variant)"
+3402,Ashuganj,Brahmanbaria,Brahamanbaria Sadar,3,Brahmanbaria,24,Brahmanbaria Sadar,alias,"""Brahamanbaria Sadar"" → ""Brahmanbaria Sadar"" (district sadar)"
+3403,Ashuganj Share,Brahmanbaria,Brahamanbaria Sadar,3,Brahmanbaria,24,Brahmanbaria Sadar,alias,"""Brahamanbaria Sadar"" → ""Brahmanbaria Sadar"" (district sadar)"
+3400,Brahamanbaria Sadar,Brahmanbaria,Brahamanbaria Sadar,3,Brahmanbaria,24,Brahmanbaria Sadar,alias,"""Brahamanbaria Sadar"" → ""Brahmanbaria Sadar"" (district sadar)"
+3404,Poun,Brahmanbaria,Brahamanbaria Sadar,3,Brahmanbaria,24,Brahmanbaria Sadar,alias,"""Brahamanbaria Sadar"" → ""Brahmanbaria Sadar"" (district sadar)"
+3401,Talshahar,Brahmanbaria,Brahamanbaria Sadar,3,Brahmanbaria,24,Brahmanbaria Sadar,alias,"""Brahamanbaria Sadar"" → ""Brahmanbaria Sadar"" (district sadar)"
+3462,Chandidar,Brahmanbaria,Kasba,3,Brahmanbaria,25,Kasba,exact,
+3463,Chargachh,Brahmanbaria,Kasba,3,Brahmanbaria,25,Kasba,exact,
+3464,Gopinathpur,Brahmanbaria,Kasba,3,Brahmanbaria,25,Kasba,exact,
+3460,Kasba,Brahmanbaria,Kasba,3,Brahmanbaria,25,Kasba,exact,
+3461,Kuti,Brahmanbaria,Kasba,3,Brahmanbaria,25,Kasba,exact,
+3419,Jibanganj,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3417,Kaitala,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3411,Laubfatehpur,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3410,Nabinagar,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3412,Rasullabad,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3414,Ratanpur,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3418,Salimganj,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3415,Shahapur,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3413,Shamgram,Brahmanbaria,Nabinagar,3,Brahmanbaria,30,Nabinagar,exact,
+3441,Fandauk,Brahmanbaria,Nasirnagar,3,Brahmanbaria,26,Nasirnagar,exact,
+3440,Nasirnagar,Brahmanbaria,Nasirnagar,3,Brahmanbaria,26,Nasirnagar,exact,
+3432,Chandura,Brahmanbaria,Sarail,3,Brahmanbaria,27,Sarail,exact,
+3430,Sarial,Brahmanbaria,Sarail,3,Brahmanbaria,27,Sarail,exact,
+3431,Shahbajpur,Brahmanbaria,Sarail,3,Brahmanbaria,27,Sarail,exact,
+3602,Baburhat,Chandpur,Chandpur Sadar,6,Chandpur,55,Chandpur Sadar,exact,
+3600,Chandpur Sadar,Chandpur,Chandpur Sadar,6,Chandpur,55,Chandpur Sadar,exact,
+3601,Puranbazar,Chandpur,Chandpur Sadar,6,Chandpur,55,Chandpur Sadar,exact,
+3603,Sahatali,Chandpur,Chandpur Sadar,6,Chandpur,55,Chandpur Sadar,exact,
+3651,Chandra,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3650,Faridganj,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3653,Gridkaliandia,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3655,Islampur Shah Isain,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3654,Rampurbazar,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3652,Rupsha,Chandpur,Faridganj,6,Chandpur,59,Faridgonj,fuzzy,"""Faridganj"" → ""Faridgonj"" (edit distance 1, please review)"
+3611,Bolakhal,Chandpur,Hajiganj,6,Chandpur,57,Hajiganj,exact,
+3610,Hajiganj,Chandpur,Hajiganj,6,Chandpur,57,Hajiganj,exact,
+3661,Gandamara,Chandpur,Hayemchar,6,Chandpur,52,Haimchar,fuzzy,"""Hayemchar"" → ""Haimchar"" (spelling variant)"
+3660,Hayemchar,Chandpur,Hayemchar,6,Chandpur,52,Haimchar,fuzzy,"""Hayemchar"" → ""Haimchar"" (spelling variant)"
+3630,Kachua,Chandpur,Kachua,6,Chandpur,53,Kachua,exact,
+3631,Pak Shrirampur,Chandpur,Kachua,6,Chandpur,53,Kachua,exact,
+3632,Rahima Nagar,Chandpur,Kachua,6,Chandpur,53,Kachua,exact,
+3633,Shachar,Chandpur,Kachua,6,Chandpur,53,Kachua,exact,
+3642,Kalipur,Chandpur,Matlobganj,6,Chandpur,,,unmatched,no upazila with a similar name in this district
+3640,Matlobganj,Chandpur,Matlobganj,6,Chandpur,,,unmatched,no upazila with a similar name in this district
+3641,Mohanpur,Chandpur,Matlobganj,6,Chandpur,,,unmatched,no upazila with a similar name in this district
+3623,Chotoshi,Chandpur,Shahrasti,6,Chandpur,54,Shahrasti,exact,
+3624,Islamia Madrasha,Chandpur,Shahrasti,6,Chandpur,54,Shahrasti,exact,
+3621,Khilabazar,Chandpur,Shahrasti,6,Chandpur,54,Shahrasti,exact,
+3622,Pashchim Kherihar Al,Chandpur,Shahrasti,6,Chandpur,54,Shahrasti,exact,
+3620,Shahrasti,Chandpur,Shahrasti,6,Chandpur,54,Shahrasti,exact,
+4376,Anowara,Chittagong,Anawara,8,Chattogram,72,Anwara,fuzzy,"""Anawara"" → ""Anwara"" (edit distance 1, please review)"
+4378,Battali,Chittagong,Anawara,8,Chattogram,72,Anwara,fuzzy,"""Anawara"" → ""Anwara"" (edit distance 1, please review)"
+4377,Paroikora,Chittagong,Anawara,8,Chattogram,72,Anwara,fuzzy,"""Anawara"" → ""Anwara"" (edit distance 1, please review)"
+4366,Boalkhali,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4369,Charandwip,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4365,Iqbal Park,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4368,Kadurkhal,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4363,Kanungopara,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4367,Sakpura,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4364,Saroatoli,Chittagong,Boalkhali,8,Chattogram,71,Boalkhali,exact,
+4221,Al- Amin Baria Madra,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4211,Amin Jute Mills,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4215,Anandabazar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4210,Bayezid Bostami,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4212,Chandgaon,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4203,Chawkbazar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4220,Chitt. Cantonment,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4219,Chitt. Customs Acca,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4209,Chitt. Politechnic In,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4218,Chitt. Sailers Colon,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4205,Chittagong Airport,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4100,Chittagong Bandar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4000,Chittagong GPO,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4223,Export Processing,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4207,Firozshah,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4216,Halishahar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4225,Halishshar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4214,Jalalabad,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4206,Jaldia Merine Accade,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4222,Middle Patenga,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4208,Mohard,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4226,North Halishahar,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4217,North Katuli,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4202,Pahartoli,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4204,Patenga,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4224,Rampura TSO,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4213,Wazedia,Chittagong,Chittagong Sadar,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4383,Barma,Chittagong,East Joara,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4382,Dohazari,Chittagong,East Joara,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4380,East Joara,Chittagong,East Joara,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4381,Gachbaria,Chittagong,East Joara,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4352,Bhandar Sharif,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4350,Fatikchhari,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4354,Harualchhari,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4353,Najirhat,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4351,Nanupur,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4355,Narayanhat,Chittagong,Fatikchhari,8,Chattogram,77,Fatikchhari,exact,
+4331,Chitt.University,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4335,Fatahabad,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4332,Gorduara,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4330,Hathazari,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4333,Katirhat,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4339,Madrasa,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4334,Mirzapur,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4337,Nuralibari,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4338,Yunus Nagar,Chittagong,Hathazari,8,Chattogram,76,Hathazari,exact,
+4393,Banigram,Chittagong,Jaldi,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4392,Gunagari,Chittagong,Jaldi,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4390,Jaldi,Chittagong,Jaldi,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4391,Khan Bahadur,Chittagong,Jaldi,8,Chattogram,,,unmatched,no upazila with a similar name in this district
+4398,Chunti,Chittagong,Lohagara,8,Chattogram,75,Lohagara,exact,
+4396,Lohagara,Chittagong,Lohagara,8,Chattogram,75,Lohagara,exact,
+4397,Padua,Chittagong,Lohagara,8,Chattogram,75,Lohagara,exact,
+4321,Abutorab,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4325,Azampur,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4323,Bharawazhat,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4322,Darrogahat,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4324,Joarganj,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4327,Korerhat,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4320,Mirsharai,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4328,Mohazanhat,Chittagong,Mirsharai,8,Chattogram,67,Mirsharai,exact,
+4371,Budhpara,Chittagong,Patiya,8,Chattogram,68,Patiya,exact,
+4370,Patiya Head Office,Chittagong,Patiya,8,Chattogram,68,Patiya,exact,
+4361,Dhamair,Chittagong,Rangunia,8,Chattogram,65,Rangunia,exact,
+4360,Rangunia,Chittagong,Rangunia,8,Chattogram,65,Rangunia,exact,
+4349,B.I.T Post Office,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4341,Beenajuri,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4347,Dewanpur,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4345,Fatepur,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4343,Gahira,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4346,Guzra Noapara,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4344,jagannath Hat,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4342,Kundeshwari,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4348,Mohamuni,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4340,Rouzan,Chittagong,Rouzan,8,Chattogram,78,Raozan,fuzzy,"""Rouzan"" → ""Raozan"" (spelling variant)"
+4300,Sandwip,Chittagong,Sandwip,8,Chattogram,69,Sandwip,exact,
+4301,Shiberhat,Chittagong,Sandwip,8,Chattogram,69,Sandwip,exact,
+4302,Urirchar,Chittagong,Sandwip,8,Chattogram,69,Sandwip,exact,
+4387,Baitul Ijjat,Chittagong,Satkania,8,Chattogram,74,Satkania,exact,
+4388,Bazalia,Chittagong,Satkania,8,Chattogram,74,Satkania,exact,
+4386,Satkania,Chittagong,Satkania,8,Chattogram,74,Satkania,exact,
+4312,Barabkunda,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4311,Baroidhala,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4313,Bawashbaria,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4315,Bhatiari,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4316,Fouzdarhat,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4317,Jafrabad,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4314,Kumira,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+4310,Sitakunda,Chittagong,Sitakunda,8,Chattogram,66,Sitakunda,exact,
+3560,Barura,Comilla,Barura,1,Comilla,2,Barura,exact,
+3562,Murdafarganj,Comilla,Barura,1,Comilla,2,Barura,exact,
+3561,Poyalgachha,Comilla,Barura,1,Comilla,2,Barura,exact,
+3526,Brahmanpara,Comilla,Brahmanpara,1,Comilla,3,Brahmanpara,exact,
+3520,Burichang,Comilla,Burichang,1,Comilla,16,Burichang,exact,
+3521,Maynamoti bazar,Comilla,Burichang,1,Comilla,16,Burichang,exact,
+3510,Chandia,Comilla,Chandina,1,Comilla,4,Chandina,exact,
+3511,Madhaiabazar,Comilla,Chandina,1,Comilla,4,Chandina,exact,
+3551,Batisa,Comilla,Chouddagram,1,Comilla,5,Chauddagram,fuzzy,"""Chouddagram"" → ""Chauddagram"" (spelling variant)"
+3552,Chiora,Comilla,Chouddagram,1,Comilla,5,Chauddagram,fuzzy,"""Chouddagram"" → ""Chauddagram"" (spelling variant)"
+3550,Chouddagram,Comilla,Chouddagram,1,Comilla,5,Chauddagram,fuzzy,"""Chouddagram"" → ""Chauddagram"" (spelling variant)"
+3501,Comilla Contoment,Comilla,Comilla Sadar,1,Comilla,11,Comilla Sadar,exact,
+3500,Comilla Sadar,Comilla,Comilla Sadar,1,Comilla,11,Comilla Sadar,exact,
+3503,Courtbari,Comilla,Comilla Sadar,1,Comilla,11,Comilla Sadar,exact,
+3502,Halimanagar,Comilla,Comilla Sadar,1,Comilla,11,Comilla Sadar,exact,
+3504,Suaganj,Comilla,Comilla Sadar,1,Comilla,11,Comilla Sadar,exact,
+3518,Dashpara,Comilla,Daudkandi,1,Comilla,6,Daudkandi,exact,
+3516,Daudkandi,Comilla,Daudkandi,1,Comilla,6,Daudkandi,exact,
+3519,Eliotganj,Comilla,Daudkandi,1,Comilla,6,Daudkandi,exact,
+3517,Gouripur,Comilla,Daudkandi,1,Comilla,6,Daudkandi,exact,
+3532,Barashalghar,Comilla,Davidhar,1,Comilla,1,Debidwar,fuzzy,"""Davidhar"" → ""Debidwar"" (edit distance 2, please review)"
+3530,Davidhar,Comilla,Davidhar,1,Comilla,1,Debidwar,fuzzy,"""Davidhar"" → ""Debidwar"" (edit distance 2, please review)"
+3533,Dhamtee,Comilla,Davidhar,1,Comilla,1,Debidwar,fuzzy,"""Davidhar"" → ""Debidwar"" (edit distance 2, please review)"
+3531,Gangamandal,Comilla,Davidhar,1,Comilla,1,Debidwar,fuzzy,"""Davidhar"" → ""Debidwar"" (edit distance 2, please review)"
+3546,Homna,Comilla,Homna,1,Comilla,7,Homna,exact,
+3572,Bipulasar,Comilla,Laksam,1,Comilla,8,Laksam,exact,
+3570,Laksam,Comilla,Laksam,1,Comilla,8,Laksam,exact,
+3571,Lakshamanpur,Comilla,Laksam,1,Comilla,8,Laksam,exact,
+3582,Chhariabazar,Comilla,Langalkot,1,Comilla,10,Nangalkot,fuzzy,"""Langalkot"" → ""Nangalkot"" (edit distance 1, please review)"
+3581,Dhalua,Comilla,Langalkot,1,Comilla,10,Nangalkot,fuzzy,"""Langalkot"" → ""Nangalkot"" (edit distance 1, please review)"
+3583,Gunabati,Comilla,Langalkot,1,Comilla,10,Nangalkot,fuzzy,"""Langalkot"" → ""Nangalkot"" (edit distance 1, please review)"
+3580,Langalkot,Comilla,Langalkot,1,Comilla,10,Nangalkot,fuzzy,"""Langalkot"" → ""Nangalkot"" (edit distance 1, please review)"
+3543,Bangra,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+3542,Companyganj,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+3540,Muradnagar,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+3545,Pantibazar,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+3541,Ramchandarpur,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+3544,Sonakanda,Comilla,Muradnagar,1,Comilla,9,Muradnagar,exact,
+4742,Badarkali,Coxs Bazar,Chiringga,9,Coxsbazar,,,unmatched,no upazila with a similar name in this district
+4740,Chiringga,Coxs Bazar,Chiringga,9,Coxsbazar,,,unmatched,no upazila with a similar name in this district
+4741,Chiringga S.O,Coxs Bazar,Chiringga,9,Coxsbazar,,,unmatched,no upazila with a similar name in this district
+4743,Malumghat,Coxs Bazar,Chiringga,9,Coxsbazar,,,unmatched,no upazila with a similar name in this district
+4700,Coxs Bazar Sadar,Coxs Bazar,Coxs Bazar Sadar,9,Coxsbazar,80,Coxsbazar Sadar,exact,
+4702,Eidga,Coxs Bazar,Coxs Bazar Sadar,9,Coxsbazar,80,Coxsbazar Sadar,exact,
+4701,Zhilanja,Coxs Bazar,Coxs Bazar Sadar,9,Coxsbazar,80,Coxsbazar Sadar,exact,
+4710,Gorakghat,Coxs Bazar,Gorakghat,9,Coxsbazar,,,unmatched,no upazila with a similar name in this district
+4720,Kutubdia,Coxs Bazar,Kutubdia,9,Coxsbazar,82,Kutubdia,exact,
+4730,Ramu,Coxs Bazar,Ramu,9,Coxsbazar,86,Ramu,exact,
+4761,Hnila,Coxs Bazar,Teknaf,9,Coxsbazar,87,Teknaf,exact,
+4762,St.Martin,Coxs Bazar,Teknaf,9,Coxsbazar,87,Teknaf,exact,
+4760,Teknaf,Coxs Bazar,Teknaf,9,Coxsbazar,87,Teknaf,exact,
+4750,Ukhia,Coxs Bazar,Ukhia,9,Coxsbazar,83,Ukhiya,fuzzy,"""Ukhia"" → ""Ukhiya"" (spelling variant)"
+3910,Chhagalnaia,Feni,Chhagalnaia,2,Feni,18,Chhagalnaiya,fuzzy,"""Chhagalnaia"" → ""Chhagalnaiya"" (spelling variant)"
+3912,Daraga Hat,Feni,Chhagalnaia,2,Feni,18,Chhagalnaiya,fuzzy,"""Chhagalnaia"" → ""Chhagalnaiya"" (spelling variant)"
+3911,Maharajganj,Feni,Chhagalnaia,2,Feni,18,Chhagalnaiya,fuzzy,"""Chhagalnaia"" → ""Chhagalnaiya"" (spelling variant)"
+3913,Puabashimulia,Feni,Chhagalnaia,2,Feni,18,Chhagalnaiya,fuzzy,"""Chhagalnaia"" → ""Chhagalnaiya"" (spelling variant)"
+3922,Chhilonia,Feni,Dagonbhuia,2,Feni,23,Daganbhuiyan,fuzzy,"""Dagonbhuia"" → ""Daganbhuiyan"" (edit distance 2, please review)"
+3920,Dagondhuia,Feni,Dagonbhuia,2,Feni,23,Daganbhuiyan,fuzzy,"""Dagonbhuia"" → ""Daganbhuiyan"" (edit distance 2, please review)"
+3921,Dudmukha,Feni,Dagonbhuia,2,Feni,23,Daganbhuiyan,fuzzy,"""Dagonbhuia"" → ""Daganbhuiyan"" (edit distance 2, please review)"
+3923,Rajapur,Feni,Dagonbhuia,2,Feni,23,Daganbhuiyan,fuzzy,"""Dagonbhuia"" → ""Daganbhuiyan"" (edit distance 2, please review)"
+3901,Fazilpur,Feni,Feni Sadar,2,Feni,19,Feni Sadar,exact,
+3900,Feni Sadar,Feni,Feni Sadar,2,Feni,19,Feni Sadar,exact,
+3903,Laskarhat,Feni,Feni Sadar,2,Feni,19,Feni Sadar,exact,
+3902,Sharshadie,Feni,Feni Sadar,2,Feni,19,Feni Sadar,exact,
+3942,Fulgazi,Feni,Pashurampur,2,Feni,,,unmatched,no upazila with a similar name in this district
+3943,Munshirhat,Feni,Pashurampur,2,Feni,,,unmatched,no upazila with a similar name in this district
+3940,Pashurampur,Feni,Pashurampur,2,Feni,,,unmatched,no upazila with a similar name in this district
+3941,Shuarbazar,Feni,Pashurampur,2,Feni,,,unmatched,no upazila with a similar name in this district
+3932,Ahmadpur,Feni,Sonagazi,2,Feni,20,Sonagazi,exact,
+3933,Kazirhat,Feni,Sonagazi,2,Feni,20,Sonagazi,exact,
+3931,Motiganj,Feni,Sonagazi,2,Feni,20,Sonagazi,exact,
+3930,Sonagazi,Feni,Sonagazi,2,Feni,20,Sonagazi,exact,
+4420,Diginala,Khagrachari,Diginala,10,Khagrachhari,89,Dighinala,fuzzy,"""Diginala"" → ""Dighinala"" (spelling variant)"
+4400,Khagrachari Sadar,Khagrachari,Khagrachari Sadar,10,Khagrachhari,88,Khagrachhari Sadar,alias,"""Khagrachari Sadar"" → ""Khagrachhari Sadar"" (district sadar)"
+4470,Laxmichhari,Khagrachari,Laxmichhari,10,Khagrachhari,91,Laxmichhari,exact,
+4430,Mahalchhari,Khagrachari,Mahalchhari,10,Khagrachhari,92,Mohalchari,fuzzy,"""Mahalchhari"" → ""Mohalchari"" (edit distance 1, please review)"
+4460,Manikchhari,Khagrachari,Manikchhari,10,Khagrachhari,93,Manikchari,fuzzy,"""Manikchhari"" → ""Manikchari"" (spelling variant)"
+4450,Matiranga,Khagrachari,Matiranga,10,Khagrachhari,95,Matiranga,exact,
+4410,Panchhari,Khagrachari,Panchhari,10,Khagrachhari,90,Panchari,fuzzy,"""Panchhari"" → ""Panchari"" (spelling variant)"
+4440,Ramghar Head Office,Khagrachari,Ramghar Head Office,10,Khagrachhari,,,unmatched,no upazila with a similar name in this district
+3730,Char Alexgander,Lakshmipur,Char Alexgander,7,Lakshmipur,,,unmatched,no upazila with a similar name in this district
+3731,Hajirghat,Lakshmipur,Char Alexgander,7,Lakshmipur,,,unmatched,no upazila with a similar name in this district
+3732,Ramgatirhat,Lakshmipur,Char Alexgander,7,Lakshmipur,,,unmatched,no upazila with a similar name in this district
+3709,Amani Lakshimpur,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3702,Bhabaniganj,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3708,Chandraganj,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3707,Choupalli,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3701,Dalal Bazar,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3706,Duttapara,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3704,Keramatganj,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3700,Lakshimpur Sadar,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3703,Mandari,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3705,Rupchara,Lakshmipur,Lakshimpur Sadar,7,Lakshmipur,60,Lakshmipur Sadar,alias,"""Lakshimpur Sadar"" → ""Lakshmipur Sadar"" (district sadar)"
+3721,Alipur,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3725,Dolta,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3723,Kanchanpur,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3724,Naagmud,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3722,Panpara,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3720,Ramganj,Lakshmipur,Ramganj,7,Lakshmipur,64,Ramganj,exact,
+3714,Bhuabari,Lakshmipur,Raypur,7,Lakshmipur,62,Raipur,fuzzy,"""Raypur"" → ""Raipur"" (spelling variant)"
+3713,Haydarganj,Lakshmipur,Raypur,7,Lakshmipur,62,Raipur,fuzzy,"""Raypur"" → ""Raipur"" (spelling variant)"
+3712,Nagerdighirpar,Lakshmipur,Raypur,7,Lakshmipur,62,Raipur,fuzzy,"""Raypur"" → ""Raipur"" (spelling variant)"
+3711,Rakhallia,Lakshmipur,Raypur,7,Lakshmipur,62,Raipur,fuzzy,"""Raypur"" → ""Raipur"" (spelling variant)"
+3710,Raypur,Lakshmipur,Raypur,7,Lakshmipur,62,Raipur,fuzzy,"""Raypur"" → ""Raipur"" (spelling variant)"
+3850,Basur Hat,Noakhali,Basurhat,5,Noakhali,,,unmatched,no upazila with a similar name in this district
+3851,Charhajari,Noakhali,Basurhat,5,Noakhali,,,unmatched,no upazila with a similar name in this district
+3831,Alaiarpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3847,Amisha Para,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3822,Banglabazar,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3824,Bazra,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3820,Begumganj,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3837,Bhabani Jibanpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3821,Choumohani,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3843,Dauti,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3848,Durgapur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3828,Gopalpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3825,Jamidar Hat,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3844,Joyag,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3829,Joynarayanpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3833,Khalafat Bazar,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3842,Khalishpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3838,Maheshganj,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3823,Mir Owarishpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3839,Nadona,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3841,Nandiapara,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3835,Oachhekpur,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3834,Rajganj,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3827,Sonaimuri,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3832,Tangirpar,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3845,Thanar Hat,Noakhali,Begumganj,5,Noakhali,45,Begumganj,exact,
+3879,Bansa Bazar,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3873,Bodalcourt,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3870,Chatkhil,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3878,Dosh Gharia,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3877,Karihati,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3872,Khilpara,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3871,Palla,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3874,Rezzakpur,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3881,Sahapur,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3882,Sampara,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3883,Shingbahura,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3875,Solla,Noakhali,Chatkhil,5,Noakhali,50,Chatkhil,exact,
+3891,Afazia,Noakhali,Hatiya,5,Noakhali,46,Hatia,fuzzy,"""Hatiya"" → ""Hatia"" (spelling variant)"
+3890,Hatiya,Noakhali,Hatiya,5,Noakhali,46,Hatia,fuzzy,"""Hatiya"" → ""Hatia"" (spelling variant)"
+3892,Tamoraddi,Noakhali,Hatiya,5,Noakhali,46,Hatia,fuzzy,"""Hatiya"" → ""Hatia"" (spelling variant)"
+3811,Chaprashir Hat,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3812,Char Jabbar,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3809,Charam Tua,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3803,Din Monir Hat,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3807,Kabirhat,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3808,Khalifar Hat,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3806,Mriddarhat,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3801,Noakhali College,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3800,Noakhali Sadar,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3804,Pak Kishoreganj,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3802,Sonapur,Noakhali,Noakhali Sadar,5,Noakhali,43,Noakhali Sadar,exact,
+3862,Beezbag,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+3864,Chatarpaia,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+3861,Kallyandi,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+3863,Kankirhat,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+3860,Senbag,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+3865,T.P. Lamua,Noakhali,Senbag,5,Noakhali,49,Senbug,fuzzy,"""Senbag"" → ""Senbug"" (edit distance 1, please review)"
+4570,Barakal,Rangamati,Barakal,4,Rangamati,37,Barkal,fuzzy,"""Barakal"" → ""Barkal"" (edit distance 1, please review)"
+4550,Bilaichhari,Rangamati,Bilaichhari,4,Rangamati,40,Belaichari,fuzzy,"""Bilaichhari"" → ""Belaichari"" (edit distance 1, please review)"
+4560,Jarachhari,Rangamati,Jarachhari,4,Rangamati,41,Juraichari,fuzzy,"""Jarachhari"" → ""Juraichari"" (edit distance 2, please review)"
+4511,Betbunia,Rangamati,Kalampati,4,Rangamati,,,unmatched,no upazila with a similar name in this district
+4510,Kalampati,Rangamati,Kalampati,4,Rangamati,,,unmatched,no upazila with a similar name in this district
+4531,Chandraghona,Rangamati,kaptai,4,Rangamati,34,Kaptai,exact,
+4530,Kaptai,Rangamati,kaptai,4,Rangamati,34,Kaptai,exact,
+4533,Kaptai Nuton Bazar,Rangamati,kaptai,4,Rangamati,34,Kaptai,exact,
+4532,Kaptai Project,Rangamati,kaptai,4,Rangamati,34,Kaptai,exact,
+4580,Longachh,Rangamati,Longachh,4,Rangamati,,,unmatched,no upazila with a similar name in this district
+4590,Marishya,Rangamati,Marishya,4,Rangamati,,,unmatched,no upazila with a similar name in this district
+4520,Nanichhar,Rangamati,Naniachhar,4,Rangamati,42,Naniarchar,fuzzy,"""Naniachhar"" → ""Naniarchar"" (edit distance 1, please review)"
+4540,Rajsthali,Rangamati,Rajsthali,4,Rangamati,39,Rajasthali,fuzzy,"""Rajsthali"" → ""Rajasthali"" (edit distance 1, please review)"
+4500,Rangamati Sadar,Rangamati,Rangamati Sadar,4,Rangamati,33,Rangamati Sadar,exact,
+1360,Demra,Dhaka,Demra,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1362,Matuail,Dhaka,Demra,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1361,Sarulia,Dhaka,Demra,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1206,Dhaka CantonmentTSO,Dhaka,Dhaka Cantt.,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1350,Dhamrai,Dhaka,Dhamrai,47,Dhaka,366,Dhamrai,exact,
+1351,Kamalpur,Dhaka,Dhamrai,47,Dhaka,366,Dhamrai,exact,
+1209,Jigatala TSO,Dhaka,Dhanmondi,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1213,Banani TSO,Dhaka,Gulshan,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1212,Gulshan Model Town,Dhaka,Gulshan,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1232,Dhania TSO,Dhaka,Jatrabari,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1330,Joypara,Dhaka,Joypara,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1332,Narisha,Dhaka,Joypara,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1331,Palamganj,Dhaka,Joypara,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1312,Ati,Dhaka,Keraniganj,47,Dhaka,367,Keraniganj,exact,
+1311,Dhaka Jute Mills,Dhaka,Keraniganj,47,Dhaka,367,Keraniganj,exact,
+1313,Kalatia,Dhaka,Keraniganj,47,Dhaka,367,Keraniganj,exact,
+1310,Keraniganj,Dhaka,Keraniganj,47,Dhaka,367,Keraniganj,exact,
+1219,KhilgaonTSO,Dhaka,Khilgaon,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1229,KhilkhetTSO,Dhaka,Khilkhet,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1211,Posta TSO,Dhaka,Lalbag,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1216,Mirpur TSO,Dhaka,Mirpur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1207,Mohammadpur Housing,Dhaka,Mohammadpur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1225,Sangsad BhabanTSO,Dhaka,Mohammadpur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1222,BangabhabanTSO,Dhaka,Motijheel,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1223,DilkushaTSO,Dhaka,Motijheel,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1323,Agla,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1325,Churain,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1322,Daudpur,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1321,Hasnabad,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1324,Khalpar,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1320,Nawabganj,Dhaka,Nawabganj,47,Dhaka,368,Nawabganj,exact,
+1205,New Market TSO,Dhaka,New market,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1000,Dhaka GPO,Dhaka,Palton,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1217,Shantinagr TSO,Dhaka,Ramna,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1214,Basabo TSO,Dhaka,Sabujbag,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1348,Amin Bazar,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1341,Dairy Farm,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1349,EPZ,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1342,Jahangirnagar Univer,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1346,Kashem Cotton Mills,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1347,Rajphulbaria,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1340,Savar,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1344,Savar Canttonment,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1343,Saver P.A.T.C,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1345,Shimulia,Dhaka,Savar,47,Dhaka,365,Savar,exact,
+1100,Dhaka Sadar HO,Dhaka,Sutrapur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1204,Gendaria TSO,Dhaka,Sutrapur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1203,Wari TSO,Dhaka,Sutrapur,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1215,Tejgaon TSO,Dhaka,Tejgaon,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1208,Dhaka Politechnic,Dhaka,Tejgaon Industrial Area,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+1230,Uttara Model TwonTSO,Dhaka,Uttara,47,Dhaka,,,unmatched,no upazila with a similar name in this district
+7870,Alfadanga,Faridpur,Alfadanga,52,Faridpur,391,Alfadanga,exact,
+7830,Bhanga,Faridpur,Bhanga,52,Faridpur,395,Bhanga,exact,
+7860,Boalmari,Faridpur,Boalmari,52,Faridpur,392,Boalmari,exact,
+7861,Rupatpat,Faridpur,Boalmari,52,Faridpur,392,Boalmari,exact,
+7810,Charbadrashan,Faridpur,Charbhadrasan,52,Faridpur,396,Charbhadrasan,exact,
+7802,Ambikapur,Faridpur,Faridpur Sadar,52,Faridpur,390,Faridpur Sadar,exact,
+7803,Baitulaman Politecni,Faridpur,Faridpur Sadar,52,Faridpur,390,Faridpur Sadar,exact,
+7800,Faridpursadar,Faridpur,Faridpur Sadar,52,Faridpur,390,Faridpur Sadar,exact,
+7801,Kanaipur,Faridpur,Faridpur Sadar,52,Faridpur,390,Faridpur Sadar,exact,
+7851,Kamarkali,Faridpur,Madukhali,52,Faridpur,397,Madhukhali,fuzzy,"""Madukhali"" → ""Madhukhali"" (spelling variant)"
+7850,Madukhali,Faridpur,Madukhali,52,Faridpur,397,Madhukhali,fuzzy,"""Madukhali"" → ""Madhukhali"" (spelling variant)"
+7840,Nagarkanda,Faridpur,Nagarkanda,52,Faridpur,394,Nagarkanda,exact,
+7841,Talma,Faridpur,Nagarkanda,52,Faridpur,394,Nagarkanda,exact,
+7822,Bishwa jaker Manjil,Faridpur,Sadarpur,52,Faridpur,393,Sadarpur,exact,
+7821,Hat Krishapur,Faridpur,Sadarpur,52,Faridpur,393,Sadarpur,exact,
+7820,Sadarpur,Faridpur,Sadarpur,52,Faridpur,393,Sadarpur,exact,
+7804,Shriangan,Faridpur,Shriangan,52,Faridpur,,,unmatched,no upazila with a similar name in this district
+1703,B.O.F,Gazipur,Gazipur Sadar,41,Gazipur,320,Gazipur Sadar,exact,
+1701,B.R.R,Gazipur,Gazipur Sadar,41,Gazipur,320,Gazipur Sadar,exact,
+1702,Chandna,Gazipur,Gazipur Sadar,41,Gazipur,320,Gazipur Sadar,exact,
+1700,Gazipur Sadar,Gazipur,Gazipur Sadar,41,Gazipur,320,Gazipur Sadar,exact,
+1704,National University,Gazipur,Gazipur Sadar,41,Gazipur,320,Gazipur Sadar,exact,
+1750,Kaliakaar,Gazipur,Kaliakaar,41,Gazipur,318,Kaliakair,fuzzy,"""Kaliakaar"" → ""Kaliakair"" (edit distance 1, please review)"
+1751,Safipur,Gazipur,Kaliakaar,41,Gazipur,318,Kaliakair,fuzzy,"""Kaliakaar"" → ""Kaliakair"" (edit distance 1, please review)"
+1720,Kaliganj,Gazipur,Kaliganj,41,Gazipur,317,Kaliganj,exact,
+1721,Pubail,Gazipur,Kaliganj,41,Gazipur,317,Kaliganj,exact,
+1722,Santanpara,Gazipur,Kaliganj,41,Gazipur,317,Kaliganj,exact,
+1723,Vaoal Jamalpur,Gazipur,Kaliganj,41,Gazipur,317,Kaliganj,exact,
+1730,kapashia,Gazipur,Kapashia,41,Gazipur,319,Kapasia,fuzzy,"""Kapashia"" → ""Kapasia"" (spelling variant)"
+1712,Ershad Nagar,Gazipur,Monnunagar,41,Gazipur,,,unmatched,no upazila with a similar name in this district
+1710,Monnunagar,Gazipur,Monnunagar,41,Gazipur,,,unmatched,no upazila with a similar name in this district
+1711,Nishat Nagar,Gazipur,Monnunagar,41,Gazipur,,,unmatched,no upazila with a similar name in this district
+1743,Barmi,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1747,Bashamur,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1748,Boubi,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1745,Kawraid,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1744,Satkhamair,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1740,Sreepur,Gazipur,Sreepur,41,Gazipur,321,Sreepur,exact,
+1741,Rajendrapur,Gazipur,Sripur,41,Gazipur,321,Sreepur,fuzzy,"""Sripur"" → ""Sreepur"" (spelling variant)"
+1742,Rajendrapur Canttome,Gazipur,Sripur,41,Gazipur,321,Sreepur,fuzzy,"""Sripur"" → ""Sreepur"" (spelling variant)"
+8102,Barfa,Gopalganj,Gopalganj Sadar,51,Gopalganj,385,Gopalganj Sadar,exact,
+8013,Chandradighalia,Gopalganj,Gopalganj Sadar,51,Gopalganj,385,Gopalganj Sadar,exact,
+8100,Gopalganj Sadar,Gopalganj,Gopalganj Sadar,51,Gopalganj,385,Gopalganj Sadar,exact,
+8101,Ulpur,Gopalganj,Gopalganj Sadar,51,Gopalganj,385,Gopalganj Sadar,exact,
+8133,Jonapur,Gopalganj,Kashiani,51,Gopalganj,386,Kashiani,exact,
+8130,Kashiani,Gopalganj,Kashiani,51,Gopalganj,386,Kashiani,exact,
+8131,Ramdia College,Gopalganj,Kashiani,51,Gopalganj,386,Kashiani,exact,
+8132,Ratoil,Gopalganj,Kashiani,51,Gopalganj,386,Kashiani,exact,
+8110,Kotalipara,Gopalganj,Kotalipara,51,Gopalganj,388,Kotalipara,exact,
+8141,Batkiamari,Gopalganj,Maksudpur,51,Gopalganj,389,Muksudpur,fuzzy,"""Maksudpur"" → ""Muksudpur"" (edit distance 1, please review)"
+8142,Khandarpara,Gopalganj,Maksudpur,51,Gopalganj,389,Muksudpur,fuzzy,"""Maksudpur"" → ""Muksudpur"" (edit distance 1, please review)"
+8140,Maksudpur,Gopalganj,Maksudpur,51,Gopalganj,389,Muksudpur,fuzzy,"""Maksudpur"" → ""Muksudpur"" (edit distance 1, please review)"
+8121,Patgati,Gopalganj,Tungipara,51,Gopalganj,387,Tungipara,exact,
+8120,Tungipara,Gopalganj,Tungipara,51,Gopalganj,387,Tungipara,exact,
+2030,Dewangonj,Jamalpur,Dewangonj,63,Jamalpur,478,Dewangonj,exact,
+2031,Dewangonj S. Mills,Jamalpur,Dewangonj,63,Jamalpur,478,Dewangonj,exact,
+2021,Durmoot,Jamalpur,Islampur,63,Jamalpur,477,Islampur,exact,
+2022,Gilabari,Jamalpur,Islampur,63,Jamalpur,477,Islampur,exact,
+2020,Islampur,Jamalpur,Islampur,63,Jamalpur,477,Islampur,exact,
+2000,Jamalpur,Jamalpur,Jamalpur,63,Jamalpur,475,Jamalpur Sadar,alias,"""Jamalpur"" → ""Jamalpur Sadar"" (thana named after district)"
+2001,Nandina,Jamalpur,Jamalpur,63,Jamalpur,475,Jamalpur Sadar,alias,"""Jamalpur"" → ""Jamalpur Sadar"" (thana named after district)"
+2002,Narundi,Jamalpur,Jamalpur,63,Jamalpur,475,Jamalpur Sadar,alias,"""Jamalpur"" → ""Jamalpur Sadar"" (thana named after district)"
+2011,Jamalpur,Jamalpur,Malandah,63,Jamalpur,476,Melandah,fuzzy,"""Malandah"" → ""Melandah"" (edit distance 1, please review)"
+2013,Mahmoodpur,Jamalpur,Malandah,63,Jamalpur,476,Melandah,fuzzy,"""Malandah"" → ""Melandah"" (edit distance 1, please review)"
+2012,Malancha,Jamalpur,Malandah,63,Jamalpur,476,Melandah,fuzzy,"""Malandah"" → ""Melandah"" (edit distance 1, please review)"
+2010,Malandah,Jamalpur,Malandah,63,Jamalpur,476,Melandah,fuzzy,"""Malandah"" → ""Melandah"" (edit distance 1, please review)"
+2041,Balijhuri,Jamalpur,Mathargonj,63,Jamalpur,480,Madarganj,fuzzy,"""Mathargonj"" → ""Madarganj"" (edit distance 2, please review)"
+2040,Mathargonj,Jamalpur,Mathargonj,63,Jamalpur,480,Madarganj,fuzzy,"""Mathargonj"" → ""Madarganj"" (edit distance 2, please review)"
+2052,Bausee,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2051,Gunerbari,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2053,Jagannath Ghat,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2055,Jamuna Sar Karkhana,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2054,Pingna,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2050,Shorishabari,Jamalpur,Shorishabari,63,Jamalpur,479,Sarishabari,fuzzy,"""Shorishabari"" → ""Sarishabari"" (edit distance 1, please review)"
+2336,Bajitpur,Kishoreganj,Bajitpur,45,Kishoreganj,354,Bajitpur,exact,
+2338,Laksmipur,Kishoreganj,Bajitpur,45,Kishoreganj,354,Bajitpur,exact,
+2337,Sararchar,Kishoreganj,Bajitpur,45,Kishoreganj,354,Bajitpur,exact,
+2350,Bhairab,Kishoreganj,Bhairob,45,Kishoreganj,347,Bhairab,fuzzy,"""Bhairob"" → ""Bhairab"" (edit distance 1, please review)"
+2320,Hossenpur,Kishoreganj,Hossenpur,45,Kishoreganj,349,Hossainpur,fuzzy,"""Hossenpur"" → ""Hossainpur"" (edit distance 2, please review)"
+2390,Itna,Kishoreganj,Itna,45,Kishoreganj,345,Itna,exact,
+2310,Karimganj,Kishoreganj,Karimganj,45,Kishoreganj,353,Karimgonj,fuzzy,"""Karimganj"" → ""Karimgonj"" (edit distance 1, please review)"
+2331,Gochhihata,Kishoreganj,Katiadi,45,Kishoreganj,346,Katiadi,exact,
+2330,Katiadi,Kishoreganj,Katiadi,45,Kishoreganj,346,Katiadi,exact,
+2301,Kishoreganj S.Mills,Kishoreganj,Kishoreganj Sadar,45,Kishoreganj,352,Kishoreganj Sadar,exact,
+2300,Kishoreganj Sadar,Kishoreganj,Kishoreganj Sadar,45,Kishoreganj,352,Kishoreganj Sadar,exact,
+2302,Maizhati,Kishoreganj,Kishoreganj Sadar,45,Kishoreganj,352,Kishoreganj Sadar,exact,
+2303,Nilganj,Kishoreganj,Kishoreganj Sadar,45,Kishoreganj,352,Kishoreganj Sadar,exact,
+2341,Chhoysuti,Kishoreganj,Kuliarchar,45,Kishoreganj,351,Kuliarchar,exact,
+2340,Kuliarchar,Kishoreganj,Kuliarchar,45,Kishoreganj,351,Kuliarchar,exact,
+2371,Abdullahpur,Kishoreganj,Mithamoin,45,Kishoreganj,356,Mithamoin,exact,
+2370,MIthamoin,Kishoreganj,Mithamoin,45,Kishoreganj,356,Mithamoin,exact,
+2360,Nikli,Kishoreganj,Nikli,45,Kishoreganj,357,Nikli,exact,
+2380,Ostagram,Kishoreganj,Ostagram,45,Kishoreganj,355,Austagram,fuzzy,"""Ostagram"" → ""Austagram"" (spelling variant)"
+2326,Pakundia,Kishoreganj,Pakundia,45,Kishoreganj,350,Pakundia,exact,
+2316,Tarial,Kishoreganj,Tarial,45,Kishoreganj,,,unmatched,no upazila with a similar name in this district
+7932,Bahadurpur,Madaripur,Barhamganj,50,Madaripur,,,unmatched,no upazila with a similar name in this district
+7930,Barhamganj,Madaripur,Barhamganj,50,Madaripur,,,unmatched,no upazila with a similar name in this district
+7931,Nilaksmibandar,Madaripur,Barhamganj,50,Madaripur,,,unmatched,no upazila with a similar name in this district
+7933,Umedpur,Madaripur,Barhamganj,50,Madaripur,,,unmatched,no upazila with a similar name in this district
+7920,Kalkini,Madaripur,kalkini,50,Madaripur,383,Kalkini,exact,
+7921,Sahabrampur,Madaripur,kalkini,50,Madaripur,383,Kalkini,exact,
+7901,Charmugria,Madaripur,Madaripur Sadar,50,Madaripur,381,Madaripur Sadar,exact,
+7903,Habiganj,Madaripur,Madaripur Sadar,50,Madaripur,381,Madaripur Sadar,exact,
+7902,Kulpaddi,Madaripur,Madaripur Sadar,50,Madaripur,381,Madaripur Sadar,exact,
+7900,Madaripur Sadar,Madaripur,Madaripur Sadar,50,Madaripur,381,Madaripur Sadar,exact,
+7904,Mustafapur,Madaripur,Madaripur Sadar,50,Madaripur,381,Madaripur Sadar,exact,
+7911,Khalia,Madaripur,Rajoir,50,Madaripur,384,Rajoir,exact,
+7910,Rajoir,Madaripur,Rajoir,50,Madaripur,384,Rajoir,exact,
+1860,Doulatpur,Manikganj,Doulatpur,46,Manikganj,363,Doulatpur,exact,
+1840,Gheor,Manikganj,Gheor,46,Manikganj,361,Gior,fuzzy,"""Gheor"" → ""Gior"" (edit distance 1, please review)"
+1831,Jhitka,Manikganj,Lechhraganj,46,Manikganj,,,unmatched,no upazila with a similar name in this district
+1830,Lechhraganj,Manikganj,Lechhraganj,46,Manikganj,,,unmatched,no upazila with a similar name in this district
+1804,Barangail,Manikganj,Manikganj Sadar,46,Manikganj,360,Manikganj Sadar,exact,
+1802,Gorpara,Manikganj,Manikganj Sadar,46,Manikganj,360,Manikganj Sadar,exact,
+1803,Mahadebpur,Manikganj,Manikganj Sadar,46,Manikganj,360,Manikganj Sadar,exact,
+1801,Manikganj Bazar,Manikganj,Manikganj Sadar,46,Manikganj,360,Manikganj Sadar,exact,
+1800,Manikganj Sadar,Manikganj,Manikganj Sadar,46,Manikganj,360,Manikganj Sadar,exact,
+1811,Baliati,Manikganj,Saturia,46,Manikganj,359,Saturia,exact,
+1810,Saturia,Manikganj,Saturia,46,Manikganj,359,Saturia,exact,
+1851,Aricha,Manikganj,Shibloya,46,Manikganj,362,Shibaloy,fuzzy,"""Shibloya"" → ""Shibaloy"" (edit distance 2, please review)"
+1850,Shibaloy,Manikganj,Shibloya,46,Manikganj,362,Shibaloy,fuzzy,"""Shibloya"" → ""Shibaloy"" (edit distance 2, please review)"
+1852,Tewta,Manikganj,Shibloya,46,Manikganj,362,Shibaloy,fuzzy,"""Shibloya"" → ""Shibaloy"" (edit distance 2, please review)"
+1853,Uthli,Manikganj,Shibloya,46,Manikganj,362,Shibaloy,fuzzy,"""Shibloya"" → ""Shibaloy"" (edit distance 2, please review)"
+1821,Baira,Manikganj,Singari,46,Manikganj,364,Singiar,fuzzy,"""Singari"" → ""Singiar"" (edit distance 2, please review)"
+1822,joymantop,Manikganj,Singari,46,Manikganj,364,Singiar,fuzzy,"""Singari"" → ""Singiar"" (edit distance 2, please review)"
+1820,Singair,Manikganj,Singari,46,Manikganj,364,Singiar,fuzzy,"""Singari"" → ""Singiar"" (edit distance 2, please review)"
+1510,Gajaria,Munshiganj,Gajaria,48,Munshiganj,374,Gajaria,exact,
+1511,Hossendi,Munshiganj,Gajaria,48,Munshiganj,374,Gajaria,exact,
+1512,Rasulpur,Munshiganj,Gajaria,48,Munshiganj,374,Gajaria,exact,
+1334,Gouragonj,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1534,Gouragonj,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1532,Haldia SO,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1333,Haridia,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1533,Haridia DESO,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1531,Korhati,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1530,Lohajang,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1335,Madini Mandal,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1535,Medini Mandal EDSO,Munshiganj,Lohajong,48,Munshiganj,373,Louhajanj,fuzzy,"""Lohajong"" → ""Louhajanj"" (edit distance 2, please review)"
+1503,Kathakhali,Munshiganj,Munshiganj Sadar,48,Munshiganj,370,Munshiganj Sadar,exact,
+1502,Mirkadim,Munshiganj,Munshiganj Sadar,48,Munshiganj,370,Munshiganj Sadar,exact,
+1500,Munshiganj Sadar,Munshiganj,Munshiganj Sadar,48,Munshiganj,370,Munshiganj Sadar,exact,
+1501,Rikabibazar,Munshiganj,Munshiganj Sadar,48,Munshiganj,370,Munshiganj Sadar,exact,
+1542,Ichapur,Munshiganj,Sirajdikhan,48,Munshiganj,372,Sirajdikhan,exact,
+1541,Kola,Munshiganj,Sirajdikhan,48,Munshiganj,372,Sirajdikhan,exact,
+1543,Malkha Nagar,Munshiganj,Sirajdikhan,48,Munshiganj,372,Sirajdikhan,exact,
+1544,Shekher Nagar,Munshiganj,Sirajdikhan,48,Munshiganj,372,Sirajdikhan,exact,
+1540,Sirajdikhan,Munshiganj,Sirajdikhan,48,Munshiganj,372,Sirajdikhan,exact,
+1557,Baghra,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1551,Barikhal,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1558,Bhaggyakul,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1553,Hashara,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1554,Kolapara,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1555,Kumarbhog,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1552,Mazpara,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1550,Srinagar,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1556,Vaggyakul SO,Munshiganj,Srinagar,48,Munshiganj,371,Sreenagar,fuzzy,"""Srinagar"" → ""Sreenagar"" (spelling variant)"
+1523,Bajrajugini,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1522,Baligao,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1521,Betkahat,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1525,Dighirpar,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1524,Hasail,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1527,Pura,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1526,Pura EDSO,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+1520,Tangibari,Munshiganj,Tangibari,48,Munshiganj,375,Tongibari,fuzzy,"""Tangibari"" → ""Tongibari"" (edit distance 1, please review)"
+2240,Bhaluka,Mymensingh,Bhaluka,62,Mymensingh,464,Bhaluka,exact,
+2216,Fulbaria,Mymensingh,Fulbaria,62,Mymensingh,462,Fulbaria,exact,
+2234,Duttarbazar,Mymensingh,Gaforgaon,62,Mymensingh,471,Gafargaon,fuzzy,"""Gaforgaon"" → ""Gafargaon"" (edit distance 1, please review)"
+2230,Gaforgaon,Mymensingh,Gaforgaon,62,Mymensingh,471,Gafargaon,fuzzy,"""Gaforgaon"" → ""Gafargaon"" (edit distance 1, please review)"
+2233,Kandipara,Mymensingh,Gaforgaon,62,Mymensingh,471,Gafargaon,fuzzy,"""Gaforgaon"" → ""Gafargaon"" (edit distance 1, please review)"
+2231,Shibganj,Mymensingh,Gaforgaon,62,Mymensingh,471,Gafargaon,fuzzy,"""Gaforgaon"" → ""Gafargaon"" (edit distance 1, please review)"
+2232,Usti,Mymensingh,Gaforgaon,62,Mymensingh,471,Gafargaon,fuzzy,"""Gaforgaon"" → ""Gafargaon"" (edit distance 1, please review)"
+2270,Gouripur,Mymensingh,Gouripur,62,Mymensingh,470,Gouripur,exact,
+2271,Ramgopalpur,Mymensingh,Gouripur,62,Mymensingh,470,Gouripur,exact,
+2261,Dhara,Mymensingh,Haluaghat,62,Mymensingh,469,Haluaghat,exact,
+2260,Haluaghat,Mymensingh,Haluaghat,62,Mymensingh,469,Haluaghat,exact,
+2262,Munshirhat,Mymensingh,Haluaghat,62,Mymensingh,469,Haluaghat,exact,
+2282,Atharabari,Mymensingh,Isshwargonj,62,Mymensingh,472,Iswarganj,fuzzy,"""Isshwargonj"" → ""Iswarganj"" (edit distance 1, please review)"
+2280,Isshwargonj,Mymensingh,Isshwargonj,62,Mymensingh,472,Iswarganj,fuzzy,"""Isshwargonj"" → ""Iswarganj"" (edit distance 1, please review)"
+2281,Sohagi,Mymensingh,Isshwargonj,62,Mymensingh,472,Iswarganj,fuzzy,"""Isshwargonj"" → ""Iswarganj"" (edit distance 1, please review)"
+2210,Muktagachha,Mymensingh,Muktagachha,62,Mymensingh,465,Muktagacha,fuzzy,"""Muktagachha"" → ""Muktagacha"" (spelling variant)"
+2202,Agriculture Universi,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2204,Biddyaganj,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2201,Kawatkhali,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2200,Mymensingh Sadar,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2205,Pearpur,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2203,Shombhuganj,Mymensingh,Mymensingh Sadar,62,Mymensingh,466,Mymensingh Sadar,exact,
+2291,Gangail,Mymensingh,Nandail,62,Mymensingh,473,Nandail,exact,
+2290,Nandail,Mymensingh,Nandail,62,Mymensingh,473,Nandail,exact,
+2251,Beltia,Mymensingh,Phulpur,62,Mymensingh,468,Phulpur,exact,
+2250,Phulpur,Mymensingh,Phulpur,62,Mymensingh,468,Phulpur,exact,
+2252,Tarakanda,Mymensingh,Phulpur,62,Mymensingh,468,Phulpur,exact,
+2221,Ahmadbad,Mymensingh,Trishal,62,Mymensingh,463,Trishal,exact,
+2223,Dhala,Mymensingh,Trishal,62,Mymensingh,463,Trishal,exact,
+2222,Ram Amritaganj,Mymensingh,Trishal,62,Mymensingh,463,Trishal,exact,
+2220,Trishal,Mymensingh,Trishal,62,Mymensingh,463,Trishal,exact,
+1450,Araihazar,Narayanganj,Araihazar,43,Narayanganj,328,Araihazar,exact,
+1451,Gopaldi,Narayanganj,Araihazar,43,Narayanganj,328,Araihazar,exact,
+1440,Baidder Bazar,Narayanganj,Baidder Bazar,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1441,Bara Nagar,Narayanganj,Baidder Bazar,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1442,Barodi,Narayanganj,Baidder Bazar,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1410,Bandar,Narayanganj,Bandar,43,Narayanganj,329,Bandar,exact,
+1413,BIDS,Narayanganj,Bandar,43,Narayanganj,329,Bandar,exact,
+1411,D.C Mills,Narayanganj,Bandar,43,Narayanganj,329,Bandar,exact,
+1414,Madanganj,Narayanganj,Bandar,43,Narayanganj,329,Bandar,exact,
+1412,Nabiganj,Narayanganj,Bandar,43,Narayanganj,329,Bandar,exact,
+1421,Fatulla Bazar,Narayanganj,Fatullah,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1420,Fatullah,Narayanganj,Fatullah,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1400,Narayanganj Sadar,Narayanganj,Narayanganj Sadar,43,Narayanganj,330,Narayanganj Sadar,exact,
+1462,Bhulta,Narayanganj,Rupganj,43,Narayanganj,331,Rupganj,exact,
+1461,Kanchan,Narayanganj,Rupganj,43,Narayanganj,331,Rupganj,exact,
+1464,Murapara,Narayanganj,Rupganj,43,Narayanganj,331,Rupganj,exact,
+1463,Nagri,Narayanganj,Rupganj,43,Narayanganj,331,Rupganj,exact,
+1460,Rupganj,Narayanganj,Rupganj,43,Narayanganj,331,Rupganj,exact,
+1431,Adamjeenagar,Narayanganj,Siddirganj,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1432,LN Mills,Narayanganj,Siddirganj,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1430,Siddirganj,Narayanganj,Siddirganj,43,Narayanganj,,,unmatched,no upazila with a similar name in this district
+1640,Belabo,Narshingdi,Belabo,40,Narsingdi,311,Belabo,exact,
+1651,Hatirdia,Narshingdi,Monohordi,40,Narsingdi,312,Monohardi,fuzzy,"""Monohordi"" → ""Monohardi"" (edit distance 1, please review)"
+1652,Katabaria,Narshingdi,Monohordi,40,Narsingdi,312,Monohardi,fuzzy,"""Monohordi"" → ""Monohardi"" (edit distance 1, please review)"
+1650,Monohordi,Narshingdi,Monohordi,40,Narsingdi,312,Monohardi,fuzzy,"""Monohordi"" → ""Monohardi"" (edit distance 1, please review)"
+1605,Karimpur,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1604,Madhabdi,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1602,Narshingdi College,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1600,Narshingdi Sadar,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1603,Panchdona,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1601,UMC Jute Mills,Narshingdi,Narshingdi Sadar,40,Narsingdi,313,Narsingdi Sadar,alias,"""Narshingdi Sadar"" → ""Narsingdi Sadar"" (district sadar)"
+1612,Char Sindhur,Narshingdi,Palash,40,Narsingdi,314,Palash,exact,
+1613,Ghorashal,Narshingdi,Palash,40,Narsingdi,314,Palash,exact,
+1611,Ghorashal Urea Facto,Narshingdi,Palash,40,Narsingdi,314,Palash,exact,
+1610,Palash,Narshingdi,Palash,40,Narsingdi,314,Palash,exact,
+1631,Bazar Hasnabad,Narshingdi,Raypura,40,Narsingdi,315,Raipura,fuzzy,"""Raypura"" → ""Raipura"" (spelling variant)"
+1632,Radhaganj bazar,Narshingdi,Raypura,40,Narsingdi,315,Raipura,fuzzy,"""Raypura"" → ""Raipura"" (spelling variant)"
+1630,Raypura,Narshingdi,Raypura,40,Narsingdi,315,Raipura,fuzzy,"""Raypura"" → ""Raipura"" (spelling variant)"
+1620,Shibpur,Narshingdi,Shibpur,40,Narsingdi,316,Shibpur,exact,
+2420,Susnng Durgapur,Netrakona,Susung Durgapur,64,Netrokona,,,unmatched,no upazila with a similar name in this district
+2470,Atpara,Netrakona,Atpara,64,Netrokona,485,Atpara,exact,
+2440,Barhatta,Netrakona,Barhatta,64,Netrokona,482,Barhatta,exact,
+2450,Dharampasha,Netrakona,Dharmapasha,64,Netrokona,,,unmatched,no upazila with a similar name in this district
+2416,Dhobaura,Netrakona,Dhobaura,64,Netrokona,,,unmatched,no upazila with a similar name in this district
+2417,Sakoai,Netrakona,Dhobaura,64,Netrokona,,,unmatched,no upazila with a similar name in this district
+2430,Kalmakanda,Netrakona,Kalmakanda,64,Netrokona,488,Kalmakanda,exact,
+2480,Kendua,Netrakona,Kendua,64,Netrokona,484,Kendua,exact,
+2460,Khaliajhri,Netrakona,Khaliajuri,64,Netrokona,487,Khaliajuri,exact,
+2462,Shaldigha,Netrakona,Khaliajuri,64,Netrokona,487,Khaliajuri,exact,
+2490,Madan,Netrakona,Madan,64,Netrokona,486,Madan,exact,
+2456,Moddoynagar,Netrakona,Moddhynagar,64,Netrokona,,,unmatched,no upazila with a similar name in this district
+2446,Mohanganj,Netrakona,Mohanganj,64,Netrokona,489,Mohongonj,fuzzy,"""Mohanganj"" → ""Mohongonj"" (edit distance 2, please review)"
+2401,Baikherhati,Netrakona,Netrakona Sadar,64,Netrokona,491,Netrokona Sadar,alias,"""Netrakona Sadar"" → ""Netrokona Sadar"" (district sadar)"
+2400,Netrakona Sadar,Netrakona,Netrakona Sadar,64,Netrokona,491,Netrokona Sadar,alias,"""Netrakona Sadar"" → ""Netrokona Sadar"" (district sadar)"
+2412,Jaria Jhanjhail,Netrakona,Purbadhola,64,Netrokona,490,Purbadhala,fuzzy,"""Purbadhola"" → ""Purbadhala"" (edit distance 1, please review)"
+2410,Purbadhola,Netrakona,Purbadhola,64,Netrokona,490,Purbadhala,fuzzy,"""Purbadhola"" → ""Purbadhala"" (edit distance 1, please review)"
+2411,Shamgonj,Netrakona,Purbadhola,64,Netrokona,490,Purbadhala,fuzzy,"""Purbadhola"" → ""Purbadhala"" (edit distance 1, please review)"
+7730,Baliakandi,Rajbari,Baliakandi,49,Rajbari,379,Baliakandi,exact,
+7731,Nalia,Rajbari,Baliakandi,49,Rajbari,379,Baliakandi,exact,
+7723,Mrigibazar,Rajbari,Pangsha,49,Rajbari,378,Pangsa,fuzzy,"""Pangsha"" → ""Pangsa"" (spelling variant)"
+7720,Pangsha,Rajbari,Pangsha,49,Rajbari,378,Pangsa,fuzzy,"""Pangsha"" → ""Pangsa"" (spelling variant)"
+7721,Ramkol,Rajbari,Pangsha,49,Rajbari,378,Pangsa,fuzzy,"""Pangsha"" → ""Pangsa"" (spelling variant)"
+7722,Ratandia,Rajbari,Pangsha,49,Rajbari,378,Pangsa,fuzzy,"""Pangsha"" → ""Pangsa"" (spelling variant)"
+7710,Goalanda,Rajbari,Rajbari Sadar,49,Rajbari,376,Rajbari Sadar,exact,
+7711,Khankhanapur,Rajbari,Rajbari Sadar,49,Rajbari,376,Rajbari Sadar,exact,
+7700,Rajbari Sadar,Rajbari,Rajbari Sadar,49,Rajbari,376,Rajbari Sadar,exact,
+8030,Bhedorganj,Shariatpur,Bhedorganj,42,Shariatpur,326,Bhedarganj,fuzzy,"""Bhedorganj"" → ""Bhedarganj"" (edit distance 1, please review)"
+8040,Damudhya,Shariatpur,Damudhya,42,Shariatpur,327,Damudya,fuzzy,"""Damudhya"" → ""Damudya"" (spelling variant)"
+8050,Gosairhat,Shariatpur,Gosairhat,42,Shariatpur,325,Gosairhat,exact,
+8010,Jajira,Shariatpur,Jajira,42,Shariatpur,324,Zajira,fuzzy,"""Jajira"" → ""Zajira"" (spelling variant)"
+8021,Bhozeshwar,Shariatpur,Naria,42,Shariatpur,323,Naria,exact,
+8022,Gharisar,Shariatpur,Naria,42,Shariatpur,323,Naria,exact,
+8024,Kartikpur,Shariatpur,Naria,42,Shariatpur,323,Naria,exact,
+8020,Naria,Shariatpur,Naria,42,Shariatpur,323,Naria,exact,
+8023,Upshi,Shariatpur,Naria,42,Shariatpur,323,Naria,exact,
+8001,Angaria,Shariatpur,Shariatpur Sadar,42,Shariatpur,322,Shariatpur Sadar,exact,
+8002,Chikandi,Shariatpur,Shariatpur Sadar,42,Shariatpur,322,Shariatpur Sadar,exact,
+8000,Shariatpur Sadar,Shariatpur,Shariatpur Sadar,42,Shariatpur,322,Shariatpur Sadar,exact,
+2140,Bakshigonj,Sherpur,Bakshigonj,61,Sherpur,,,unmatched,no upazila with a similar name in this district
+2120,Jhinaigati,Sherpur,Jhinaigati,61,Sherpur,461,Jhenaigati,fuzzy,"""Jhinaigati"" → ""Jhenaigati"" (edit distance 1, please review)"
+2151,Gonopaddi,Sherpur,Nakla,61,Sherpur,460,Nokla,fuzzy,"""Nakla"" → ""Nokla"" (edit distance 1, please review)"
+2150,Nakla,Sherpur,Nakla,61,Sherpur,460,Nokla,fuzzy,"""Nakla"" → ""Nokla"" (edit distance 1, please review)"
+2111,Hatibandha,Sherpur,Nalitabari,61,Sherpur,458,Nalitabari,exact,
+2110,Nalitabari,Sherpur,Nalitabari,61,Sherpur,458,Nalitabari,exact,
+2100,Sherpur Shadar,Sherpur,Sherpur Shadar,61,Sherpur,457,Sherpur Sadar,fuzzy,"""Sherpur Shadar"" → ""Sherpur Sadar"" (spelling variant)"
+2130,Shribardi,Sherpur,Shribardi,61,Sherpur,459,Sreebordi,fuzzy,"""Shribardi"" → ""Sreebordi"" (edit distance 1, please review)"
+1920,Basail,Tangail,Basail,44,Tangail,333,Basail,exact,
+1960,Bhuapur,Tangail,Bhuapur,44,Tangail,334,Bhuapur,exact,
+1910,Delduar,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1913,Elasin,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1914,Hinga Nagar,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1911,Jangalia,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1915,Lowhati,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1912,Patharail,Tangail,Delduar,44,Tangail,335,Delduar,exact,
+1982,D. Pakutia,Tangail,Ghatail,44,Tangail,336,Ghatail,exact,
+1983,Dhalapara,Tangail,Ghatail,44,Tangail,336,Ghatail,exact,
+1980,Ghatial,Tangail,Ghatail,44,Tangail,336,Ghatail,exact,
+1984,Lohani,Tangail,Ghatail,44,Tangail,336,Ghatail,exact,
+1981,Zahidganj,Tangail,Ghatail,44,Tangail,336,Ghatail,exact,
+1990,Gopalpur,Tangail,Gopalpur,44,Tangail,337,Gopalpur,exact,
+1992,Hemnagar,Tangail,Gopalpur,44,Tangail,337,Gopalpur,exact,
+1991,Jhowail,Tangail,Gopalpur,44,Tangail,337,Gopalpur,exact,
+1973,Ballabazar,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1974,Elinga,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1970,Kalihati,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1977,Nagarbari,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1976,Nagarbari SO,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1972,Nagbari,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1975,Palisha,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1971,Rajafair,Tangail,Kalihati,44,Tangail,343,Kalihati,exact,
+1930,Kashkawlia,Tangail,Kashkaolia,44,Tangail,,,unmatched,no upazila with a similar name in this district
+1997,Dhobari,Tangail,Madhupur,44,Tangail,338,Madhupur,exact,
+1996,Madhupur,Tangail,Madhupur,44,Tangail,338,Madhupur,exact,
+1941,Gorai,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1944,Jarmuki,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1942,M.C. College,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1940,Mirzapur,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1945,Mohera,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1943,Warri paikpara,Tangail,Mirzapur,44,Tangail,339,Mirzapur,exact,
+1937,Dhuburia,Tangail,Nagarpur,44,Tangail,340,Nagarpur,exact,
+1936,Nagarpur,Tangail,Nagarpur,44,Tangail,340,Nagarpur,exact,
+1938,Salimabad,Tangail,Nagarpur,44,Tangail,340,Nagarpur,exact,
+1951,Kochua,Tangail,Sakhipur,44,Tangail,341,Sakhipur,exact,
+1950,Sakhipur,Tangail,Sakhipur,44,Tangail,341,Sakhipur,exact,
+1901,Kagmari,Tangail,Tangail Sadar,44,Tangail,342,Tangail Sadar,exact,
+1903,Korotia,Tangail,Tangail Sadar,44,Tangail,342,Tangail Sadar,exact,
+1904,Purabari,Tangail,Tangail Sadar,44,Tangail,342,Tangail Sadar,exact,
+1902,Santosh,Tangail,Tangail Sadar,44,Tangail,342,Tangail Sadar,exact,
+1900,Tangail Sadar,Tangail,Tangail Sadar,44,Tangail,342,Tangail Sadar,exact,
+9300,Bagerhat Sadar,Bagherhat,Bagerhat Sadar,28,Bagerhat,216,Bagerhat Sadar,exact,
+9301,P.C College,Bagherhat,Bagerhat Sadar,28,Bagerhat,216,Bagerhat Sadar,exact,
+9302,Rangdia,Bagherhat,Bagerhat Sadar,28,Bagerhat,216,Bagerhat Sadar,exact,
+9350,Chalna Ankorage,Bagherhat,Chalna Ankorage,28,Bagerhat,,,unmatched,no upazila with a similar name in this district
+9351,Mongla Port,Bagherhat,Chalna Ankorage,28,Bagerhat,,,unmatched,no upazila with a similar name in this district
+9361,Barabaria,Bagherhat,Chitalmari,28,Bagerhat,223,Chitalmari,exact,
+9360,Chitalmari,Bagherhat,Chitalmari,28,Bagerhat,223,Chitalmari,exact,
+9372,Bhanganpar Bazar,Bagherhat,Fakirhat,28,Bagerhat,215,Fakirhat,exact,
+9370,Fakirhat,Bagherhat,Fakirhat,28,Bagerhat,215,Fakirhat,exact,
+9371,Mansa,Bagherhat,Fakirhat,28,Bagerhat,215,Fakirhat,exact,
+9310,Kachua,Bagherhat,Kachua UPO,28,Bagerhat,221,Kachua,fuzzy,"""Kachua UPO"" → ""Kachua"" (spelling variant)"
+9311,Sonarkola,Bagherhat,Kachua UPO,28,Bagerhat,221,Kachua,fuzzy,"""Kachua UPO"" → ""Kachua"" (spelling variant)"
+9383,Charkulia,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9382,Dariala,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9381,Kahalpur,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9380,Mollahat,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9384,Nagarkandi,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9385,Pak Gangni,Bagherhat,Mollahat,28,Bagerhat,217,Mollahat,exact,
+9320,Morelganj,Bagherhat,Morelganj,28,Bagerhat,220,Morrelganj,fuzzy,"""Morelganj"" → ""Morrelganj"" (spelling variant)"
+9321,Sannasi Bazar,Bagherhat,Morelganj,28,Bagerhat,220,Morrelganj,fuzzy,"""Morelganj"" → ""Morrelganj"" (spelling variant)"
+9322,Telisatee,Bagherhat,Morelganj,28,Bagerhat,220,Morrelganj,fuzzy,"""Morelganj"" → ""Morrelganj"" (spelling variant)"
+9341,Foylahat,Bagherhat,Rampal,28,Bagerhat,219,Rampal,exact,
+9343,Gourambha,Bagherhat,Rampal,28,Bagerhat,219,Rampal,exact,
+9340,Rampal,Bagherhat,Rampal,28,Bagerhat,219,Rampal,exact,
+9342,Sonatunia,Bagherhat,Rampal,28,Bagerhat,219,Rampal,exact,
+9330,Rayenda,Bagherhat,Rayenda,28,Bagerhat,,,unmatched,no upazila with a similar name in this district
+7210,Alamdanga,Chuadanga,Alamdanga,24,Chuadanga,193,Alamdanga,exact,
+7211,Hardi,Chuadanga,Alamdanga,24,Chuadanga,193,Alamdanga,exact,
+7200,Chuadanga Sadar,Chuadanga,Chuadanga Sadar,24,Chuadanga,192,Chuadanga Sadar,exact,
+7201,Munshiganj,Chuadanga,Chuadanga Sadar,24,Chuadanga,192,Chuadanga Sadar,exact,
+7222,Andulbaria,Chuadanga,Damurhuda,24,Chuadanga,194,Damurhuda,exact,
+7220,Damurhuda,Chuadanga,Damurhuda,24,Chuadanga,194,Damurhuda,exact,
+7221,Darshana,Chuadanga,Damurhuda,24,Chuadanga,194,Damurhuda,exact,
+7230,Doulatganj,Chuadanga,Doulatganj,24,Chuadanga,,,unmatched,no upazila with a similar name in this district
+7470,Bagharpara,Jessore,Bagharpara,20,Jashore,173,Bagherpara,fuzzy,"""Bagharpara"" → ""Bagherpara"" (edit distance 1, please review)"
+7471,Gouranagar,Jessore,Bagharpara,20,Jashore,173,Bagherpara,fuzzy,"""Bagharpara"" → ""Bagherpara"" (edit distance 1, please review)"
+7410,Chougachha,Jessore,Chaugachha,20,Jashore,174,Chougachha,fuzzy,"""Chaugachha"" → ""Chougachha"" (spelling variant)"
+7406,Basundia,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7402,Chanchra,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7407,Churamankathi,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7404,Jessore Airbach,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7403,Jessore canttonment,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7400,Jessore Sadar,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7401,Jessore Upa-Shahar,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7405,Rupdia,Jessore,Jessore Sadar,20,Jashore,177,Jessore Sadar,exact,
+7420,Jhikargachha,Jessore,Jhikargachha,20,Jashore,175,Jhikargacha,fuzzy,"""Jhikargachha"" → ""Jhikargacha"" (spelling variant)"
+7450,Keshobpur,Jessore,Keshabpur,20,Jashore,176,Keshabpur,exact,
+7440,Monirampur,Jessore,Monirampur,20,Jashore,171,Manirampur,fuzzy,"""Monirampur"" → ""Manirampur"" (edit distance 1, please review)"
+7462,Bhugilhat,Jessore,Noapara,20,Jashore,,,unmatched,no upazila with a similar name in this district
+7460,Noapara,Jessore,Noapara,20,Jashore,,,unmatched,no upazila with a similar name in this district
+7461,Rajghat,Jessore,Noapara,20,Jashore,,,unmatched,no upazila with a similar name in this district
+7433,Bag Achra,Jessore,Sarsa,20,Jashore,178,Sharsha,fuzzy,"""Sarsa"" → ""Sharsha"" (spelling variant)"
+7431,Benapole,Jessore,Sarsa,20,Jashore,178,Sharsha,fuzzy,"""Sarsa"" → ""Sharsha"" (spelling variant)"
+7432,Jadabpur,Jessore,Sarsa,20,Jashore,178,Sharsha,fuzzy,"""Sarsa"" → ""Sharsha"" (spelling variant)"
+7430,Sarsa,Jessore,Sarsa,20,Jashore,178,Sharsha,fuzzy,"""Sarsa"" → ""Sharsha"" (spelling variant)"
+7310,Harinakundu,Jinaidaha,Harinakundu,29,Jhenaidah,226,Harinakundu,exact,
+7301,Jinaidaha Cadet College,Jinaidaha,Jinaidaha Sadar,29,Jhenaidah,224,Jhenaidah Sadar,alias,"""Jinaidaha Sadar"" → ""Jhenaidah Sadar"" (district sadar)"
+7300,Jinaidaha Sadar,Jinaidaha,Jinaidaha Sadar,29,Jhenaidah,224,Jhenaidah Sadar,alias,"""Jinaidaha Sadar"" → ""Jhenaidah Sadar"" (district sadar)"
+7330,Kotchandpur,Jinaidaha,Kotchandpur,29,Jhenaidah,228,Kotchandpur,exact,
+7340,Maheshpur,Jinaidaha,Maheshpur,29,Jhenaidah,229,Moheshpur,fuzzy,"""Maheshpur"" → ""Moheshpur"" (edit distance 1, please review)"
+7351,Hatbar Bazar,Jinaidaha,Naldanga,29,Jhenaidah,,,unmatched,no upazila with a similar name in this district
+7350,Naldanga,Jinaidaha,Naldanga,29,Jhenaidah,,,unmatched,no upazila with a similar name in this district
+7321,Kumiradaha,Jinaidaha,Shailakupa,29,Jhenaidah,225,Shailkupa,fuzzy,"""Shailakupa"" → ""Shailkupa"" (edit distance 1, please review)"
+7320,Shailakupa,Jinaidaha,Shailakupa,29,Jhenaidah,225,Shailkupa,fuzzy,"""Shailakupa"" → ""Shailkupa"" (edit distance 1, please review)"
+9240,Alaipur,Khulna,Alaipur,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9242,Belphulia,Khulna,Alaipur,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9241,Rupsha,Khulna,Alaipur,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9260,Batiaghat,Khulna,Batiaghat,27,Khulna,212,Botiaghata,fuzzy,"""Batiaghat"" → ""Botiaghata"" (edit distance 2, please review)"
+9261,Surkalee,Khulna,Batiaghat,27,Khulna,212,Botiaghata,fuzzy,"""Batiaghat"" → ""Botiaghata"" (edit distance 2, please review)"
+9272,Bajua,Khulna,Chalna Bazar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9270,Chalna Bazar,Khulna,Chalna Bazar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9271,Dakup,Khulna,Chalna Bazar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9273,Nalian,Khulna,Chalna Bazar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9221,Chandni Mahal,Khulna,Digalia,27,Khulna,208,Digholia,fuzzy,"""Digalia"" → ""Digholia"" (edit distance 1, please review)"
+9220,Digalia,Khulna,Digalia,27,Khulna,208,Digholia,fuzzy,"""Digalia"" → ""Digholia"" (edit distance 1, please review)"
+9224,Gazirhat,Khulna,Digalia,27,Khulna,208,Digholia,fuzzy,"""Digalia"" → ""Digholia"" (edit distance 1, please review)"
+9223,Ghoshghati,Khulna,Digalia,27,Khulna,208,Digholia,fuzzy,"""Digalia"" → ""Digholia"" (edit distance 1, please review)"
+9222,Senhati,Khulna,Digalia,27,Khulna,208,Digholia,fuzzy,"""Digalia"" → ""Digholia"" (edit distance 1, please review)"
+9207,Atra Shilpa Area,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9203,BIT Khulna,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9202,Doulatpur,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9205,Jahanabad Canttonmen,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9100,Khula Sadar,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9000,Khulna G.P.O,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9201,Khulna Shipyard,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9208,Khulna University,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9204,Siramani,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9206,Sonali Jute Mills,Khulna,Khulna Sadar,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9291,Amadee,Khulna,Madinabad,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9290,Madinabad,Khulna,Madinabad,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9284,Chandkhali,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9285,Garaikhali,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9281,Godaipur,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9282,Kapilmoni,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9283,Katipara,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9280,Paikgachha,Khulna,Paikgachha,27,Khulna,206,Paikgasa,fuzzy,"""Paikgachha"" → ""Paikgasa"" (edit distance 2, please review)"
+9210,Phultala,Khulna,Phultala,27,Khulna,207,Fultola,fuzzy,"""Phultala"" → ""Fultola"" (edit distance 2, please review)"
+9252,Chuknagar,Khulna,Sajiara,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9251,Ghonabanda,Khulna,Sajiara,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9250,Sajiara,Khulna,Sajiara,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9253,Shahapur,Khulna,Sajiara,27,Khulna,,,unmatched,no upazila with a similar name in this district
+9231,Pak Barasat,Khulna,Terakhada,27,Khulna,210,Terokhada,fuzzy,"""Terakhada"" → ""Terokhada"" (edit distance 1, please review)"
+9230,Terakhada,Khulna,Terakhada,27,Khulna,210,Terokhada,fuzzy,"""Terakhada"" → ""Terokhada"" (edit distance 1, please review)"
+7042,Allardarga,Kustia,Bheramara,25,Kushtia,201,Bheramara,exact,
+7040,Bheramara,Kustia,Bheramara,25,Kushtia,201,Bheramara,exact,
+7041,Ganges Bheramara,Kustia,Bheramara,25,Kushtia,201,Bheramara,exact,
+7020,Janipur,Kustia,Janipur,25,Kushtia,,,unmatched,no upazila with a similar name in this district
+7021,Khoksa,Kustia,Janipur,25,Kushtia,,,unmatched,no upazila with a similar name in this district
+7010,Kumarkhali,Kustia,Kumarkhali,25,Kushtia,197,Kumarkhali,exact,
+7011,Panti,Kustia,Kumarkhali,25,Kushtia,197,Kumarkhali,exact,
+7003,Islami University,Kustia,Kustia Sadar,25,Kushtia,196,Kushtia Sadar,alias,"""Kustia Sadar"" → ""Kushtia Sadar"" (district sadar)"
+7002,Jagati,Kustia,Kustia Sadar,25,Kushtia,196,Kushtia Sadar,alias,"""Kustia Sadar"" → ""Kushtia Sadar"" (district sadar)"
+7001,Kushtia Mohini,Kustia,Kustia Sadar,25,Kushtia,196,Kushtia Sadar,alias,"""Kustia Sadar"" → ""Kushtia Sadar"" (district sadar)"
+7000,Kustia Sadar,Kustia,Kustia Sadar,25,Kushtia,196,Kushtia Sadar,alias,"""Kustia Sadar"" → ""Kushtia Sadar"" (district sadar)"
+7032,Amla Sadarpur,Kustia,Mirpur,25,Kushtia,199,Mirpur,exact,
+7030,Mirpur,Kustia,Mirpur,25,Kushtia,199,Mirpur,exact,
+7031,Poradaha,Kustia,Mirpur,25,Kushtia,199,Mirpur,exact,
+7052,Khasmathurapur,Kustia,Rafayetpur,25,Kushtia,,,unmatched,no upazila with a similar name in this district
+7050,Rafayetpur,Kustia,Rafayetpur,25,Kushtia,,,unmatched,no upazila with a similar name in this district
+7051,Taragunia,Kustia,Rafayetpur,25,Kushtia,,,unmatched,no upazila with a similar name in this district
+7620,Arpara,Magura,Arpara,26,Magura,,,unmatched,no upazila with a similar name in this district
+7600,Magura Sadar,Magura,Magura Sadar,26,Magura,204,Magura Sadar,exact,
+7631,Binodpur,Magura,Mohammadpur,26,Magura,205,Mohammadpur,exact,
+7630,Mohammadpur,Magura,Mohammadpur,26,Magura,205,Mohammadpur,exact,
+7632,Nahata,Magura,Mohammadpur,26,Magura,205,Mohammadpur,exact,
+7611,Langalbadh,Magura,Shripur,26,Magura,203,Sreepur,fuzzy,"""Shripur"" → ""Sreepur"" (spelling variant)"
+7612,Nachol,Magura,Shripur,26,Magura,203,Sreepur,fuzzy,"""Shripur"" → ""Sreepur"" (spelling variant)"
+7610,Shripur,Magura,Shripur,26,Magura,203,Sreepur,fuzzy,"""Shripur"" → ""Sreepur"" (spelling variant)"
+7110,Gangni,Meherpur,Gangni,22,Meherpur,188,Gangni,exact,
+7101,Amjhupi,Meherpur,Meherpur Sadar,22,Meherpur,187,Meherpur Sadar,exact,
+7152,Amjhupi,Meherpur,Meherpur Sadar,22,Meherpur,187,Meherpur Sadar,exact,
+7100,Meherpur Sadar,Meherpur,Meherpur Sadar,22,Meherpur,187,Meherpur Sadar,exact,
+7102,Mujib Nagar Complex,Meherpur,Meherpur Sadar,22,Meherpur,187,Meherpur Sadar,exact,
+7520,Kalia,Narail,Kalia,23,Narail,191,Kalia,exact,
+7514,Baradia,Narail,Laxmipasha,23,Narail,,,unmatched,no upazila with a similar name in this district
+7512,Itna,Narail,Laxmipasha,23,Narail,,,unmatched,no upazila with a similar name in this district
+7510,Laxmipasha,Narail,Laxmipasha,23,Narail,,,unmatched,no upazila with a similar name in this district
+7511,Lohagora,Narail,Laxmipasha,23,Narail,,,unmatched,no upazila with a similar name in this district
+7513,Naldi,Narail,Laxmipasha,23,Narail,,,unmatched,no upazila with a similar name in this district
+7521,Mohajan,Narail,Mohajan,23,Narail,,,unmatched,no upazila with a similar name in this district
+7500,Narail Sadar,Narail,Narail Sadar,23,Narail,189,Narail Sadar,exact,
+7501,Ratanganj,Narail,Narail Sadar,23,Narail,189,Narail Sadar,exact,
+9460,Ashashuni,Satkhira,Ashashuni,21,Satkhira,179,Assasuni,fuzzy,"""Ashashuni"" → ""Assasuni"" (spelling variant)"
+9461,Baradal,Satkhira,Ashashuni,21,Satkhira,179,Assasuni,fuzzy,"""Ashashuni"" → ""Assasuni"" (spelling variant)"
+9430,Debbhata,Satkhira,Debbhata,21,Satkhira,180,Debhata,fuzzy,"""Debbhata"" → ""Debhata"" (spelling variant)"
+9431,Gurugram,Satkhira,Debbhata,21,Satkhira,180,Debhata,fuzzy,"""Debbhata"" → ""Debhata"" (spelling variant)"
+9415,Chandanpur,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9413,Hamidpur,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9412,Jhaudanga,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9410,kalaroa,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9414,Khordo,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9411,Murarikati,Satkhira,kalaroa,21,Satkhira,181,Kalaroa,exact,
+9440,Kaliganj UPO,Satkhira,Kaliganj UPO,21,Satkhira,185,Kaliganj,fuzzy,"""Kaliganj UPO"" → ""Kaliganj"" (spelling variant)"
+9441,Nalta Mubaroknagar,Satkhira,Kaliganj UPO,21,Satkhira,185,Kaliganj,fuzzy,"""Kaliganj UPO"" → ""Kaliganj"" (spelling variant)"
+9442,Ratanpur,Satkhira,Kaliganj UPO,21,Satkhira,185,Kaliganj,fuzzy,"""Kaliganj UPO"" → ""Kaliganj"" (spelling variant)"
+9453,Buri Goalini,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9454,Gabura,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9455,Habinagar,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9450,Nakipur,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9452,Naobeki,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9451,Noornagar,Satkhira,Nakipur,21,Satkhira,,,unmatched,no upazila with a similar name in this district
+9403,Budhhat,Satkhira,Satkhira Sadar,21,Satkhira,182,Satkhira Sadar,exact,
+9402,Gunakar kati,Satkhira,Satkhira Sadar,21,Satkhira,182,Satkhira Sadar,exact,
+9401,Satkhira Islamia Acc,Satkhira,Satkhira Sadar,21,Satkhira,182,Satkhira Sadar,exact,
+9400,Satkhira Sadar,Satkhira,Satkhira Sadar,21,Satkhira,182,Satkhira Sadar,exact,
+9421,Patkelghata,Satkhira,Taala,21,Satkhira,184,Tala,fuzzy,"""Taala"" → ""Tala"" (spelling variant)"
+9420,Taala,Satkhira,Taala,21,Satkhira,184,Tala,fuzzy,"""Taala"" → ""Tala"" (spelling variant)"
+5890,Adamdighi,Bogra,Alamdighi,14,Bogura,127,Adamdighi,fuzzy,"""Alamdighi"" → ""Adamdighi"" (edit distance 1, please review)"
+5892,Nasharatpur,Bogra,Alamdighi,14,Bogura,127,Adamdighi,fuzzy,"""Alamdighi"" → ""Adamdighi"" (edit distance 1, please review)"
+5891,Santahar,Bogra,Alamdighi,14,Bogura,127,Adamdighi,fuzzy,"""Alamdighi"" → ""Adamdighi"" (edit distance 1, please review)"
+5801,Bogra Canttonment,Bogra,Bogra Sadar,14,Bogura,123,Bogra Sadar,exact,
+5800,Bogra Sadar,Bogra,Bogra Sadar,14,Bogura,123,Bogra Sadar,exact,
+5850,Dhunat,Bogra,Dhunat,14,Bogura,130,Dhunot,fuzzy,"""Dhunat"" → ""Dhunot"" (edit distance 1, please review)"
+5851,Gosaibari,Bogra,Dhunat,14,Bogura,130,Dhunot,fuzzy,"""Dhunat"" → ""Dhunot"" (edit distance 1, please review)"
+5880,Dupchachia,Bogra,Dupchachia,14,Bogura,126,Dupchanchia,fuzzy,"""Dupchachia"" → ""Dupchanchia"" (edit distance 1, please review)"
+5881,Talora,Bogra,Dupchachia,14,Bogura,126,Dupchanchia,fuzzy,"""Dupchachia"" → ""Dupchanchia"" (edit distance 1, please review)"
+5820,Gabtoli,Bogra,Gabtoli,14,Bogura,131,Gabtali,fuzzy,"""Gabtoli"" → ""Gabtali"" (edit distance 1, please review)"
+5821,Sukhanpukur,Bogra,Gabtoli,14,Bogura,131,Gabtali,fuzzy,"""Gabtoli"" → ""Gabtali"" (edit distance 1, please review)"
+5870,Kahalu,Bogra,Kahalu,14,Bogura,122,Kahaloo,fuzzy,"""Kahalu"" → ""Kahaloo"" (spelling variant)"
+5860,Nandigram,Bogra,Nandigram,14,Bogura,128,Nondigram,fuzzy,"""Nandigram"" → ""Nondigram"" (edit distance 1, please review)"
+5831,Chandan Baisha,Bogra,Sariakandi,14,Bogura,124,Shariakandi,fuzzy,"""Sariakandi"" → ""Shariakandi"" (spelling variant)"
+5830,Sariakandi,Bogra,Sariakandi,14,Bogura,124,Shariakandi,fuzzy,"""Sariakandi"" → ""Shariakandi"" (spelling variant)"
+5841,Chandaikona,Bogra,Sherpur,14,Bogura,132,Sherpur,exact,
+5842,Palli Unnyan Accadem,Bogra,Sherpur,14,Bogura,132,Sherpur,exact,
+5840,Sherpur,Bogra,Sherpur,14,Bogura,132,Sherpur,exact,
+5810,Shibganj,Bogra,Shibganj,14,Bogura,133,Shibganj,exact,
+5826,Sonatola,Bogra,Sonatola,14,Bogura,129,Sonatala,fuzzy,"""Sonatola"" → ""Sonatala"" (edit distance 1, please review)"
+6330,Bholahat,Chapinawabganj,Bholahat,18,Chapainawabganj,158,Bholahat,exact,
+6303,Amnura,Chapinawabganj,Chapinawabganj Sadar,18,Chapainawabganj,155,Chapainawabganj Sadar,alias,"""Chapinawabganj Sadar"" → ""Chapainawabganj Sadar"" (district sadar)"
+6300,Chapinawbganj Sadar,Chapinawabganj,Chapinawabganj Sadar,18,Chapainawabganj,155,Chapainawabganj Sadar,alias,"""Chapinawabganj Sadar"" → ""Chapainawabganj Sadar"" (district sadar)"
+6301,Rajarampur,Chapinawabganj,Chapinawabganj Sadar,18,Chapainawabganj,155,Chapainawabganj Sadar,alias,"""Chapinawabganj Sadar"" → ""Chapainawabganj Sadar"" (district sadar)"
+6302,Ramchandrapur,Chapinawabganj,Chapinawabganj Sadar,18,Chapainawabganj,155,Chapainawabganj Sadar,alias,"""Chapinawabganj Sadar"" → ""Chapainawabganj Sadar"" (district sadar)"
+6311,Mandumala,Chapinawabganj,Nachol,18,Chapainawabganj,157,Nachol,exact,
+6310,Nachol,Chapinawabganj,Nachol,18,Chapainawabganj,157,Nachol,exact,
+6321,Gomashtapur,Chapinawabganj,Rohanpur,18,Chapainawabganj,,,unmatched,no upazila with a similar name in this district
+6320,Rohanpur,Chapinawabganj,Rohanpur,18,Chapainawabganj,,,unmatched,no upazila with a similar name in this district
+6341,Kansart,Chapinawabganj,Shibganj U.P.O,18,Chapainawabganj,,,unmatched,no upazila with a similar name in this district
+6342,Manaksha,Chapinawabganj,Shibganj U.P.O,18,Chapainawabganj,,,unmatched,no upazila with a similar name in this district
+6340,Shibganj U.P.O,Chapinawabganj,Shibganj U.P.O,18,Chapainawabganj,,,unmatched,no upazila with a similar name in this district
+5940,Akklepur,Joypurhat,Akkelpur,17,Joypurhat,150,Akkelpur,exact,
+5941,jamalganj,Joypurhat,Akkelpur,17,Joypurhat,150,Akkelpur,exact,
+5942,Tilakpur,Joypurhat,Akkelpur,17,Joypurhat,150,Akkelpur,exact,
+5900,Joypurhat Sadar,Joypurhat,Joypurhat Sadar,17,Joypurhat,154,Joypurhat Sadar,exact,
+5930,kalai,Joypurhat,kalai,17,Joypurhat,151,Kalai,exact,
+5920,Khetlal,Joypurhat,Khetlal,17,Joypurhat,152,Khetlal,exact,
+5910,Panchbibi,Joypurhat,panchbibi,17,Joypurhat,153,Panchbibi,exact,
+6596,Ahsanganj,Naogaon,Ahsanganj,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6597,Bandai,Naogaon,Ahsanganj,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6570,Badalgachhi,Naogaon,Badalgachhi,19,Naogaon,161,Badalgachi,fuzzy,"""Badalgachhi"" → ""Badalgachi"" (spelling variant)"
+6580,Dhamuirhat,Naogaon,Dhamuirhat,19,Naogaon,163,Dhamoirhat,fuzzy,"""Dhamuirhat"" → ""Dhamoirhat"" (edit distance 1, please review)"
+6530,Mahadebpur,Naogaon,Mahadebpur,19,Naogaon,160,Mohadevpur,fuzzy,"""Mahadebpur"" → ""Mohadevpur"" (edit distance 1, please review)"
+6500,Naogaon Sadar,Naogaon,Naogaon Sadar,19,Naogaon,168,Naogaon Sadar,exact,
+6520,Niamatpur,Naogaon,Niamatpur,19,Naogaon,164,Niamatpur,exact,
+6550,Nitpur,Naogaon,Nitpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6552,Panguria,Naogaon,Nitpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6551,Porsa,Naogaon,Nitpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6540,Patnitala,Naogaon,Patnitala,19,Naogaon,162,Patnitala,exact,
+6512,Balihar,Naogaon,Prasadpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6511,Manda,Naogaon,Prasadpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6510,Prasadpur,Naogaon,Prasadpur,19,Naogaon,,,unmatched,no upazila with a similar name in this district
+6591,Kashimpur,Naogaon,Raninagar,19,Naogaon,167,Raninagar,exact,
+6590,Raninagar,Naogaon,Raninagar,19,Naogaon,167,Raninagar,exact,
+6561,Moduhil,Naogaon,Sapahar,19,Naogaon,170,Sapahar,exact,
+6560,Sapahar,Naogaon,Sapahar,19,Naogaon,170,Sapahar,exact,
+6422,Abdulpur,Natore,Gopalpur UPO,16,Natore,,,unmatched,no upazila with a similar name in this district
+6420,Gopalpur U.P.O,Natore,Gopalpur UPO,16,Natore,,,unmatched,no upazila with a similar name in this district
+6421,Lalpur S.O,Natore,Gopalpur UPO,16,Natore,,,unmatched,no upazila with a similar name in this district
+6432,Baraigram,Natore,Harua,16,Natore,,,unmatched,no upazila with a similar name in this district
+6431,Dayarampur,Natore,Harua,16,Natore,,,unmatched,no upazila with a similar name in this district
+6430,Harua,Natore,Harua,16,Natore,,,unmatched,no upazila with a similar name in this district
+6440,Hatgurudaspur,Natore,Hatgurudaspur,16,Natore,,,unmatched,no upazila with a similar name in this district
+6410,Laxman,Natore,Laxman,16,Natore,,,unmatched,no upazila with a similar name in this district
+6402,Baiddyabal Gharia,Natore,Natore Sadar,16,Natore,143,Natore Sadar,exact,
+6401,Digapatia,Natore,Natore Sadar,16,Natore,143,Natore Sadar,exact,
+6403,Madhnagar,Natore,Natore Sadar,16,Natore,143,Natore Sadar,exact,
+6400,Natore Sadar,Natore,Natore Sadar,16,Natore,143,Natore Sadar,exact,
+6450,Singra,Natore,Singra,16,Natore,144,Singra,exact,
+6650,Banwarinagar,Pabna,Banwarinagar,13,Pabna,,,unmatched,no upazila with a similar name in this district
+6680,Bera,Pabna,Bera,13,Pabna,117,Bera,exact,
+6682,Kashinathpur,Pabna,Bera,13,Pabna,117,Bera,exact,
+6681,Nakalia,Pabna,Bera,13,Pabna,117,Bera,exact,
+6683,Puran Bharenga,Pabna,Bera,13,Pabna,117,Bera,exact,
+6640,Bhangura,Pabna,Bhangura,13,Pabna,115,Bhangura,exact,
+6630,Chatmohar,Pabna,Chatmohar,13,Pabna,119,Chatmohar,exact,
+6610,Debottar,Pabna,Debottar,13,Pabna,,,unmatched,no upazila with a similar name in this district
+6621,Dhapari,Pabna,Ishwardi,13,Pabna,114,Ishurdi,fuzzy,"""Ishwardi"" → ""Ishurdi"" (edit distance 1, please review)"
+6620,Ishwardi,Pabna,Ishwardi,13,Pabna,114,Ishurdi,fuzzy,"""Ishwardi"" → ""Ishurdi"" (edit distance 1, please review)"
+6622,Pakshi,Pabna,Ishwardi,13,Pabna,114,Ishurdi,fuzzy,"""Ishwardi"" → ""Ishurdi"" (edit distance 1, please review)"
+6623,Rajapur,Pabna,Ishwardi,13,Pabna,114,Ishurdi,fuzzy,"""Ishwardi"" → ""Ishurdi"" (edit distance 1, please review)"
+6602,Hamayetpur,Pabna,Pabna Sadar,13,Pabna,116,Pabna Sadar,exact,
+6601,Kaliko Cotton Mills,Pabna,Pabna Sadar,13,Pabna,116,Pabna Sadar,exact,
+6600,Pabna Sadar,Pabna,Pabna Sadar,13,Pabna,116,Pabna Sadar,exact,
+6670,Sathia,Pabna,Sathia,13,Pabna,120,Santhia,fuzzy,"""Sathia"" → ""Santhia"" (edit distance 1, please review)"
+6661,Sagarkandi,Pabna,Sujanagar,13,Pabna,113,Sujanagar,exact,
+6660,Sujanagar,Pabna,Sujanagar,13,Pabna,113,Sujanagar,exact,
+6281,Arani,Rajshahi,Bagha,15,Rajshahi,139,Bagha,exact,
+6280,Bagha,Rajshahi,Bagha,15,Rajshahi,139,Bagha,exact,
+6250,Bhabaniganj,Rajshahi,Bhabaniganj,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6251,Taharpur,Rajshahi,Bhabaniganj,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6270,Charghat,Rajshahi,Charghat,15,Rajshahi,137,Charghat,exact,
+6271,Sarda,Rajshahi,Charghat,15,Rajshahi,137,Charghat,exact,
+6240,Durgapur,Rajshahi,Durgapur,15,Rajshahi,135,Durgapur,exact,
+6290,Godagari,Rajshahi,Godagari,15,Rajshahi,140,Godagari,exact,
+6291,Premtoli,Rajshahi,Godagari,15,Rajshahi,140,Godagari,exact,
+6220,Khodmohanpur,Rajshahi,Khod Mohanpur,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6210,Lalitganj,Rajshahi,Lalitganj,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6211,Rajshahi Sugar Mills,Rajshahi,Lalitganj,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6212,Shyampur,Rajshahi,Lalitganj,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6260,Putia,Rajshahi,Putia,15,Rajshahi,138,Puthia,fuzzy,"""Putia"" → ""Puthia"" (spelling variant)"
+6206,Binodpur Bazar,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6100,Ghuramara,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6204,Kazla,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6202,Rajshahi Canttonment,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6201,Rajshahi Court,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6000,Rajshahi Sadar,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6205,Rajshahi University,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6203,Sapura,Rajshahi,Rajshahi Sadar,15,Rajshahi,,,unmatched,no upazila with a similar name in this district
+6230,Tanor,Rajshahi,Tanor,15,Rajshahi,141,Tanore,fuzzy,"""Tanor"" → ""Tanore"" (edit distance 1, please review)"
+6730,Baiddya Jam Toil,Sirajganj,Baiddya Jam Toil,12,Sirajganj,,,unmatched,no upazila with a similar name in this district
+6740,Belkuchi,Sirajganj,Belkuchi,12,Sirajganj,104,Belkuchi,exact,
+6751,Enayetpur,Sirajganj,Belkuchi,12,Sirajganj,104,Belkuchi,exact,
+6742,Rajapur,Sirajganj,Belkuchi,12,Sirajganj,104,Belkuchi,exact,
+6741,Sohagpur,Sirajganj,Belkuchi,12,Sirajganj,104,Belkuchi,exact,
+6752,Sthal,Sirajganj,Belkuchi,12,Sirajganj,104,Belkuchi,exact,
+6720,Dhangora,Sirajganj,Dhangora,12,Sirajganj,,,unmatched,no upazila with a similar name in this district
+6721,Malonga,Sirajganj,Dhangora,12,Sirajganj,,,unmatched,no upazila with a similar name in this district
+6712,Gandail,Sirajganj,Kazipur,12,Sirajganj,107,Kazipur,exact,
+6710,Kazipur,Sirajganj,Kazipur,12,Sirajganj,107,Kazipur,exact,
+6711,Shuvgachha,Sirajganj,Kazipur,12,Sirajganj,107,Kazipur,exact,
+6772,Jamirta,Sirajganj,Shahjadpur,12,Sirajganj,109,Shahjadpur,exact,
+6773,Kaijuri,Sirajganj,Shahjadpur,12,Sirajganj,109,Shahjadpur,exact,
+6771,Porjana,Sirajganj,Shahjadpur,12,Sirajganj,109,Shahjadpur,exact,
+6770,Shahjadpur,Sirajganj,Shahjadpur,12,Sirajganj,109,Shahjadpur,exact,
+6701,Raipur,Sirajganj,Sirajganj Sadar,12,Sirajganj,110,Sirajganj Sadar,exact,
+6702,Rashidabad,Sirajganj,Sirajganj Sadar,12,Sirajganj,110,Sirajganj Sadar,exact,
+6700,Sirajganj Sadar,Sirajganj,Sirajganj Sadar,12,Sirajganj,110,Sirajganj Sadar,exact,
+6780,Tarash,Sirajganj,Tarash,12,Sirajganj,111,Tarash,exact,
+6762,Lahiri Mohanpur,Sirajganj,Ullapara,12,Sirajganj,112,Ullapara,exact,
+6763,Salap,Sirajganj,Ullapara,12,Sirajganj,112,Ullapara,exact,
+6760,Ullapara,Sirajganj,Ullapara,12,Sirajganj,112,Ullapara,exact,
+6761,Ullapara R.S,Sirajganj,Ullapara,12,Sirajganj,112,Ullapara,exact,
+3360,Azmireeganj,Hobiganj,Azmireeganj,38,Habiganj,294,Ajmiriganj,fuzzy,"""Azmireeganj"" → ""Ajmiriganj"" (spelling variant)"
+3310,Bahubal,Hobiganj,Bahubal,38,Habiganj,293,Bahubal,exact,
+3350,Baniachang,Hobiganj,Baniachang,38,Habiganj,295,Baniachong,fuzzy,"""Baniachang"" → ""Baniachong"" (edit distance 1, please review)"
+3351,Jatrapasha,Hobiganj,Baniachang,38,Habiganj,295,Baniachong,fuzzy,"""Baniachang"" → ""Baniachong"" (edit distance 1, please review)"
+3352,Kadirganj,Hobiganj,Baniachang,38,Habiganj,295,Baniachong,fuzzy,"""Baniachang"" → ""Baniachong"" (edit distance 1, please review)"
+3321,Chandpurbagan,Hobiganj,Chunarughat,38,Habiganj,297,Chunarughat,exact,
+3320,Chunarughat,Hobiganj,Chunarughat,38,Habiganj,297,Chunarughat,exact,
+3322,Narapati,Hobiganj,Chunarughat,38,Habiganj,297,Chunarughat,exact,
+3302,Gopaya,Hobiganj,Hobiganj Sadar,38,Habiganj,298,Habiganj Sadar,alias,"""Hobiganj Sadar"" → ""Habiganj Sadar"" (district sadar)"
+3300,Hobiganj Sadar,Hobiganj,Hobiganj Sadar,38,Habiganj,298,Habiganj Sadar,alias,"""Hobiganj Sadar"" → ""Habiganj Sadar"" (district sadar)"
+3301,Shaestaganj,Hobiganj,Hobiganj Sadar,38,Habiganj,298,Habiganj Sadar,alias,"""Hobiganj Sadar"" → ""Habiganj Sadar"" (district sadar)"
+3340,Kalauk,Hobiganj,Kalauk,38,Habiganj,,,unmatched,no upazila with a similar name in this district
+3341,Lakhai,Hobiganj,Kalauk,38,Habiganj,,,unmatched,no upazila with a similar name in this district
+3331,Itakhola,Hobiganj,Madhabpur,38,Habiganj,299,Madhabpur,exact,
+3330,Madhabpur,Hobiganj,Madhabpur,38,Habiganj,299,Madhabpur,exact,
+3333,Saihamnagar,Hobiganj,Madhabpur,38,Habiganj,299,Madhabpur,exact,
+3332,Shahajibazar,Hobiganj,Madhabpur,38,Habiganj,299,Madhabpur,exact,
+3373,Digalbak,Hobiganj,Nabiganj,38,Habiganj,292,Nabiganj,exact,
+3372,Golduba,Hobiganj,Nabiganj,38,Habiganj,292,Nabiganj,exact,
+3371,Goplarbazar,Hobiganj,Nabiganj,38,Habiganj,292,Nabiganj,exact,
+3374,Inathganj,Hobiganj,Nabiganj,38,Habiganj,292,Nabiganj,exact,
+3370,Nabiganj,Hobiganj,Nabiganj,38,Habiganj,292,Nabiganj,exact,
+3250,Baralekha,Moulvibazar,Baralekha,37,Moulvibazar,285,Barlekha,fuzzy,"""Baralekha"" → ""Barlekha"" (edit distance 1, please review)"
+3252,Dhakkhinbag,Moulvibazar,Baralekha,37,Moulvibazar,285,Barlekha,fuzzy,"""Baralekha"" → ""Barlekha"" (edit distance 1, please review)"
+3251,Juri,Moulvibazar,Baralekha,37,Moulvibazar,285,Barlekha,fuzzy,"""Baralekha"" → ""Barlekha"" (edit distance 1, please review)"
+3253,Purbashahabajpur,Moulvibazar,Baralekha,37,Moulvibazar,285,Barlekha,fuzzy,"""Baralekha"" → ""Barlekha"" (edit distance 1, please review)"
+3220,Kamalganj,Moulvibazar,Kamalganj,37,Moulvibazar,286,Kamolganj,fuzzy,"""Kamalganj"" → ""Kamolganj"" (edit distance 1, please review)"
+3221,Keramatnaga,Moulvibazar,Kamalganj,37,Moulvibazar,286,Kamolganj,fuzzy,"""Kamalganj"" → ""Kamolganj"" (edit distance 1, please review)"
+3224,Munshibazar,Moulvibazar,Kamalganj,37,Moulvibazar,286,Kamolganj,fuzzy,"""Kamalganj"" → ""Kamolganj"" (edit distance 1, please review)"
+3222,Patrakhola,Moulvibazar,Kamalganj,37,Moulvibazar,286,Kamolganj,fuzzy,"""Kamalganj"" → ""Kamolganj"" (edit distance 1, please review)"
+3223,Shamsher Nagar,Moulvibazar,Kamalganj,37,Moulvibazar,286,Kamolganj,fuzzy,"""Kamalganj"" → ""Kamolganj"" (edit distance 1, please review)"
+3237,Baramchal,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3234,Kajaldhara,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3235,Karimpur,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3230,Kulaura,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3232,Langla,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3233,Prithimpasha,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3231,Tillagaon,Moulvibazar,Kulaura,37,Moulvibazar,287,Kulaura,exact,
+3203,Afrozganj,Moulvibazar,Moulvibazar Sadar,37,Moulvibazar,288,Moulvibazar Sadar,exact,
+3201,Barakapan,Moulvibazar,Moulvibazar Sadar,37,Moulvibazar,288,Moulvibazar Sadar,exact,
+3202,Monumukh,Moulvibazar,Moulvibazar Sadar,37,Moulvibazar,288,Moulvibazar Sadar,exact,
+3200,Moulvibazar Sadar,Moulvibazar,Moulvibazar Sadar,37,Moulvibazar,288,Moulvibazar Sadar,exact,
+3240,Rajnagar,Moulvibazar,Rajnagar,37,Moulvibazar,289,Rajnagar,exact,
+3212,Kalighat,Moulvibazar,Srimangal,37,Moulvibazar,290,Sreemangal,fuzzy,"""Srimangal"" → ""Sreemangal"" (spelling variant)"
+3213,Khejurichhara,Moulvibazar,Srimangal,37,Moulvibazar,290,Sreemangal,fuzzy,"""Srimangal"" → ""Sreemangal"" (spelling variant)"
+3211,Narain Chora,Moulvibazar,Srimangal,37,Moulvibazar,290,Sreemangal,fuzzy,"""Srimangal"" → ""Sreemangal"" (spelling variant)"
+3214,Satgaon,Moulvibazar,Srimangal,37,Moulvibazar,290,Sreemangal,fuzzy,"""Srimangal"" → ""Sreemangal"" (spelling variant)"
+3210,Srimangal,Moulvibazar,Srimangal,37,Moulvibazar,290,Sreemangal,fuzzy,"""Srimangal"" → ""Sreemangal"" (spelling variant)"
+3010,Bishamsapur,Sunamganj,Bishamsarpur,39,Sunamganj,302,Bishwambarpur,fuzzy,"""Bishamsarpur"" → ""Bishwambarpur"" (edit distance 2, please review)"
+3080,Chhatak,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3081,Chhatak Cement Facto,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3082,Chhatak Paper Mills,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3893,Chourangi Bazar,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3083,Gabindaganj,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3084,Gabindaganj Natun Ba,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3088,Islamabad,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3087,jahidpur,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3085,Khurma,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3086,Moinpur,Sunamganj,Chhatak,39,Sunamganj,303,Chhatak,exact,
+3040,Dhirai Chandpur,Sunamganj,Dhirai Chandpur,39,Sunamganj,,,unmatched,no upazila with a similar name in this district
+3041,Jagdal,Sunamganj,Dhirai Chandpur,39,Sunamganj,,,unmatched,no upazila with a similar name in this district
+3070,Duara bazar,Sunamganj,Duara bazar,39,Sunamganj,305,Dowarabazar,fuzzy,"""Duara bazar"" → ""Dowarabazar"" (edit distance 1, please review)"
+3050,Ghungiar,Sunamganj,Ghungiar,39,Sunamganj,,,unmatched,no upazila with a similar name in this district
+3062,Atuajan,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3063,Hasan Fatemapur,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3060,Jagnnathpur,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3064,Rasulganj,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3065,Shiramsi,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3061,Syedpur,Sunamganj,Jagnnathpur,39,Sunamganj,304,Jagannathpur,fuzzy,"""Jagnnathpur"" → ""Jagannathpur"" (edit distance 1, please review)"
+3020,Sachna,Sunamganj,Sachna,39,Sunamganj,,,unmatched,no upazila with a similar name in this district
+3001,Pagla,Sunamganj,Sunamganj Sadar,39,Sunamganj,300,Sunamganj Sadar,exact,
+3002,Patharia,Sunamganj,Sunamganj Sadar,39,Sunamganj,300,Sunamganj Sadar,exact,
+3000,Sunamganj Sadar,Sunamganj,Sunamganj Sadar,39,Sunamganj,300,Sunamganj Sadar,exact,
+3030,Tahirpur,Sunamganj,Tahirpur,39,Sunamganj,306,Tahirpur,exact,
+3120,Balaganj,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3125,Begumpur,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3122,Brahman Shashon,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3128,Gaharpur,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3124,Goala Bazar,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3121,Karua,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3127,Kathal Khair,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3129,Natun Bazar,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3126,Omarpur,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3123,Tajpur,Sylhet,Balaganj,36,Sylhet,272,Balaganj,exact,
+3170,Bianibazar,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3175,Churkai,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3171,jaldup,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3173,Kurar bazar,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3172,Mathiura,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3174,Salia bazar,Sylhet,Bianibazar,36,Sylhet,273,Beanibazar,fuzzy,"""Bianibazar"" → ""Beanibazar"" (edit distance 1, please review)"
+3130,Bishwanath,Sylhet,Bishwanath,36,Sylhet,274,Bishwanath,exact,
+3131,Dashghar,Sylhet,Bishwanath,36,Sylhet,274,Bishwanath,exact,
+3133,Deokalas,Sylhet,Bishwanath,36,Sylhet,274,Bishwanath,exact,
+3132,Doulathpur,Sylhet,Bishwanath,36,Sylhet,274,Bishwanath,exact,
+3134,Singer kanch,Sylhet,Bishwanath,36,Sylhet,274,Bishwanath,exact,
+3116,Fenchuganj,Sylhet,Fenchuganj,36,Sylhet,276,Fenchuganj,exact,
+3117,Fenchuganj SareKarkh,Sylhet,Fenchuganj,36,Sylhet,276,Fenchuganj,exact,
+3152,Chiknagul,Sylhet,Goainhat,36,Sylhet,278,Gowainghat,fuzzy,"""Goainhat"" → ""Gowainghat"" (edit distance 2, please review)"
+3150,Goainhat,Sylhet,Goainhat,36,Sylhet,278,Gowainghat,fuzzy,"""Goainhat"" → ""Gowainghat"" (edit distance 2, please review)"
+3151,Jaflong,Sylhet,Goainhat,36,Sylhet,278,Gowainghat,fuzzy,"""Goainhat"" → ""Gowainghat"" (edit distance 2, please review)"
+3164,banigram,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3165,Chandanpur,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3162,Dakkhin Bhadashore,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3161,Dhaka Dakkhin,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3160,Gopalgannj,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3163,Ranaping,Sylhet,Gopalganj,36,Sylhet,277,Golapganj,fuzzy,"""Gopalganj"" → ""Golapganj"" (edit distance 2, please review)"
+3156,Jainthapur,Sylhet,Jaintapur,36,Sylhet,279,Jaintiapur,fuzzy,"""Jaintapur"" → ""Jaintiapur"" (edit distance 1, please review)"
+3191,Ichhamati,Sylhet,Jakiganj,36,Sylhet,282,Zakiganj,fuzzy,"""Jakiganj"" → ""Zakiganj"" (spelling variant)"
+3190,Jakiganj,Sylhet,Jakiganj,36,Sylhet,282,Zakiganj,fuzzy,"""Jakiganj"" → ""Zakiganj"" (spelling variant)"
+3181,Chatulbazar,Sylhet,Kanaighat,36,Sylhet,280,Kanaighat,exact,
+3183,Gachbari,Sylhet,Kanaighat,36,Sylhet,280,Kanaighat,exact,
+3180,Kanaighat,Sylhet,Kanaighat,36,Sylhet,280,Kanaighat,exact,
+3182,Manikganj,Sylhet,Kanaighat,36,Sylhet,280,Kanaighat,exact,
+3140,Kompanyganj,Sylhet,Kompanyganj,36,Sylhet,275,Companiganj,fuzzy,"""Kompanyganj"" → ""Companiganj"" (edit distance 1, please review)"
+3106,Birahimpur,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3107,Jalalabad,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3104,Jalalabad Cantoment,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3111,Kadamtali,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3112,Kamalbazer,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3103,Khadimnagar,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3113,Lalbazar,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3108,Mogla,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3109,Ranga Hajiganj,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3114,Shahajalal Science &,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3105,Silam,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3100,Sylhe Sadar,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3102,Sylhet Biman Bondar,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+3101,Sylhet Cadet Col,Sylhet,Sylhet Sadar,36,Sylhet,281,Sylhet Sadar,exact,
+5270,Bangla Hili,Dinajpur,Bangla Hili,54,Dinajpur,,,unmatched,no upazila with a similar name in this district
+5210,Biral,Dinajpur,Biral,54,Dinajpur,415,Birol,fuzzy,"""Biral"" → ""Birol"" (edit distance 1, please review)"
+5266,Birampur,Dinajpur,Birampur,54,Dinajpur,407,Birampur,exact,
+5220,Birganj,Dinajpur,Birganj,54,Dinajpur,405,Birganj,exact,
+5240,Chrirbandar,Dinajpur,Chrirbandar,54,Dinajpur,416,Chirirbandar,fuzzy,"""Chrirbandar"" → ""Chirirbandar"" (edit distance 1, please review)"
+5241,Ranirbandar,Dinajpur,Chrirbandar,54,Dinajpur,416,Chirirbandar,fuzzy,"""Chrirbandar"" → ""Chirirbandar"" (edit distance 1, please review)"
+5201,Dinajpur Rajbari,Dinajpur,Dinajpur Sadar,54,Dinajpur,412,Dinajpur Sadar,exact,
+5200,Dinajpur Sadar,Dinajpur,Dinajpur Sadar,54,Dinajpur,412,Dinajpur Sadar,exact,
+5230,Khansama,Dinajpur,Khansama,54,Dinajpur,414,Khansama,exact,
+5231,Pakarhat,Dinajpur,Khansama,54,Dinajpur,414,Khansama,exact,
+5226,Maharajganj,Dinajpur,Maharajganj,54,Dinajpur,,,unmatched,no upazila with a similar name in this district
+5281,Daudpur,Dinajpur,Nababganj,54,Dinajpur,404,Nawabganj,fuzzy,"""Nababganj"" → ""Nawabganj"" (edit distance 2, please review)"
+5282,Gopalpur,Dinajpur,Nababganj,54,Dinajpur,404,Nawabganj,fuzzy,"""Nababganj"" → ""Nawabganj"" (edit distance 2, please review)"
+5280,Nababganj,Dinajpur,Nababganj,54,Dinajpur,404,Nawabganj,fuzzy,"""Nababganj"" → ""Nawabganj"" (edit distance 2, please review)"
+5291,Ghoraghat,Dinajpur,Osmanpur,54,Dinajpur,,,unmatched,no upazila with a similar name in this district
+5290,Osmanpur,Dinajpur,Osmanpur,54,Dinajpur,,,unmatched,no upazila with a similar name in this district
+5250,Parbatipur,Dinajpur,Parbatipur,54,Dinajpur,408,Parbatipur,exact,
+5260,Phulbari,Dinajpur,Phulbari,54,Dinajpur,411,Fulbari,fuzzy,"""Phulbari"" → ""Fulbari"" (edit distance 1, please review)"
+5216,Setabganj,Dinajpur,Setabganj,54,Dinajpur,,,unmatched,no upazila with a similar name in this district
+5750,Bonarpara,Gaibandha,Bonarpara,57,Gaibandha,,,unmatched,no upazila with a similar name in this district
+5751,saghata,Gaibandha,Bonarpara,57,Gaibandha,,,unmatched,no upazila with a similar name in this district
+5700,Gaibandha Sadar,Gaibandha,Gaibandha Sadar,57,Gaibandha,429,Gaibandha Sadar,exact,
+5740,Gobindhaganj,Gaibandha,Gobindaganj,57,Gaibandha,432,Gobindaganj,exact,
+5741,Mahimaganj,Gaibandha,Gobindaganj,57,Gaibandha,432,Gobindaganj,exact,
+5730,Palashbari,Gaibandha,Palashbari,57,Gaibandha,430,Palashbari,exact,
+5761,Bharatkhali,Gaibandha,Phulchhari,57,Gaibandha,434,Phulchari,fuzzy,"""Phulchhari"" → ""Phulchari"" (spelling variant)"
+5760,Phulchhari,Gaibandha,Phulchhari,57,Gaibandha,434,Phulchari,fuzzy,"""Phulchhari"" → ""Phulchari"" (spelling variant)"
+5711,Naldanga,Gaibandha,Saadullapur,57,Gaibandha,428,Sadullapur,fuzzy,"""Saadullapur"" → ""Sadullapur"" (spelling variant)"
+5710,Saadullapur,Gaibandha,Saadullapur,57,Gaibandha,428,Sadullapur,fuzzy,"""Saadullapur"" → ""Sadullapur"" (spelling variant)"
+5721,Bamandanga,Gaibandha,Sundarganj,57,Gaibandha,433,Sundarganj,exact,
+5720,Sundarganj,Gaibandha,Sundarganj,57,Gaibandha,433,Sundarganj,exact,
+5670,Bhurungamari,Kurigram,Bhurungamari,60,Kurigram,450,Bhurungamari,exact,
+5630,Chilmari,Kurigram,Chilmari,60,Kurigram,454,Chilmari,exact,
+5631,Jorgachh,Kurigram,Chilmari,60,Kurigram,454,Chilmari,exact,
+5600,Kurigram Sadar,Kurigram,Kurigram Sadar,60,Kurigram,448,Kurigram Sadar,exact,
+5601,Pandul,Kurigram,Kurigram Sadar,60,Kurigram,448,Kurigram Sadar,exact,
+5680,Phulbari,Kurigram,Kurigram Sadar,60,Kurigram,448,Kurigram Sadar,exact,
+5660,Nageshwar,Kurigram,Nageshwar,60,Kurigram,449,Nageshwari,fuzzy,"""Nageshwar"" → ""Nageshwari"" (edit distance 1, please review)"
+5611,Nazimkhan,Kurigram,Rajarhat,60,Kurigram,452,Rajarhat,exact,
+5610,Rajarhat,Kurigram,Rajarhat,60,Kurigram,452,Rajarhat,exact,
+5650,Rajibpur,Kurigram,Rajibpur,60,Kurigram,,,unmatched,no upazila with a similar name in this district
+5640,Roumari,Kurigram,Roumari,60,Kurigram,455,Rowmari,fuzzy,"""Roumari"" → ""Rowmari"" (edit distance 1, please review)"
+5621,Bazarhat,Kurigram,Ulipur,60,Kurigram,453,Ulipur,exact,
+5620,Ulipur,Kurigram,Ulipur,60,Kurigram,453,Ulipur,exact,
+5510,Aditmari,Lalmonirhat,Aditmari,55,Lalmonirhat,421,Aditmari,exact,
+5530,Hatibandha,Lalmonirhat,Hatibandha,55,Lalmonirhat,419,Hatibandha,exact,
+5502,Kulaghat SO,Lalmonirhat,Lalmonirhat Sadar,55,Lalmonirhat,417,Lalmonirhat Sadar,exact,
+5500,Lalmonirhat Sadar,Lalmonirhat,Lalmonirhat Sadar,55,Lalmonirhat,417,Lalmonirhat Sadar,exact,
+5501,Moghalhat,Lalmonirhat,Lalmonirhat Sadar,55,Lalmonirhat,417,Lalmonirhat Sadar,exact,
+5541,Baura,Lalmonirhat,Patgram,55,Lalmonirhat,420,Patgram,exact,
+5542,Burimari,Lalmonirhat,Patgram,55,Lalmonirhat,420,Patgram,exact,
+5540,Patgram,Lalmonirhat,Patgram,55,Lalmonirhat,420,Patgram,exact,
+5520,Tushbhandar,Lalmonirhat,Tushbhandar,55,Lalmonirhat,,,unmatched,no upazila with a similar name in this district
+5350,Dimla,Nilphamari,Dimla,56,Nilphamari,424,Dimla,exact,
+5351,Ghaga Kharibari,Nilphamari,Dimla,56,Nilphamari,424,Dimla,exact,
+5341,Chilahati,Nilphamari,Domar,56,Nilphamari,423,Domar,exact,
+5340,Domar,Nilphamari,Domar,56,Nilphamari,423,Domar,exact,
+5330,Jaldhaka,Nilphamari,Jaldhaka,56,Nilphamari,425,Jaldhaka,exact,
+5320,Kishoriganj,Nilphamari,Kishoriganj,56,Nilphamari,426,Kishorganj,fuzzy,"""Kishoriganj"" → ""Kishorganj"" (edit distance 1, please review)"
+5300,Nilphamari Sadar,Nilphamari,Nilphamari Sadar,56,Nilphamari,427,Nilphamari Sadar,exact,
+5301,Nilphamari Sugar Mil,Nilphamari,Nilphamari Sadar,56,Nilphamari,427,Nilphamari Sadar,exact,
+5310,Syedpur,Nilphamari,Syedpur,56,Nilphamari,422,Syedpur,exact,
+5311,Syedpur Upashahar,Nilphamari,Syedpur,56,Nilphamari,422,Syedpur,exact,
+5010,Boda,Panchagarh,Boda,53,Panchagarh,401,Boda,exact,
+5040,Chotto Dab,Panchagarh,Chotto Dab,53,Panchagarh,,,unmatched,no upazila with a similar name in this district
+5041,Mirjapur,Panchagarh,Chotto Dab,53,Panchagarh,,,unmatched,no upazila with a similar name in this district
+5020,Dabiganj,Panchagarh,Dabiganj,53,Panchagarh,400,Debiganj,fuzzy,"""Dabiganj"" → ""Debiganj"" (edit distance 1, please review)"
+5000,Panchagar Sadar,Panchagarh,Panchagra Sadar,53,Panchagarh,399,Panchagarh Sadar,alias,"""Panchagra Sadar"" → ""Panchagarh Sadar"" (district sadar)"
+5030,Tetulia,Panchagarh,Tetulia,53,Panchagarh,403,Tetulia,exact,
+5430,Badarganj,Rangpur,Badarganj,59,Rangpur,443,Badargonj,fuzzy,"""Badarganj"" → ""Badargonj"" (edit distance 1, please review)"
+5431,Shyampur,Rangpur,Badarganj,59,Rangpur,443,Badargonj,fuzzy,"""Badarganj"" → ""Badargonj"" (edit distance 1, please review)"
+5410,Gangachara,Rangpur,Gangachara,59,Rangpur,441,Gangachara,exact,
+5441,Haragachh,Rangpur,Kaunia,59,Rangpur,446,Kaunia,exact,
+5440,Kaunia,Rangpur,Kaunia,59,Rangpur,446,Kaunia,exact,
+5460,Mithapukur,Rangpur,Mithapukur,59,Rangpur,444,Mithapukur,exact,
+5450,Pirgachha,Rangpur,Pirgachha,59,Rangpur,447,Pirgacha,fuzzy,"""Pirgachha"" → ""Pirgacha"" (spelling variant)"
+5402,Alamnagar,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5403,Mahiganj,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5404,Rangpur Cadet Colleg,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5405,Rangpur Carmiecal Col,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5400,Rangpur Sadar,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5401,Rangpur Upa-Shahar,Rangpur,Rangpur Sadar,59,Rangpur,440,Rangpur Sadar,exact,
+5420,Taraganj,Rangpur,Taraganj,59,Rangpur,442,Taragonj,fuzzy,"""Taraganj"" → ""Taragonj"" (edit distance 1, please review)"
+5140,Baliadangi,Thakurgaon,Baliadangi,58,Thakurgaon,439,Baliadangi,exact,
+5141,Lahiri,Thakurgaon,Baliadangi,58,Thakurgaon,439,Baliadangi,exact,
+5130,Jibanpur,Thakurgaon,Jibanpur,58,Thakurgaon,,,unmatched,no upazila with a similar name in this district
+5110,Pirganj,Thakurgaon,Pirganj,58,Thakurgaon,436,Pirganj,exact,
+5470,Pirganj,Thakurgaon,Pirganj,58,Thakurgaon,436,Pirganj,exact,
+5121,Nekmarad,Thakurgaon,Rani Sankail,58,Thakurgaon,437,Ranisankail,exact,
+5120,Rani Sankail,Thakurgaon,Rani Sankail,58,Thakurgaon,437,Ranisankail,exact,
+5103,Ruhia,Thakurgaon,Thakurgaon Sadar,58,Thakurgaon,435,Thakurgaon Sadar,exact,
+5102,Shibganj,Thakurgaon,Thakurgaon Sadar,58,Thakurgaon,435,Thakurgaon Sadar,exact,
+5101,Thakurgaon Road,Thakurgaon,Thakurgaon Sadar,58,Thakurgaon,435,Thakurgaon Sadar,exact,
+5100,Thakurgaon Sadar,Thakurgaon,Thakurgaon Sadar,58,Thakurgaon,435,Thakurgaon Sadar,exact,
