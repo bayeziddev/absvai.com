@@ -23,13 +23,17 @@ const variant = async (sku: string) => (await t.sql<{ id: number }>('SELECT id F
 const productId = async (slug: string) => (await t.sql<{ id: number }>('SELECT id FROM products WHERE slug = ?', slug))[0].id;
 
 let ipCounter = 0;
-async function order(lines: Array<{ variantId: number; qty: number }>, over: Record<string, unknown> = {}) {
+/** A storefront order the way the browser places it: checkout session (cookies + signed token), then place. */
+async function order(lines: Array<{ variantId: number; qty: number }>, over: Record<string, unknown> = {}, session?: { cookie: string; token: string }) {
+  const s = session ?? (await t.checkoutSession());
+  const n = ++ipCounter;
   return t.json('/api/checkout/place', {
     method: 'POST',
-    headers: { 'cf-connecting-ip': `10.0.0.${++ipCounter}` }, // each simulated customer has their own connection (rate limit is per IP)
+    headers: { 'cf-connecting-ip': `10.0.0.${n}`, cookie: s.cookie }, // each simulated customer has their own connection (rate limit is per IP)
     body: {
-      phone: '01712345678', name: 'Rahim Uddin', divisionId: ids.dhakaDivision, districtId: ids.tangail, upazilaId: ids.kalihati,
-      postcode: null, addressLine: 'House 12, Road 5, Kalihati Bazar', landmark: 'Near the high school', paymentMethod: 'cod', lines, ...over,
+      // A different phone per customer by default, so the repeat-order and 24-hour rules only fire where a test means them to.
+      phone: `0171${String(n).padStart(7, '0')}`, name: 'Rahim Uddin', divisionId: ids.dhakaDivision, districtId: ids.tangail, upazilaId: ids.kalihati,
+      postcode: null, addressLine: 'House 12, Road 5, Kalihati Bazar', landmark: 'Near the high school', paymentMethod: 'cod', lines, token: s.token, ...over,
     },
   });
 }
@@ -123,7 +127,7 @@ describe('seasons, pre-orders and notify-me', () => {
   it('records a notify-me request', async () => {
     const r = await t.json('/api/notify', { method: 'POST', body: { productId: await productId('langra-mango'), phone: '01912345678', channel: 'whatsapp' } });
     expect(r.status).toBe(200);
-    expect((await t.sql('SELECT * FROM notify_requests'))[0]).toMatchObject({ phone: '01912345678', channel: 'whatsapp', status: 'waiting' });
+    expect((await t.sql('SELECT * FROM notify_requests'))[0]).toMatchObject({ phone: '8801912345678', channel: 'whatsapp', status: 'waiting' });
   });
 
   it('takes pre-orders only with an advance, under a PRE- reference', async () => {
@@ -168,15 +172,19 @@ describe('COD orders: OTP, confirmation call, invoice', () => {
   let token = '';
   let orderId = 0;
 
-  it('places a COD order, takes stock and sends an English SMS with an OTP', async () => {
-    const v = await variant('MCH-SEAL-300MM-0002');
-    const before = (await t.sql('SELECT stock FROM product_variants WHERE id = ?', v))[0].stock;
-    const r = await order([{ variantId: v, qty: 1 }], { phone: '01611111111', districtId: ids.dhaka, upazilaId: ids.dhakaSouth });
+  let sealer = 0;
+  let sealerBefore = { stock: 0, reserved: 0 };
+
+  it('places a COD order as New (stock is not touched yet) and sends an English SMS with an OTP', async () => {
+    sealer = await variant('MCH-SEAL-300MM-0002');
+    sealerBefore = (await t.sql('SELECT stock, reserved FROM product_variants WHERE id = ?', sealer))[0];
+    const r = await order([{ variantId: sealer, qty: 1 }], { phone: '01611111111', districtId: ids.dhaka, upazilaId: ids.dhakaSouth });
     expect(r.status).toBe(201);
     ({ orderNo, accessToken: token, orderId } = r.body);
     expect(orderNo).toMatch(/^AV-\d{6}-\d{4}$/);
     expect(r.body.totalPaisa).toBe(185000); // over the ৳1,500 threshold, so delivery is free
-    expect((await t.sql('SELECT stock FROM product_variants WHERE id = ?', v))[0].stock).toBe(before - 1);
+    expect((await t.sql('SELECT status FROM orders WHERE id = ?', orderId))[0].status).toBe('new');
+    expect((await t.sql('SELECT stock, reserved FROM product_variants WHERE id = ?', sealer))[0]).toEqual(sealerBefore);
     const sms = await t.sql('SELECT kind, body FROM sms_outbox WHERE order_id = ? ORDER BY id', orderId);
     expect(sms.map(s => s.kind)).toEqual(['order_received', 'otp']);
     for (const s of sms) expect(/^[\x20-\x7E]*$/.test(s.body) && s.body.length <= 160).toBe(true);
@@ -198,6 +206,10 @@ describe('COD orders: OTP, confirmation call, invoice', () => {
     const conf = await t.adminJson(`/orders/${orderId}/status`, 'POST', { to: 'confirmed' });
     expect(conf.status).toBe(200);
     expect(conf.body.invoiceNo).toMatch(/^INV-\d{8}-0001$/);
+    // Confirmation holds the stock for this order; it leaves only when the parcel goes to the courier.
+    expect((await t.sql('SELECT stock, reserved FROM product_variants WHERE id = ?', sealer))[0]).toEqual({ stock: sealerBefore.stock, reserved: sealerBefore.reserved + 1 });
+    const moves = await t.sql("SELECT kind, change, reserved_change FROM stock_movements WHERE order_id = ? ORDER BY id", orderId);
+    expect(moves).toEqual([{ kind: 'reserve', change: 0, reserved_change: 1 }]);
     const pdf = await t.fetch(`/api/admin/orders/${orderId}/invoice.pdf`, { headers: { cookie: t.admin.cookie } });
     expect(pdf.headers.get('content-type')).toBe('application/pdf');
     expect(new TextDecoder().decode((await pdf.arrayBuffer()).slice(0, 8))).toBe('%PDF-1.4');
@@ -207,17 +219,17 @@ describe('COD orders: OTP, confirmation call, invoice', () => {
     const r = await order([{ variantId: await variant('SPC-MMSL-500G-0002'), qty: 1 }], { phone: '01622222222' });
     const id = r.body.orderId;
     expect((await t.adminJson(`/orders/${id}/call`, 'POST', { outcome: 'no_answer' })).status).toBe(200);
-    expect((await t.sql('SELECT status FROM orders WHERE id = ?', id))[0].status).toBe('confirmation_attempted');
+    expect((await t.sql('SELECT status, call_attempts FROM orders WHERE id = ?', id))[0]).toEqual({ status: 'new', call_attempts: 1 });
     expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'confirmed' })).status).toBe(409);
     await t.adminJson(`/orders/${id}/call`, 'POST', { outcome: 'confirmed', note: 'Customer confirmed address' });
     const conf = await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'confirmed' });
     expect(conf.body.invoiceNo).toMatch(/-0002$/);
-    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'shipped' })).status).toBe(400); // must be packed first
+    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'in_courier' })).status).toBe(409); // must be packed first
     await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'packed' });
-    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'shipped' })).body.error).toMatch(/tracking ID/);
-    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'shipped', courier: 'Steadfast', trackingId: 'SF123456' })).status).toBe(200);
+    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'in_courier', courier: 'steadfast' })).body.error).toMatch(/tracking ID/);
+    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'in_courier', courier: 'steadfast', trackingId: 'SF123456' })).status).toBe(200);
     const track = await t.json('/api/orders/track', { method: 'POST', body: { phone: '01622222222', orderNo: r.body.orderNo } });
-    expect(track.body).toMatchObject({ status: 'shipped', courier: 'Steadfast', trackingId: 'SF123456' });
+    expect(track.body).toMatchObject({ status: 'in_courier', trackingId: 'SF123456' });
   });
 
   it('flags a double tap as a possible duplicate and lets staff merge it', async () => {
@@ -251,7 +263,7 @@ describe('admin: templates drive the upload form', () => {
     const created = await t.adminJson('/products', 'POST', { categoryId: await catId('organic-seasonal-food'), name: 'Sundarban Honey' });
     const id = created.body.id;
     const p = (await t.adminJson(`/products/${id}`)).body;
-    expect(p.effectiveVariantAttributes.map((a: { attributeTypeId: string }) => a.attributeTypeId)).toEqual(['weight', 'packaging']);
+    expect(p.effectiveVariantAttributes.map((a: { attributeTypeId: string }) => a.attributeTypeId)).toEqual(['weight', 'volume', 'packaging']);
     expect(p.effectiveSpecFields.map((f: { key: string }) => f.key)).toEqual(expect.arrayContaining(['origin', 'batch_no', 'best_before', 'storage']));
     expect(p.effectiveSpecFields.some((f: { key: string }) => /warranty/.test(f.key))).toBe(false);
 
@@ -267,7 +279,7 @@ describe('admin: templates drive the upload form', () => {
     });
     const saved = await save({ origin: 'Sundarbans', batch_no: 'B-7', ingredients: 'Raw honey', storage: 'Keep closed' });
     expect(saved.status).toBe(200);
-    expect(saved.body.variants[0].sku).toBe('ORG-SHNY-500G-0008');
+    expect(saved.body.variants[0].sku).toMatch(/^ORG-SHNY-500G-\d{4}$/); // category code, product code, option, store-wide sequence
     expect(saved.body.variants[0].netValue).toBe(500); // filled from the "500g" weight
     const blocked = await t.adminJson(`/products/${id}/publish`, 'POST', {});
     expect(blocked.status).toBe(409);
@@ -431,7 +443,7 @@ describe('storefront pages and SEO', () => {
 
   it('cron publishes scheduled products', async () => {
     await t.sql("UPDATE products SET status = 'scheduled', publish_at = '2020-01-01T00:00:00.000Z' WHERE slug = 'wooden-hand-masher'");
-    expect(await publishScheduled(t.env)).toBe(1);
+    expect(await publishScheduled(t.env)).toHaveLength(1);
     expect((await t.sql("SELECT status FROM products WHERE slug = 'wooden-hand-masher'"))[0].status).toBe('published');
   });
 });

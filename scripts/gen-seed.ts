@@ -61,10 +61,14 @@ SEASONS.forEach((s, i) => cfg.push(insert('seasons', {
   landing_intro: s.intro, sort_order: i,
 })));
 
+const depthOf = (slug: string): number => { const c = CATEGORIES.find(x => x.slug === slug)!; return c.parent ? depthOf(c.parent) + 1 : 1; };
+const effectiveTemplate = (slug: string): string => { const c = CATEGORIES.find(x => x.slug === slug)!; return c.template ?? effectiveTemplate(c.parent!); };
+
 CATEGORIES.forEach((c, i) => {
+  if (depthOf(c.slug) > 3) throw new Error(`${c.slug}: categories go at most three levels deep`);
   cfg.push(insert('categories', {
     slug: c.slug, name: c.name, code: c.code, template_id: c.template, icon_url: c.icon, description: c.description ?? null,
-    parent_id: c.parent ? `(SELECT id FROM categories WHERE slug = ${q(c.parent)})` : null,
+    parent_id: c.parent ? `(SELECT id FROM categories WHERE slug = ${q(c.parent)})` : null, depth: depthOf(c.slug),
     season_visibility: c.seasons?.length ? 'seasons' : 'always', sort_order: i,
   }));
   for (const s of c.seasons ?? []) {
@@ -106,10 +110,10 @@ writeFileSync(join(ROOT, 'worker/migrations/0003_seed_config.sql'), cfg.join('\n
 
 // ───────────── Demo catalog (local/test only) ─────────────
 
-interface DemoVariant { attrs: Record<string, string>; price: number; compare?: number; stock: number; packed: number; net?: [number, 'g' | 'kg' | 'ml' | 'l' | 'pcs']; tiers?: Array<{ minQty: number; pricePaisa: number }> }
+interface DemoVariant { attrs: Record<string, string>; price: number; compare?: number; stock: number; packed: number; net?: [number, 'g' | 'kg' | 'ml' | 'l' | 'm' | 'pcs']; tiers?: Array<{ minQty: number; pricePaisa: number }>; shelf?: string }
 interface DemoProduct {
   slug: string; category: string; template: string; name: string; code: string; short: string; description: string; brand?: string;
-  original?: boolean; chips?: string[]; fulfilment?: 'in_stock' | 'pre_order' | 'made_to_order'; preorder?: { dispatch: string; type: 'delivery_charge' | 'fixed'; advance?: number };
+  original?: boolean; home?: boolean; chips?: string[]; fulfilment?: 'in_stock' | 'pre_order' | 'made_to_order'; preorder?: { dispatch: string; type: 'delivery_charge' | 'fixed'; advance?: number };
   shipping?: 'standard' | 'fragile' | 'heavy_bulky' | 'perishable'; bulkyMode?: 'zone_fixed' | 'confirm_by_phone'; free?: boolean; video?: string;
   specs: Record<string, string>; variants: DemoVariant[]; image: string; seasons?: string[]; sizeChart?: { columns: string[]; rows: Array<{ size: string; values: string[] }> };
   keywords?: string; sold?: number;
@@ -160,7 +164,20 @@ const DEMO: DemoProduct[] = [
     image: '/img/placeholders/mango.svg',
   },
   {
-    slug: '42-item-master-masala', category: 'spices-masala', template: 'packaged_food', name: '42 Item Master Masala', code: 'MMSL', brand: 'Abs Vai', original: true,
+    slug: 'sundarbans-honey', category: 'organic-seasonal-food', template: 'weighed_food', name: 'Sundarbans Mangrove Honey', code: 'HONY',
+    short: 'Raw honey from the Sundarbans, sold by volume.',
+    description: 'Collected by licensed mouals in the Sundarbans and strained once. Packed in glass jars.',
+    chips: ['Raw, not heated', 'Glass jar'], sold: 22,
+    specs: { origin: 'Sundarbans, Khulna', batch_no: 'Batch H-04 · Sep 2026', best_before: '2028-09-30', ingredients: '100% honey', storage: 'Keep at room temperature, away from sunlight.' },
+    variants: [
+      { attrs: { volume: '250ml' }, price: 42000, stock: 30, packed: 520, net: [250, 'ml'] },
+      { attrs: { volume: '500ml' }, price: 80000, compare: 85000, stock: 24, packed: 900, net: [500, 'ml'] },
+      { attrs: { volume: '1l' }, price: 150000, stock: 10, packed: 1700, net: [1, 'l'] },
+    ],
+    image: '/img/placeholders/liquid-gur.svg',
+  },
+  {
+    slug: '42-item-master-masala', category: 'spices-masala', template: 'packaged_food', name: '42 Item Master Masala', code: 'MMSL', brand: 'Abs Vai', original: true, home: true,
     short: 'One masala for fuchka, chotpoti, jhal muri, velpuri and haleem.',
     description: 'Our own blend of 42 spices, ground and packed by ABS VAI LTD. Cooking directions are printed on the box.',
     chips: ['42 spices in one pack', 'Recipe on the box', 'Made by Abs Vai'], sold: 312,
@@ -186,7 +203,7 @@ const DEMO: DemoProduct[] = [
     image: '/img/placeholders/sealer.svg',
   },
   {
-    slug: 'manual-chanachur-press', category: 'presses', template: 'machinery', name: 'Manual Chanachur Press', code: 'CHNC',
+    slug: 'manual-chanachur-press', category: 'chanachur-presses', template: 'machinery', home: true, name: 'Manual Chanachur Press', code: 'CHNC',
     short: 'Make chanachur, jhuri bhaja and sev at home or for your shop.',
     description: 'A screw press with a food-grade cylinder and five interchangeable dies. Built for daily use in small food businesses.',
     chips: ['5 dies included', 'Food-grade cylinder', 'Business guide included'], bulkyMode: 'zone_fixed', sold: 41,
@@ -237,6 +254,13 @@ const DEMO: DemoProduct[] = [
     image: '/img/placeholders/panjabi.svg',
   },
   {
+    slug: 'cotton-voile-fabric', category: 'unstitched-fabric', template: 'fabric', name: 'Cotton Voile Fabric', code: 'VOIL',
+    short: 'Soft printed cotton voile, cut to the length you choose.', description: 'Lightweight cotton voile for kurtis, three-pieces and summer wear.',
+    specs: { fabric: '100% cotton voile', width: '44', care: 'Hand wash cold. Dry in shade.' },
+    variants: ['2m', '2.5m', '5m'].flatMap(len => ['Indigo', 'Rust'].map(color => ({ attrs: { length_m: len, color }, price: Math.round(Number(len.replace('m', '')) * 32000), stock: 15, packed: Math.round(Number(len.replace('m', '')) * 140 + 60), net: [Number(len.replace('m', '')), 'm'] as [number, 'm'] }))),
+    image: '/img/placeholders/panjabi.svg',
+  },
+  {
     slug: 'winter-wool-shawl', category: 'winter-wear', template: 'apparel', name: 'Winter Wool Shawl', code: 'SHWL',
     short: 'Warm, light wool-blend shawl.', description: 'A wide wool-blend shawl for cold mornings.',
     seasons: ['winter'], specs: { fabric: 'Wool blend', care: 'Hand wash cold.', gender_age: 'Unisex' },
@@ -282,16 +306,18 @@ const demo: string[] = [
     ]) + " WHERE slug = 'winter';",
   "UPDATE seasons SET starts_on = '2027-05-20', ends_on = '2027-07-31' WHERE slug = 'mango';",
   "UPDATE settings SET value = '8801700000000' WHERE key = 'whatsapp_number';",
+  "UPDATE delivery_zones SET default_courier = 'steadfast';",
   "UPDATE settings SET value = '+880 1700-000000' WHERE key = 'support_phone';",
   "UPDATE settings SET value = " + j([{ wallet: 'bKash', number: '01700-000000', type: 'Merchant' }, { wallet: 'Nagad', number: '01700-000000', type: 'Personal' }]) + " WHERE key = 'manual_wallets';",
 ];
 
 for (const p of DEMO) {
+  if (effectiveTemplate(p.category) !== p.template) throw new Error(`${p.slug}: category ${p.category} uses ${effectiveTemplate(p.category)}`);
   const catSel = `(SELECT id FROM categories WHERE slug = ${q(p.category)})`;
   const tpl = TEMPLATES.find(t => t.id === p.template)!;
   demo.push(insert('products', {
     slug: p.slug, category_id: catSel, template_id: p.template, name: p.name, code: p.code, short_description: p.short, description: p.description,
-    brand: p.brand ?? (p.original ? 'Abs Vai' : null), is_original: p.original ? 1 : 0, benefit_chips: JSON.stringify(p.chips ?? []),
+    brand: p.brand ?? (p.original ? 'Abs Vai' : null), is_original: p.original ? 1 : 0, show_on_home: p.home ? 1 : 0, benefit_chips: JSON.stringify(p.chips ?? []),
     status: 'published', published_at: '2026-10-01T00:00:00.000Z', fulfilment_mode: p.fulfilment ?? 'in_stock',
     preorder_dispatch_date: p.preorder?.dispatch ?? null, preorder_advance_type: p.preorder?.type ?? null, preorder_advance_paisa: p.preorder?.advance ?? null,
     made_to_order_lead_days: p.fulfilment === 'made_to_order' ? Number(p.specs.lead_time_days ?? 3) : null,
@@ -309,10 +335,10 @@ for (const p of DEMO) {
     const sku = `${code}-${p.code}-${variantCode(v.attrs)}-${String(n).padStart(4, '0')}`;
     demo.push(insert('product_variants', {
       product_id: pid, sku, attributes: JSON.stringify(v.attrs), attributes_key: attributesKey(v.attrs), price_paisa: v.price,
-      compare_at_price_paisa: v.compare ?? null, wholesale_tiers: JSON.stringify(v.tiers ?? []), stock: v.stock, packed_weight_grams: v.packed,
-      net_value: v.net?.[0] ?? null, net_unit: v.net?.[1] ?? null, sort_order: i,
+      compare_at_price_paisa: v.compare ?? null, cost_paisa: Math.round(v.price * 0.62), wholesale_tiers: JSON.stringify(v.tiers ?? []), stock: v.stock, packed_weight_grams: v.packed,
+      net_value: v.net?.[0] ?? null, net_unit: v.net?.[1] ?? null, shelf_location: v.shelf ?? `${code}-${String(Math.ceil(n / 4)).padStart(2, '0')}`, sort_order: i,
     }));
-    demo.push(`INSERT INTO inventory_log (variant_id, change, reason, batch_no, note) SELECT id, stock, 'initial', ${q(p.specs.batch_no ?? null)}, 'Demo opening stock' FROM product_variants WHERE sku = ${q(sku)};`);
+    demo.push(`INSERT INTO stock_movements (variant_id, change, kind, reason, batch_no, note) SELECT id, stock, 'initial', 'received', ${q(p.specs.batch_no ?? null)}, 'Demo opening stock' FROM product_variants WHERE sku = ${q(sku)};`);
   });
 }
 for (const [code, n] of seq) demo.push(`INSERT INTO counters (name, value) VALUES (${q(`sku:${code}`)}, ${n}) ON CONFLICT(name) DO UPDATE SET value = excluded.value;`);

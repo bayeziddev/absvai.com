@@ -9,6 +9,10 @@ export interface Env {
   ENVIRONMENT: string;
   SETUP_TOKEN?: string;
   OTP_PEPPER?: string;
+  /** HMAC key for checkout tokens and the salt for device/IP/phone hashes. */
+  SIGNING_KEY?: string;
+  /** 32 random bytes (base64) that encrypt settings secrets with AES-GCM. */
+  SETTINGS_KEY?: string;
   TURNSTILE_SECRET?: string;
   TURNSTILE_SITE_KEY?: string;
   SMS_PROVIDER?: string;

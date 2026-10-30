@@ -119,24 +119,3 @@ export function rowToZone(r: Record<string, unknown>): Zone {
   };
 }
 
-/**
- * Zone for an address: upazila override → district mapping → default zone.
- * needsArea is true when the district has upazila overrides with different zones and no upazila was chosen,
- * so the shown charge could still change.
- */
-export async function resolveZone(db: D1Database, districtId: number, upazilaId: number | null): Promise<{ zone: Zone; needsArea: boolean } | null> {
-  if (upazilaId) {
-    const o = await db.prepare('SELECT z.* FROM zone_upazila_overrides o JOIN delivery_zones z ON z.id = o.zone_id WHERE o.upazila_id = ?').bind(upazilaId).first();
-    if (o) return { zone: rowToZone(o), needsArea: false };
-  }
-  const d = await db.prepare('SELECT z.* FROM zone_districts zd JOIN delivery_zones z ON z.id = zd.zone_id WHERE zd.district_id = ?').bind(districtId).first();
-  const zoneRow = d ?? (await db.prepare('SELECT * FROM delivery_zones WHERE is_default = 1 ORDER BY sort_order LIMIT 1').first());
-  if (!zoneRow) return null;
-  let needsArea = false;
-  if (!upazilaId) {
-    const ov = await db.prepare(`SELECT COUNT(*) AS n FROM zone_upazila_overrides o JOIN geo_upazilas u ON u.id = o.upazila_id
-                                 WHERE u.district_id = ? AND o.zone_id != ?`).bind(districtId, zoneRow.id).first<{ n: number }>();
-    needsArea = (ov?.n ?? 0) > 0;
-  }
-  return { zone: rowToZone(zoneRow), needsArea };
-}

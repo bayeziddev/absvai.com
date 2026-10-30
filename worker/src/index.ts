@@ -1,10 +1,11 @@
 /**
  * Abs Vai: one Cloudflare Worker serves the storefront (server-rendered), the admin app (static assets)
  * and every /api/* route. Static files in dist/ are served by Workers Static Assets before this code runs.
+ * The deployed entry point is worker.ts, which puts the edge cache in front of the storefront pages.
  */
 import { Hono } from 'hono';
-import type { AppEnv, Env } from './env';
-import { scheduled } from './cron';
+import type { AppEnv } from './env';
+import { buildCsp } from './lib/csp';
 import { HttpError } from './lib/http';
 import { admin } from './routes/admin';
 import { api } from './routes/api';
@@ -12,18 +13,7 @@ import { notFound, pages } from './routes/pages';
 
 const app = new Hono<AppEnv>();
 
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' https://challenges.cloudflare.com",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https:",
-  "connect-src 'self'",
-  'frame-src https://www.youtube-nocookie.com https://challenges.cloudflare.com',
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-].join('; ');
+
 
 app.use('*', (c, next) => {
   const url = new URL(c.req.url);
@@ -33,12 +23,14 @@ app.use('*', (c, next) => {
 app.use('*', async (c, next) => {
   const url = new URL(c.req.url);
   await next();
-  c.header('Content-Security-Policy', CSP);
+  // Pages load settings while rendering, so their CSP reflects the integrations that are on right now.
+  if (!c.res.headers.get('Content-Security-Policy')) c.header('Content-Security-Policy', buildCsp(c.var.settings));
   c.header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   c.header('Permissions-Policy', 'geolocation=(self), camera=(), microphone=(), payment=()');
-  if (url.pathname.startsWith('/api/')) c.header('Cache-Control', c.res.headers.get('Cache-Control') ?? 'no-store');
+  // Nothing is cacheable unless a route says so: cart, checkout, account, admin and API writes are private, no-store.
+  if (!c.res.headers.get('Cache-Control')) c.header('Cache-Control', 'private, no-store');
 });
 
 app.onError(async (err, c) => {
@@ -57,7 +49,7 @@ app.route('/api', api);
 // Product photos and documents uploaded to R2.
 app.get('/media/*', async c => {
   const key = c.req.path.slice('/media/'.length);
-  if (!/^p\/\d+\/[\w-]+\.(webp|jpg|png|avif|pdf)$/.test(key)) return c.notFound();
+  if (!/^(p\/\d+|brand)\/[\w-]+\.(webp|jpg|png|avif|pdf|svg)$/.test(key)) return c.notFound();
   const obj = await c.env.MEDIA.get(key);
   if (!obj) return c.notFound();
   const headers = new Headers();
@@ -69,10 +61,5 @@ app.get('/media/*', async c => {
 
 app.route('/', pages);
 app.notFound(c => (c.req.path.startsWith('/api/') ? c.json({ error: 'Not found' }, 404) : notFound(c)));
-
-export default {
-  fetch: app.fetch,
-  scheduled: (controller: ScheduledController, env: Env, ctx: ExecutionContext) => ctx.waitUntil(scheduled(controller, env)),
-} satisfies ExportedHandler<Env>;
 
 export { app };

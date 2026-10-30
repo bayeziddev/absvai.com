@@ -1,4 +1,5 @@
-// Abs Vai storefront: shared behaviour for every page. No framework, no tracking.
+// Abs Vai storefront: shared behaviour for every page. No framework. Third-party tracking only runs through track.js when
+// the owner turns it on, and never for a prerendered page the visitor did not open.
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 export const taka = paisa => `৳${Math.floor(Math.abs(paisa) / 100).toLocaleString('en-US')}${paisa % 100 ? `.${String(Math.abs(paisa) % 100).padStart(2, '0')}` : ''}`;
@@ -14,14 +15,22 @@ function store(key, fallback) {
 const cartStore = store('absvai.cart', []);
 const wishStore = store('absvai.wish', []);
 
+/** Tracking events for track.js (Pixel/GA4). Queued, so nothing is lost if track.js loads later or never. */
+export function track(name, data = {}) {
+  (window.__absvaiq ||= []).push({ name, data });
+  dispatchEvent(new CustomEvent('absvai:track', { detail: { name, data } }));
+}
+
 export const cart = {
   lines: () => cartStore.get().filter(l => Number.isInteger(l.variantId) && l.qty > 0),
+  // Optimistic: the badge updates immediately; prices are checked on the server at cart and checkout.
   add(variantId, qty = 1) {
     const lines = cart.lines();
     const hit = lines.find(l => l.variantId === variantId);
     if (hit) hit.qty = Math.min(99, hit.qty + qty); else lines.push({ variantId, qty });
     cartStore.set(lines);
     badges();
+    track('AddToCart', { variantId, qty });
   },
   setQty(variantId, qty) {
     cartStore.set(cart.lines().map(l => (l.variantId === variantId ? { ...l, qty } : l)).filter(l => l.qty > 0));
@@ -263,9 +272,63 @@ function setupMisc() {
   install?.addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; install.hidden = true; });
 }
 
+// ── Live price and stock on edge-cached pages (Section 2.2) ──
+async function setupLive() {
+  const cards = $$('[data-product-id]');
+  const ids = [...new Set(cards.map(c => Number(c.dataset.productId)).filter(Boolean))].sort((a, b) => a - b).slice(0, 60);
+  if (!ids.length || $('[data-pdp-form]')) return;
+  let live;
+  try { live = (await (await fetch(`/api/live?ids=${ids.join(',')}`)).json()).products; } catch { return; }
+  for (const card of cards) {
+    const p = live?.[card.dataset.productId];
+    if (!p || !p.variants.length) continue;
+    const cheapest = [...p.variants].sort((a, b) => a.pricePaisa - b.pricePaisa)[0];
+    const strong = $('.price strong', card);
+    if (strong) strong.innerHTML = p.variants.length > 1 ? `<small>from </small>${taka(cheapest.pricePaisa)}` : taka(cheapest.pricePaisa);
+    const struck = $('.price s', card);
+    if (struck) struck.hidden = !(cheapest.compareAtPricePaisa > cheapest.pricePaisa);
+    const actions = $('.card-actions', card);
+    if (actions && !p.variants.some(v => v.canBuy)) {
+      actions.innerHTML = `<p class="avail avail-out_of_stock">${esc(p.availability?.label || 'Out of stock')}</p>`;
+    }
+  }
+}
+
+// ── Prefetch fallback for browsers without the Speculation Rules API (Section 2.3) ──
+function setupPrefetch() {
+  if (HTMLScriptElement.supports?.('speculationrules') || !('IntersectionObserver' in window)) return;
+  if (navigator.connection?.saveData) return;
+  const done = new Set();
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting || done.size >= 12) continue;
+      const href = e.target.getAttribute('href');
+      io.unobserve(e.target);
+      if (done.has(href)) continue;
+      done.add(href);
+      (window.requestIdleCallback || setTimeout)(() => {
+        const l = document.createElement('link');
+        l.rel = 'prefetch';
+        l.href = href;
+        document.head.append(l);
+      });
+    }
+  }, { rootMargin: '200px' });
+  $$('a[href^="/p/"], a[href^="/c/"]').forEach(a => io.observe(a));
+}
+
 setupDrawer();
 setupSearch();
 setupCarousels();
 setupCards();
 setupMisc();
 badges();
+setupLive();
+setupPrefetch();
+if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+if ($('[data-pdp-form]')) {
+  let pid = null;
+  try { pid = JSON.parse($('#page-data').textContent).product?.id ?? null; } catch { /* ignore */ }
+  track('ViewContent', { productId: pid });
+}
+if ($('[data-checkout]')) track('InitiateCheckout', {});

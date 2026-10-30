@@ -1,7 +1,8 @@
-import type { CategoryNode, ProductCard, ProductDetail } from '../data/catalog';
+import type { CategoryNode, ProductCard, ProductDetail } from '../repo/catalog';
 import { formatDate } from '../lib/dates';
 import { formatTaka, formatUnitPrice, unitPrice } from '../lib/money';
-import { STATUS_LABELS, type OrderStatus } from '../lib/order-status';
+import { localPhone, maskPhone } from '../lib/phone';
+import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
 import { effectiveVariantAttributes, formatNetQuantity, infoPanels } from '../lib/templates';
 import { Banner, Breadcrumbs, Burst, CategoryCarousel, CheckChip, Empty, Grid, HeroCarousel, OriginalsSeal, Pagination, PromoBanner, Rail, SectionTitle, TrustStrip } from './components';
 import { Icon } from './icons';
@@ -10,7 +11,7 @@ import { Icon } from './icons';
 
 export function HomePage(p: {
   banners: Banner[]; categories: CategoryNode[]; seasonal: Set<number>; activeSeason: { slug: string; name: string } | null;
-  inSeason: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; settings: Record<string, string>;
+  inSeason: ProductCard[]; featured: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; settings: Record<string, string>;
 }) {
   return (
     <>
@@ -20,6 +21,12 @@ export function HomePage(p: {
         <section class="section">
           <SectionTitle title={`In Season Now · ${p.activeSeason.name}`} href={`/season/${p.activeSeason.slug}`} />
           <Rail items={p.inSeason} label="In season now" />
+        </section>
+      )}
+      {p.featured.length > 0 && (
+        <section class="section">
+          <SectionTitle title="Picked for you" href="/shop" />
+          <Rail items={p.featured} label="Picked for you" />
         </section>
       )}
       {p.originals.length > 0 && (
@@ -184,7 +191,7 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
             <span class="save-pill" data-save hidden={!save}>{save ? `Save ${formatTaka(save)}` : ''}</span>
           </div>
           <p class="unit-price" data-unit>{unit}</p>
-          <p class={`avail avail-${a.state}`} data-avail>{a.label}{a.state === 'available' && first && first.stock <= 5 ? ` · only ${first.stock} left` : ''}</p>
+          <p class={`avail avail-${a.state}`} data-avail>{a.label}{a.state === 'available' && first && first.available <= 5 ? ` · only ${first.available} left` : ''}</p>
           {first && first.wholesaleTiers.length > 0 && (
             <div class="tiers" data-tiers>
               <p><Icon name="tag" size={16} />Wholesale prices</p>
@@ -308,7 +315,7 @@ export function productPageData(d: ProductDetail) {
     product: { id: d.product.id, slug: d.product.slug, name: d.product.name },
     attributes: attrs.map(a => a.attributeTypeId),
     variants: d.variants.map(v => ({
-      id: v.id, attributes: v.attributes, pricePaisa: v.pricePaisa, compareAtPricePaisa: v.compareAtPricePaisa, stock: v.stock, tiers: v.wholesaleTiers,
+      id: v.id, attributes: v.attributes, pricePaisa: v.pricePaisa, compareAtPricePaisa: v.compareAtPricePaisa, stock: v.available, tiers: v.wholesaleTiers,
       unit: formatUnitPrice(unitPrice(v.pricePaisa, v.netValue, v.netUnit)), net: formatNetQuantity(v.netValue, v.netUnit),
       image: v.imageIds.map(id => media[id]).find(Boolean) ?? null, availability: d.availabilityByVariant[v.id],
     })),
@@ -342,6 +349,9 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
               <span>We’ll call or text this number to confirm your order.</span>
               <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required />
             </label>
+            <p class="field-note" data-capture-note>We save your details as you type so we can help if your order doesn’t go through. <a href="/policies/privacy">Privacy</a></p>
+            {/* Honeypot: hidden from people, filled by bots. Orders with it filled are rejected. */}
+            <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>
           </fieldset>
           <fieldset class="co-step">
             <legend><span class="step-no">2</span>Your name</legend>
@@ -405,7 +415,7 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
           </dl>
           <ul class="explain" data-explain />
           <p class="eta" data-eta />
-          {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" />}
+          {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" />}
           <p class="form-msg error" data-co-error role="alert" />
           <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>Place order</button>
           <p class="small muted">We save your details as you type so our team can help if checkout fails. We never store your GPS location.</p>
@@ -418,9 +428,9 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
 export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<string, unknown>>; wallets: Array<{ wallet: string; number: string; type?: string }> }) {
   const o = p.o;
   const status = o.status as OrderStatus;
-  const needsOtp = o.payment_method === 'cod' && !o.otp_verified_at && (status === 'pending' || status === 'confirmation_attempted');
+  const needsOtp = o.payment_method === 'cod' && !o.otp_verified_at && status === 'new';
   const needsAdvance = Boolean(o.advance_required) && (o.advance_status === 'pending');
-  const phone = String(o.phone);
+  const phone = localPhone(String(o.phone));
   return (
     <div class="container narrow order-done" data-order={String(o.order_no)} data-token={String(o.access_token)}>
       <div class="done-head">
@@ -432,7 +442,7 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
       {needsOtp && (
         <form class="otp card-box" data-otp>
           <h2>Confirm faster with the SMS code</h2>
-          <p>We sent a 6-digit code to {phone.slice(0, 3)}XXXXX{phone.slice(-3)}. Enter it so we can confirm without calling.</p>
+          <p>We sent a 6-digit code to {maskPhone(phone)}. Enter it so we can confirm without calling.</p>
           <div class="otp-row">
             <label class="sr-only" for="otp-code">Code</label>
             <input id="otp-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength={6} pattern="\d{6}" placeholder="••••••" required />

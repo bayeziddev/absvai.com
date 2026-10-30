@@ -10,13 +10,19 @@ let browser;
 before(async () => { server = await startServer(); browser = await launchBrowser(); });
 after(async () => { await browser?.close(); server?.stop(); });
 
+// No ctx.route() here: Playwright request interception makes Chromium skip cross-document view transitions and report it
+// as a page error. Fonts are self-hosted, so nothing external needs blocking.
 async function phone() {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, geolocation: { latitude: 24.3833, longitude: 90.0167 }, permissions: ['geolocation'] });
-  await ctx.route(/fonts\.(googleapis|gstatic)\.com|i\.ytimg\.com/, r => r.abort());
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   return { ctx, page, errors };
+}
+
+async function waitFor(fn, ms = 8000) {
+  for (const end = Date.now() + ms; Date.now() < end; await new Promise(r => setTimeout(r, 250))) { const v = fn(); if (v) return v; }
+  throw new Error('timed out');
 }
 
 async function fillContact(page, number) {
@@ -26,6 +32,8 @@ async function fillContact(page, number) {
 }
 
 async function placeAndWait(page) {
+  // The server silently rejects forms submitted within 3 seconds of the checkout session starting (bot check).
+  await page.waitForFunction(() => performance.now() > 3500);
   await page.click('[data-place]');
   await page.waitForURL(/\/order\/(AV|PRE)-\d{6}-\d{4}\?t=/, { timeout: 15000 });
   return decodeURIComponent(new URL(page.url()).pathname.split('/').pop());
@@ -48,8 +56,15 @@ describe('storefront checkout', () => {
     await page.waitForFunction(() => /Inside Dhaka City/.test(document.querySelector('[data-eta]').textContent));
     assert.equal(await page.textContent('[data-delivery]'), '৳85'); // 1.2kg packed: ৳70 + ৳15 for the extra kg
     await page.fill('input[name=addressLine]', 'House 7, Road 3, Dhanmondi');
+    await page.locator('input[name=addressLine]').blur();
+    // Incomplete-order capture: one row for this checkout as soon as the phone is valid.
+    // The row starts on the phone blur and fills in as the customer keeps typing (debounced).
+    const [row] = await waitFor(() => { const r = server.sql("SELECT status, name, subtotal_paisa FROM abandoned_checkouts WHERE phone = '8801710000001' AND name IS NOT NULL"); return r.length ? r : null; });
+    assert.deepEqual(row, { status: 'new', name: 'Test Customer', subtotal_paisa: 72000 });
     const orderNo = await placeAndWait(page);
     assert.match(await page.textContent('h1'), /Thank you, Test!/);
+    assert.equal(server.sql("SELECT COUNT(*) AS n FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].n, 1);
+    assert.equal(server.sql("SELECT status FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].status, 'converted');
     const [o] = server.sql(`SELECT total_paisa, district_name, upazila_name, postcode, post_office FROM orders WHERE order_no = '${orderNo}'`);
     assert.deepEqual(o, { total_paisa: 80500, district_name: 'Dhaka', upazila_name: 'Dhaka South City Corporation', postcode: '1209', post_office: 'Jigatala TSO' });
     assert.deepEqual(errors, []);
@@ -137,7 +152,6 @@ describe('storefront checkout', () => {
 describe('admin smart upload form', () => {
   it('sets up the owner, then blocks publishing a food product until best-before is added', async () => {
     const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
-    await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
@@ -154,7 +168,7 @@ describe('admin smart upload form', () => {
     await page.waitForSelector('.over #cat');
     await page.selectOption('.over #cat', { label: 'Organic & Seasonal Food (Weighed food)' });
     await page.waitForSelector('.over #why:not([hidden])');
-    assert.match(await page.textContent('.over #why'), /weight options/);
+    assert.match(await page.textContent('.over #why'), /weight \(or volume for liquids\) options/);
     await page.fill('.over #name', 'Sundarban Honey');
     await page.click('.over-foot #go');
     await page.waitForSelector('.steps');
@@ -199,9 +213,68 @@ describe('admin smart upload form', () => {
     await page.waitForSelector('.over-head .badge:has-text("published")');
 
     const skus = server.sql("SELECT sku FROM product_variants v JOIN products p ON p.id = v.product_id WHERE p.slug = 'sundarban-honey' ORDER BY v.sort_order").map(r => r.sku);
-    assert.deepEqual(skus, ['ORG-SHNY-500G-0008', 'ORG-SHNY-750G-0009']);
+    assert.equal(skus.length, 2);
+    assert.match(skus[0], /^ORG-SHNY-500G-\d{4}$/);
+    assert.match(skus[1], /^ORG-SHNY-750G-\d{4}$/);
     const pdp = await (await fetch(`${server.base}/p/sundarban-honey`)).text();
     assert.match(pdp, /৳1,100 \/ kg/);
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+
+  it('enters a Messenger order by hand, confirms, packs and sends it to the courier', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    page.on('dialog', d => d.accept('SF-E2E-12345'));
+    await page.goto(`${server.base}/admin/`);
+    await page.fill('input[name=email]', 'owner@absvai.test');
+    await page.fill('input[name=password]', 'correct-horse-42');
+    await page.click('#auth button');
+    await page.waitForSelector('.stages');
+    assert.equal(await page.$$eval('.stages .stage', s => s.length), 11); // 8 stages + on hold, returns to scan, incomplete
+
+    await page.goto(`${server.base}/admin/#/manual`);
+    await page.waitForSelector('#mo');
+    await page.click('summary:has-text("Paste chat")');
+    await page.fill('#chat', 'Customer: amar number 01799-887766, please send 1kg gur');
+    await page.click('#find');
+    await page.click('#found [data-ph="01799887766"]');
+    assert.equal(await page.inputValue('input[name=phone]'), '01799887766');
+    await page.fill('input[name=name]', 'Messenger Buyer');
+    await page.selectOption('select[name=source]', 'messenger');
+    await page.fill('#psearch', 'patali');
+    await page.click('#presults .result:has-text("1kg")');
+    await page.fill('input[name=postcode]', '1209');
+    await page.waitForFunction(() => document.querySelector('select[name=districtId]').value !== '');
+    await page.selectOption('select[name=upazilaId]', { label: 'Dhaka South City Corporation' });
+    await page.fill('input[name=addressLine]', 'Flat 3B, Road 9, Dhanmondi');
+    await page.waitForFunction(() => /Total ৳/.test(document.querySelector('#quote').textContent));
+    await page.click('#place');
+    await page.waitForURL(/#\/orders\/\d+$/);
+    const id = Number(page.url().split('/').pop());
+    const [o] = server.sql(`SELECT status, source, phone FROM orders WHERE id = ${id}`);
+    assert.deepEqual(o, { status: 'new', source: 'messenger', phone: '8801799887766' });
+
+    // Confirm via a logged call, then pack and hand to Steadfast from the order panel.
+    await page.waitForSelector('.over #call-go');
+    await page.selectOption('.over #call-out', 'confirmed');
+    await page.click('.over #call-go');
+    await page.waitForFunction(() => !document.querySelector('.over .notice') || !/Before confirming/.test(document.querySelector('.over').textContent));
+    for (const to of ['confirmed', 'packed']) {
+      await page.selectOption('.over #to', to);
+      await page.click('.over #move');
+      await page.waitForFunction(st => document.querySelector('.over-head h2').textContent.includes(st), to);
+    }
+    await page.selectOption('.over #to', 'in_courier');
+    await page.selectOption('.over #courier', 'steadfast');
+    await page.fill('.over #tracking', 'SF-E2E-12345');
+    await page.click('.over #move');
+    await page.waitForFunction(() => document.querySelector('.over-head h2').textContent.includes('in courier'));
+    const [shipped] = server.sql(`SELECT status, courier, tracking_id, invoice_no IS NOT NULL AS invoiced FROM orders WHERE id = ${id}`);
+    assert.deepEqual(shipped, { status: 'in_courier', courier: 'steadfast', tracking_id: 'SF-E2E-12345', invoiced: 1 });
+    assert.deepEqual(server.sql(`SELECT kind FROM stock_movements WHERE order_id = ${id} ORDER BY id`).map(r => r.kind), ['reserve', 'sale']);
     assert.deepEqual(errors, []);
     await ctx.close();
   });

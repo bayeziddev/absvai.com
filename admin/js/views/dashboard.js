@@ -1,4 +1,4 @@
-import { api, badge, date, esc, taka } from '../app.js';
+import { api, badge, can, date, esc, taka } from '../app.js';
 
 function chart(rows) {
   // 14 fixed day slots ending today (Bangladesh date), so one busy day doesn't fill the whole chart.
@@ -19,14 +19,19 @@ export async function dashboard(v) {
   const k = d.kpis;
   const s = d.seasons;
   v.innerHTML = `
-    <div class="page-head"><div><h1>Dashboard</h1><p>Today in Bangladesh time.</p></div><a class="btn btn-primary" href="#/products?new=1">+ Add product</a></div>
+    <div class="page-head"><div><h1>Overview</h1><p>Today in Bangladesh time.</p></div><div class="row">${can('orders:write') ? '<a class="btn btn-outline" href="#/manual">+ Manual order</a>' : ''}${can('catalog:write') ? '<a class="btn btn-primary" href="#/products?new=1">+ Add product</a>' : ''}</div></div>
     <div class="health">${d.health.map(h => `<span><span class="dot ${h.ok ? 'ok' : 'warn'}"></span>${esc(h.text)}</span>`).join('')}</div>
+    <h2 class="section-title">Order pipeline</h2>
+    <div class="stages">${d.stages.map(st => `<a class="stage ${st.value === 'new' && st.count ? 'alert' : ''}" href="#/orders?status=${st.value}" title="${esc(st.meaning)}"><span>${esc(st.label)}</span><b>${st.count}</b><small>${esc(st.scope)}</small></a>`).join('')}
+      <a class="stage ${d.held ? 'alert' : ''}" href="#/orders?status=held" title="Possible duplicates or too many orders from one phone"><span>On hold</span><b>${d.held}</b><small>needs a look</small></a>
+      <a class="stage ${d.awaitingReturnScan ? 'warn' : ''}" href="#/returns" title="Returned parcels not scanned in at the warehouse yet"><span>Returns to scan</span><b>${d.awaitingReturnScan}</b><small>stock back on scan</small></a>
+      <a class="stage" href="#/incomplete" title="Checkouts with a phone number that were not finished"><span>Incomplete</span><b>${d.incomplete}</b><small>last 7 days</small></a></div>
     <div class="kpis">
       <div class="kpi"><span>Today’s orders</span><b>${k.todayOrders}</b></div>
       <div class="kpi"><span>Today’s revenue</span><b>${taka(k.todayRevenuePaisa)}</b></div>
-      <div class="kpi"><span>COD to collect</span><b>${taka(k.codPendingPaisa)}</b></div>
-      <div class="kpi ${k.awaitingConfirmation ? 'alert' : ''}"><span>Awaiting confirmation</span><b>${k.awaitingConfirmation}</b></div>
+      <div class="kpi"><span>Cash on Delivery with couriers</span><b>${taka(k.codWithCourierPaisa)}</b></div>
       <div class="kpi"><span>Low stock options</span><b>${k.lowStock}</b></div>
+      ${k.stockValuePaisa !== undefined ? `<div class="kpi"><span>Stock value at cost</span><b>${taka(k.stockValuePaisa)}</b></div>` : ''}
     </div>
     <div class="split">
       <div>
@@ -44,7 +49,7 @@ export async function dashboard(v) {
           ${s.next ? `<p class="muted">Next: <b>${esc(s.next.name)}</b> in ${s.next.daysUntil} day(s), ${date(s.next.startsOn)}</p>` : ''}
           ${s.undated.length ? `<p class="muted">Needs dates: ${s.undated.map(esc).join(', ')}</p>` : ''}
           <a class="btn btn-sm" style="background:#fff;color:#2A1F1A" href="#/seasons">Open season calendar</a></div>
-        <div class="card"><h2>Low stock</h2>${d.lowStock.length ? `<ul class="attention">${d.lowStock.map(l => `<li><a href="#/products/${l.product_id}"><span class="dot ${l.stock === 0 ? 'alert' : 'warn'}"></span><span>${esc(l.name)}<br><span class="small muted">${esc(l.sku)} · ${l.stock} left</span></span></a></li>`).join('')}</ul>` : '<p class="muted">All options have stock.</p>'}</div>
+        <div class="card"><h2>Low stock</h2>${d.lowStock.length ? `<ul class="attention">${d.lowStock.map(l => `<li><a href="#/products/${l.product_id}"><span class="dot ${l.stock === 0 ? 'alert' : 'warn'}"></span><span>${esc(l.name)}<br><span class="small muted">${esc(l.sku)} · ${l.stock} available</span></span></a></li>`).join('')}</ul>` : '<p class="muted">All options have stock.</p>'}</div>
         ${d.fuzzyPostcodes ? `<div class="card"><h2>Postcodes</h2><p class="small">${d.fuzzyPostcodes} postcode(s) were linked by spelling match during import. <a href="#/geo?status=fuzzy">Review them</a>.</p></div>` : ''}
       </div>
     </div>`;

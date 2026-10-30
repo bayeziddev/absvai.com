@@ -43,7 +43,22 @@ function update() {
 }
 
 form.addEventListener('change', e => {
-  if (e.target.name?.startsWith('opt-')) { choice[e.target.name.slice(4)] = e.target.value; update(); }
+  if (e.target.name?.startsWith('opt-')) { choice[e.target.name.slice(4)] = e.target.value; update();
+
+// The page itself is served from the edge cache; current price and stock come from /api/live (Section 2.2).
+fetch(`/api/live?ids=${data.product.id}`).then(r => (r.ok ? r.json() : null)).then(live => {
+  const p = live?.products?.[data.product.id];
+  if (!p) return;
+  for (const lv of p.variants) {
+    const v = data.variants.find(x => x.id === lv.id);
+    if (!v) continue;
+    v.pricePaisa = lv.pricePaisa;
+    v.compareAtPricePaisa = lv.compareAtPricePaisa;
+    v.stock = lv.available;
+    v.availability = { ...v.availability, canBuy: lv.canBuy, label: lv.label, state: lv.available > 0 || v.availability.state !== 'available' ? v.availability.state : 'out_of_stock' };
+  }
+  update();
+}).catch(() => {}); }
 });
 form.querySelectorAll('[data-qty]').forEach(b => b.addEventListener('click', () => {
   qtyInput.value = String(Math.min(Number(qtyInput.max) || 99, Math.max(1, (Number(qtyInput.value) || 1) + Number(b.dataset.qty))));
@@ -59,3 +74,18 @@ document.querySelectorAll('[data-thumb]').forEach(t => t.addEventListener('click
 }));
 
 update();
+
+// The page itself is served from the edge cache; current price and stock come from /api/live (Section 2.2).
+fetch(`/api/live?ids=${data.product.id}`).then(r => (r.ok ? r.json() : null)).then(live => {
+  const p = live?.products?.[data.product.id];
+  if (!p) return;
+  for (const lv of p.variants) {
+    const v = data.variants.find(x => x.id === lv.id);
+    if (!v) continue;
+    v.pricePaisa = lv.pricePaisa;
+    v.compareAtPricePaisa = lv.compareAtPricePaisa;
+    v.stock = lv.available;
+    v.availability = { ...v.availability, canBuy: lv.canBuy, label: lv.label, state: lv.available > 0 || v.availability.state !== 'available' ? v.availability.state : 'out_of_stock' };
+  }
+  update();
+}).catch(() => {});

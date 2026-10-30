@@ -1,5 +1,17 @@
 /* Abs Vai storefront: "spice market meets Facebook ad". Mobile-first, no framework. */
 
+/* Self-hosted, latin subset (OFL). font-display: swap so text never waits for a font. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500 600; font-display: swap; src: url(/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/inter-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/poppins-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Poppins'; font-style: normal; font-weight: 800; font-display: swap; src: url(/fonts/poppins-latin-800-normal.woff2) format('woff2'); }
+
+/* Cross-document view transitions: page swaps fade instead of flashing white (Section 2). */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
 :root {
   --chili: #B3261E;
   --chili-dark: #8C1D17;
@@ -477,3 +489,10 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .map-card .leaflet-container { background: var(--cream); font: inherit; }
 .totals { column-gap: 0; }
 .totals dt { padding-right: 12px; }
+
+/* Checkout: capture notice and the honeypot field (hidden from people, filled by bots). */
+.field-note { margin: 6px 0 0; font-size: .8rem; color: var(--muted, #6B5B50); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+/* Third-level categories in the menu. */
+.drawer-sub-3 { padding-left: 14px; font-size: .92em; }
+.wordmark img { display: block; max-height: 32px; width: auto; }

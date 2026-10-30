@@ -1,6 +1,9 @@
 -- Abs Vai core schema (Cloudflare D1 / SQLite).
 -- Money is always integer paisa (৳1 = 100). Dates are ISO-8601 text.
 -- Bangladesh-local calendar dates (season start/end, invoice dates) are stored as YYYY-MM-DD.
+-- Phones are stored normalized as 8801XXXXXXXXX. Device IDs and IPs are stored only as salted hashes.
+-- Revised before the first production deploy for the v2 operations platform (8-stage pipeline, stock reservation,
+-- incomplete orders, fraud tables). From the first deploy on, every change is a new additive migration.
 
 PRAGMA foreign_keys = ON;
 
@@ -8,7 +11,8 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE settings (
   key        TEXT PRIMARY KEY,
-  value      TEXT NOT NULL,
+  value      TEXT NOT NULL,                 -- secrets hold "v1:<iv>:<ciphertext>" (AES-GCM), never plain text
+  is_secret  INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 
@@ -16,9 +20,10 @@ CREATE TABLE admins (
   id            TEXT PRIMARY KEY,
   email         TEXT NOT NULL UNIQUE COLLATE NOCASE,
   name          TEXT NOT NULL,
-  role          TEXT NOT NULL CHECK (role IN ('super_admin','manager','order_processor','viewer')),
+  role          TEXT NOT NULL CHECK (role IN ('super_admin','manager','order_processor','warehouse','accountant','viewer')),
   password_hash TEXT NOT NULL,
   is_active     INTEGER NOT NULL DEFAULT 1,
+  on_duty       INTEGER NOT NULL DEFAULT 1,
   last_login_at TEXT,
   created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
@@ -34,6 +39,7 @@ CREATE TABLE audit_log (
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE INDEX idx_audit_created ON audit_log (created_at);
+CREATE INDEX idx_audit_entity ON audit_log (entity, entity_id);
 
 -- Named sequences (invoice numbers per day, order numbers per day, SKU sequence per category code).
 CREATE TABLE counters (
@@ -108,6 +114,7 @@ CREATE TABLE delivery_zones (
   bulky_charge_paisa INTEGER NOT NULL DEFAULT 0,
   eta_text           TEXT NOT NULL,
   is_default         INTEGER NOT NULL DEFAULT 0,
+  default_courier    TEXT,                    -- steadfast | pathao | redx | carrybee | own_delivery
   sort_order         INTEGER NOT NULL DEFAULT 0
 );
 
@@ -206,7 +213,8 @@ CREATE TABLE categories (
   name              TEXT NOT NULL,
   code              TEXT NOT NULL,            -- SKU category code, e.g. ORG
   parent_id         INTEGER REFERENCES categories(id),
-  template_id       TEXT NOT NULL REFERENCES product_templates(id),
+  depth             INTEGER NOT NULL DEFAULT 1 CHECK (depth BETWEEN 1 AND 3),   -- Category → Subcategory → Child category
+  template_id       TEXT REFERENCES product_templates(id),                      -- NULL: inherits the parent's template
   icon_url          TEXT,
   description       TEXT,
   season_visibility TEXT NOT NULL DEFAULT 'always' CHECK (season_visibility IN ('always','seasons')),
@@ -216,9 +224,10 @@ CREATE TABLE categories (
   meta_description  TEXT,
   created_at        TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   updated_at        TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-  deleted_at        TEXT
+  deleted_at        TEXT,
+  CHECK (template_id IS NOT NULL OR parent_id IS NOT NULL)
 );
-CREATE INDEX idx_categories_parent ON categories (parent_id);
+CREATE INDEX idx_categories_parent ON categories (parent_id, sort_order);
 
 CREATE TABLE products (
   id                      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -231,6 +240,7 @@ CREATE TABLE products (
   description             TEXT,
   brand                   TEXT,
   is_original             INTEGER NOT NULL DEFAULT 0,
+  show_on_home            INTEGER NOT NULL DEFAULT 0,
   benefit_chips           TEXT NOT NULL DEFAULT '[]',
   status                  TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','scheduled','published','archived')),
   publish_at              TEXT,
@@ -255,7 +265,8 @@ CREATE TABLE products (
   deleted_at              TEXT
 );
 CREATE INDEX idx_products_category ON products (category_id);
-CREATE INDEX idx_products_status ON products (status);
+CREATE INDEX idx_products_status ON products (status, published_at);
+CREATE INDEX idx_products_home ON products (show_on_home) WHERE show_on_home = 1;
 
 CREATE TABLE product_spec_values (
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
@@ -272,17 +283,22 @@ CREATE TABLE product_variants (
   attributes_key         TEXT NOT NULL,      -- canonical sorted form, unique per product
   price_paisa            INTEGER NOT NULL CHECK (price_paisa >= 0),
   compare_at_price_paisa INTEGER,
+  cost_paisa             INTEGER CHECK (cost_paisa >= 0),  -- weighted-average cost; Owner/Accountant only
   wholesale_tiers        TEXT NOT NULL DEFAULT '[]',
-  stock                  INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),  -- a sale that would go negative fails the whole order batch
+  stock                  INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),     -- on hand in the warehouse
+  reserved               INTEGER NOT NULL DEFAULT 0 CHECK (reserved >= 0),  -- held by confirmed orders not yet with the courier
   packed_weight_grams    INTEGER NOT NULL CHECK (packed_weight_grams >= 0), -- 0 only on drafts: the publish checklist blocks it
   net_value              REAL,
-  net_unit               TEXT CHECK (net_unit IN ('g','kg','ml','l','pcs')),
+  net_unit               TEXT CHECK (net_unit IN ('g','kg','ml','l','m','pcs')),
+  gtin                   TEXT UNIQUE,         -- official GS1 GTIN/EAN-13 when the client has one; internal barcode = SKU (Code 128)
+  shelf_location         TEXT,                -- sorts the picking list
   image_ids              TEXT NOT NULL DEFAULT '[]',
   is_active              INTEGER NOT NULL DEFAULT 1,
   sort_order             INTEGER NOT NULL DEFAULT 0,
   created_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   updated_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-  UNIQUE (product_id, attributes_key)
+  UNIQUE (product_id, attributes_key),
+  CHECK (reserved <= stock)   -- confirming more than is on hand fails the whole batch
 );
 CREATE INDEX idx_variants_product ON product_variants (product_id);
 
@@ -389,9 +405,11 @@ CREATE TABLE customers (
   order_count     INTEGER NOT NULL DEFAULT 0,
   delivered_count INTEGER NOT NULL DEFAULT 0,
   returned_count  INTEGER NOT NULL DEFAULT 0,
+  last_order_at   TEXT,
   created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
+CREATE INDEX idx_customers_updated ON customers (updated_at DESC);
 
 -- No raw GPS is ever stored: only the chosen area IDs, postcode and the typed address.
 CREATE TABLE addresses (
@@ -416,9 +434,12 @@ CREATE TABLE orders (
   access_token           TEXT NOT NULL,          -- lets the customer open their own order page
   invoice_no             TEXT UNIQUE,            -- INV-YYYYMMDD-#### once confirmed
   customer_id            INTEGER REFERENCES customers(id),
-  status                 TEXT NOT NULL DEFAULT 'pending' CHECK (status IN (
-                           'pending','confirmation_attempted','confirmed','packed','shipped','delivered',
-                           'cancelled','refused_at_delivery','returned')),
+  -- Eight-stage pipeline, enforced by worker/src/lib/state-machine.ts.
+  status                 TEXT NOT NULL DEFAULT 'new' CHECK (status IN (
+                           'new','confirmed','packed','in_courier','delivered','partial_delivered','cancelled','returned')),
+  sub_status             TEXT,                   -- new: call_attempted · in_courier: picked_up, in_transit, out_for_delivery, on_hold, awaiting_approval · returned: in_transit_back, received
+  call_attempts          INTEGER NOT NULL DEFAULT 0,
+  hold_reason            TEXT,                   -- set by a fraud rule; the order can't be confirmed until staff release it
   fulfilment_type        TEXT NOT NULL DEFAULT 'standard' CHECK (fulfilment_type IN ('standard','pre_order','made_to_order')),
   payment_method         TEXT NOT NULL CHECK (payment_method IN ('cod','manual_mobile','bkash','nagad','rocket','card')),
   payment_status         TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid','partially_paid','paid','refunded')),
@@ -437,7 +458,7 @@ CREATE TABLE orders (
   delivery_zone_id       INTEGER REFERENCES delivery_zones(id),
   eta_text               TEXT,
   customer_name          TEXT NOT NULL,
-  phone                  TEXT NOT NULL,
+  phone                  TEXT NOT NULL,          -- 8801XXXXXXXXX
   division_id            INTEGER NOT NULL,
   district_id            INTEGER NOT NULL,
   upazila_id             INTEGER NOT NULL,
@@ -457,20 +478,44 @@ CREATE TABLE orders (
   confirmation_method    TEXT CHECK (confirmation_method IN ('otp','call','prepaid')),
   otp_verified_at        TEXT,
   confirmed_at           TEXT,
-  shipped_at             TEXT,
+  packed_at              TEXT,
+  in_courier_at          TEXT,
   delivered_at           TEXT,
   cancel_reason          TEXT,
+  return_reason          TEXT CHECK (return_reason IN ('refused','unreachable','wrong_address','damaged','other')),
+  returned_at            TEXT,
+  return_received_at     TEXT,                   -- set only by the warehouse scan; this is when stock comes back
+  return_received_by     TEXT,
   courier                TEXT,
+  consignment_id         TEXT,
   tracking_id            TEXT,
-  source                 TEXT NOT NULL DEFAULT 'web',
+  last_courier_update_at TEXT,
+  last_transition_id     TEXT,                   -- written with every status change; guards the rest of that batch
+  -- Sales channel. Manual orders require one (feeds per-channel reports).
+  source                 TEXT NOT NULL DEFAULT 'web' CHECK (source IN (
+                           'web','landing','facebook_comment','messenger','whatsapp','phone_call','instagram','walk_in','other')),
+  source_detail          TEXT,
   utm                    TEXT NOT NULL DEFAULT '{}',
+  checkout_session_id    TEXT,
+  device_hash            TEXT,
+  ip_hash                TEXT,
+  created_by             TEXT REFERENCES admins(id),   -- staff member credited with a manual order
+  assigned_to            TEXT REFERENCES admins(id),
   is_test                INTEGER NOT NULL DEFAULT 0,
   created_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   updated_at             TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
-CREATE INDEX idx_orders_status ON orders (status);
-CREATE INDEX idx_orders_phone ON orders (phone);
-CREATE INDEX idx_orders_created ON orders (created_at);
+-- Composite indexes for the admin's top queries (checked with EXPLAIN QUERY PLAN in tests/integration/scale.test.ts).
+CREATE INDEX idx_orders_status_created  ON orders (status, created_at DESC);
+CREATE INDEX idx_orders_phone_created   ON orders (phone, created_at DESC);
+CREATE INDEX idx_orders_agent_status    ON orders (assigned_to, status, created_at DESC);
+CREATE INDEX idx_orders_ip_created      ON orders (ip_hash, created_at);
+CREATE INDEX idx_orders_device_created  ON orders (device_hash, created_at);
+CREATE INDEX idx_orders_source_created  ON orders (source, created_at);
+CREATE INDEX idx_orders_created         ON orders (created_at DESC);
+CREATE INDEX idx_orders_tracking        ON orders (tracking_id) WHERE tracking_id IS NOT NULL;
+CREATE INDEX idx_orders_held            ON orders (created_at) WHERE hold_reason IS NOT NULL;
+CREATE UNIQUE INDEX idx_orders_consignment ON orders (courier, consignment_id) WHERE consignment_id IS NOT NULL;
 
 CREATE TABLE order_items (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -482,24 +527,30 @@ CREATE TABLE order_items (
   variant_label       TEXT,
   unit_price_paisa    INTEGER NOT NULL,
   qty                 INTEGER NOT NULL CHECK (qty > 0),
+  returned_qty        INTEGER NOT NULL DEFAULT 0,          -- partial delivery: how many come back
   line_total_paisa    INTEGER NOT NULL,
   packed_weight_grams INTEGER NOT NULL,
-  fulfilment_mode     TEXT NOT NULL
+  fulfilment_mode     TEXT NOT NULL,
+  created_at          TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  CHECK (returned_qty BETWEEN 0 AND qty)
 );
 CREATE INDEX idx_order_items_order ON order_items (order_id);
+CREATE INDEX idx_items_variant_created ON order_items (variant_id, created_at);
 
+-- Status history and activity: every transition records who or what made it (staff, customer, courier, system) and why.
 CREATE TABLE order_events (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   order_id    INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  kind        TEXT NOT NULL,              -- status | call | otp | payment | note | risk
+  kind        TEXT NOT NULL,              -- status | rejected_transition | call | otp | payment | note | risk | hold | return_scan
   from_status TEXT,
   to_status   TEXT,
   outcome     TEXT,                        -- for calls: confirmed | no_answer | wrong_number | cancel_requested | call_back
   note        TEXT,
+  actor_type  TEXT NOT NULL DEFAULT 'staff' CHECK (actor_type IN ('staff','customer','courier','system')),
   admin_id    TEXT,
   created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
-CREATE INDEX idx_order_events_order ON order_events (order_id);
+CREATE INDEX idx_order_events_order ON order_events (order_id, id);
 
 CREATE TABLE order_otps (
   order_id   INTEGER PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
@@ -509,6 +560,20 @@ CREATE TABLE order_otps (
   sends      INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
+
+-- Every OTP send (and every refused one). Caps are counted here, a strict limit, not by the approximate edge limiter.
+CREATE TABLE otp_log (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  phone       TEXT NOT NULL,
+  device_hash TEXT,
+  ip_hash     TEXT,
+  order_id    INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  status      TEXT NOT NULL CHECK (status IN ('sent','capped_phone','capped_device','capped_global')),
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX idx_otp_phone_created ON otp_log (phone, created_at);
+CREATE INDEX idx_otp_device_created ON otp_log (device_hash, created_at);
+CREATE INDEX idx_otp_created ON otp_log (created_at);
 
 CREATE TABLE invoices (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -529,6 +594,7 @@ CREATE TABLE payments (
   verified_by  TEXT,
   created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
+CREATE INDEX idx_payments_order ON payments (order_id);
 
 CREATE TABLE refunds (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -539,20 +605,32 @@ CREATE TABLE refunds (
   created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 
+-- Incomplete orders: one row per checkout session (HttpOnly cookie), upserted as the customer types. Never a row per keystroke.
 CREATE TABLE abandoned_checkouts (
-  id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  token          TEXT NOT NULL UNIQUE,
-  phone          TEXT,
-  name           TEXT,
-  address        TEXT NOT NULL DEFAULT '{}',
-  cart           TEXT NOT NULL DEFAULT '[]',
-  subtotal_paisa INTEGER NOT NULL DEFAULT 0,
-  status         TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','converted','contacted','dismissed')),
-  order_id       INTEGER REFERENCES orders(id),
-  created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-  updated_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  checkout_session_id TEXT NOT NULL,
+  phone               TEXT NOT NULL,            -- only valid, normalized numbers create a row
+  name                TEXT,
+  address             TEXT NOT NULL DEFAULT '{}',
+  cart                TEXT NOT NULL DEFAULT '[]', -- [{variantId, qty, pricePaisa, name, sku}]
+  subtotal_paisa      INTEGER NOT NULL DEFAULT 0,
+  source              TEXT NOT NULL DEFAULT '{}', -- {landingPageId, utm}
+  device_hash         TEXT,
+  ip_hash             TEXT,
+  risk_level          TEXT NOT NULL DEFAULT 'low' CHECK (risk_level IN ('low','medium','high','blocked')),
+  risk_reasons        TEXT NOT NULL DEFAULT '[]',
+  status              TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','contacted','converted','not_interested','unreachable','spam')),
+  converted_order_id  INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  converted_at        TEXT,
+  contacted_at        TEXT,
+  assigned_to         TEXT REFERENCES admins(id),
+  note                TEXT,
+  created_at          TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at          TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
-CREATE INDEX idx_abandoned_status ON abandoned_checkouts (status, updated_at);
+CREATE UNIQUE INDEX idx_abandoned_session ON abandoned_checkouts (checkout_session_id);
+CREATE INDEX idx_abandoned_status_updated ON abandoned_checkouts (status, updated_at DESC);
+CREATE INDEX idx_abandoned_phone ON abandoned_checkouts (phone);
 
 CREATE TABLE risk_flags (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -562,21 +640,70 @@ CREATE TABLE risk_flags (
   detail      TEXT,
   created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
+CREATE INDEX idx_risk_flags_order ON risk_flags (order_id);
+
+-- ───────────────────────── Fraud & bot protection ─────────────────────────
+
+-- Phone, device and IP blocks. Values are salted hashes; value_hint is a masked form staff can recognise.
+-- IP blocks must expire (many mobile customers share one IP); a permanent IP block needs an explicit reason.
+CREATE TABLE block_list (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  type       TEXT NOT NULL CHECK (type IN ('phone','device','ip')),
+  value_hash TEXT NOT NULL,
+  value_hint TEXT,
+  reason     TEXT NOT NULL,
+  expires_at TEXT,
+  created_by TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  CHECK (type != 'ip' OR expires_at IS NOT NULL OR length(reason) >= 10)
+);
+CREATE UNIQUE INDEX idx_blocklist ON block_list (type, value_hash);
+
+-- Every block, hold or rate limit, so false positives are visible and reversible.
+CREATE TABLE blocked_attempts (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  layer       TEXT NOT NULL CHECK (layer IN ('phone','device','ip','velocity','interval','otp','bot','honeypot','token')),
+  action      TEXT NOT NULL CHECK (action IN ('blocked','held','rate_limited','silently_rejected')),
+  route       TEXT NOT NULL,
+  reason      TEXT NOT NULL,
+  phone_hint  TEXT,
+  phone_hash  TEXT,
+  device_hash TEXT,
+  ip_hash     TEXT,
+  order_id    INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  block_id    INTEGER REFERENCES block_list(id) ON DELETE SET NULL,
+  reviewed_at TEXT,
+  reviewed_by TEXT,
+  review_note TEXT,
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX idx_blocked_attempts_created ON blocked_attempts (created_at DESC);
 
 -- ───────────────────────── Operations ─────────────────────────
 
-CREATE TABLE inventory_log (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  variant_id INTEGER NOT NULL REFERENCES product_variants(id),
-  change     INTEGER NOT NULL,
-  reason     TEXT NOT NULL CHECK (reason IN ('receive','sale','adjust','return','cancel','initial')),
-  batch_no   TEXT,
-  note       TEXT,
-  order_id   INTEGER REFERENCES orders(id),
-  admin_id   TEXT,
-  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+-- Stock movements ledger: every change to on-hand or reserved stock, with who, when and why. Stock is never edited silently.
+CREATE TABLE stock_movements (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  variant_id      INTEGER NOT NULL REFERENCES product_variants(id),
+  change          INTEGER NOT NULL,               -- on-hand change
+  reserved_change INTEGER NOT NULL DEFAULT 0,
+  kind            TEXT NOT NULL CHECK (kind IN ('initial','purchase_received','reserve','release','sale','pos_sale','return_received','adjustment','transfer')),
+  reason          TEXT,                            -- adjustments: received, count_correction, damaged_in_transit, damaged_in_storage, expired, missing, lost_by_courier
+  batch_no        TEXT,
+  note            TEXT,
+  order_id        INTEGER REFERENCES orders(id),
+  admin_id        TEXT,
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
-CREATE INDEX idx_inventory_variant ON inventory_log (variant_id);
+CREATE INDEX idx_stock_moves_variant ON stock_movements (variant_id, created_at);
+CREATE INDEX idx_stock_moves_batch ON stock_movements (batch_no) WHERE batch_no IS NOT NULL;
+
+-- Edge-cache purge queue: one row per tag, so a bulk edit of 200 products becomes one batched purge.
+CREATE TABLE cache_purges (
+  tag          TEXT PRIMARY KEY,
+  requested_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  attempts     INTEGER NOT NULL DEFAULT 0
+);
 
 CREATE TABLE sms_outbox (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -589,6 +716,7 @@ CREATE TABLE sms_outbox (
   created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
   sent_at      TEXT
 );
+CREATE INDEX idx_sms_outbox_created ON sms_outbox (created_at);
 
 -- Phase 2/3 modules: tables exist now so later releases need no destructive migrations.
 CREATE TABLE coupons (

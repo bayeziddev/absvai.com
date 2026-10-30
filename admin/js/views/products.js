@@ -33,9 +33,12 @@ export async function products(v, [id]) {
 }
 
 function categoryOptions(cats, selected) {
-  const roots = cats.filter(c => !c.parent_id);
-  return roots.map(r => [r, ...cats.filter(c => c.parent_id === r.id)]).flat()
-    .map(c => `<option value="${c.id}" data-template="${esc(c.template_id)}" ${c.id === selected ? 'selected' : ''}>${c.parent_id ? '— ' : ''}${esc(c.name)} (${esc(c.template_name)})</option>`).join('');
+  // Three levels, in menu order; subcategories that inherit show their parent's template.
+  const kids = pid => cats.filter(c => (c.parent_id ?? null) === pid).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+  const walk = pid => kids(pid).flatMap(c => [c, ...walk(c.id)]);
+  const tName = c => c.template_name ?? cats.find(x => x.template_id === c.effective_template_id)?.template_name ?? c.effective_template_id;
+  return walk(null)
+    .map(c => `<option value="${c.id}" data-template="${esc(c.effective_template_id ?? c.template_id)}" ${c.id === selected ? 'selected' : ''}>${'— '.repeat((c.depth ?? 1) - 1)}${esc(c.name)} (${esc(tName(c))}${c.inherits_template ? ', inherited' : ''})</option>`).join('');
 }
 
 function newProduct(cats, done) {
@@ -89,7 +92,7 @@ const STEPS = ['Category', 'Basics', 'Details', 'Options & prices', 'Photos & vi
 const PROFILES = { standard: 'Standard parcel', fragile: 'Fragile', heavy_bulky: 'Heavy / bulky', perishable: 'Perishable food' };
 const FULFIL = { in_stock: 'In stock', pre_order: 'Pre-order (seasonal)', made_to_order: 'Made to order' };
 const keyOf = a => Object.keys(a).filter(k => a[k]).sort().map(k => `${k}=${String(a[k]).toLowerCase()}`).join('|');
-const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(g|kg|ml|l|pcs)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
+const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 
 async function compressImage(file) {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return { file, width: null, height: null };
@@ -111,7 +114,7 @@ export async function openProduct(id, done, startStep = 1) {
   const pr = d.product;
   const f = {
     categoryId: pr.category_id, name: pr.name, slug: pr.slug, code: pr.code, shortDescription: pr.short_description ?? '', description: pr.description ?? '', brand: pr.brand ?? '',
-    isOriginal: Boolean(pr.is_original), benefitChips: pr.benefit_chips ?? [], specs: { ...d.specs }, promotedSpecKeys: pr.promoted_spec_keys ?? [], seasonIds: d.seasonIds,
+    isOriginal: Boolean(pr.is_original), showOnHome: Boolean(pr.show_on_home), benefitChips: pr.benefit_chips ?? [], specs: { ...d.specs }, promotedSpecKeys: pr.promoted_spec_keys ?? [], seasonIds: d.seasonIds,
     fulfilmentMode: pr.fulfilment_mode, preorderDispatchDate: pr.preorder_dispatch_date ?? '', preorderAdvanceType: pr.preorder_advance_type ?? 'delivery_charge', preorderAdvancePaisa: pr.preorder_advance_paisa,
     madeToOrderLeadDays: pr.made_to_order_lead_days, shippingProfile: pr.shipping_profile, bulkyDeliveryMode: pr.bulky_delivery_mode, freeDelivery: Boolean(pr.free_delivery), videoUrl: pr.video_url ?? '',
     sizeChart: pr.size_chart ?? { columns: d.template.sizeChartColumns, rows: [] }, metaTitle: pr.meta_title ?? '', metaDescription: pr.meta_description ?? '', searchKeywords: pr.search_keywords ?? '',
@@ -170,6 +173,9 @@ export async function openProduct(id, done, startStep = 1) {
         v.stock = Number(g('stock').value) || 0;
         v.packedWeightGrams = Number(g('packed').value) || 0;
         v.sku = g('sku').value.trim().toUpperCase();
+        if (d.canSeeCost) v.costPaisa = toPaisa(g('cost').value);
+        v.gtin = g('gtin').value.replace(/\s/g, '') || null;
+        v.shelfLocation = g('shelf').value.trim() || null;
         v.isActive = g('active').checked;
         const img = g('image').value;
         v.imageIds = img ? [Number(img)] : [];
@@ -223,16 +229,18 @@ export async function openProduct(id, done, startStep = 1) {
         <span class="muted small">Bulk fill:</span><input class="i" id="bulk-v" placeholder="value" style="width:110px">
         <button class="btn btn-sm btn-ghost" type="button" data-bulk="price">Same price (৳)</button><button class="btn btn-sm btn-ghost" type="button" data-bulk="stock">Same stock</button>
         <button class="btn btn-sm btn-ghost" type="button" data-bulk="packed">Same packed weight (g)</button><button class="btn btn-sm btn-ghost" type="button" data-bulk="step">+৳ per size step</button></div>
-      <div class="table-wrap vt"><table id="vt"><thead><tr><th>Option</th><th>Price ৳</th><th>Original ৳</th><th>Stock</th><th>Packed weight for delivery (g)</th><th>Net qty</th><th>Photo</th><th>SKU (blank = automatic)</th><th>On</th><th></th></tr></thead><tbody>
+      <div class="table-wrap vt"><table id="vt"><thead><tr><th>Option</th><th>Price ৳</th><th>Original ৳</th>${d.canSeeCost ? '<th>Cost ৳</th>' : ''}<th>Stock</th><th>Packed weight for delivery (g)</th><th>Net qty</th><th>Photo</th><th>SKU (blank = automatic)</th><th>GTIN / EAN <span class="help">optional</span></th><th>Shelf</th><th>On</th><th></th></tr></thead><tbody>
         ${f.variants.map((v, i) => `<tr data-i="${i}"><td class="opt">${esc(variantLabel(v))}</td>
           <td><input data-v="price" inputmode="decimal" value="${esc(fromPaisa(v.pricePaisa))}"></td><td><input data-v="compare" inputmode="decimal" value="${esc(fromPaisa(v.compareAtPricePaisa))}"></td>
-          <td><input data-v="stock" type="number" min="0" value="${v.stock ?? 0}"></td><td><input data-v="packed" type="number" min="0" value="${v.packedWeightGrams || ''}" placeholder="e.g. 650"></td>
+          ${d.canSeeCost ? `<td><input data-v="cost" inputmode="decimal" value="${esc(fromPaisa(v.costPaisa))}" title="Cost price: only Owner and Accountant see this"></td>` : ''}
+          <td><input data-v="stock" type="number" min="${v.reserved ?? 0}" value="${v.stock ?? 0}" title="${v.reserved ? `${v.reserved} held for confirmed orders` : ''}">${v.reserved ? `<br><span class="small muted">${v.reserved} held</span>` : ''}</td><td><input data-v="packed" type="number" min="0" value="${v.packedWeightGrams || ''}" placeholder="e.g. 650"></td>
           <td><input data-v="net" value="${v.netValue ? `${v.netValue}${v.netUnit === 'pcs' ? ' pcs' : v.netUnit}` : ''}" placeholder="${d.template.requiresNetQuantity ? 'e.g. 500g' : 'optional'}"></td>
           <td><select data-v="image"><option value="">Main photo</option>${images().map((m, n) => `<option value="${m.id}" ${v.imageIds?.includes(m.id) ? 'selected' : ''}>Photo ${n + 1}</option>`).join('')}</select></td>
-          <td><input class="sku" data-v="sku" value="${esc(v.sku ?? '')}" placeholder="auto"></td><td><input type="checkbox" data-v="active" ${v.isActive !== false ? 'checked' : ''}></td>
-          <td><button class="btn btn-sm btn-ghost" type="button" data-tiers="${i}" title="Wholesale prices">${(v.wholesaleTiers ?? []).length ? `${v.wholesaleTiers.length} tier(s)` : 'Wholesale'}</button></td></tr>`).join('') || '<tr><td colspan="10" class="empty">Choose values above, then “Update option rows”.</td></tr>'}
+          <td><input class="sku" data-v="sku" value="${esc(v.sku ?? '')}" placeholder="auto"></td><td><input data-v="gtin" inputmode="numeric" maxlength="14" value="${esc(v.gtin ?? '')}" placeholder="from the pack"></td><td><input data-v="shelf" value="${esc(v.shelfLocation ?? '')}" placeholder="A-03" style="width:70px"></td><td><input type="checkbox" data-v="active" ${v.isActive !== false ? 'checked' : ''}></td>
+          <td><button class="btn btn-sm btn-ghost" type="button" data-tiers="${i}" title="Wholesale prices">${(v.wholesaleTiers ?? []).length ? `${v.wholesaleTiers.length} tier(s)` : 'Wholesale'}</button></td></tr>`).join('') || `<tr><td colspan="${d.canSeeCost ? 13 : 12}" class="empty">Choose values above, then “Update option rows”.</td></tr>`}
       </tbody></table></div>
-      <p class="small muted">Net quantity fills itself from values like “500g” or “100 pcs”, and shows customers a price per kg or per piece.</p>
+      <p class="small muted">Net quantity fills itself from values like “500g”, “1L” or “100 pcs”, and shows customers a price per kg, litre or piece. Every option gets a Code 128 barcode of its SKU.
+        ${f.variants.some(v => v.id) ? `<a href="/api/admin/print/labels?variants=${f.variants.filter(v => v.id).map(v => v.id).join(',')}" target="_blank">Print labels for these options</a>` : ''}</p>
       ${d.template.requiresSizeChart ? sizeChartEditor() : ''}`;
   }
 
@@ -255,7 +263,7 @@ export async function openProduct(id, done, startStep = 1) {
     const old = new Map(f.variants.map(v => [keyOf(v.attributes), v]));
     const first = f.variants[0];
     f.variants = combos.map(attributes => old.get(keyOf(attributes)) ?? {
-      attributes, pricePaisa: first?.pricePaisa ?? 0, compareAtPricePaisa: null, stock: 0, packedWeightGrams: first?.packedWeightGrams ?? 0,
+      attributes, pricePaisa: first?.pricePaisa ?? 0, compareAtPricePaisa: null, costPaisa: first?.costPaisa ?? null, gtin: null, shelfLocation: first?.shelfLocation ?? null, stock: 0, packedWeightGrams: first?.packedWeightGrams ?? 0,
       netValue: parseNet(Object.values(attributes).find(parseNet))?.value ?? null, netUnit: parseNet(Object.values(attributes).find(parseNet))?.unit ?? null, sku: '', imageIds: [], wholesaleTiers: [], isActive: true,
     });
     render();
@@ -316,6 +324,7 @@ export async function openProduct(id, done, startStep = 1) {
         <div class="grid-2"><label class="f">Brand${d.template.requiresBrand ? ' <span class="req">*</span>' : ''}<input data-k="brand" value="${esc(f.brand)}" placeholder="${f.isOriginal ? 'Abs Vai' : ''}"></label>
         <label class="f">Product code <span class="help">Used in SKUs, e.g. PTGR.</span><input data-k="code" value="${esc(f.code)}" maxlength="8"></label></div>
         <label class="check"><input type="checkbox" data-k="isOriginal" ${f.isOriginal ? 'checked' : ''}> Abs Vai Original (shows the “Made by Abs Vai” seal)</label>
+        <label class="check"><input type="checkbox" data-k="showOnHome" ${f.showOnHome ? 'checked' : ''}> Show on the homepage (“Featured” rail)</label>
         <label class="f" style="margin-top:12px">Benefit chips <span class="help">Up to 4, one per line, e.g. “Strong build”, “Free poly sheet”. Real facts only.</span><textarea id="chips" rows="4">${esc(f.benefitChips.join('\n'))}</textarea></label>`;
       case 2: return `<p class="explain">${esc(d.template.explanation)}</p><div class="grid-2">${fieldsNow().map(field).join('')}</div>
         ${f.promotedSpecKeys.length ? `<p class="notice">Customers choose: ${f.promotedSpecKeys.map(k => `<b>${esc(d.template.specFields.find(x => x.key === k)?.label ?? k)}</b> <button class="btn btn-sm btn-ghost" type="button" data-unpromote="${esc(k)}">undo</button>`).join(' ')}. Set its values in step 4.</p>` : ''}`;
@@ -371,11 +380,15 @@ export async function openProduct(id, done, startStep = 1) {
   async function save() {
     collect();
     const payload = { ...f, variants: f.variants.map(v => ({ ...v, id: v.id ?? null })) };
+    // Lock the form while saving: the step re-renders from the saved data, which would wipe anything typed meanwhile.
+    so.body.inert = true; stepsBar.inert = true;
     try {
       d = await api(`/products/${id}`, 'PUT', payload);
     } catch (e) {
       if (e.data?.details?.checklist) { d.checklist = e.data.details.checklist; }
       throw e;
+    } finally {
+      so.body.inert = false; stepsBar.inert = false;
     }
     f.variants = d.variants.filter(x => x.isActive).map(x => ({ ...x }));
     f.slug = d.product.slug; f.code = d.product.code;

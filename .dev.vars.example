@@ -1,9 +1,17 @@
 # Copy to worker/.dev.vars for local development. Never commit real values.
+# Local runs are not production: signing and settings keys fall back to fixed development values.
+ENVIRONMENT=development
 # One-time token for creating the first Super Admin at /admin/ (first-run setup).
 SETUP_TOKEN=change-me-local-only
 # Pepper mixed into OTP hashes.
 OTP_PEPPER=change-me-local-only
-# Optional: Cloudflare Turnstile secret. When set, checkout requires a Turnstile token.
+# Production needs both of these (the deploy workflow sets them from repository secrets):
+#   SIGNING_KEY  — checkout tokens and salted device/IP/phone hashes:  openssl rand -base64 32
+#   SETTINGS_KEY — AES-GCM key for credentials saved in Settings (32 bytes, base64): openssl rand -base64 32
+# SIGNING_KEY=
+# SETTINGS_KEY=
+# Optional: Cloudflare Turnstile. When the secret is set, checkout requires a Turnstile token.
+# TURNSTILE_SITE_KEY=
 # TURNSTILE_SECRET=
 # Optional: SMS provider. Leave unset to write messages to the sms_outbox table only.
 # SMS_PROVIDER=

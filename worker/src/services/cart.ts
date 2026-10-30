@@ -1,5 +1,5 @@
 /** Server-side cart pricing. The browser cart only holds variant IDs and quantities; prices always come from here. */
-import { getSeasons, getTemplate, rowToVariant } from '../data/catalog';
+import { cartVariantRows, getSeasons, getTemplate, rowToVariant } from '../repo/catalog';
 import { bdDate } from '../lib/dates';
 import { parseJson } from '../lib/http';
 import { tierPrice } from '../lib/money';
@@ -48,16 +48,8 @@ export function sanitizeLines(input: unknown): CartLineIn[] {
 export async function priceCart(db: D1Database, lines: CartLineIn[], now = new Date()): Promise<{ lines: PricedLine[]; subtotalPaisa: number; problems: string[] }> {
   if (!lines.length) return { lines: [], subtotalPaisa: 0, problems: [] };
   const ids = lines.map(l => l.variantId);
-  const rows = await db.prepare(
-    `SELECT v.*, p.id AS pid, p.slug, p.name, p.template_id, p.status, p.publish_at, p.deleted_at, p.free_delivery, p.shipping_profile,
-            p.bulky_delivery_mode, p.fulfilment_mode, p.preorder_advance_type, p.preorder_advance_paisa, p.preorder_dispatch_date,
-            p.made_to_order_lead_days,
-            (SELECT url FROM product_media m WHERE m.product_id = p.id AND m.kind = 'image' ORDER BY m.sort_order, m.id LIMIT 1) AS image_url,
-            (SELECT json_group_array(ps.season_id) FROM product_seasons ps WHERE ps.product_id = p.id) AS season_ids
-       FROM product_variants v JOIN products p ON p.id = v.product_id
-      WHERE v.id IN (${ids.map(() => '?').join(',')})`,
-  ).bind(...ids).all<Record<string, unknown>>();
-  const byId = new Map(rows.results.map(r => [Number(r.id), r]));
+  const rows = await cartVariantRows(db, ids);
+  const byId = new Map(rows.map(r => [Number(r.id), r]));
   const seasons = await getSeasons(db);
   const today = bdDate(now);
   const out: PricedLine[] = [];
@@ -73,9 +65,10 @@ export async function priceCart(db: D1Database, lines: CartLineIn[], now = new D
     const order = template ? effectiveVariantAttributes(template, promoted).map(a => a.attributeTypeId) : [];
     const label = [...order.filter(k => v.attributes[k]), ...Object.keys(v.attributes).filter(k => !order.includes(k))].map(k => v.attributes[k]).join(' · ');
     const linked = seasons.filter(s => parseJson<number[]>(r.season_ids, []).includes(s.id));
-    const availability = productAvailability(r as { fulfilment_mode: string }, linked, v.stock, today);
+    // Confirmed orders hold stock (reserved), so customers can only buy what is still available.
+    const availability = productAvailability(r as { fulfilment_mode: string }, linked, v.available, today);
     const fulfilment = r.fulfilment_mode as PricedLine['fulfilmentMode'];
-    const maxQty = fulfilment === 'made_to_order' ? 20 : Math.min(MAX_QTY, Math.max(0, v.stock));
+    const maxQty = fulfilment === 'made_to_order' ? 20 : Math.min(MAX_QTY, v.available);
     let problem: string | null = null;
     if (!availability.canBuy) problem = availability.label;
     else if (maxQty === 0) problem = 'Out of stock';

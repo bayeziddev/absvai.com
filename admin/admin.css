@@ -158,3 +158,29 @@ td img.thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
 .split { display: grid; gap: 14px; grid-template-columns: 1fr; } @media (min-width: 1000px) { .split { grid-template-columns: 1.6fr 1fr; } }
 .print-only { display: none; }
 @media print { .side, .topbar, .rightbar, .no-print, .over-head, .over-foot { display: none !important; } .print-only { display: block; } .over { position: static; width: auto; box-shadow: none; } body { background: #fff; } }
+
+/* v2: pipeline stage cards, product search results, category tree drag and drop */
+.section-title { font: 700 1rem var(--display); margin: 4px 0 8px; }
+.stages { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 14px; }
+@media (min-width: 700px) { .stages { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1200px) { .stages { grid-template-columns: repeat(6, 1fr); } }
+.stage { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow); color: inherit; text-decoration: none; }
+.stage span { color: var(--muted); font-size: .78rem; font-weight: 700; }
+.stage b { display: block; font: 800 1.35rem var(--display); }
+.stage small { color: var(--muted); font-size: .72rem; }
+.stage:hover { border-color: var(--clove); }
+.stage.alert { border-color: var(--chili); } .stage.alert b { color: var(--chili); }
+.stage.warn { border-color: var(--turmeric); }
+.search-results { display: grid; gap: 4px; margin: 6px 0 10px; }
+.search-results .result { text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer; font: inherit; }
+.search-results .result:hover, .search-results .result:focus { border-color: var(--chili); outline: none; }
+.err { color: var(--chili-dark); }
+.tree { list-style: none; padding-left: 0; margin: 0; }
+.tree .tree { padding-left: 22px; border-left: 2px dashed var(--line); margin-left: 10px; }
+.tree-row { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin: 4px 0; }
+.tree-row .grip { cursor: grab; color: var(--muted); user-select: none; padding: 0 4px; }
+.tree-row.dragging { opacity: .45; }
+.tree-row.drop-before { box-shadow: 0 -3px 0 var(--chili); }
+.tree-row.drop-inside { outline: 2px solid var(--chili); }
+.tree-row.drop-after { box-shadow: 0 3px 0 var(--chili); }
+.tree-row .name { flex: 1; font-weight: 600; }

@@ -70,16 +70,19 @@ export const formData = form => Object.fromEntries(new FormData(form));
 export const can = perm => {
   const r = state.user?.role;
   if (r === 'super_admin') return true;
+  // Mirrors the server's role table (worker/src/lib/auth.ts). The server enforces it; this only hides buttons.
   const map = {
-    manager: ['orders:write', 'catalog:write', 'seasons:write', 'geo:write', 'audit:read'],
-    order_processor: ['orders:write'],
-    viewer: [],
+    manager: ['orders:write', 'orders:export', 'orders:discount', 'catalog:write', 'seasons:write', 'geo:write', 'settings:write', 'security:read', 'security:write', 'inventory:write', 'audit:read', 'reports:read'],
+    order_processor: ['orders:write', 'security:read'],
+    warehouse: ['orders:pack', 'inventory:write'],
+    accountant: ['orders:export', 'cost:read', 'reports:read', 'audit:read'],
+    viewer: ['reports:read'],
   };
   return (map[r] ?? []).includes(perm);
 };
 
 export function badge(status) {
-  const colors = { pending: 'b-yellow', confirmation_attempted: 'b-yellow', confirmed: 'b-green', packed: 'b-green', shipped: 'b-green', delivered: 'b-dark', cancelled: 'b-grey', refused_at_delivery: 'b-red', returned: 'b-red', draft: 'b-grey', published: 'b-green', scheduled: 'b-yellow', archived: 'b-grey', low: 'b-green', medium: 'b-yellow', high: 'b-red', active: 'b-green', upcoming: 'b-yellow', past: 'b-grey', needs_dates: 'b-red', off: 'b-grey', exact: 'b-green', alias: 'b-green', fuzzy: 'b-yellow', unmatched: 'b-red', manual: 'b-dark', submitted: 'b-yellow', paid: 'b-green', not_required: 'b-grey', open: 'b-yellow', contacted: 'b-green', converted: 'b-dark', dismissed: 'b-grey', waiting: 'b-yellow', sent: 'b-green', retired: 'b-grey', new: 'b-yellow', won: 'b-green', lost: 'b-grey' };
+  const colors = { new: 'b-yellow', in_courier: 'b-green', partial_delivered: 'b-red', blocked: 'b-red', held: 'b-red', not_interested: 'b-grey', unreachable: 'b-grey', spam: 'b-red', received: 'b-dark', rate_limited: 'b-yellow', silently_rejected: 'b-red', confirmed: 'b-green', packed: 'b-green', delivered: 'b-dark', cancelled: 'b-grey', returned: 'b-red', draft: 'b-grey', published: 'b-green', scheduled: 'b-yellow', archived: 'b-grey', low: 'b-green', medium: 'b-yellow', high: 'b-red', active: 'b-green', upcoming: 'b-yellow', past: 'b-grey', needs_dates: 'b-red', off: 'b-grey', exact: 'b-green', alias: 'b-green', fuzzy: 'b-yellow', unmatched: 'b-red', manual: 'b-dark', submitted: 'b-yellow', paid: 'b-green', not_required: 'b-grey', open: 'b-yellow', contacted: 'b-green', converted: 'b-dark', dismissed: 'b-grey', waiting: 'b-yellow', sent: 'b-green', retired: 'b-grey', won: 'b-green', lost: 'b-grey' };
   return `<span class="badge ${colors[status] ?? ''}">${esc(String(status ?? '').replace(/_/g, ' '))}</span>`;
 }
 
@@ -92,7 +95,8 @@ const ICONS = {
   gear: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
   clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2', search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4', file: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
   chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', chart: 'M3 3v18h18M7 15l4-4 3 3 5-6', shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', help: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01',
-  menu: 'M3 6h18M3 12h18M3 18h18',
+  menu: 'M3 6h18M3 12h18M3 18h18', scan: 'M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M14 8v8M17 8v8',
+  lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4', plus: 'M12 5v14M5 12h14', barcode: 'M4 6v12M7 6v12M10 6v12M14 6v12M17 6v12M20 6v12',
 };
 export const icon = (n, s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[n] ?? ICONS.help}"/></svg>`;
 
@@ -169,7 +173,7 @@ async function renderRightbar() {
   if (!rb) return;
   rb.innerHTML = `
     <div class="card"><h3>${esc(state.user.name)}</h3><p class="muted small">${esc(state.user.email)}<br>${badge(state.user.role)}</p></div>
-    <div class="card"><h3>Quick links</h3><p class="small"><a href="#/products?new=1">+ Add a product</a><br><a href="#/orders?status=pending">Orders to confirm</a><br><a href="#/seasons">Season calendar</a><br><a href="#/help">Help for staff</a></p></div>
+    <div class="card"><h3>Quick links</h3><p class="small"><a href="#/products?new=1">+ Add a product</a><br><a href="#/orders?status=new">Orders to confirm</a><br><a href="#/manual">+ Manual order</a><br><a href="#/incomplete">Incomplete orders</a><br><a href="#/seasons">Season calendar</a><br><a href="#/help">Help for staff</a></p></div>
     <div class="card" id="rb-notes"><h3>Notifications</h3><p class="muted small">Loading…</p></div>`;
   try {
     const d = await api('/dashboard');

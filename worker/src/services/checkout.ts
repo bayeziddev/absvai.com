@@ -1,6 +1,7 @@
 /** Checkout quote: repriced cart + live delivery charge + advance rules, shown before the customer places the order. */
-import { settingInt } from '../data/settings';
-import { deliveryCharge, resolveZone, type ChargeResult } from '../lib/delivery-charge';
+import { deliveryCharge, type ChargeResult } from '../lib/delivery-charge';
+import { resolveZone } from '../repo/geo';
+import { settingInt } from '../repo/settings';
 import { formatTaka } from '../lib/money';
 import { priceCart, type CartLineIn, type PricedLine } from './cart';
 
@@ -12,6 +13,8 @@ export interface Quote {
   subtotalPaisa: number;
   delivery: ChargeResult | null;
   needsArea: boolean;
+  defaultCourier: string | null;
+  discountPaisa: number;
   advance: AdvanceRule;
   totalPaisa: number | null;
   hasPreOrder: boolean;
@@ -57,16 +60,18 @@ export function advanceFor(lines: PricedLine[], delivery: ChargeResult | null, o
 export async function quote(
   db: D1Database,
   settings: Record<string, string>,
-  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean },
+  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number },
   now = new Date(),
 ): Promise<Quote> {
   const priced = await priceCart(db, input.lines, now);
   let delivery: ChargeResult | null = null;
   let needsArea = false;
+  let defaultCourier: string | null = null;
   if (input.districtId) {
     const z = await resolveZone(db, input.districtId, input.upazilaId);
     if (z) {
       needsArea = z.needsArea;
+      defaultCourier = z.defaultCourier;
       delivery = deliveryCharge(
         priced.lines.map(l => ({ qty: l.qty, packedWeightGrams: l.packedWeightGrams, freeDelivery: l.freeDelivery, shippingProfile: l.shippingProfile, bulkyDeliveryMode: l.bulkyDeliveryMode, lineTotalPaisa: l.lineTotalPaisa })),
         z.zone,
@@ -79,7 +84,9 @@ export async function quote(
       );
     }
   }
-  const totalPaisa = delivery && delivery.chargePaisa !== null ? priced.subtotalPaisa + delivery.chargePaisa + delivery.codFeePaisa : null;
+  // Manual orders only: a staff discount, never more than the subtotal (role limits are checked by the caller).
+  const discountPaisa = Math.min(Math.max(0, input.discountPaisa ?? 0), priced.subtotalPaisa);
+  const totalPaisa = delivery && delivery.chargePaisa !== null ? priced.subtotalPaisa - discountPaisa + delivery.chargePaisa + delivery.codFeePaisa : null;
   const advance = advanceFor(priced.lines, delivery, {
     totalPaisa: totalPaisa ?? priced.subtotalPaisa,
     highValueThresholdPaisa: settingInt(settings, 'advance_high_value_threshold_paisa'),
@@ -91,6 +98,8 @@ export async function quote(
     subtotalPaisa: priced.subtotalPaisa,
     delivery,
     needsArea,
+    defaultCourier,
+    discountPaisa,
     advance,
     totalPaisa,
     hasPreOrder: priced.lines.some(l => l.fulfilmentMode === 'pre_order'),

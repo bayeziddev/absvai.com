@@ -1,13 +1,33 @@
-# Abs Vai: one Worker serves the storefront, the admin app and every /api/* route.
+# Abs Vai: one Worker serves the storefront, the admin app, every /api/* route and the scheduled jobs.
+# Production runs on the Workers Paid plan (D1 queries on the Free plan stop at the daily limits).
 name = "absvai"
-main = "src/index.ts"
+main = "src/worker.ts"
 compatibility_date = "2026-09-01"
+# ctx.exports (the gateway → Storefront loopback) is on by default from 2025-11-17.
 
-# Production domains. Comment out for a workers.dev preview deploy.
+# Production domains (top-level key: it must stay above the first [table] header). The deploy workflow drops this
+# line when the absvai.com zone is not in the Cloudflare account yet, so the first deploy goes to workers.dev.
 routes = [
   { pattern = "absvai.com", custom_domain = true },
   { pattern = "www.absvai.com", custom_domain = true },
 ]
+
+# Edge cache (Workers Cache): on for the Storefront entrypoint only. The default entrypoint is the gateway and runs on
+# every request; it forwards public GETs to Storefront with a normalised cache key (see src/worker.ts).
+[cache]
+enabled = true
+
+[exports.default]
+type = "worker"
+
+  [exports.default.cache]
+  enabled = false
+
+[exports.Storefront]
+type = "worker"
+
+  [exports.Storefront.cache]
+  enabled = true
 
 [assets]
 # Built by `npm run build` from public/, admin/ and the generated geo outlines.
@@ -18,13 +38,14 @@ not_found_handling = "none"
 [[d1_databases]]
 binding = "DB"
 database_name = "absvai"
-# Replace with the id printed by `wrangler d1 create absvai`.
+# Placeholder for local development. The deploy workflow finds or creates the real database and writes its id here
+# (scripts/ensure-cloudflare-resources.mjs); for a manual deploy, use the id from `wrangler d1 create absvai`.
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "KV"
-# Replace with the id printed by `wrangler kv namespace create absvai`.
+# Placeholder, filled in the same way (namespace title "absvai-kv").
 id = "00000000000000000000000000000000"
 
 [[r2_buckets]]
@@ -33,7 +54,7 @@ bucket_name = "absvai-media"
 
 [triggers]
 # 18:05 UTC = 00:05 Bangladesh time: season start/end switching and back-in-season messages.
-# Every 30 minutes: abandoned-checkout follow-up queue.
+# Every 30 minutes: scheduled publishing and the edge-cache refresh queue. Nightly: incomplete-order purge.
 crons = ["5 18 * * *", "*/30 * * * *"]
 
 [vars]

@@ -44,6 +44,9 @@ export interface TemplateDef {
 
 export const ATTRIBUTE_TYPES: AttributeTypeDef[] = [
   { id: 'weight', name: 'Weight', helpText: 'How much the customer gets, e.g. 500g or 1kg.', values: ['250g', '500g', '1kg', '2kg', '5kg'] },
+  { id: 'volume', name: 'Volume', helpText: 'For liquids, e.g. 500ml or 1l.', values: ['250ml', '500ml', '1l', '2l'] },
+  { id: 'length_m', name: 'Length (metre)', helpText: 'For fabric sold by the metre, e.g. 2.5m.', values: ['1m', '2m', '2.5m', '3m', '5m'] },
+  { id: 'model', name: 'Model', values: [] },
   { id: 'pack_size', name: 'Pack size', values: ['50g', '100g', '250g', '500g', '1kg'] },
   { id: 'packaging', name: 'Packaging', values: ['Foil tray', 'Clay pot (hari)', 'Jar'] },
   { id: 'model_size', name: 'Size / model', helpText: 'e.g. 4-inch press, 300mm sealer.', values: ['4-inch', '6-inch', '200mm', '300mm', '400mm'] },
@@ -77,9 +80,11 @@ export const TEMPLATES: TemplateDef[] = [
   {
     id: 'weighed_food',
     name: 'Weighed food',
-    explanation: 'Food products need weight options, where it comes from, a batch and a best-before date.',
+    explanation: 'Food products need weight (or volume for liquids) options, where it comes from, a batch and a best-before date.',
+    // Weight or Volume: neither is required on its own, but every option needs a net quantity (requiresNetQuantity).
     variantAttributes: [
-      { attributeTypeId: 'weight', required: true, presetValues: ['250g', '500g', '1kg', '2kg', '5kg'] },
+      { attributeTypeId: 'weight', required: false, presetValues: ['250g', '500g', '1kg', '2kg', '5kg'] },
+      { attributeTypeId: 'volume', required: false, presetValues: ['250ml', '500ml', '1l', '2l'] },
       { attributeTypeId: 'packaging', required: false, presetValues: ['Foil tray', 'Clay pot (hari)', 'Jar'] },
     ],
     specFields: [
@@ -204,6 +209,25 @@ export const TEMPLATES: TemplateDef[] = [
     cardKeySpecs: ['fabric'],
   },
   {
+    id: 'fabric',
+    name: 'Fabric by the metre',
+    explanation: 'Unstitched fabric is sold by length in metres, with the fabric type, width and care instructions.',
+    variantAttributes: [
+      { attributeTypeId: 'length_m', required: true, presetValues: ['1m', '2m', '2.5m', '3m', '5m'] },
+      { attributeTypeId: 'color', required: false, presetValues: [] },
+    ],
+    specFields: [
+      { key: 'fabric', label: 'Fabric', type: 'text', required: true, panel: 'specs', placeholder: '100% cotton', filterable: true },
+      { key: 'width', label: 'Width', type: 'number', unit: 'inch', required: true, panel: 'specs', placeholder: '44' },
+      { key: 'care', label: 'Care instructions', type: 'longtext', required: true, panel: 'care' },
+      { key: 'occasion', label: 'Occasion', type: 'text', panel: 'details', placeholder: 'Eid, everyday' },
+    ],
+    defaultShippingProfile: 'standard',
+    allowedFulfilment: ['in_stock'],
+    requiresNetQuantity: true,
+    cardKeySpecs: ['fabric', 'width'],
+  },
+  {
     id: 'footwear',
     name: 'Shoes',
     explanation: 'Shoes need sizes, a size chart with foot length in cm, and upper and sole materials.',
@@ -280,7 +304,7 @@ export interface CategoryDef {
   slug: string;
   name: string;
   code: string;
-  template: string;
+  template: string | null; // null: inherits the parent's template
   icon: string;
   parent?: string;
   seasons?: string[]; // season slugs; when set the category only shows during those seasons
@@ -292,12 +316,14 @@ export const CATEGORIES: CategoryDef[] = [
   { slug: 'khejur-gur', name: 'Khejur Gur', code: 'ORG', template: 'weighed_food', icon: '/img/placeholders/gur.svg', parent: 'organic-seasonal-food', seasons: ['winter'], description: 'Date-palm jaggery: patali, liquid (jhola) and nolen gur.' },
   { slug: 'spices-masala', name: 'Spices & Masala', code: 'SPC', template: 'packaged_food', icon: '/img/placeholders/masala.svg', description: 'Abs Vai Master Masala and single spices.' },
   { slug: 'food-business-machines', name: 'Food Business Machines', code: 'MCH', template: 'machinery', icon: '/img/placeholders/press.svg', description: 'Presses, sealers and juicers for small food businesses.' },
-  { slug: 'presses', name: 'Presses', code: 'MCH', template: 'machinery', icon: '/img/placeholders/press.svg', parent: 'food-business-machines' },
+  { slug: 'presses', name: 'Presses', code: 'MCH', template: null, icon: '/img/placeholders/press.svg', parent: 'food-business-machines' },
+  { slug: 'chanachur-presses', name: 'Chanachur Presses', code: 'MCH', template: null, icon: '/img/placeholders/press.svg', parent: 'presses', description: 'Screw presses for chanachur, jhuri bhaja and sev.' },
   { slug: 'sealers', name: 'Sealers', code: 'MCH', template: 'machinery', icon: '/img/placeholders/sealer.svg', parent: 'food-business-machines' },
   { slug: 'kitchen-wooden-tools', name: 'Kitchen & Wooden Tools', code: 'TLS', template: 'handmade_tool', icon: '/img/placeholders/velpuri.svg', description: 'Handmade velpuri makers, mashers and rolling boards.' },
   { slug: 'home-furniture', name: 'Home & Furniture', code: 'HOM', template: 'bulky_home', icon: '/img/placeholders/rack.svg' },
   { slug: 'clothing', name: 'Clothing', code: 'CLO', template: 'apparel', icon: '/img/placeholders/panjabi.svg' },
-  { slug: 'winter-wear', name: 'Winter Wear', code: 'CLO', template: 'apparel', icon: '/img/placeholders/shawl.svg', parent: 'clothing', seasons: ['winter'] },
+  { slug: 'winter-wear', name: 'Winter Wear', code: 'CLO', template: null, icon: '/img/placeholders/shawl.svg', parent: 'clothing', seasons: ['winter'] },
+  { slug: 'unstitched-fabric', name: 'Unstitched Fabric', code: 'CLO', template: 'fabric', icon: '/img/placeholders/panjabi.svg', parent: 'clothing', description: 'Cotton and linen fabric sold by the metre.' },
   { slug: 'shoes', name: 'Shoes', code: 'SHO', template: 'footwear', icon: '/img/placeholders/loafer.svg' },
   { slug: 'gadgets-electronics', name: 'Gadgets & Electronics', code: 'GAD', template: 'electronics', icon: '/img/placeholders/watch.svg' },
   { slug: 'accessories', name: 'Accessories', code: 'ACC', template: 'simple', icon: '/img/placeholders/wallet.svg' },
@@ -354,8 +380,25 @@ export const SETTINGS: Record<string, string> = {
   ai_chat_enabled: '0',
   company_name: 'ABS VAI LTD',
   company_address: '',
+  // Tracking IDs are format-validated in admin and never pasted as raw script (Section 19).
+  gtm_id: '',
   pixel_id: '',
   ga4_id: '',
-  catalog_version: '1',
+  clarity_id: '',
   geo_postcode_version: '1',
+  // Branding (Settings → Store & Branding). Empty values fall back to the built-in wordmark and palette.
+  brand_logo_url: '',
+  brand_colors: '{}',
+  social_links: '{}',
+  // Fraud & bot protection (Section 11). All admin-configurable.
+  order_interval_minutes: '10',
+  velocity_max_orders_24h: '3',
+  otp_max_per_phone_hour: '3',
+  otp_max_per_device_day: '5',
+  otp_daily_cap: '500',
+  // Incomplete orders (Section 8).
+  incomplete_conversion_window_hours: '24',
+  incomplete_retention_days: '60',
+  // Manual orders: largest discount a Sales Agent may give, as a percentage of the subtotal.
+  manual_discount_max_percent: '10',
 };

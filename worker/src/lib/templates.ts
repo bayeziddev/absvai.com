@@ -72,53 +72,10 @@ export const SHIPPING_PROFILE_LABELS: Record<ShippingProfile, string> = {
   perishable: 'Perishable food',
 };
 
-const parseJson = <T>(s: unknown, fallback: T): T => {
+export const parseJsonSafe = <T>(s: unknown, fallback: T): T => {
   if (typeof s !== 'string' || !s) return fallback;
   try { return JSON.parse(s) as T; } catch { return fallback; }
 };
-
-/** Loads a template with its attributes, preset values, swatches and spec fields. */
-export async function loadTemplate(db: D1Database, id: string): Promise<ProductTemplate | null> {
-  const t = await db.prepare('SELECT * FROM product_templates WHERE id = ?').bind(id).first<Record<string, unknown>>();
-  if (!t) return null;
-  const [attrs, swatches, fields] = await db.batch([
-    db.prepare(`SELECT tva.*, at.name AS type_name, at.input FROM template_variant_attributes tva
-                JOIN attribute_types at ON at.id = tva.attribute_type_id WHERE tva.template_id = ? ORDER BY tva.sort_order`).bind(id),
-    db.prepare(`SELECT av.attribute_type_id, av.value, av.swatch_hex FROM attribute_values av
-                JOIN template_variant_attributes tva ON tva.attribute_type_id = av.attribute_type_id
-                WHERE tva.template_id = ? AND av.swatch_hex IS NOT NULL`).bind(id),
-    db.prepare('SELECT * FROM template_spec_fields WHERE template_id = ? ORDER BY sort_order').bind(id),
-  ]);
-  const swatchMap = new Map<string, Record<string, string>>();
-  for (const s of swatches.results as Array<Record<string, string>>) {
-    const m = swatchMap.get(s.attribute_type_id) ?? {};
-    m[s.value] = s.swatch_hex;
-    swatchMap.set(s.attribute_type_id, m);
-  }
-  return {
-    id: String(t.id),
-    name: String(t.name),
-    explanation: String(t.explanation),
-    variantAttributes: (attrs.results as Array<Record<string, unknown>>).map(a => ({
-      attributeTypeId: String(a.attribute_type_id),
-      label: String(a.label ?? a.type_name),
-      required: Boolean(a.required),
-      presetValues: parseJson<string[]>(a.preset_values, []),
-      allowCustomValues: Boolean(a.allow_custom_values),
-      input: (a.input as VariantAttribute['input']) ?? 'chips',
-      swatches: swatchMap.get(String(a.attribute_type_id)),
-    })),
-    specFields: (fields.results as Array<Record<string, unknown>>).map(rowToSpecField),
-    defaultShippingProfile: t.default_shipping_profile as ShippingProfile,
-    allowedFulfilment: parseJson<FulfilmentMode[]>(t.allowed_fulfilment, ['in_stock']),
-    requiresSizeChart: Boolean(t.requires_size_chart),
-    sizeChartColumns: parseJson<string[]>(t.size_chart_columns, []),
-    requiresBrand: Boolean(t.requires_brand),
-    requiresNetQuantity: Boolean(t.requires_net_quantity),
-    cardKeySpecs: parseJson<string[]>(t.card_key_specs, []),
-    status: t.status as ProductTemplate['status'],
-  };
-}
 
 export function rowToSpecField(f: Record<string, unknown>): SpecField {
   return {
@@ -129,7 +86,7 @@ export function rowToSpecField(f: Record<string, unknown>): SpecField {
     required: Boolean(f.required),
     helpText: (f.help_text as string) ?? null,
     placeholder: (f.placeholder as string) ?? null,
-    options: parseJson<string[] | null>(f.options, null),
+    options: parseJsonSafe<string[] | null>(f.options, null),
     panel: String(f.panel ?? 'details'),
     showOnProductPage: Boolean(f.show_on_product_page),
     canBecomeVariant: Boolean(f.can_become_variant),
@@ -165,9 +122,9 @@ export function combinations(selections: Array<{ attributeTypeId: string; values
 /** "500g" → {500, g}; "1.5 kg" → {1.5, kg}; "100 pcs" → {100, pcs}. */
 export function parseNetQuantity(value: string | undefined | null): { value: number; unit: NetUnit } | null {
   if (!value) return null;
-  const m = value.trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(g|gm|gram|grams|kg|ml|l|ltr|litre|liter|pcs|pc|pieces)\b/);
+  const m = value.trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(g|gm|gram|grams|kg|ml|l|ltr|litre|liter|m|metre|meter|metres|meters|pcs|pc|pieces)\b/);
   if (!m) return null;
-  const unitMap: Record<string, NetUnit> = { g: 'g', gm: 'g', gram: 'g', grams: 'g', kg: 'kg', ml: 'ml', l: 'l', ltr: 'l', litre: 'l', liter: 'l', pcs: 'pcs', pc: 'pcs', pieces: 'pcs' };
+  const unitMap: Record<string, NetUnit> = { g: 'g', gm: 'g', gram: 'g', grams: 'g', kg: 'kg', ml: 'ml', l: 'l', ltr: 'l', litre: 'l', liter: 'l', m: 'm', metre: 'm', meter: 'm', metres: 'm', meters: 'm', pcs: 'pcs', pc: 'pcs', pieces: 'pcs' };
   return { value: Number(m[1]), unit: unitMap[m[2]] };
 }
 

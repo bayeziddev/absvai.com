@@ -15,7 +15,7 @@ describe('weighed_food template (Organic & Seasonal Food)', () => {
   const t = launchTemplate('weighed_food');
 
   it('offers Weight presets and food spec fields, never Size, Color or Warranty', () => {
-    expect(t.variantAttributes.map(a => a.attributeTypeId)).toEqual(['weight', 'packaging']);
+    expect(t.variantAttributes.map(a => a.attributeTypeId)).toEqual(['weight', 'volume', 'packaging']);
     expect(t.variantAttributes[0].presetValues).toEqual(['250g', '500g', '1kg', '2kg', '5kg']);
     const keys = t.specFields.map(f => f.key);
     expect(keys).toEqual(expect.arrayContaining(['origin', 'batch_no', 'best_before', 'storage', 'ingredients']));

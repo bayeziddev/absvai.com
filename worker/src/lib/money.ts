@@ -21,16 +21,17 @@ export function takaToPaisa(input: string | number): number | null {
   return Number(whole) * 100 + Number(frac.padEnd(2, '0'));
 }
 
-export type NetUnit = 'g' | 'kg' | 'ml' | 'l' | 'pcs';
+export type NetUnit = 'g' | 'kg' | 'ml' | 'l' | 'm' | 'pcs';
 
-/** "৳650 / kg" for weighed food, "৳9 / pc" for packaging packs. */
-export function unitPrice(pricePaisa: number, netValue: number | null | undefined, netUnit: NetUnit | null | undefined): { paisa: number; per: 'kg' | 'litre' | 'pc' } | null {
+/** "৳650 / kg" for weighed food, "৳320 / m" for fabric, "৳9 / pc" for packaging packs. */
+export function unitPrice(pricePaisa: number, netValue: number | null | undefined, netUnit: NetUnit | null | undefined): { paisa: number; per: 'kg' | 'litre' | 'm' | 'pc' } | null {
   if (!netValue || !netUnit || netValue <= 0) return null;
   switch (netUnit) {
     case 'g': return { paisa: Math.round((pricePaisa * 1000) / netValue), per: 'kg' };
     case 'kg': return { paisa: Math.round(pricePaisa / netValue), per: 'kg' };
     case 'ml': return { paisa: Math.round((pricePaisa * 1000) / netValue), per: 'litre' };
     case 'l': return { paisa: Math.round(pricePaisa / netValue), per: 'litre' };
+    case 'm': return { paisa: Math.round(pricePaisa / netValue), per: 'm' };
     case 'pcs': return { paisa: Math.round(pricePaisa / netValue), per: 'pc' };
   }
 }

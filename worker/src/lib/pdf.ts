@@ -1,5 +1,6 @@
 /**
- * Tiny dependency-free PDF writer (A4, Helvetica / Helvetica-Bold, WinAnsi). Enough for invoices.
+ * Tiny dependency-free PDF writer (A4 or label sizes, Helvetica / Helvetica-Bold, WinAnsi, Code 128 bars). Enough for
+ * invoices, packing slips and thermal labels.
  * Text outside WinAnsi (e.g. Bangla) cannot be drawn with the standard fonts and becomes "?";
  * the admin also has a printable HTML invoice that renders any script.
  */
@@ -38,10 +39,20 @@ type RGB = [number, number, number];
 const hex = (h: string): RGB => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
 const rgb = (c: RGB) => c.map(v => v.toFixed(3)).join(' ');
 
+import { code128Bars } from './barcode';
+
+/** Page sizes in points: A4, and the 4×6 inch thermal label most Bangladeshi couriers print. */
+export const PAGE = { a4: [595, 842] as const, thermal4x6: [288, 432] as const };
+
 export class PdfDoc {
-  readonly width = 595;
-  readonly height = 842;
+  readonly width: number;
+  readonly height: number;
   private pages: string[][] = [[]];
+
+  constructor(size: readonly [number, number] = PAGE.a4) {
+    this.width = size[0];
+    this.height = size[1];
+  }
   private get ops() { return this.pages[this.pages.length - 1]; }
 
   addPage() { this.pages.push([]); }
@@ -73,6 +84,17 @@ export class PdfDoc {
 
   line(x1: number, y1: number, x2: number, y2: number, color = '#E9DCC6', width = 0.8) {
     this.ops.push(`${rgb(hex(color))} RG ${width} w ${x1} ${y1} m ${x2} ${y2} l S`);
+  }
+
+  /** Code 128 barcode with its text underneath. x/y is the bottom-left of the bars; returns the width drawn. */
+  barcode(x: number, y: number, text: string, opts: { height?: number; module?: number; label?: boolean } = {}): number {
+    const m = opts.module ?? 0.9;
+    const h = opts.height ?? 32;
+    const { bars, totalModules } = code128Bars(text);
+    const bars0 = bars.map(([bx, bw]) => `${(x + bx * m).toFixed(2)} ${y.toFixed(2)} ${(bw * m).toFixed(2)} ${h} re`).join(' ');
+    this.ops.push(`0 0 0 rg ${bars0} f`);
+    if (opts.label !== false) this.text(x + (totalModules * m) / 2, y - 9, text, { size: 7, align: 'center' });
+    return totalModules * m;
   }
 
   toBytes(): Uint8Array<ArrayBuffer> {

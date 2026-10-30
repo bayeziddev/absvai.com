@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canTransition, confirmBlockers } from '../../worker/src/lib/order-status';
+import { canTransition, confirmBlockers } from '../../worker/src/lib/state-machine';
 import { normalizeBdPhone } from '../../worker/src/lib/phone';
 import { assessRisk } from '../../worker/src/lib/risk';
 import { expandQuery } from '../../worker/src/lib/search';
@@ -37,9 +37,9 @@ describe('seasons', () => {
 
 describe('order pipeline', () => {
   it('follows the defined transitions only', () => {
-    expect(canTransition('pending', 'confirmed')).toBe(true);
-    expect(canTransition('pending', 'shipped')).toBe(false);
-    expect(canTransition('shipped', 'refused_at_delivery')).toBe(true);
+    expect(canTransition('new', 'confirmed')).toBe(true);
+    expect(canTransition('new', 'in_courier')).toBe(false);
+    expect(canTransition('in_courier', 'returned')).toBe(true);
     expect(canTransition('cancelled', 'confirmed')).toBe(false);
   });
 
@@ -77,9 +77,9 @@ describe('search synonyms', () => {
 
 describe('phones, SMS and dates', () => {
   it('normalises Bangladeshi mobile numbers', () => {
-    expect(normalizeBdPhone('+880 1712-345678')).toBe('01712345678');
-    expect(normalizeBdPhone('8801712345678')).toBe('01712345678');
-    expect(normalizeBdPhone('০১৭১২৩৪৫৬৭৮')).toBe('01712345678');
+    expect(normalizeBdPhone('+880 1712-345678')).toBe('8801712345678');
+    expect(normalizeBdPhone('01712345678')).toBe('8801712345678');
+    expect(normalizeBdPhone('০১৭১২৩৪৫৬৭৮')).toBe('8801712345678');
     expect(normalizeBdPhone('01212345678')).toBeNull();
   });
 

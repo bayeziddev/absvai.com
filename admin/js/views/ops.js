@@ -60,21 +60,6 @@ export async function preorders(v) {
   v.querySelectorAll('[data-send]').forEach(b => busy(b, async () => { const r = await api('/notify-requests/send', 'POST', { productId: Number(b.dataset.send) }); toast(`${r.sent} message(s) sent.`); preorders(v); }));
 }
 
-// ───────────── Abandoned checkouts ─────────────
-
-export async function abandoned(v) {
-  const status = qs().get('status') ?? 'open';
-  const rows = await api(`/abandoned?status=${status}`);
-  v.innerHTML = `<div class="page-head"><div><h1>Abandoned checkouts</h1><p>Saved as customers typed at checkout (phone first). Call them to help finish the order.</p></div></div>
-    <nav class="tabs">${['open', 'contacted', 'converted', 'dismissed'].map(s => `<a href="#/abandoned?status=${s}" aria-current="${s === status}">${s}</a>`).join('')}</nav>
-    <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Cart</th><th class="right">Value</th><th>Last activity</th><th></th></tr></thead><tbody>
-    ${rows.map(a => `<tr><td><b>${esc(a.name ?? '—')}</b><br><a href="tel:${esc(a.phone)}">${esc(a.phone)}</a>${a.address?.addressLine ? `<br><span class="small muted">${esc(a.address.addressLine)}</span>` : ''}</td>
-      <td class="small">${a.cart.map(l => `${esc(l.name)} × ${l.qty}`).join('<br>')}</td><td class="right">${taka(a.subtotal_paisa)}</td><td>${date(a.updated_at)}</td>
-      <td class="nowrap">${status === 'open' && can('orders:write') ? `<button class="btn btn-sm btn-outline" data-s="contacted" data-id="${a.id}">Contacted</button> <button class="btn btn-sm btn-ghost" data-s="dismissed" data-id="${a.id}">Dismiss</button>` : badge(a.status)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">None.</td></tr>'}
-    </tbody></table></div>`;
-  v.querySelectorAll('[data-s]').forEach(b => busy(b, async () => { await api(`/abandoned/${b.dataset.id}`, 'POST', { status: b.dataset.s }); abandoned(v); }));
-}
-
 // ───────────── Customers ─────────────
 
 export async function customers(v) {
@@ -92,19 +77,26 @@ export async function customers(v) {
 
 // ───────────── Inventory ─────────────
 
+const KIND_LABELS = { initial: 'Opening stock', purchase_received: 'Received', reserve: 'Held for an order', release: 'Hold released', sale: 'Sent with courier', pos_sale: 'Shop sale', return_received: 'Return scanned in', adjustment: 'Adjustment', transfer: 'Transfer' };
+
 export async function inventory(v) {
-  const rows = await api('/inventory');
-  v.innerHTML = `<div class="page-head"><div><h1>Inventory</h1><p>Lowest stock first. Receiving food stock? Enter the batch number so a complaint can be traced to its batch.</p></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Product / option</th><th>SKU</th><th class="right">Stock</th><th>Status</th><th></th></tr></thead><tbody>
-    ${rows.map(r => `<tr><td><b>${esc(r.name)}</b><br><span class="small muted">${esc(Object.values(r.attributes).join(' · ') || 'Single option')}</span></td><td class="small">${esc(r.sku)}</td>
-      <td class="right"><b style="color:${r.stock <= 5 && r.fulfilment_mode === 'in_stock' ? 'var(--chili)' : 'inherit'}">${r.stock}</b></td><td>${badge(r.status)}</td>
-      <td class="nowrap">${can('catalog:write') ? `<button class="btn btn-sm btn-outline" data-adj="${r.id}">Adjust</button>` : ''} <button class="btn btn-sm btn-ghost" data-log="${r.id}">History</button></td></tr>`).join('')}
+  const [d, reasons] = await Promise.all([api('/inventory'), api('/inventory/reasons')]);
+  const rows = d.items;
+  v.innerHTML = `<div class="page-head"><div><h1>Inventory</h1><p>Lowest available first. <b>Available</b> = on hand minus what confirmed orders are holding. Every change is kept in the stock history with a reason.</p></div></div>
+    ${d.stockValue ? `<div class="kpis"><div class="kpi"><span>Stock value at cost</span><b>${taka(d.stockValue.valuePaisa)}</b></div>${d.stockValue.unitsWithoutCost ? `<div class="kpi alert"><span>Options with stock but no cost price</span><b>${d.stockValue.unitsWithoutCost}</b></div>` : ''}</div>` : ''}
+    <div class="table-wrap"><table><thead><tr><th>Product / option</th><th>SKU · shelf</th><th class="right">On hand</th><th class="right">Held</th><th class="right">Available</th>${d.stockValue ? '<th class="right">Value</th>' : ''}<th>Status</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><b>${esc(r.name)}</b><br><span class="small muted">${esc(Object.values(r.attributes).join(' · ') || 'Single option')}</span></td><td class="small">${esc(r.sku)}${r.shelf_location ? `<br><span class="muted">shelf ${esc(r.shelf_location)}</span>` : ''}</td>
+      <td class="right">${r.stock}</td><td class="right">${r.reserved || ''}</td>
+      <td class="right"><b style="color:${r.available <= 5 && r.fulfilment_mode === 'in_stock' ? 'var(--chili)' : 'inherit'}">${r.available}</b></td>
+      ${d.stockValue ? `<td class="right">${r.cost_paisa == null ? '<span class="muted small">no cost</span>' : taka(r.stock_value_paisa)}</td>` : ''}<td>${badge(r.status)}</td>
+      <td class="nowrap">${can('inventory:write') ? `<button class="btn btn-sm btn-outline" data-adj="${r.id}">Adjust</button>` : ''} <button class="btn btn-sm btn-ghost" data-log="${r.id}">History</button></td></tr>`).join('')}
     </tbody></table></div>`;
   v.querySelectorAll('[data-adj]').forEach(b => b.addEventListener('click', () => {
     const r = rows.find(x => x.id === Number(b.dataset.adj));
     const so = slideOver(`Adjust stock · ${r.sku}`);
-    so.body.innerHTML = `<p>Current stock: <b>${r.stock}</b></p><label class="f">Reason<select id="re"><option value="receive">Received new stock</option><option value="adjust">Correction / damaged</option><option value="return">Customer return</option></select></label>
-      <label class="f">Change <span class="help">Positive adds, negative removes, e.g. 20 or -2.</span><input id="ch" type="number"></label><label class="f">Batch no. (food)<input id="ba"></label><label class="f">Note<input id="no"></label>`;
+    so.body.innerHTML = `<p>On hand: <b>${r.stock}</b>${r.reserved ? ` · held for confirmed orders: <b>${r.reserved}</b>` : ''}</p>
+      <label class="f">Reason *<select id="re"><option value="">Choose…</option>${Object.entries(reasons).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select></label>
+      <label class="f">Change <span class="help">Positive adds, negative removes, e.g. 20 or -2. Returned parcels come back through Returns scan, not here.</span><input id="ch" type="number"></label><label class="f">Batch no. (food)<input id="ba"></label><label class="f">Note<input id="no"></label>`;
     so.foot.innerHTML = '<span></span><button class="btn btn-primary" id="s">Save</button>';
     busy(so.foot.querySelector('#s'), async () => {
       await api('/inventory/adjust', 'POST', { variantId: r.id, change: Number(so.body.querySelector('#ch').value), reason: so.body.querySelector('#re').value, batchNo: so.body.querySelector('#ba').value, note: so.body.querySelector('#no').value });
@@ -114,8 +106,23 @@ export async function inventory(v) {
   v.querySelectorAll('[data-log]').forEach(b => b.addEventListener('click', async () => {
     const log = await api(`/inventory/log?variantId=${b.dataset.log}`);
     const so = slideOver('Stock history');
-    so.body.innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th class="right">Change</th><th>Reason</th><th>Batch</th><th>By</th></tr></thead><tbody>${log.map(l => `<tr><td>${date(l.created_at)}</td><td class="right">${l.change > 0 ? '+' : ''}${l.change}</td><td>${esc(l.reason)}${l.order_id ? ` <a href="#/orders/${l.order_id}">order</a>` : ''}${l.note ? `<br><span class="small muted">${esc(l.note)}</span>` : ''}</td><td>${esc(l.batch_no ?? '')}</td><td>${esc(l.admin_name ?? '')}</td></tr>`).join('')}</tbody></table></div>`;
+    so.body.innerHTML = `<div class="table-wrap"><table><thead><tr><th>When</th><th class="right">On hand</th><th class="right">Held</th><th>What</th><th>Batch</th><th>By</th></tr></thead><tbody>${log.map(l => `<tr><td class="nowrap">${date(l.created_at)}</td><td class="right">${l.change > 0 ? '+' : ''}${l.change || ''}</td><td class="right">${l.reserved_change > 0 ? '+' : ''}${l.reserved_change || ''}</td>
+      <td>${esc(KIND_LABELS[l.kind] ?? l.kind)}${l.reason ? ` · ${esc(reasons[l.reason] ?? l.reason)}` : ''}${l.order_id ? ` <a href="#/orders/${l.order_id}">${esc(l.order_no ?? 'order')}</a>` : ''}${l.note ? `<br><span class="small muted">${esc(l.note)}</span>` : ''}</td><td>${esc(l.batch_no ?? '')}</td><td>${esc(l.admin_name ?? '')}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No changes yet.</td></tr>'}</tbody></table></div>`;
   }));
+}
+
+/** "Load older" for append-only logs paged by id. */
+async function paged(v, path, render) {
+  const tbody = v.querySelector('tbody');
+  const more = v.querySelector('#more');
+  let rows = await api(path);
+  tbody.innerHTML = rows.map(render).join('') || '<tr><td colspan="5" class="empty">Nothing yet.</td></tr>';
+  more.hidden = rows.length < 100;
+  more.onclick = async () => {
+    rows = await api(`${path}?before=${rows[rows.length - 1].id}`);
+    tbody.insertAdjacentHTML('beforeend', rows.map(render).join(''));
+    more.hidden = rows.length < 100;
+  };
 }
 
 // ───────────── Wholesale, outbox, audit ─────────────
@@ -130,15 +137,15 @@ export async function wholesale(v) {
 }
 
 export async function outbox(v) {
-  const rows = await api('/sms-outbox');
   v.innerHTML = `<div class="page-head"><div><h1>SMS outbox</h1><p>Every message the store sends. Until an SMS provider is connected, messages are <b>logged</b> here and not delivered.</p></div></div>
-    <div class="table-wrap"><table><thead><tr><th>When</th><th>To</th><th>Kind</th><th>Message</th><th>Status</th></tr></thead><tbody>
-    ${rows.map(s => `<tr><td class="nowrap">${date(s.created_at)}</td><td>${esc(s.to_phone)}</td><td>${esc(s.kind)}</td><td class="small">${esc(s.body)}<br><span class="muted">${s.body.length} chars</span></td><td>${badge(s.status)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Nothing sent yet.</td></tr>'}</tbody></table></div>`;
+    <div class="table-wrap"><table><thead><tr><th>When</th><th>To</th><th>Kind</th><th>Message</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+    <p class="center"><button class="btn btn-outline" id="more" hidden>Load older</button></p>`;
+  await paged(v, '/sms-outbox', s => `<tr><td class="nowrap">${date(s.created_at)}</td><td>${esc(s.to_phone)}</td><td>${esc(s.kind)}</td><td class="small">${esc(s.body)}<br><span class="muted">${s.body.length} chars</span></td><td>${badge(s.status)}</td></tr>`);
 }
 
 export async function audit(v) {
-  const rows = await api('/audit');
-  v.innerHTML = `<div class="page-head"><div><h1>Audit log</h1><p>Who changed what, and when.</p></div></div>
-    <div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Item</th><th>Detail</th></tr></thead><tbody>
-    ${rows.map(a => `<tr><td class="nowrap">${date(a.created_at)}</td><td>${esc(a.admin_name ?? 'system')}</td><td>${esc(a.action)}</td><td>${esc(a.entity ?? '')} ${esc(a.entity_id ?? '')}</td><td class="small muted">${esc((a.detail ?? '').slice(0, 160))}</td></tr>`).join('')}</tbody></table></div>`;
+  v.innerHTML = `<div class="page-head"><div><h1>Audit log</h1><p>Who changed what, and when. Settings changes keep the before and after values; credentials are never written here.</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Item</th><th>Detail</th></tr></thead><tbody></tbody></table></div>
+    <p class="center"><button class="btn btn-outline" id="more" hidden>Load older</button></p>`;
+  await paged(v, '/audit', a => `<tr><td class="nowrap">${date(a.created_at)}</td><td>${esc(a.admin_name ?? 'system')}</td><td>${esc(a.action)}</td><td>${esc(a.entity ?? '')} ${esc(a.entity_id ?? '')}</td><td class="small muted"><details><summary>${esc((a.detail ?? '').slice(0, 80))}</summary><pre style="white-space:pre-wrap">${esc(a.detail ?? '')}</pre></details></td></tr>`);
 }

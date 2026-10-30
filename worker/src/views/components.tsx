@@ -1,5 +1,5 @@
 import type { Child } from 'hono/jsx';
-import type { CategoryNode, ProductCard } from '../data/catalog';
+import type { CategoryNode, ProductCard } from '../repo/catalog';
 import { formatTaka } from '../lib/money';
 import { Icon } from './icons';
 

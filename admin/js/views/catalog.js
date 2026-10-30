@@ -1,49 +1,165 @@
 import { api, badge, busy, can, confirmBox, esc, slideOver, toast } from '../app.js';
 
-// ───────────── Categories ─────────────
+// ───────────── Categories (three levels, drag and drop) ─────────────
+
+const MAX_DEPTH = 3;
 
 export async function categories(v) {
   const [cats, templates, seasons] = await Promise.all([api('/categories'), api('/templates'), api('/season-options')]);
-  const roots = cats.filter(c => !c.parent_id);
-  const ordered = roots.flatMap(r => [r, ...cats.filter(c => c.parent_id === r.id)]);
-  v.innerHTML = `
-    <div class="page-head"><div><h1>Categories</h1><p>Each category uses one product template. Seasonal categories hide from the menu outside their season.</p></div>${can('catalog:write') ? '<button class="btn btn-primary" id="new">+ Add category</button>' : ''}</div>
-    <div class="table-wrap"><table><thead><tr><th>Category</th><th>Code</th><th>Template</th><th>Shows</th><th class="right">Products</th><th>Active</th></tr></thead><tbody>
-    ${ordered.map(c => `<tr class="clickable" data-id="${c.id}"><td>${c.parent_id ? '<span class="muted">— </span>' : ''}<b>${esc(c.name)}</b><br><span class="small muted">/c/${esc(c.slug)}</span></td><td>${esc(c.code)}</td><td>${esc(c.template_name)}</td>
-      <td>${c.season_visibility === 'always' ? 'Always' : `Only in ${c.season_ids.map(id => esc(seasons.find(s => s.id === id)?.name ?? '?')).join(', ')}`}</td><td class="right">${c.product_count}</td><td>${c.is_active ? badge('active') : badge('off')}</td></tr>`).join('')}
-    </tbody></table></div>`;
-  const open = c => editCategory(c, cats, templates, seasons, () => categories(v));
-  v.querySelectorAll('tr[data-id]').forEach(r => r.addEventListener('click', () => open(cats.find(c => c.id === Number(r.dataset.id)))));
-  v.querySelector('#new')?.addEventListener('click', () => open(null));
+  const write = can('catalog:write');
+  const tName = id => templates.find(t => t.id === id)?.name ?? id ?? '?';
+  // Working copy of the arrangement; saved in one request.
+  let tree = cats.map(c => ({ id: c.id, parentId: c.parent_id ?? null, sortOrder: c.sort_order }));
+  const kids = pid => tree.filter(n => n.parentId === pid).sort((x, y) => x.sortOrder - y.sortOrder);
+  const height = id => { const k = kids(id); return k.length ? 1 + Math.max(...k.map(n => height(n.id))) : 0; };
+  const depth = id => { let d = 1; let n = tree.find(x => x.id === id); while (n?.parentId) { d++; n = tree.find(x => x.id === n.parentId); } return d; };
+  const isInside = (id, maybeAncestor) => { let n = tree.find(x => x.id === id); while (n?.parentId) { if (n.parentId === maybeAncestor) return true; n = tree.find(x => x.id === n.parentId); } return false; };
+  const row = n => {
+    const c = cats.find(x => x.id === n.id);
+    return `<li><div class="tree-row" data-id="${c.id}" ${write ? 'draggable="true"' : ''}>${write ? '<span class="grip" title="Drag to move" aria-hidden="true">⠿</span>' : ''}
+      <span class="name">${esc(c.name)} <span class="small muted">/c/${esc(c.slug)} · ${esc(c.code)}</span></span>
+      <span class="small">${c.inherits_template ? `<span class="muted">inherits</span> ${esc(tName(c.effective_template_id))}` : esc(tName(c.template_id))}</span>
+      <span class="small">${c.season_visibility === 'always' ? '' : `Only in ${c.season_ids.map(id => esc(seasons.find(s => s.id === id)?.name ?? '?')).join(', ')}`}</span>
+      <span class="small muted">${c.product_count} product(s)</span>${c.is_active ? '' : badge('off')}
+      ${write ? `<span class="row" style="gap:2px"><button class="btn btn-sm btn-ghost" data-up="${c.id}" aria-label="Move ${esc(c.name)} up">↑</button><button class="btn btn-sm btn-ghost" data-down="${c.id}" aria-label="Move ${esc(c.name)} down">↓</button><button class="btn btn-sm btn-ghost" data-out="${c.id}" aria-label="Move ${esc(c.name)} one level up" ${n.parentId ? '' : 'disabled'}>←</button></span>` : ''}
+      <button class="btn btn-sm btn-outline" data-edit="${c.id}">Edit</button></div>
+      ${kids(n.id).length ? `<ul class="tree">${kids(n.id).map(row).join('')}</ul>` : ''}</li>`;
+  };
+  let dirty = false;
+  const draw = () => {
+    v.innerHTML = `
+      <div class="page-head"><div><h1>Categories</h1><p>Up to three levels: Category → Subcategory → Child category. Drag a row onto another to put it inside, or above/below to reorder. A subcategory can use its parent’s template. Seasonal categories hide from the menu outside their season.</p></div>
+        <div class="row">${write ? `<button class="btn btn-outline" id="save-order" ${dirty ? '' : 'disabled'}>Save arrangement</button><button class="btn btn-primary" id="new">+ Add category</button>` : ''}</div></div>
+      ${dirty ? '<p class="notice">You have moved categories. Press <b>Save arrangement</b> to publish the new menu.</p>' : ''}
+      <ul class="tree">${kids(null).map(row).join('') || '<li class="muted">No categories yet.</li>'}</ul>`;
+    bind();
+  };
+  const renumber = pid => kids(pid).forEach((n, i) => { n.sortOrder = i; });
+  const move = (id, parentId, beforeId) => {
+    const n = tree.find(x => x.id === id);
+    if (parentId === id || (parentId && isInside(parentId, id))) return toast('A category cannot go inside itself.', true);
+    if ((parentId ? depth(parentId) : 0) + 1 + height(id) > MAX_DEPTH) return toast('Categories go three levels deep at most.', true);
+    const c = cats.find(x => x.id === id);
+    if (!parentId && c.inherits_template) return toast(`“${c.name}” uses its parent’s template. Give it its own template before making it top level.`, true);
+    const old = n.parentId;
+    n.parentId = parentId;
+    const siblings = kids(parentId).filter(x => x.id !== id);
+    const at = beforeId ? siblings.findIndex(x => x.id === beforeId) : siblings.length;
+    siblings.splice(at < 0 ? siblings.length : at, 0, n);
+    siblings.forEach((x, i) => { x.sortOrder = i; });
+    renumber(old);
+    dirty = true;
+    draw();
+  };
+  const bind = () => {
+    const edit = c => editCategory(c, cats, templates, seasons, () => categories(v));
+    v.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => edit(cats.find(c => c.id === Number(b.dataset.edit)))));
+    v.querySelector('#new')?.addEventListener('click', () => edit(null));
+    if (!write) return;
+    v.querySelectorAll('[data-up],[data-down]').forEach(b => b.addEventListener('click', () => {
+      const id = Number(b.dataset.up ?? b.dataset.down);
+      const n = tree.find(x => x.id === id);
+      const sib = kids(n.parentId);
+      const i = sib.findIndex(x => x.id === id);
+      const j = b.dataset.up ? i - 1 : i + 1;
+      if (j < 0 || j >= sib.length) return;
+      [sib[i].sortOrder, sib[j].sortOrder] = [sib[j].sortOrder, sib[i].sortOrder];
+      dirty = true; draw();
+    }));
+    v.querySelectorAll('[data-out]').forEach(b => b.addEventListener('click', () => {
+      const n = tree.find(x => x.id === Number(b.dataset.out));
+      const parent = tree.find(x => x.id === n.parentId);
+      if (parent) move(n.id, parent.parentId, kids(parent.parentId)[kids(parent.parentId).findIndex(x => x.id === parent.id) + 1]?.id ?? null);
+    }));
+    let dragId = null;
+    v.querySelectorAll('.tree-row[draggable]').forEach(el => {
+      const clear = () => el.classList.remove('drop-before', 'drop-inside', 'drop-after');
+      const zone = e => { const r = el.getBoundingClientRect(); const y = (e.clientY - r.top) / r.height; return y < 0.3 ? 'before' : y > 0.7 ? 'after' : 'inside'; };
+      el.addEventListener('dragstart', e => { dragId = Number(el.dataset.id); el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(dragId)); });
+      el.addEventListener('dragend', () => { el.classList.remove('dragging'); dragId = null; });
+      el.addEventListener('dragover', e => { if (!dragId || dragId === Number(el.dataset.id)) return; e.preventDefault(); clear(); el.classList.add(`drop-${zone(e)}`); });
+      el.addEventListener('dragleave', clear);
+      el.addEventListener('drop', e => {
+        e.preventDefault(); clear();
+        const target = tree.find(x => x.id === Number(el.dataset.id));
+        if (!dragId || dragId === target.id) return;
+        const z = zone(e);
+        if (z === 'inside') return move(dragId, target.id, null);
+        const sib = kids(target.parentId).filter(x => x.id !== dragId);
+        const i = sib.findIndex(x => x.id === target.id);
+        move(dragId, target.parentId, z === 'before' ? target.id : sib[i + 1]?.id ?? null);
+      });
+    });
+    const save = v.querySelector('#save-order');
+    if (save) busy(save, async () => {
+      const r = await api('/categories-order', 'PUT', { items: tree.map(n => ({ id: n.id, parentId: n.parentId, sortOrder: n.sortOrder })) });
+      toast(`Saved. ${r.moved} categor${r.moved === 1 ? 'y' : 'ies'} moved; the menu refreshes everywhere.`);
+      categories(v);
+    });
+  };
+  // Start from contiguous positions so ↑/↓ always swap two different values.
+  [...new Set(tree.map(n => n.parentId))].forEach(renumber);
+  draw();
 }
 
 function editCategory(c, cats, templates, seasons, done) {
   const so = slideOver(c ? `Category · ${c.name}` : 'New category');
   const active = templates.filter(t => t.status === 'active' || t.id === c?.template_id);
+  // A parent must leave room below it: depth(parent) + 1 + height(this) ≤ 3.
+  const height = id => { const k = cats.filter(x => x.parent_id === id); return k.length ? 1 + Math.max(...k.map(x => height(x.id))) : 0; };
+  const inside = (id, anc) => { let n = cats.find(x => x.id === id); while (n?.parent_id) { if (n.parent_id === anc) return true; n = cats.find(x => x.id === n.parent_id); } return false; };
+  const parents = cats.filter(x => x.id !== c?.id && !(c && inside(x.id, c.id)) && x.depth + 1 + (c ? height(c.id) : 0) <= MAX_DEPTH);
+  const label = x => { const p = cats.find(y => y.id === x.parent_id); const g = p && cats.find(y => y.id === p.parent_id); return [g, p, x].filter(Boolean).map(y => y.name).join(' › '); };
   so.body.innerHTML = `<form id="f">
     <label class="f">Name<input name="name" value="${esc(c?.name ?? '')}" required></label>
     <div class="grid-2"><label class="f">Web address (slug)<input name="slug" value="${esc(c?.slug ?? '')}" placeholder="made from the name"></label>
       <label class="f">SKU code <span class="help">2–5 letters, starts every SKU, e.g. ORG.</span><input name="code" value="${esc(c?.code ?? '')}" maxlength="5" required></label></div>
-    <label class="f">Parent category<select name="parentId"><option value="">None (top level)</option>${cats.filter(x => !x.parent_id && x.id !== c?.id).map(x => `<option value="${x.id}" ${x.id === c?.parent_id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
-    <label class="f">Product template <span class="help">Decides the options and details every product here needs.</span><select name="templateId">${active.map(t => `<option value="${esc(t.id)}" ${t.id === c?.template_id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
+    <label class="f">Parent category<select name="parentId"><option value="">None (top level)</option>${parents.map(x => `<option value="${x.id}" ${x.id === c?.parent_id ? 'selected' : ''}>${esc(label(x))}</option>`).join('')}</select></label>
+    <label class="f">Product template <span class="help">Decides the options and details every product here needs.</span><select name="templateId"><option value="">Use the parent’s template</option>${active.map(t => `<option value="${esc(t.id)}" ${t.id === c?.template_id ? 'selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
     <label class="f">Show in the menu<select name="seasonVisibility"><option value="always">Always</option><option value="seasons" ${c?.season_visibility === 'seasons' ? 'selected' : ''}>Only during these seasons…</option></select></label>
     <div id="sv" ${c?.season_visibility === 'seasons' ? '' : 'hidden'}>${seasons.map(s => `<label class="check" style="margin-right:12px"><input type="checkbox" name="season" value="${s.id}" ${c?.season_ids?.includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}</div>
     <label class="f" style="margin-top:12px">Icon / image URL<input name="iconUrl" value="${esc(c?.icon_url ?? '')}" placeholder="/img/placeholders/gur.svg"></label>
     <label class="f">Description<textarea name="description" rows="2">${esc(c?.description ?? '')}</textarea></label>
-    <div class="grid-2"><label class="f">Display order<input name="sortOrder" type="number" value="${c?.sort_order ?? 0}"></label><label class="check"><input type="checkbox" name="isActive" ${c?.is_active !== 0 ? 'checked' : ''}> Active</label></div>
+    <label class="check"><input type="checkbox" name="isActive" ${c?.is_active !== 0 ? 'checked' : ''}> Active</label>
     <div class="grid-2"><label class="f">SEO title<input name="metaTitle" value="${esc(c?.meta_title ?? '')}"></label><label class="f">SEO description<input name="metaDescription" value="${esc(c?.meta_description ?? '')}"></label></div></form>`;
   const form = so.body.querySelector('#f');
+  if (!c) form.templateId.value = active[0]?.id ?? '';
   form.seasonVisibility.addEventListener('change', () => { so.body.querySelector('#sv').hidden = form.seasonVisibility.value !== 'seasons'; });
   so.foot.innerHTML = `${c && can('catalog:write') ? '<button class="btn btn-ghost" id="del">Delete</button>' : '<span></span>'}${can('catalog:write') ? '<button class="btn btn-primary" id="save">Save</button>' : ''}`;
   if (!can('catalog:write')) return;
   busy(so.foot.querySelector('#save'), async () => {
-    const body = { name: form.name.value, slug: form.slug.value, code: form.code.value, parentId: Number(form.parentId.value) || null, templateId: form.templateId.value, seasonVisibility: form.seasonVisibility.value,
-      seasonIds: [...form.querySelectorAll('[name=season]:checked')].map(x => Number(x.value)), iconUrl: form.iconUrl.value, description: form.description.value, sortOrder: Number(form.sortOrder.value) || 0,
+    const body = { name: form.name.value, slug: form.slug.value, code: form.code.value, parentId: Number(form.parentId.value) || null, templateId: form.templateId.value || null, seasonVisibility: form.seasonVisibility.value,
+      seasonIds: [...form.querySelectorAll('[name=season]:checked')].map(x => Number(x.value)), iconUrl: form.iconUrl.value, description: form.description.value, sortOrder: c?.sort_order,
       isActive: form.isActive.checked, metaTitle: form.metaTitle.value, metaDescription: form.metaDescription.value };
     await api(c ? `/categories/${c.id}` : '/categories', c ? 'PUT' : 'POST', body);
     toast('Saved.'); so.close(); done();
   });
   if (c) busy(so.foot.querySelector('#del'), async () => { if (await confirmBox(`Delete “${c.name}”?`)) { await api(`/categories/${c.id}`, 'DELETE'); so.close(); done(); } });
+}
+
+// ───────────── Barcodes & labels (Section 13.2) ─────────────
+
+export async function labels(v) {
+  const picked = new Map();
+  v.innerHTML = `<div class="page-head"><div><h1>Barcodes & labels</h1><p>Every option has a Code 128 barcode of its SKU. Print shelf or product labels on A4 sticker sheets (3 × 8) or a 38 × 25 mm thermal roll.</p></div></div>
+    <div class="split"><div class="card"><h2>1. Find options</h2><input class="i" id="q" placeholder="Name, SKU or scan" style="width:100%"><div id="res" class="search-results"></div></div>
+      <div class="card"><h2>2. Print</h2><div class="table-wrap"><table><thead><tr><th>Option</th><th></th></tr></thead><tbody id="sel"><tr><td colspan="2" class="muted small">Nothing chosen yet.</td></tr></tbody></table></div>
+        <div class="grid-2" style="margin-top:10px"><label class="f">Copies of each<input id="copies" type="number" min="1" max="100" value="1"></label><label class="f">Layout<select id="layout"><option value="a4">A4 sticker sheet (70 × 37 mm)</option><option value="thermal">Thermal roll (38 × 25 mm)</option></select></label></div>
+        <button class="btn btn-primary" id="print" style="width:100%">Open labels to print</button></div></div>`;
+  const $ = s => v.querySelector(s);
+  const drawSel = () => { $('#sel').innerHTML = [...picked.values()].map(r => `<tr><td>${esc(r.name)} ${esc(r.label)}<br><span class="small muted">${esc(r.sku)}${r.gtin ? ` · ${esc(r.gtin)}` : ''}</span></td><td><button class="btn btn-sm btn-ghost" data-rm="${r.id}">Remove</button></td></tr>`).join('') || '<tr><td colspan="2" class="muted small">Nothing chosen yet.</td></tr>';
+    $('#sel').querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { picked.delete(Number(b.dataset.rm)); drawSel(); })); };
+  let t;
+  $('#q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(async () => {
+    const q = $('#q').value.trim();
+    const rows = q.length < 2 ? [] : await api(`/variants/search?q=${encodeURIComponent(q)}`);
+    $('#res').innerHTML = rows.map((r, i) => `<button type="button" class="result" data-i="${i}"><b>${esc(r.name)}</b> ${esc(r.label)}<br><span class="small muted">${esc(r.sku)}</span></button>`).join('');
+    $('#res').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => { const r = rows[Number(b.dataset.i)]; picked.set(r.id, r); drawSel(); }));
+  }, 250); });
+  $('#print').addEventListener('click', () => {
+    if (!picked.size) return toast('Choose at least one option.', true);
+    window.open(`/api/admin/print/labels?variants=${[...picked.keys()].join(',')}&copies=${Number($('#copies').value) || 1}&layout=${$('#layout').value}`, '_blank');
+  });
 }
 
 // ───────────── Product templates (data, not code) ─────────────

@@ -3,7 +3,17 @@
  * at 100,000 iterations (the Workers maximum) with a per-password random salt.
  * Sessions are random tokens stored in KV; the cookie is HttpOnly, Secure, SameSite=Strict.
  */
-export type Role = 'super_admin' | 'manager' | 'order_processor' | 'viewer';
+export type Role = 'super_admin' | 'manager' | 'order_processor' | 'warehouse' | 'accountant' | 'viewer';
+
+export const ROLES: Role[] = ['super_admin', 'manager', 'order_processor', 'warehouse', 'accountant', 'viewer'];
+export const ROLE_LABELS: Record<Role, string> = {
+  super_admin: 'Owner / Super Admin',
+  manager: 'Manager',
+  order_processor: 'Sales Agent',
+  warehouse: 'Warehouse',
+  accountant: 'Accountant',
+  viewer: 'Viewer',
+};
 
 const ITERATIONS = 100_000;
 const enc = new TextEncoder();
@@ -50,11 +60,18 @@ export function passwordProblem(pw: string): string | null {
   return null;
 }
 
-/** What each role may do. Enforced on the server for every admin route. */
+/**
+ * What each role may do. Enforced on the server for every admin route.
+ * Field-level rules: `cost:read` (cost price, stock value, profit) is Owner/Accountant only; `secrets:write`
+ * (payment, SMS, courier and CAPI credentials) is Super Admin only and is granted only through '*'.
+ */
 const PERMISSIONS: Record<Role, string[]> = {
   super_admin: ['*'],
-  manager: ['dashboard', 'orders:read', 'orders:write', 'catalog:read', 'catalog:write', 'seasons:write', 'customers:read', 'geo:write', 'settings:read', 'audit:read', 'reports:read'],
-  order_processor: ['dashboard', 'orders:read', 'orders:write', 'catalog:read', 'customers:read', 'settings:read'],
+  manager: ['dashboard', 'orders:read', 'orders:write', 'orders:export', 'orders:discount', 'catalog:read', 'catalog:write', 'seasons:write', 'customers:read', 'geo:write',
+    'settings:read', 'settings:write', 'security:read', 'security:write', 'inventory:write', 'audit:read', 'reports:read'],
+  order_processor: ['dashboard', 'orders:read', 'orders:write', 'catalog:read', 'customers:read', 'settings:read', 'security:read'],
+  warehouse: ['dashboard', 'orders:read', 'orders:pack', 'catalog:read', 'inventory:write', 'settings:read'],
+  accountant: ['dashboard', 'orders:read', 'orders:export', 'catalog:read', 'customers:read', 'settings:read', 'cost:read', 'reports:read', 'audit:read'],
   viewer: ['dashboard', 'orders:read', 'catalog:read', 'customers:read', 'settings:read', 'reports:read'],
 };
 

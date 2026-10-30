@@ -21,13 +21,27 @@ const lines = buyNow ? [{ variantId: buyNow, qty: Math.max(1, Math.min(99, Numbe
 let geo = null; // { divisions, districts, upazilas, postcodes }
 let lastQuote = null;
 
-function token() {
+// ── Checkout session (Section 8.1): after an invisible Turnstile check the server sets an HttpOnly session cookie and
+// returns a short-lived signed token. Capture and placement both need it, so scripts can't flood the store. ──
+let session = null; // { token, expiresAt }
+let sessionWaiters = [];
+async function startSession(turnstileToken) {
   try {
-    let t = localStorage.getItem('absvai.co.token');
-    if (!t || !/^[a-f0-9]{32}$/.test(t)) { t = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('absvai.co.token', t); }
-    return t;
-  } catch { return null; }
+    session = await api('/api/checkout/session', { turnstileToken: turnstileToken || '' });
+  } catch (err) {
+    errorBox.textContent = err.message;
+  }
+  sessionWaiters.splice(0).forEach(fn => fn(session));
 }
+function checkoutToken() {
+  if (session && Date.parse(session.expiresAt) - Date.now() > 60_000) return Promise.resolve(session.token);
+  return new Promise(resolve => {
+    sessionWaiters.push(s => resolve(s?.token ?? null));
+    if (session) { session = null; window.turnstile?.reset?.(); if (!pd.turnstile) startSession(''); }
+  });
+}
+// Turnstile calls this (data-callback) once the invisible check passes.
+window.absvaiTurnstile = token => startSession(token);
 
 function fill(select, rows, placeholder) {
   select.replaceChildren(new Option(placeholder, ''), ...rows.map(([id, name]) => new Option(name, String(id))));
@@ -159,11 +173,12 @@ async function showMap(districtId) {
 
 // ── Quote, advance and summary ──
 let quoteTimer;
+let captureTimer;
 function areaChanged() {
   clearTimeout(quoteTimer);
   quoteTimer = setTimeout(refreshQuote, 120);
   showMap(Number(sel.district.value) || null);
-  saveDraft();
+  captureSoon();
 }
 
 const payment = () => form.querySelector('input[name=paymentMethod]:checked')?.value ?? 'cod';
@@ -203,21 +218,44 @@ function renderSummary(q) {
   placeBtn.textContent = q.hasPreOrder ? 'Place pre-order' : 'Place order';
 }
 
-// ── Abandoned-checkout capture (phone first) ──
-let draftTimer;
-function saveDraft() {
-  clearTimeout(draftTimer);
-  draftTimer = setTimeout(() => {
-    if (!/^(\+?88)?01[3-9]\d{8}$/.test(form.phone.value.replace(/[\s-]/g, ''))) return;
-    const t = token();
-    if (!t) return;
-    api('/api/checkout/draft', {
-      token: t, phone: form.phone.value, name: form.name.value, lines, divisionId: Number(sel.division.value) || null, districtId: Number(sel.district.value) || null,
-      upazilaId: Number(sel.upazila.value) || null, postcode: form.postcode.value, addressLine: form.addressLine.value, landmark: form.landmark.value,
-    }).catch(() => {});
-  }, 1200);
+// ── Incomplete-order capture (Section 8.1): starts only once the phone number is valid. Blur on the phone field, a
+// debounced update ~1 s after typing stops, and a final sendBeacon snapshot when the page is hidden. The server keeps
+// one row per checkout session, so there is never a row per keystroke. ──
+const validPhone = () => /^(\+?88)?01[3-9]\d{8}$/.test(form.phone.value.replace(/[\s-]/g, ''));
+let utmCache = null;
+function utm() {
+  if (utmCache) return utmCache;
+  try { utmCache = JSON.parse(sessionStorage.getItem('absvai.utm') || '{}'); } catch { utmCache = {}; }
+  return utmCache;
 }
-['phone', 'name', 'addressLine', 'landmark'].forEach(n => form[n].addEventListener('input', saveDraft));
+function snapshot(token) {
+  return {
+    token, phone: form.phone.value, name: form.name.value, lines, divisionId: Number(sel.division.value) || null, districtId: Number(sel.district.value) || null,
+    upazilaId: Number(sel.upazila.value) || null, postcode: form.postcode.value, addressLine: form.addressLine.value, landmark: form.landmark.value, utm: utm(),
+  };
+}
+let lastSent = '';
+let placed = false;
+async function capture() {
+  if (placed || !validPhone() || !lines.length) return;
+  const token = await checkoutToken();
+  if (!token) return;
+  const body = JSON.stringify(snapshot(token));
+  if (body === lastSent) return;
+  lastSent = body;
+  fetch('/api/checkout/capture', { method: 'POST', headers: { 'content-type': 'text/plain' }, body, credentials: 'same-origin', keepalive: true }).catch(() => {});
+}
+function captureSoon() { clearTimeout(captureTimer); captureTimer = setTimeout(capture, 1000); }
+form.phone.addEventListener('blur', capture);
+['phone', 'name', 'addressLine', 'landmark', 'postcode'].forEach(n => form[n].addEventListener('input', captureSoon));
+Object.values(sel).forEach(s => s.addEventListener('change', captureSoon));
+function beacon() {
+  if (placed || !validPhone() || !session || !navigator.sendBeacon) return;
+  const body = JSON.stringify(snapshot(session.token));
+  if (body !== lastSent && navigator.sendBeacon('/api/checkout/capture', new Blob([body], { type: 'text/plain' }))) lastSent = body;
+}
+addEventListener('pagehide', beacon);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') beacon(); });
 form.phone.addEventListener('change', refreshQuote);
 
 // ── Submit ──
@@ -246,24 +284,24 @@ form.addEventListener('submit', async e => {
   placeBtn.disabled = true;
   placeBtn.textContent = 'Placing your order…';
   errorBox.textContent = '';
-  let utm = {};
-  try { utm = JSON.parse(sessionStorage.getItem('absvai.utm') || '{}'); } catch { /* ignore */ }
   try {
+    const token = await checkoutToken();
+    if (!token) throw new Error('Your checkout session could not start. Reload the page and try again.');
     const r = await api('/api/checkout/place', {
       phone: form.phone.value, name: form.name.value, divisionId: Number(sel.division.value), districtId: Number(sel.district.value), upazilaId: Number(sel.upazila.value),
       unionId: Number(sel.union.value) || null, postcode: form.postcode.value || null, addressLine: form.addressLine.value, landmark: form.landmark.value, note: form.note.value,
       paymentMethod: payment(), advanceTrxId: form.advanceTrxId?.value || null, advanceWallet: form.advanceWallet?.value || null,
-      lines, token: token(), utm, source: buyNow ? 'web:order-now' : 'web:cart', turnstileToken: form.querySelector('[name="cf-turnstile-response"]')?.value ?? '',
+      lines, token, utm: utm(), website: form.website?.value ?? '',
     });
+    placed = true;
     if (!buyNow) cart.clear();
-    try { localStorage.removeItem('absvai.co.token'); } catch { /* ignore */ }
     location.href = `/order/${encodeURIComponent(r.orderNo)}?t=${encodeURIComponent(r.accessToken)}`;
   } catch (err) {
     errorBox.textContent = err.message;
     placeBtn.disabled = false;
     placeBtn.textContent = 'Place order';
     if (err.status === 409) refreshQuote();
-    window.turnstile?.reset?.();
+    if (err.status === 401) { session = null; window.turnstile?.reset?.(); if (!pd.turnstile) startSession(''); }
   }
 });
 
@@ -274,6 +312,8 @@ async function boot() {
     return;
   }
   refreshQuote();
+  // Without a Turnstile site key (local development) the session starts straight away.
+  if (!pd.turnstile) startSession('');
   try {
     const { version } = await api('/api/geo/version');
     const [h, postcodes] = await Promise.all([api(`/api/geo/${version}/hierarchy.json`), api(`/api/geo/${version}/postcodes.json`)]);

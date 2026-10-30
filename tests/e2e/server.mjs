@@ -15,7 +15,7 @@ export async function startServer(port = 8790) {
   w('d1', 'migrations', 'apply', 'DB');
   w('d1', 'execute', 'DB', '--file', 'worker/seed/demo.sql');
   const proc = spawn('npx', ['wrangler', 'dev', '-c', 'worker/wrangler.toml', '--port', String(port), '--ip', '127.0.0.1', '--persist-to', persist,
-    '--var', 'SETUP_TOKEN:e2e-setup-token', '--var', 'OTP_PEPPER:e2e-pepper', '--var', `SITE_URL:http://127.0.0.1:${port}`, '--show-interactive-dev-session=false'], { cwd: ROOT, env, stdio: 'pipe', detached: true });
+    '--var', 'SETUP_TOKEN:e2e-setup-token', '--var', 'OTP_PEPPER:e2e-pepper', '--var', 'ENVIRONMENT:development', '--var', `SITE_URL:http://127.0.0.1:${port}`, '--show-interactive-dev-session=false'], { cwd: ROOT, env, stdio: 'pipe', detached: true });
   let log = '';
   proc.stdout.on('data', d => { log += d; });
   proc.stderr.on('data', d => { log += d; });

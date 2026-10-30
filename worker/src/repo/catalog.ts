@@ -4,7 +4,8 @@ import { parseJson } from '../lib/http';
 import { formatUnitPrice, unitPrice, type NetUnit } from '../lib/money';
 import { categoryVisible, isSeasonActive, productAvailability, type Availability, type SeasonRow } from '../lib/seasons';
 import { likeEscape } from '../lib/search';
-import { cardKeySpecLine, loadTemplate, type ProductTemplate } from '../lib/templates';
+import { cardKeySpecLine, type ProductTemplate } from '../lib/templates';
+import { loadTemplate } from './templates';
 
 export interface Variant {
   id: number;
@@ -13,12 +14,20 @@ export interface Variant {
   pricePaisa: number;
   compareAtPricePaisa: number | null;
   wholesaleTiers: Array<{ minQty: number; pricePaisa: number }>;
+  /** On hand in the warehouse. */
   stock: number;
+  /** Held by confirmed orders that have not left with the courier yet. */
+  reserved: number;
+  /** What customers can still order: stock − reserved. */
+  available: number;
   packedWeightGrams: number;
   netValue: number | null;
   netUnit: NetUnit | null;
   imageIds: number[];
   isActive: boolean;
+  costPaisa: number | null;
+  gtin: string | null;
+  shelfLocation: string | null;
 }
 
 export interface ProductCard {
@@ -70,11 +79,16 @@ export function rowToVariant(v: Record<string, unknown>): Variant {
     compareAtPricePaisa: v.compare_at_price_paisa == null ? null : Number(v.compare_at_price_paisa),
     wholesaleTiers: typeof v.wholesale_tiers === 'string' ? parseJson(v.wholesale_tiers, []) : (v.wholesale_tiers as Variant['wholesaleTiers']) ?? [],
     stock: Number(v.stock),
+    reserved: Number(v.reserved ?? 0),
+    available: Math.max(0, Number(v.stock) - Number(v.reserved ?? 0)),
     packedWeightGrams: Number(v.packed_weight_grams),
     netValue: v.net_value == null ? null : Number(v.net_value),
     netUnit: (v.net_unit as NetUnit) ?? null,
     imageIds: typeof v.image_ids === 'string' ? parseJson(v.image_ids, []) : (v.image_ids as number[]) ?? [],
     isActive: Boolean(v.is_active ?? 1),
+    costPaisa: v.cost_paisa == null ? null : Number(v.cost_paisa),
+    gtin: (v.gtin as string) ?? null,
+    shelfLocation: (v.shelf_location as string) ?? null,
   };
 }
 
@@ -86,6 +100,7 @@ export interface ProductQuery {
   terms?: string[];
   seasonIds?: number[];
   originals?: boolean;
+  featured?: boolean;
   deals?: boolean;
   freeDelivery?: boolean;
   newSinceIso?: string;
@@ -114,6 +129,7 @@ export async function queryProducts(db: D1Database, q: ProductQuery, now = new D
     params.push(...q.seasonIds);
   }
   if (q.originals) where.push('p.is_original = 1');
+  if (q.featured) where.push('p.show_on_home = 1');
   if (q.freeDelivery) where.push('p.free_delivery = 1');
   if (q.newSinceIso) { where.push('p.published_at >= ?'); params.push(q.newSinceIso); }
   if (q.deals) where.push('EXISTS (SELECT 1 FROM product_variants v WHERE v.product_id = p.id AND v.is_active = 1 AND v.compare_at_price_paisa > v.price_paisa)');
@@ -155,7 +171,7 @@ export async function queryProducts(db: D1Database, q: ProductQuery, now = new D
          (SELECT MAX(v.compare_at_price_paisa - v.price_paisa) FROM product_variants v WHERE v.product_id = p.id AND v.is_active = 1) AS max_saving,
          (SELECT url FROM product_media m WHERE m.product_id = p.id AND m.kind = 'image' ORDER BY m.sort_order, m.id LIMIT 1) AS image_url,
          (SELECT json_group_array(json_object('id', v.id, 'sku', v.sku, 'attributes', json(v.attributes), 'price_paisa', v.price_paisa,
-             'compare_at_price_paisa', v.compare_at_price_paisa, 'stock', v.stock, 'packed_weight_grams', v.packed_weight_grams,
+             'compare_at_price_paisa', v.compare_at_price_paisa, 'stock', v.stock, 'reserved', v.reserved, 'packed_weight_grams', v.packed_weight_grams,
              'net_value', v.net_value, 'net_unit', v.net_unit, 'wholesale_tiers', json(v.wholesale_tiers), 'image_ids', json(v.image_ids)))
             FROM product_variants v WHERE v.product_id = p.id AND v.is_active = 1) AS variants_json,
          (SELECT json_group_object(s.field_key, s.value) FROM product_spec_values s WHERE s.product_id = p.id) AS specs_json,
@@ -182,7 +198,7 @@ export function toCard(r: Record<string, unknown>, template: ProductTemplate, se
   const seasonIds = parseJson<number[]>(r.season_ids, []);
   const linked = seasons.filter(s => seasonIds.includes(s.id));
   const cheapest = [...variants].sort((a, b) => a.pricePaisa - b.pricePaisa)[0] ?? null;
-  const stock = variants.reduce((s, v) => s + Math.max(0, v.stock), 0);
+  const stock = variants.reduce((s, v) => s + v.available, 0);
   const availability = productAvailability(r as { fulfilment_mode: string }, linked, stock, today);
   const compare = cheapest?.compareAtPricePaisa && cheapest.compareAtPricePaisa > cheapest.pricePaisa ? cheapest.compareAtPricePaisa : null;
   return {
@@ -247,8 +263,8 @@ export async function getProductDetail(db: D1Database, slug: string, opts: { pre
   const vs = (variants.results as Array<Record<string, unknown>>).map(rowToVariant);
   const today = bdDate(now);
   const availabilityByVariant: Record<number, Availability> = {};
-  for (const v of vs) availabilityByVariant[v.id] = productAvailability(product as { fulfilment_mode: string }, linked, v.stock, today);
-  const totalStock = vs.reduce((s, v) => s + Math.max(0, v.stock), 0);
+  for (const v of vs) availabilityByVariant[v.id] = productAvailability(product as { fulfilment_mode: string }, linked, v.available, today);
+  const totalStock = vs.reduce((s, v) => s + v.available, 0);
   return {
     product,
     template,
@@ -269,7 +285,7 @@ export async function getProductDetail(db: D1Database, slug: string, opts: { pre
   };
 }
 
-export interface CategoryNode { id: number; slug: string; name: string; icon: string; description: string; templateId: string; children: CategoryNode[]; parentId: number | null; visible: boolean }
+export interface CategoryNode { id: number; slug: string; name: string; icon: string; description: string; templateId: string; ownTemplateId: string | null; depth: number; seasonIds: number[]; children: CategoryNode[]; parentId: number | null; visible: boolean }
 
 export async function getCategoryTree(db: D1Database, now = new Date()): Promise<CategoryNode[]> {
   const [cats, links] = await db.batch([
@@ -282,10 +298,14 @@ export async function getCategoryTree(db: D1Database, now = new Date()): Promise
   for (const l of links.results as Array<{ category_id: number; season_id: number }>) linkMap.set(l.category_id, [...(linkMap.get(l.category_id) ?? []), l.season_id]);
   const nodes = (cats.results as Array<Record<string, unknown>>).map<CategoryNode>(c => ({
     id: Number(c.id), slug: String(c.slug), name: String(c.name), icon: String(c.icon_url ?? '/img/placeholders/none.svg'),
-    description: String(c.description ?? ''), templateId: String(c.template_id), parentId: c.parent_id == null ? null : Number(c.parent_id),
+    description: String(c.description ?? ''), templateId: String(c.template_id ?? ''), ownTemplateId: (c.template_id as string) ?? null, depth: Number(c.depth ?? 1), seasonIds: linkMap.get(Number(c.id)) ?? [],
+    parentId: c.parent_id == null ? null : Number(c.parent_id),
     children: [], visible: categoryVisible(c as { season_visibility: string }, seasons.filter(s => (linkMap.get(Number(c.id)) ?? []).includes(s.id)), today),
   }));
   const byId = new Map(nodes.map(n => [n.id, n]));
+  // A child category inherits its parent's template unless it sets its own.
+  const resolve = (n: CategoryNode, guard = 0): string => n.ownTemplateId ?? (n.parentId && guard < 3 && byId.get(n.parentId) ? resolve(byId.get(n.parentId)!, guard + 1) : '');
+  for (const n of nodes) n.templateId = resolve(n);
   const roots: CategoryNode[] = [];
   for (const n of nodes) {
     if (n.parentId && byId.get(n.parentId)) byId.get(n.parentId)!.children.push(n);
@@ -354,4 +374,92 @@ export async function facets(db: D1Database, categoryIds: number[], template: Pr
     }
   }
   return out;
+}
+
+/** Category page header: the category, its effective template (inherited when not set) and its season links. */
+export async function getCategoryBySlug(db: D1Database, slug: string): Promise<{ id: number; slug: string; name: string; description: string | null; metaTitle: string | null; metaDescription: string | null; seasonVisibility: string; templateId: string; parentId: number | null; isActive: boolean; seasonIds: number[] } | null> {
+  const r = await db.prepare(
+    `WITH RECURSIVE up(id, parent_id, template_id, lvl) AS (
+       SELECT id, parent_id, template_id, 0 FROM categories WHERE slug = ? AND deleted_at IS NULL
+       UNION ALL SELECT c.id, c.parent_id, c.template_id, up.lvl + 1 FROM categories c JOIN up ON c.id = up.parent_id WHERE up.template_id IS NULL AND up.lvl < 3)
+     SELECT c.*, (SELECT template_id FROM up WHERE template_id IS NOT NULL ORDER BY lvl LIMIT 1) AS effective_template,
+            (SELECT json_group_array(season_id) FROM category_seasons cs WHERE cs.category_id = c.id) AS season_ids
+       FROM categories c WHERE c.slug = ? AND c.deleted_at IS NULL`,
+  ).bind(slug, slug).first<Record<string, unknown>>();
+  if (!r) return null;
+  return {
+    id: Number(r.id), slug: String(r.slug), name: String(r.name), description: (r.description as string) ?? null, metaTitle: (r.meta_title as string) ?? null,
+    metaDescription: (r.meta_description as string) ?? null, seasonVisibility: String(r.season_visibility), templateId: String(r.effective_template ?? ''),
+    parentId: r.parent_id == null ? null : Number(r.parent_id), isActive: Boolean(r.is_active), seasonIds: parseJson<number[]>(r.season_ids, []),
+  };
+}
+
+/** Delivery zone summary for the product page delivery panel. */
+export async function zoneSummaries(db: D1Database): Promise<Array<{ name: string; eta_text: string; base_charge_paisa: number }>> {
+  return (await db.prepare('SELECT name, eta_text, base_charge_paisa FROM delivery_zones ORDER BY sort_order').all<{ name: string; eta_text: string; base_charge_paisa: number }>()).results;
+}
+
+export async function sitemapEntries(db: D1Database, nowIso: string): Promise<{ products: Array<{ slug: string; updated_at: string }>; categories: Array<{ slug: string; updated_at: string }> }> {
+  const [products, cats] = await db.batch([
+    db.prepare("SELECT slug, updated_at FROM products WHERE deleted_at IS NULL AND (status = 'published' OR (status = 'scheduled' AND publish_at <= ?))").bind(nowIso),
+    db.prepare('SELECT slug, updated_at FROM categories WHERE is_active = 1 AND deleted_at IS NULL'),
+  ]);
+  return { products: products.results as Array<{ slug: string; updated_at: string }>, categories: cats.results as Array<{ slug: string; updated_at: string }> };
+}
+
+export async function suggestCategories(db: D1Database, terms: string[]): Promise<Array<{ slug: string; name: string }>> {
+  if (!terms.length) return [];
+  return (await db.prepare(`SELECT slug, name FROM categories WHERE is_active = 1 AND deleted_at IS NULL AND (${terms.map(() => "name LIKE ? ESCAPE '\\'").join(' OR ')}) LIMIT 4`)
+    .bind(...terms.map(t => `%${likeEscape(t)}%`)).all<{ slug: string; name: string }>()).results;
+}
+
+export async function productExists(db: D1Database, id: number): Promise<boolean> {
+  return Boolean(await db.prepare('SELECT 1 FROM products WHERE id = ? AND deleted_at IS NULL').bind(id).first());
+}
+
+export interface LiveVariant { id: number; pricePaisa: number; compareAtPricePaisa: number | null; available: number; canBuy: boolean; label: string }
+
+/**
+ * Live price and stock for cached pages (Section 2.2): /api/live?ids=… fills these in after the cached HTML paints.
+ * Checkout always re-validates on the server.
+ */
+export async function liveProducts(db: D1Database, ids: number[], now = new Date()): Promise<Record<number, { variants: LiveVariant[]; availability: Availability }>> {
+  if (!ids.length) return {};
+  const rows = await db.prepare(
+    `SELECT p.id AS pid, p.fulfilment_mode, p.preorder_dispatch_date, v.id, v.price_paisa, v.compare_at_price_paisa, v.stock, v.reserved,
+            (SELECT json_group_array(ps.season_id) FROM product_seasons ps WHERE ps.product_id = p.id) AS season_ids
+       FROM products p JOIN product_variants v ON v.product_id = p.id AND v.is_active = 1
+      WHERE p.id IN (${ids.map(() => '?').join(',')}) AND ${PUBLISHED_SQL} ORDER BY v.sort_order, v.id`,
+  ).bind(...ids, now.toISOString()).all<Record<string, unknown>>();
+  const seasons = await getSeasons(db);
+  const today = bdDate(now);
+  const out: Record<number, { variants: LiveVariant[]; availability: Availability }> = {};
+  const totals = new Map<number, number>();
+  for (const r of rows.results) {
+    const pid = Number(r.pid);
+    const linked = seasons.filter(s => parseJson<number[]>(r.season_ids, []).includes(s.id));
+    const available = Math.max(0, Number(r.stock) - Number(r.reserved));
+    const a = productAvailability(r as { fulfilment_mode: string; preorder_dispatch_date: string | null }, linked, available, today);
+    (out[pid] ??= { variants: [], availability: a }).variants.push({
+      id: Number(r.id), pricePaisa: Number(r.price_paisa), compareAtPricePaisa: r.compare_at_price_paisa == null ? null : Number(r.compare_at_price_paisa),
+      available, canBuy: a.canBuy, label: a.label,
+    });
+    totals.set(pid, (totals.get(pid) ?? 0) + available);
+    out[pid].availability = productAvailability(r as { fulfilment_mode: string; preorder_dispatch_date: string | null }, linked, totals.get(pid)!, today);
+  }
+  return out;
+}
+
+/** Variant rows with everything cart pricing needs (prices always come from here, never from the browser). */
+export async function cartVariantRows(db: D1Database, ids: number[]): Promise<Array<Record<string, unknown>>> {
+  if (!ids.length) return [];
+  return (await db.prepare(
+    `SELECT v.*, p.id AS pid, p.slug, p.name, p.template_id, p.status, p.publish_at, p.deleted_at, p.free_delivery, p.shipping_profile,
+            p.bulky_delivery_mode, p.fulfilment_mode, p.preorder_advance_type, p.preorder_advance_paisa, p.preorder_dispatch_date,
+            p.made_to_order_lead_days,
+            (SELECT url FROM product_media m WHERE m.product_id = p.id AND m.kind = 'image' ORDER BY m.sort_order, m.id LIMIT 1) AS image_url,
+            (SELECT json_group_array(ps.season_id) FROM product_seasons ps WHERE ps.product_id = p.id) AS season_ids
+       FROM product_variants v JOIN products p ON p.id = v.product_id
+      WHERE v.id IN (${ids.map(() => '?').join(',')})`,
+  ).bind(...ids).all<Record<string, unknown>>()).results;
 }

@@ -1,5 +1,6 @@
 import type { Child } from 'hono/jsx';
-import type { CategoryNode } from '../data/catalog';
+import type { CategoryNode } from '../repo/catalog';
+import { DEFAULT_COLORS, parseBrandColors, TRACKING_FORMATS } from '../lib/settings-schema';
 import { Icon } from './icons';
 
 export interface LayoutProps {
@@ -23,6 +24,24 @@ export interface LayoutProps {
 
 const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
 
+/** Pages that handle phone numbers, addresses or payments never load Google Tag Manager (Section 19). */
+const PRIVATE_PATHS = /^\/(cart|checkout|account|order|track|wishlist)(\/|$)/;
+
+/**
+ * Speculation Rules (Section 2.3): prefetch same-site links on hover/touch, prerender product pages on press.
+ * Never pages with side effects. Browsers without support fall back to the IntersectionObserver prefetch in app.js.
+ */
+const SPECULATION_RULES = {
+  prefetch: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/cart*' } }, { not: { href_matches: '/checkout*' } }, { not: { href_matches: '/account*' } }, { not: { href_matches: '/order/*' } }, { not: { href_matches: '/api/*' } }, { not: { href_matches: '/admin*' } }, { not: { selector_matches: '[rel~=nofollow]' } }] }, eagerness: 'moderate' }],
+  prerender: [{ where: { href_matches: '/p/*' }, eagerness: 'conservative' }],
+};
+
+function trackingConfig(s: Record<string, string>, path: string) {
+  const ok = (k: keyof typeof TRACKING_FORMATS) => (s[k] && TRACKING_FORMATS[k].test(s[k]) ? s[k] : null);
+  const cfg = { pixelId: ok('pixel_id'), ga4Id: ok('ga4_id'), clarityId: ok('clarity_id'), gtmId: PRIVATE_PATHS.test(path) ? null : ok('gtm_id') };
+  return Object.values(cfg).some(Boolean) ? cfg : null;
+}
+
 export function Layout(p: LayoutProps) {
   const s = p.settings;
   const store = s.store_name || 'Abs Vai';
@@ -31,6 +50,13 @@ export function Layout(p: LayoutProps) {
   const image = p.image ? (p.image.startsWith('http') ? p.image : `${p.siteUrl}${p.image}`) : `${p.siteUrl}/img/og-default.png`;
   const wa = s.whatsapp_number?.replace(/\D/g, '');
   const announce = s.announcement || '';
+  const logo = /^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/.test(s.brand_logo_url ?? '') ? s.brand_logo_url : null;
+  const colors = parseBrandColors(JSON.parse(s.brand_colors || '{}'));
+  const customColors = (Object.keys(DEFAULT_COLORS) as Array<keyof typeof DEFAULT_COLORS>).some(k => colors[k] !== DEFAULT_COLORS[k]);
+  const tracking = trackingConfig(s, p.path);
+  const Wordmark = (props: { light?: boolean }) => (
+    <a class={`wordmark${props.light ? ' wordmark-light' : ''}`} href="/" aria-label={`${store} home`}>{logo ? <img src={logo} alt={store} height="32" /> : <>Abs<span>Vai</span></>}</a>
+  );
   return (
     <html lang="en">
       <head>
@@ -40,7 +66,7 @@ export function Layout(p: LayoutProps) {
         {p.description && <meta name="description" content={p.description} />}
         <link rel="canonical" href={canonical} />
         {p.noindex && <meta name="robots" content="noindex" />}
-        <meta name="theme-color" content="#B3261E" />
+        <meta name="theme-color" content={colors.chili} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={store} />
         <meta property="og:title" content={p.title} />
@@ -50,10 +76,10 @@ export function Layout(p: LayoutProps) {
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800&display=swap" />
+        <link rel="preload" href="/fonts/poppins-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         <link rel="stylesheet" href="/css/app.css" />
+        {customColors && <link rel="stylesheet" href="/brand.css" />}
+        <script type="speculationrules" dangerouslySetInnerHTML={{ __html: json(SPECULATION_RULES) }} />
         {(p.jsonLd ?? []).map(d => <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json(d) }} />)}
       </head>
       <body class={p.bodyClass}>
@@ -66,7 +92,7 @@ export function Layout(p: LayoutProps) {
         <header class="site-header">
           <div class="header-inner">
             <button class="icon-btn" type="button" data-drawer-open aria-controls="drawer" aria-expanded="false" aria-label="Open menu"><Icon name="menu" /></button>
-            <a class="wordmark" href="/" aria-label={`${store} home`}>Abs<span>Vai</span></a>
+            <Wordmark />
             <form class="search" action="/search" method="get" role="search" data-search>
               <label class="sr-only" for="q">Search products</label>
               <input id="q" name="q" type="search" placeholder="Search gur, masala, sealer…" autocomplete="off" enterkeyhint="search" />
@@ -88,7 +114,7 @@ export function Layout(p: LayoutProps) {
         <div class="drawer-backdrop" data-drawer-close hidden />
         <nav class="drawer" id="drawer" aria-label="Menu" hidden>
           <div class="drawer-head">
-            <a class="wordmark" href="/">Abs<span>Vai</span></a>
+            <Wordmark />
             <button class="icon-btn" type="button" data-drawer-close aria-label="Close menu"><Icon name="close" /></button>
           </div>
           <ul class="drawer-list">
@@ -100,7 +126,13 @@ export function Layout(p: LayoutProps) {
                   {p.categories.map(c => (
                     <li>
                       <a href={`/c/${c.slug}`}><img src={c.icon} alt="" width="36" height="36" loading="lazy" />{c.name}</a>
-                      {c.children.length > 0 && <ul>{c.children.map(k => <li><a href={`/c/${k.slug}`}>{k.name}</a></li>)}</ul>}
+                      {c.children.length > 0 && (
+                        <ul>{c.children.map(k => (
+                          <li><a href={`/c/${k.slug}`}>{k.name}</a>
+                            {k.children.length > 0 && <ul class="drawer-sub-3">{k.children.map(g => <li><a href={`/c/${g.slug}`}>{g.name}</a></li>)}</ul>}
+                          </li>
+                        ))}</ul>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -122,7 +154,7 @@ export function Layout(p: LayoutProps) {
         <footer class="site-footer">
           <div class="footer-inner">
             <div>
-              <a class="wordmark wordmark-light" href="/">Abs<span>Vai</span></a>
+              <Wordmark light />
               <p>{s.tagline || 'Seasonal goods, honest prices.'}</p>
               <p class="small">{s.company_name || 'ABS VAI LTD'}{s.company_address ? ` · ${s.company_address}` : ''}</p>
             </div>
@@ -172,6 +204,8 @@ export function Layout(p: LayoutProps) {
         <div class="toast" role="status" aria-live="polite" data-toast hidden />
 
         {p.pageData && <script type="application/json" id="page-data" dangerouslySetInnerHTML={{ __html: json(p.pageData) }} />}
+        {tracking && <script type="application/json" id="tracking-config" dangerouslySetInnerHTML={{ __html: json(tracking) }} />}
+        {tracking && <script src="/js/track.js" defer />}
         {p.turnstileSiteKey && <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
         <script type="module" src="/js/app.js" />
         {(p.scripts ?? []).map(src => <script type="module" src={src} />)}
