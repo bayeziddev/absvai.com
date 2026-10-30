@@ -1,0 +1,41 @@
+# Abs Vai: one Worker serves the storefront, the admin app and every /api/* route.
+name = "absvai"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# Production domains. Comment out for a workers.dev preview deploy.
+routes = [
+  { pattern = "absvai.com", custom_domain = true },
+  { pattern = "www.absvai.com", custom_domain = true },
+]
+
+[assets]
+# Built by `npm run build` from public/, admin/ and the generated geo outlines.
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "none"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "absvai"
+# Replace with the id printed by `wrangler d1 create absvai`.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "KV"
+# Replace with the id printed by `wrangler kv namespace create absvai`.
+id = "00000000000000000000000000000000"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "absvai-media"
+
+[triggers]
+# 18:05 UTC = 00:05 Bangladesh time: season start/end switching and back-in-season messages.
+# Every 30 minutes: abandoned-checkout follow-up queue.
+crons = ["5 18 * * *", "*/30 * * * *"]
+
+[vars]
+SITE_URL = "https://absvai.com"
+ENVIRONMENT = "production"

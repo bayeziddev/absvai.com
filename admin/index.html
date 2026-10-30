@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Abs Vai Admin</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800&display=swap">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <div id="app" aria-live="polite"><p class="boot">Loading…</p></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog id="confirm" class="confirm">
+    <form method="dialog">
+      <p id="confirm-text"></p>
+      <div class="row-end"><button class="btn btn-ghost" value="no">Cancel</button><button class="btn btn-primary" value="yes">Yes, continue</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="/admin/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Copy to worker/.dev.vars for local development. Never commit real values.
+# One-time token for creating the first Super Admin at /admin/ (first-run setup).
+SETUP_TOKEN=change-me-local-only
+# Pepper mixed into OTP hashes.
+OTP_PEPPER=change-me-local-only
+# Optional: Cloudflare Turnstile secret. When set, checkout requires a Turnstile token.
+# TURNSTILE_SECRET=
+# Optional: SMS provider. Leave unset to write messages to the sms_outbox table only.
+# SMS_PROVIDER=
+# SMS_API_KEY=
