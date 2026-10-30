@@ -38,7 +38,7 @@ GitHub → the repository → **Settings → Secrets and variables → Actions �
 | `CLOUDFLARE_ACCOUNT_ID` | yes | dashboard → Workers & Pages → Account ID (right side) |
 | `SETUP_TOKEN` | yes | any long random text you choose (like a password); you type it once at `/admin/` to create the Super Admin |
 | `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY` | **no, created for you** | internal random keys nobody types (they hash SMS codes, sign checkout sessions and encrypt passwords saved in Settings). The first deploy creates them and keeps them on Cloudflare; later deploys keep the same ones. Add your own only if you want a copy (`openssl rand -base64 32` each) |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | Cloudflare → Turnstile → add a widget for `absvai.com` |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `absvai.absvai.workers.dev` and `absvai.com`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
 | `SMS_PROVIDER`, `SMS_API_KEY` | later | once the SMS gateway is chosen; until then messages are logged in Admin → SMS outbox |
 
 The deploy never replaces those three keys once they exist: if it can't read the Worker's secrets it stops instead. If you ever

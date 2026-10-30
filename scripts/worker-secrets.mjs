@@ -38,6 +38,12 @@ const secrets = {};
 const notes = [];
 for (const k of PASS_THROUGH) if (process.env[k]) secrets[k] = process.env[k];
 
+// Half a Turnstile setup would block every checkout: the secret makes the server demand a token the page can't produce.
+if (Boolean(process.env.TURNSTILE_SITE_KEY) !== Boolean(process.env.TURNSTILE_SECRET)) {
+  console.error('Add both TURNSTILE_SITE_KEY and TURNSTILE_SECRET (Cloudflare → Turnstile → your widget), or neither.');
+  process.exit(1);
+}
+
 if (process.env.SETTINGS_KEY && Buffer.from(process.env.SETTINGS_KEY, 'base64').length !== 32) {
   console.error('SETTINGS_KEY in GitHub must be 32 random bytes in base64 (openssl rand -base64 32), or remove it and let the deploy create one.');
   process.exit(1);
