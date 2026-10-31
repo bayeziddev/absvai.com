@@ -14,6 +14,7 @@ import { loadSettings, settingInt } from '../repo/settings';
 import { sendBackInSeason } from '../routes/admin-ops';
 import { flushPurges, purge } from '../services/cache';
 import { dailySummary, flushEmails, trimOldEmails } from '../services/email';
+import { syncCourierStatuses } from '../services/couriers';
 import { stageCounts } from '../repo/dashboard';
 import { newIncompleteCount } from '../repo/incomplete';
 import { lowStock } from '../repo/inventory';
@@ -71,6 +72,8 @@ export async function scheduled(controller: ScheduledController, env: Env, ctx?:
     await dailySummary(env, await attentionToday(env)).catch(e => console.warn('daily summary failed', e));
     await trimOldEmails(env);
   }
+  // Parcels the courier has not told us about for a few hours: ask the courier.
+  await syncCourierStatuses(env).catch(e => console.warn('courier sync failed', e));
   // Emails that could not go out right away (Resend busy, a rate limit) are retried here.
   await flushEmails(env, 40).catch(e => console.warn('email flush failed', e));
   await purge(env, undefined, tags);

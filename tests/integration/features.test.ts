@@ -167,3 +167,112 @@ describe('website: popup banner and shop name', () => {
     expect((await t.adminJson('/settings', 'PUT', { popup_banner: JSON.stringify({ ...popup, cta_href: 'javascript:alert(1)' }) })).status).toBe(400);
   });
 });
+
+describe('couriers: Steadfast and Pathao', () => {
+  const calls: Array<{ url: string; method: string; headers: Record<string, string>; body: Record<string, unknown> | null }> = [];
+  let courierFetch: typeof fetch;
+  let sfSeq = 1424107;
+  const statusOf = async (id: number) => (await t.sql<{ status: string; sub_status: string | null; tracking_id: string | null; consignment_id: string | null; courier: string | null }>('SELECT status, sub_status, tracking_id, consignment_id, courier FROM orders WHERE id = ?', id))[0];
+  async function packedOrder() {
+    const r = await place();
+    const id = r.body.orderId as number;
+    await t.adminJson(`/orders/${id}/call`, 'POST', { outcome: 'confirmed' });
+    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'confirmed' })).status).toBe(200);
+    expect((await t.adminJson(`/orders/${id}/status`, 'POST', { to: 'packed' })).status).toBe(200);
+    return { id, orderNo: r.body.orderNo as string };
+  }
+
+  beforeAll(() => {
+    const before = globalThis.fetch;
+    courierFetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input instanceof Request ? input.url : input);
+      if (!/packzy\.com|pathao\.com/.test(url)) return before(input, init);
+      const headers: Record<string, string> = {};
+      new Headers(init?.headers).forEach((v, k) => { headers[k] = v; });
+      calls.push({ url, method: init?.method ?? 'GET', headers, body: init?.body ? JSON.parse(String(init.body)) : null });
+      const json = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'content-type': 'application/json' } });
+      if (url.endsWith('/create_order')) { const n = sfSeq++; return json({ status: 200, message: 'Consignment has been created successfully.', consignment: { consignment_id: n, tracking_code: `15BA${n}`, status: 'in_review' } }); }
+      if (url.endsWith('/get_balance')) return json({ status: 200, current_balance: 1500 });
+      if (url.includes('/status_by_cid/')) return json({ status: 200, delivery_status: 'delivered' });
+      if (url.endsWith('/issue-token')) return json({ token_type: 'Bearer', expires_in: 3600, access_token: 'pathao-token' });
+      if (url.endsWith('/stores')) return json({ data: { data: [{ store_id: 777, store_name: 'Abs Vai Tangail' }] } });
+      if (url.endsWith('/city-list')) return json({ data: { data: [{ city_id: 9, city_name: 'Tangail' }] } });
+      if (url.includes('/zone-list')) return json({ data: { data: [{ zone_id: 91, zone_name: 'Kalihati' }] } });
+      if (url.endsWith('/aladdin/api/v1/orders')) return json({ data: { consignment_id: 'DL121224VS8TEN', merchant_order_id: 'x', order_status: 'Pending', delivery_fee: 110 } });
+      return json({ message: 'not found' }, 404);
+    }) as typeof fetch;
+    globalThis.fetch = courierFetch;
+  });
+
+  it('books a packed order with Steadfast, gets the tracking code and moves it to In Courier', async () => {
+    expect((await t.adminJson('/settings', 'PUT', { steadfast_api_key: 'sf-key', steadfast_secret_key: 'sf-secret' })).status).toBe(200);
+    expect((await t.adminJson('/couriers/steadfast/test', 'POST', {})).body.message).toMatch(/Balance: ৳1,500/);
+    const { id, orderNo } = await packedOrder();
+    const r = await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'steadfast' });
+    expect(r.body).toMatchObject({ ok: true, consignmentId: '1424107', trackingId: '15BA1424107' });
+    expect(await statusOf(id)).toMatchObject({ status: 'in_courier', courier: 'steadfast', tracking_id: '15BA1424107', consignment_id: '1424107' });
+    const sent = calls.find(c => c.url.endsWith('/create_order'))!;
+    expect(sent.headers).toMatchObject({ 'api-key': 'sf-key', 'secret-key': 'sf-secret' });
+    expect(sent.body).toMatchObject({ invoice: orderNo, recipient_phone: expect.stringMatching(/^01\d{9}$/), cod_amount: expect.any(Number) });
+    // Booking again is harmless.
+    expect((await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'steadfast' })).body.trackingId).toBe('15BA1424107');
+    // Only packed orders can be booked.
+    const fresh = await place();
+    expect((await t.adminJson(`/orders/${fresh.body.orderId}/book`, 'POST', { courier: 'steadfast' })).body.error).toMatch(/Pack order/);
+  });
+
+  it('takes Steadfast webhooks only with the right token, and delivered parcels close the order', async () => {
+    const { id } = await packedOrder();
+    const booked = await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'steadfast' });
+    const cid = booked.body.consignmentId as string;
+    const [{ order_no: invoice }] = await t.sql<{ order_no: string }>('SELECT order_no FROM orders WHERE id = ?', id);
+    const token = (await t.adminJson('/couriers/setup')).body.steadfast.webhookToken;
+    const hook = (auth: string, b: object) => t.fetch('/api/webhooks/steadfast', { method: 'POST', headers: { authorization: auth, 'content-type': 'application/json' }, body: JSON.stringify(b) });
+    expect((await hook('Bearer wrong', { consignment_id: cid, status: 'delivered' })).status).toBe(401);
+    expect((await hook(`Bearer ${token}`, { consignment_id: cid, invoice, status: 'hold' })).status).toBe(200);
+    expect(await statusOf(id)).toMatchObject({ status: 'in_courier', sub_status: 'on_hold' });
+    expect((await hook(`Bearer ${token}`, { consignment_id: cid, invoice, status: 'delivered', cod_amount: 500 })).status).toBe(200);
+    expect((await statusOf(id)).status).toBe('delivered');
+    // A repeat of the same news changes nothing.
+    expect((await (await hook(`Bearer ${token}`, { consignment_id: cid, status: 'delivered' })).json() as { result: string }).result).toBe('ignored');
+  });
+
+  it('books with Pathao after the area is chosen once, and Pathao webhooks update the order', async () => {
+    expect((await t.adminJson('/settings', 'PUT', { pathao_client_id: '1234', pathao_client_secret: 'pa-secret', pathao_username: 'owner@absvai.test', pathao_password: 'pa-pass', pathao_webhook_integration_secret: 'pathao-handshake' })).status).toBe(200);
+    const test = await t.adminJson('/couriers/pathao/test', 'POST', {});
+    expect(test.body.stores).toEqual([{ id: '777', name: 'Abs Vai Tangail' }]);
+    await t.adminJson('/settings', 'PUT', { pathao_store_id: '777' });
+    const { id, orderNo } = await packedOrder();
+    const first = await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'pathao' });
+    expect(first.status).toBe(409);
+    expect(first.body.details.needsArea).toMatchObject({ upazilaId: ids.kalihati, name: 'Kalihati, Tangail' });
+    expect((await t.adminJson('/couriers/pathao/cities')).body).toEqual([{ id: '9', name: 'Tangail' }]);
+    expect((await t.adminJson('/couriers/pathao/area', 'PUT', { upazilaId: ids.kalihati, cityId: '9', zoneId: '91' })).status).toBe(200);
+    const r = await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'pathao' });
+    expect(r.body.trackingId).toBe('DL121224VS8TEN');
+    const sent = calls.filter(c => c.url.endsWith('/aladdin/api/v1/orders')).at(-1)!;
+    expect(sent.headers.authorization).toBe('Bearer pathao-token');
+    expect(sent.body).toMatchObject({ store_id: 777, merchant_order_id: orderNo, recipient_city: 9, recipient_zone: 91, delivery_type: 48, item_type: 2 });
+    expect(Number(sent.body!.item_weight)).toBeGreaterThanOrEqual(0.5);
+
+    const url = new URL((await t.adminJson('/couriers/setup')).body.pathao.webhookUrl);
+    const hook = (path: string, b: object) => t.fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) });
+    expect((await hook('/api/webhooks/pathao/not-the-token', { consignment_id: 'DL121224VS8TEN', event: 'order.delivered' })).status).toBe(401);
+    const shake = await hook(url.pathname, { event: 'webhook_integration' });
+    expect(shake.status).toBe(202);
+    expect(shake.headers.get('x-pathao-merchant-webhook-integration-secret')).toBe('pathao-handshake');
+    await hook(url.pathname, { consignment_id: 'DL121224VS8TEN', merchant_order_id: orderNo, event: 'order.in-transit' });
+    expect((await statusOf(id)).sub_status).toBe('in_transit');
+    await hook(url.pathname, { consignment_id: 'DL121224VS8TEN', merchant_order_id: orderNo, event: 'order.returned' });
+    expect(await statusOf(id)).toMatchObject({ status: 'returned', sub_status: 'in_transit_back' });
+  });
+
+  it('asks the courier about quiet parcels from the cron', async () => {
+    const { id } = await packedOrder();
+    await t.adminJson(`/orders/${id}/book`, 'POST', { courier: 'steadfast' });
+    await t.sql("UPDATE orders SET last_courier_update_at = '2026-01-01T00:00:00.000Z' WHERE id = ?", id);
+    const { syncCourierStatuses } = await import('../../worker/src/services/couriers');
+    expect(await syncCourierStatuses(t.env)).toBeGreaterThanOrEqual(1);
+    expect((await statusOf(id)).status).toBe('delivered');
+  });
+});

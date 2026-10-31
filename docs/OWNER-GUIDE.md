@@ -99,6 +99,29 @@ Actions); the deploy copies it to the Worker. Until your own domain (for example
 Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
 the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@absvai.com>`.
 
+## Couriers: Steadfast and Pathao
+
+**Couriers** (in the menu, under Delivery) connects your courier accounts. Keys are saved encrypted; only the Owner / Super
+Admin can change them.
+
+| Courier | Where to find the keys | Paste into Couriers | Webhook to add in the courier's panel |
+|---|---|---|---|
+| Steadfast | Steadfast merchant panel → API | **API Key**, **Secret Key** | **Callback URL** `https://absvai.absvai.workers.dev/api/webhooks/steadfast` and the **Auth Token (Bearer)** shown on the Couriers page |
+| Pathao | Pathao merchant panel → Developers API → Merchant API Credentials | **Client ID**, **Client Secret**, your Pathao **login email** and **password**; then **Test connection** and pick the **pickup store** | The **Callback URL** shown on the Couriers page (it ends with a secret code). If Pathao shows an integration secret, paste it into Couriers |
+
+After `absvai.com` is connected, the addresses change to `https://absvai.com/…`; the Couriers page always shows the right ones.
+
+Press **Test connection** after saving: Steadfast shows your balance, Pathao lists your pickup stores.
+
+**Booking**: open a **Packed** order → **Book with Steadfast** or **Book with Pathao**, or tick several packed orders in the
+list → **Book with Steadfast / Pathao** (up to 50 at a time). The courier sends back the tracking ID, the order moves to
+**In Courier**, and the customer gets the tracking SMS (and email). The amount to collect is the order total minus any advance
+already received. The first time Pathao delivers to an area, choose Pathao's city and zone for it once; it is remembered.
+
+**Tracking**: when the courier updates a parcel, the order updates by itself: delivered parcels move to **Delivered**, returned
+or cancelled ones to **Returned** (scan them in when they arrive), and picked up / in transit / on hold show on the order. If a
+courier goes quiet, the shop asks it every few hours.
+
 ## Chat and the assistants
 
 The green chat button on the shop opens a small menu: **Ask our shop assistant** (instant answers about products, delivery

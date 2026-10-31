@@ -9,6 +9,7 @@ import { buildCsp } from './lib/csp';
 import { HttpError } from './lib/http';
 import { originalOf } from './lib/images';
 import { flushEmails } from './services/email';
+import { webhooks } from './routes/webhooks';
 import { admin } from './routes/admin';
 import { api } from './routes/api';
 import { notFound, pages } from './routes/pages';
@@ -46,12 +47,13 @@ app.onError(async (err, c) => {
 });
 
 // Emails queued while placing or changing orders (and from the Emails page) go out right after the response.
-const SENDS_EMAIL = /^\/api\/(checkout\/place|wholesale-inquiry|admin\/(orders|manual|emails|returns))/;
+const SENDS_EMAIL = /^\/api\/(checkout\/place|wholesale-inquiry|webhooks|admin\/(orders|manual|emails|returns|couriers))/;
 app.use('/api/*', async (c, next) => {
   await next();
   if (c.req.method !== 'GET' && SENDS_EMAIL.test(c.req.path) && c.res.status < 400) c.executionCtx.waitUntil(flushEmails(c.env).catch(e => console.warn('email flush failed', e)));
 });
 
+app.route('/api/webhooks', webhooks);
 app.route('/api/admin', admin);
 app.route('/api', api);
 

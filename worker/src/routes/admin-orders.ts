@@ -26,6 +26,9 @@ import { sanitizeLines } from '../services/cart';
 import { blockValue } from '../services/fraud';
 import { changeStatus, COURIERS, courierLabel, MANUAL_SOURCES, ORDER_SOURCES, placeOrder, receiveReturnScan } from '../services/orders';
 import { allowed, audit, need, needAny } from './admin-helpers';
+import { API_COURIERS, bookOrder, isApiCourier, pathaoLookup, PATHAO_DEFAULT_URL, STEADFAST_DEFAULT_URL, testCourier, webhookToken } from '../services/couriers';
+import { getSecret, loadSettings } from '../repo/settings';
+import { saveCourierArea } from '../repo/geo';
 import { settingsOf } from './context';
 
 export const adminOrders = new Hono<AppEnv>();
@@ -286,6 +289,77 @@ adminOrders.post('/orders/assign', need('orders:write'), async c => {
   const n = await assignOrders(c.env.DB, ids, adminId);
   await audit(c, 'order.assign', 'order', null, { ids, adminId });
   return c.json({ ok: true, updated: n });
+});
+
+// ───────────── Courier booking (Steadfast, Pathao) ─────────────
+
+/** Books one packed order with a courier: the tracking ID comes back and the order moves to In Courier. */
+adminOrders.post('/orders/:id/book', needAny('orders:write', 'orders:pack'), async c => {
+  const id = posInt(c.req.param('id')) ?? 0;
+  const courier = str((await readJson(c)).courier, 20);
+  if (!isApiCourier(courier)) throw bad('Choose Steadfast or Pathao.');
+  const r = await bookOrder(c.env, id, courier, c.var.session.adminId);
+  await audit(c, 'order.book', 'order', id, { courier, consignment: r.consignmentId });
+  return c.json({ ok: true, ...r });
+});
+
+/** Books many packed orders at once (up to 50 per press); each order's result is listed. */
+adminOrders.post('/orders/book-bulk', needAny('orders:write', 'orders:pack'), async c => {
+  const b = await readJson(c);
+  const courier = str(b.courier, 20);
+  if (!isApiCourier(courier)) throw bad('Choose Steadfast or Pathao.');
+  const ids = (Array.isArray(b.ids) ? b.ids : []).map(Number).filter(n => Number.isInteger(n) && n > 0).slice(0, 50);
+  if (!ids.length) throw bad('Select the packed orders to book.');
+  const results: Array<{ id: number; ok: boolean; trackingId?: string; error?: string }> = [];
+  for (const id of ids) {
+    try { results.push({ id, ok: true, trackingId: (await bookOrder(c.env, id, courier, c.var.session.adminId)).trackingId }); } catch (e) { results.push({ id, ok: false, error: e instanceof Error ? e.message : String(e) }); }
+  }
+  await audit(c, 'order.book_bulk', 'order', null, { courier, booked: results.filter(r => r.ok).length, failed: results.filter(r => !r.ok).length });
+  return c.json({ results });
+});
+
+/** The Couriers page: what is connected, and the webhook addresses to paste into each courier's panel. */
+adminOrders.get('/couriers/setup', need('settings:read'), async c => {
+  const s = await loadSettings(c.env.DB);
+  const has = async (k: string) => Boolean(await getSecret(c.env, k));
+  const site = c.env.SITE_URL;
+  return c.json({
+    steadfast: {
+      connected: (await has('steadfast_api_key')) && (await has('steadfast_secret_key')), baseUrl: s.steadfast_base_url || STEADFAST_DEFAULT_URL, defaultUrl: STEADFAST_DEFAULT_URL,
+      webhookUrl: `${site}/api/webhooks/steadfast`, webhookToken: await webhookToken(c.env, 'steadfast'),
+    },
+    pathao: {
+      connected: Boolean(s.pathao_client_id && s.pathao_username && (await has('pathao_client_secret')) && (await has('pathao_password'))), baseUrl: s.pathao_base_url || PATHAO_DEFAULT_URL, defaultUrl: PATHAO_DEFAULT_URL,
+      clientId: s.pathao_client_id ?? '', username: s.pathao_username ?? '', storeId: s.pathao_store_id ?? '', integrationSecret: s.pathao_webhook_integration_secret ?? '',
+      webhookUrl: `${site}/api/webhooks/pathao/${await webhookToken(c.env, 'pathao')}`,
+    },
+    couriers: API_COURIERS,
+  });
+});
+
+adminOrders.post('/couriers/:courier/test', need('settings:read'), async c => {
+  const courier = c.req.param('courier');
+  if (!isApiCourier(courier)) throw notFound();
+  return c.json(await testCourier(c.env, courier));
+});
+
+/** Pathao's cities, zones (of a city), areas (of a zone) and pickup stores, for the pickers. */
+adminOrders.get('/couriers/pathao/:what', needAny('orders:write', 'orders:pack', 'settings:read'), async c => {
+  const what = c.req.param('what');
+  if (!['cities', 'zones', 'areas', 'stores'].includes(what)) throw notFound();
+  return c.json(await pathaoLookup(c.env, what as 'cities' | 'zones' | 'areas' | 'stores', str(c.req.query('parent'), 20) || undefined));
+});
+
+/** Saves Pathao's city/zone/area for one of our areas (from the booking picker), then booking can go ahead. */
+adminOrders.put('/couriers/pathao/area', needAny('orders:write', 'orders:pack', 'geo:write'), async c => {
+  const b = await readJson(c);
+  const upazilaId = posInt(b.upazilaId);
+  const cityId = str(b.cityId, 20);
+  const zoneId = str(b.zoneId, 20);
+  if (!upazilaId || !cityId || !zoneId) throw bad('Choose the Pathao city and zone.');
+  await saveCourierArea(c.env.DB, { courier: 'pathao', upazilaId, cityId, zoneId, areaId: str(b.areaId, 20) || null, label: str(b.label, 80) || null });
+  await audit(c, 'courier.map', 'upazila', upazilaId, { courier: 'pathao' });
+  return c.json({ ok: true });
 });
 
 adminOrders.post('/orders/:id/courier', needAny('orders:write', 'orders:pack'), async c => {

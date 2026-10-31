@@ -39,7 +39,8 @@ export async function orders(v, [id]) {
     <div class="filters" id="bulk" hidden><b id="bulk-n"></b>
       ${canMove() ? `<select class="i" id="bulk-to"><option value="">Move to…</option>${can('orders:write') ? '<option value="confirmed">Confirmed</option>' : ''}<option value="packed">Packed</option><option value="in_courier">In Courier</option>${can('orders:write') ? '<option value="delivered">Delivered</option><option value="cancelled">Cancelled</option>' : ''}</select>
         <select class="i" id="bulk-courier" hidden>${Object.entries(m.couriers).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select>
-        <button class="btn btn-primary btn-sm" id="bulk-go">Apply</button>` : ''}
+        <button class="btn btn-primary btn-sm" id="bulk-go">Apply</button>
+        <button class="btn btn-outline btn-sm" data-bulk-book="steadfast">Book with Steadfast</button><button class="btn btn-outline btn-sm" data-bulk-book="pathao">Book with Pathao</button>` : ''}
       ${can('orders:write') ? `<select class="i" id="bulk-assign"><option value="">Assign to…</option><option value="-">Nobody</option>${staff.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</select>` : ''}
       <button class="btn btn-outline btn-sm" data-print="invoice-a4">Invoices (A4)</button><button class="btn btn-outline btn-sm" data-print="invoice-thermal">Invoices (4×6)</button>
       <button class="btn btn-outline btn-sm" data-print="slip-a4">Packing slips</button><button class="btn btn-outline btn-sm" data-print="picking">Picking list</button></div>
@@ -93,6 +94,14 @@ export async function orders(v, [id]) {
     toast(failed.length ? `${r.summary}. First problem: ${failed[0].message}` : r.summary, failed.length > 0);
     orders(v, []);
   });
+  v.querySelectorAll('[data-bulk-book]').forEach(b => busy(b, async () => {
+    const ids = picked();
+    if (!(await confirmBox(`Book ${ids.length} packed order(s) with ${b.textContent.replace('Book with ', '')}?`))) return;
+    const r = await api('/orders/book-bulk', 'POST', { ids, courier: b.dataset.bulkBook });
+    const failed = r.results.filter(x => !x.ok);
+    toast(failed.length ? `${r.results.length - failed.length} booked, ${failed.length} not: ${failed[0].error}` : `${r.results.length} order(s) booked and moved to In Courier.`, failed.length > 0);
+    orders(v, []);
+  }));
   $('#bulk-assign')?.addEventListener('change', async e => {
     if (!e.target.value) return;
     try {
@@ -151,6 +160,8 @@ export async function openOrder(id, { onChange } = {}) {
           ${o.advance_required ? `<div class="card"><h2>Advance ${badge(o.advance_status)}</h2><p class="small">${esc(o.advance_reason ?? '')}</p><dl class="kv"><dt>Amount</dt><dd>${taka(o.advance_amount_paisa)}</dd><dt>TrxID</dt><dd>${esc(o.advance_trx_id ?? '—')} ${o.advance_wallet ? `(${esc(o.advance_wallet)})` : ''}</dd></dl>
             ${write && o.advance_status !== 'paid' ? `<div class="row" style="margin-top:10px"><input class="i" id="adv-amt" value="${o.advance_amount_paisa ? o.advance_amount_paisa / 100 : ''}" placeholder="Amount received ৳" style="max-width:150px"><button class="btn btn-leaf btn-sm" id="adv-ok">Mark received</button>${o.advance_status === 'submitted' ? '<button class="btn btn-outline btn-sm" id="adv-no">Not found</button>' : ''}</div>` : ''}</div>` : ''}
           ${write && o.status === 'new' ? `<div class="card"><h2>Confirmation call</h2><div class="row"><select class="i" id="call-out" style="flex:1">${CALLS.map(([x, l]) => `<option value="${x}">${l}</option>`).join('')}</select></div><input class="i" id="call-note" placeholder="What did they say? (optional)" style="margin:8px 0"><button class="btn btn-outline btn-sm" id="call-go">Log call</button>${o.call_attempts ? `<p class="small muted">${o.call_attempts} call attempt(s) so far.</p>` : ''}</div>` : ''}
+          ${canMove() && o.status === 'packed' ? `<div class="card book-card"><h2>Send with a courier</h2><p class="small muted">Books the parcel in the courier’s system. The tracking ID comes back by itself and the customer gets it by SMS and email.</p>
+            <div class="row"><button class="btn btn-primary" data-book="steadfast">Book with Steadfast</button><button class="btn btn-outline" data-book="pathao">Book with Pathao</button></div></div>` : ''}
           ${canMove() ? `<div class="card"><h2>Move order</h2>
             ${d.nextStatuses.length ? `<select class="i" id="to">${d.nextStatuses.map(s => `<option value="${s.value}">${s.label}</option>`).join('')}</select>
             <div id="ship" hidden class="grid-2" style="margin-top:8px"><label class="f">Courier<select id="courier">${Object.entries(m.couriers).map(([k, l]) => `<option value="${k}" ${o.courier === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label><label class="f">Tracking ID<input id="tracking" value="${esc(o.tracking_id ?? '')}"></label></div>
@@ -175,6 +186,10 @@ export async function openOrder(id, { onChange } = {}) {
     if ($('#call-go')) busy($('#call-go'), async () => { await api(`/orders/${id}/call`, 'POST', { outcome: $('#call-out').value, note: $('#call-note').value }); await after('Call logged.'); });
     for (const b of ['#claim', '#claim2']) if ($(b)) busy($(b), async () => { await api('/orders/assign', 'POST', { ids: [id], adminId: state.user.id }); await after('Assigned to you.'); });
     if ($('#blk-go')) busy($('#blk-go'), async () => { if (await confirmBox('Block this customer from ordering online? You can undo it in Security.')) { await api(`/orders/${id}/block`, 'POST', { type: $('#blk-type').value, reason: $('#blk-reason').value }); await after('Blocked.'); } });
+    so.body.querySelectorAll('[data-book]').forEach(b => busy(b, async () => {
+      const r = await bookWithCourier(id, b.dataset.book);
+      if (r) await after(`Booked. Tracking ID ${r.trackingId}. The order is now In Courier.`);
+    }));
     $('#sub')?.addEventListener('change', async e => { try { await api(`/orders/${id}/courier`, 'POST', { subStatus: e.target.value }); await after('Courier status saved.'); } catch (err) { toast(err.message, true); } });
     const to = $('#to');
     if (to) {
@@ -191,6 +206,47 @@ export async function openOrder(id, { onChange } = {}) {
     $('#test')?.addEventListener('change', async e => { await api(`/orders/${id}/test`, 'POST', { isTest: e.target.checked }); toast('Saved.'); });
   };
   await load();
+}
+
+/**
+ * Books an order with a courier. Pathao needs its own city and zone for the customer's area: the first time an area
+ * is used, staff pick them once from Pathao's lists, and booking continues.
+ */
+async function bookWithCourier(id, courier) {
+  try { return await api(`/orders/${id}/book`, 'POST', { courier }); } catch (err) {
+    const need = err.data?.details?.needsArea;
+    if (!need) throw err;
+    if (!(await pathaoAreaPicker(need))) return null;
+    return api(`/orders/${id}/book`, 'POST', { courier });
+  }
+}
+
+function pathaoAreaPicker(need) {
+  return new Promise(resolve => {
+    let done = false;
+    const so = slideOver(`Pathao area for ${need.name}`, { onClose: () => { if (!done) resolve(false); } });
+    so.body.innerHTML = `<p class="small muted">Pathao uses its own list of areas. Choose the one that matches <b>${esc(need.name)}</b>. It is saved, so the next order from this area books in one tap.</p>
+      <label class="f">City<select id="pc"><option value="">Loading…</option></select></label><label class="f">Zone<select id="pz" disabled></select></label><label class="f">Area (optional)<select id="pa" disabled></select></label>`;
+    so.foot.innerHTML = '<span></span><button class="btn btn-primary" id="ps">Save and book</button>';
+    const $ = s => so.body.querySelector(s);
+    const fill = (sel, rows, guess) => {
+      sel.innerHTML = `<option value="">Choose…</option>${rows.map(r => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('')}`;
+      sel.disabled = false;
+      const hit = rows.find(r => guess.some(g => r.name.toLowerCase().includes(g)));
+      if (hit) { sel.value = hit.id; sel.dispatchEvent(new Event('change')); }
+    };
+    const words = need.name.toLowerCase().split(/[,\s]+/).filter(w => w.length > 3);
+    $('#pc').addEventListener('change', async e => { $('#pa').innerHTML = ''; if (e.target.value) fill($('#pz'), await api(`/couriers/pathao/zones?parent=${encodeURIComponent(e.target.value)}`), words); });
+    $('#pz').addEventListener('change', async e => { if (e.target.value) fill($('#pa'), await api(`/couriers/pathao/areas?parent=${encodeURIComponent(e.target.value)}`), words); });
+    api('/couriers/pathao/cities').then(rows => fill($('#pc'), rows, words.slice(-1))).catch(err => { toast(err.message, true); });
+    busy(so.foot.querySelector('#ps'), async () => {
+      if (!$('#pc').value || !$('#pz').value) throw new Error('Choose the city and zone.');
+      await api('/couriers/pathao/area', 'PUT', { upazilaId: need.upazilaId, cityId: $('#pc').value, zoneId: $('#pz').value, areaId: $('#pa').value, label: need.name });
+      done = true;
+      so.close();
+      resolve(true);
+    });
+  });
 }
 
 /** Browser-printed invoice: renders any script (Bangla names included), unlike the standard-font PDF. */

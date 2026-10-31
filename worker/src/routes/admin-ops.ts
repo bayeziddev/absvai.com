@@ -23,7 +23,7 @@ import { newIncompleteCount } from '../repo/incomplete';
 import { ADJUST_REASONS, adjustStock, inventoryList, lowStock, movements, productAvailable, stockValue, variantProduct } from '../repo/inventory';
 import { addSynonym, deleteSynonym, listSynonyms, listWholesale, markNotified, notifySummary, setWholesaleStatus, waitingNotify } from '../repo/misc';
 import { createSeason, deleteSeason, resetEndedSeasons, seasonReadiness, seasonsOfProduct, seasonsWithCounts, updateSeason } from '../repo/seasons';
-import { bumpGeoVersion, loadSettings, settingInt } from '../repo/settings';
+import { bumpGeoVersion, getSecret, loadSettings, settingInt } from '../repo/settings';
 import { adminSystemPrompt, askModel, cleanTurns, guideSections, matchGuide, ownerGuide } from '../services/assistant';
 import { listOutbox } from '../repo/sms';
 import { productRow } from '../repo/catalog-admin';
@@ -92,7 +92,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
     { label: 'Edge cache', ok: backlog < 50, text: backlog ? `${backlog} page tag(s) waiting to refresh` : 'Pages up to date at the edge' },
     { label: 'Photo storage', ok: Boolean(c.env.MEDIA), text: c.env.MEDIA ? 'Photo storage (R2) on' : 'Photo storage off: switch on R2 in Cloudflare' },
     { label: 'Email', ok: Boolean(c.env.RESEND_API_KEY), text: c.env.RESEND_API_KEY ? 'Email (Resend) connected' : 'Email not connected (add RESEND_API_KEY in GitHub secrets)' },
-    { label: 'Courier', ok: false, text: 'Courier API not connected yet (Phase 2)' },
+    { label: 'Courier', ok: Boolean((await loadSettings(db)).pathao_client_id) || Boolean(await getSecret(c.env, 'steadfast_api_key')), text: 'Courier booking (Steadfast, Pathao): set up in Couriers' },
   ];
 
   return c.json({

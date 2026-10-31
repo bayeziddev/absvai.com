@@ -281,7 +281,15 @@ cannot double-reserve or double-ship; illegal moves are refused and logged as `r
 `sale`, `return_received`, `adjustment`…). Returns scan: Sales → Returns scan accepts the invoice, order or tracking barcode; a second
 scan is refused. *Integration + E2E tested.*
 
-### 9.2 Courier integrations — **Planned P2** (*confirm*)
+### 9.2 Courier integrations — **Built for Steadfast and Pathao** (*confirm with the first test booking*)
+Steadfast (API key + secret key headers; create order, balance, status by consignment id; Bearer-token webhook) and Pathao
+(password-grant token cached in KV; city/zone/area/store lists; create order; order info; webhook with a secret URL token and
+the integration-secret reply header) live in `worker/src/services/couriers.ts`, with the API addresses editable in Admin →
+Couriers. The shapes follow the couriers' merchant API as used by their published integrations; their official pages need a
+merchant login, so the first booking is the confirmation. The courier's own error text is shown to staff. RedX and Carrybee
+keep manual tracking IDs.
+
+#### Original plan
 Steadfast, Pathao, RedX and Carrybee are configured as couriers (labels, default courier per zone, `courier_area_map` for their
 city/zone/area IDs, encrypted credential slots in Settings). Booking, status sync and webhooks will be written from each provider's
 official API documentation once the client confirms which accounts exist. Until then staff enter the tracking ID when moving an order

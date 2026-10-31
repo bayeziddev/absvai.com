@@ -299,3 +299,9 @@ body:has(.save-bar) .ai-panel { bottom: 146px; height: min(560px, calc(100dvh - 
 .em-status li.ok { border-color: var(--leaf); } .em-status li.warn { border-color: var(--turmeric); } .em-status li.bad { border-color: var(--chili); }
 /* A side panel (product, order, category…) has its own Save buttons at the bottom: the assistant steps aside. */
 body:has(.over) .ai-fab, body:has(.over) .ai-panel, body:has(dialog[open]) .ai-fab { display: none; }
+/* Couriers page */
+.howto { margin: 0 0 12px; padding-left: 20px; line-height: 1.6; }
+.copy-row { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 6px 0; }
+.copy-row code { overflow-wrap: anywhere; background: var(--bg); padding: 6px 8px; border-radius: 8px; font-size: 12px; }
+@media (max-width: 640px) { .copy-row { grid-template-columns: 1fr auto; } .copy-row span { grid-column: 1 / -1; } }
+.book-card .row { gap: 8px; flex-wrap: wrap; }

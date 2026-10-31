@@ -9,6 +9,7 @@ import { security } from './views/security.js';
 import { help, settings, soon, staff } from './views/settings.js';
 import { website } from './views/website.js';
 import { emails } from './views/emails.js';
+import { courier } from './views/courier.js';
 
 // `simple: true` items are the everyday screens shown in simple mode (the default); "Show all tools" reveals the rest.
 export const NAV = [
@@ -28,6 +29,7 @@ export const NAV = [
   { group: 'Stock' },
   { route: 'inventory', simple: true, label: 'Inventory', icon: 'box' },
   { group: 'Delivery' },
+  { route: 'courier', simple: true, label: 'Couriers', icon: 'truck' },
   { route: 'zones', label: 'Delivery zones', icon: 'truck' },
   { route: 'geo', label: 'Postcodes & geo', icon: 'pin' },
   { route: 'couriers', label: 'Courier area mapping', icon: 'truck' },
@@ -55,5 +57,5 @@ export const NAV = [
 
 export const routes = {
   dashboard, orders, incomplete, manual, returns, preorders, customers, wholesale, products, categories, templates, attributes, labels,
-  inventory, seasons, synonyms, zones, geo, couriers, settings, staff, security, outbox, audit, help, soon, website, emails,
+  inventory, seasons, synonyms, zones, geo, couriers, settings, staff, security, outbox, audit, help, soon, website, emails, courier,
 };
