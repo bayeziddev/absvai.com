@@ -190,7 +190,7 @@ export async function applyCourierStatus(env: Env, order: Json, courier: string,
   if (out.to === 'delivered') { await changeStatus(env, id, 'delivered', { actor: 'courier', adminId: null, note: label }); return 'moved'; }
   if (out.to === 'returned') { await changeStatus(env, id, 'returned', { actor: 'courier', adminId: null, returnReason: 'other', note: `${label} (the parcel is coming back; scan it in when it arrives)` }); return 'moved'; }
   if (out.sub === order.sub_status && out.sub) { await touchCourierUpdate(env.DB, id); return 'ignored'; }
-  await courierProgress(env.DB, id, out.sub ?? null, label);
+  await courierProgress(env.DB, id, out.sub ?? null, label, { name: courier, words: raw });
   return 'noted';
 }
 

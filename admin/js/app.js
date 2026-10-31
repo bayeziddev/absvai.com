@@ -1,5 +1,6 @@
 // Abs Vai admin: a small hash-routed app. Every permission is enforced again on the server.
 import { NAV, routes } from './routes.js';
+import { autoLabelTables } from './tables.js';
 
 export const state = { user: null, csrf: '' };
 const app = document.getElementById('app');
@@ -189,7 +190,7 @@ async function renderRightbar() {
   if (!rb) return;
   rb.innerHTML = `
     <div class="card"><h3>${esc(state.user.name)}</h3><p class="muted small">${esc(state.user.email)}<br>${badge(state.user.role)}</p></div>
-    <div class="card"><h3>Quick links</h3><p class="small"><a href="#/products?new=1">+ Add a product</a><br><a href="#/orders?status=new">Orders to confirm</a><br><a href="#/manual">+ Manual order</a><br><a href="#/incomplete">Incomplete orders</a><br><a href="#/seasons">Season calendar</a><br><a href="#/help">Help for staff</a></p></div>
+    <div class="card"><h3>Quick links</h3><p class="small"><a href="#/products?new=1">+ Add a product</a><br><a href="#/orders?status=new">Orders to confirm</a><br><a href="#/manual">+ Manual order</a><br><a href="#/incomplete">Incomplete orders</a><br><a href="#/seasons">Season calendar</a><br><a href="#/help">Help for staff</a><br><a href="/admin/guide-bn.html" target="_blank" rel="noopener">বাংলা গাইড (Bangla guide)</a></p></div>
     <div class="card" id="rb-notes"><h3>Notifications</h3><p class="muted small">Loading…</p></div>`;
   try {
     const d = await api('/dashboard');
@@ -212,6 +213,8 @@ async function route() {
 }
 
 addEventListener('hashchange', route);
+
+autoLabelTables();
 
 (async () => {
   try {

@@ -59,6 +59,8 @@ function trackingConfig(s: Record<string, string>, path: string) {
 export function Layout(p: LayoutProps) {
   const s = p.settings;
   const store = s.store_name || 'Abs Vai';
+  // Admin → Sellers has the on/off switch: off hides these links and closes /sell.
+  const sellersOpen = s.sellers_open !== '0';
   const fullTitle = p.path === '/' ? `${store} · ${s.tagline || 'Seasonal goods, honest prices.'}` : `${p.title} · ${store}`;
   const canonical = `${p.siteUrl}${p.path}`;
   const image = p.image ? (p.image.startsWith('http') ? p.image : `${p.siteUrl}${p.image}`) : `${p.siteUrl}/img/og-default.png`;
@@ -126,6 +128,7 @@ export function Layout(p: LayoutProps) {
               <a href="/deals">Hot Deals</a>
               <a href="/originals">Abs Vai Originals</a>
               <a href="/track">Track Order</a>
+              {sellersOpen && <a href="/sell">Sell with us</a>}
             </nav>
             <button class="icon-btn search-toggle" type="button" data-search-toggle aria-label="Search" aria-expanded="false"><Icon name="search" /></button>
             <a class="icon-btn" href="/wishlist" aria-label="Wishlist"><Icon name="heart" /><span class="badge" data-wish-count hidden>0</span></a>
@@ -166,6 +169,7 @@ export function Layout(p: LayoutProps) {
             <li><a href="/new"><Icon name="box" />New Arrivals</a></li>
             <li><a href="/c/food-business-machines"><Icon name="cash" />For Food Businesses</a></li>
             <li><a href="/track"><Icon name="pin" />Track Order</a></li>
+            {sellersOpen && <li><a href="/sell"><Icon name="user" />Sell with us</a></li>}
             <li><a href="/contact"><Icon name="phone" />Contact</a></li>
           </ul>
           <button class="btn btn-primary btn-block" type="button" data-install hidden><Icon name="download" />Install App</button>
@@ -185,7 +189,7 @@ export function Layout(p: LayoutProps) {
               <li><a href="/categories">Categories</a></li>
               <li><a href="/track">Track your order</a></li>
               <li><a href="/contact">Contact &amp; wholesale</a></li>
-              <li><a href="/sell">Sell on {store}</a></li>
+              {sellersOpen && <li><a href="/sell">Sell on {store}</a></li>}
             </ul>
             <ul>
               <li><a href="/policies/delivery">Delivery &amp; payment</a></li>

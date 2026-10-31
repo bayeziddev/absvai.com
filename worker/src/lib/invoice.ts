@@ -1,6 +1,7 @@
 import { formatDate } from './dates';
 import { formatTakaAscii } from './money';
 import { PdfDoc } from './pdf';
+import { PAYMENT_LABELS } from './tracking';
 
 export interface InvoiceData {
   invoiceNo: string;
@@ -19,7 +20,6 @@ export interface InvoiceData {
   totalPaisa: number;
 }
 
-const PAYMENT_LABELS: Record<string, string> = { cod: 'Cash on Delivery', manual_mobile: 'Mobile wallet (bKash / Nagad / Rocket)', bkash: 'bKash', nagad: 'Nagad', rocket: 'Rocket', card: 'Card' };
 
 export function buildInvoicePdf(d: InvoiceData): Uint8Array<ArrayBuffer> {
   const pdf = new PdfDoc();

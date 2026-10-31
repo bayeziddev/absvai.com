@@ -9,10 +9,10 @@ export interface SellerRow {
 }
 const PUBLIC_COLS = 'id, shop_name, slug, owner_name, email, phone, district, address, business_type, sells, about, payout_method, payout_number, status, review_note, reviewed_at, commission_percent, last_login_at, created_at';
 
-export async function createSeller(db: D1Database, s: { shopName: string; slug: string; ownerName: string; email: string; phone: string; passwordHash: string; district: string | null; address: string | null; businessType: string | null; sells: string | null; payoutMethod: string | null; payoutNumber: string | null; commission: number }): Promise<number> {
-  const r = await db.prepare(`INSERT INTO sellers (shop_name, slug, owner_name, email, phone, password_hash, district, address, business_type, sells, payout_method, payout_number, commission_percent)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
-    .bind(s.shopName, s.slug, s.ownerName, s.email, s.phone, s.passwordHash, s.district, s.address, s.businessType, s.sells, s.payoutMethod, s.payoutNumber, s.commission).first<{ id: number }>();
+export async function createSeller(db: D1Database, s: { shopName: string; slug: string; ownerName: string; email: string; phone: string; passwordHash: string; district: string | null; address: string | null; businessType: string | null; sells: string | null; commission: number }): Promise<number> {
+  const r = await db.prepare(`INSERT INTO sellers (shop_name, slug, owner_name, email, phone, password_hash, district, address, business_type, sells, commission_percent)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
+    .bind(s.shopName, s.slug, s.ownerName, s.email, s.phone, s.passwordHash, s.district, s.address, s.businessType, s.sells, s.commission).first<{ id: number }>();
   return r!.id;
 }
 
@@ -25,7 +25,8 @@ export async function listSellers(db: D1Database, status: string | null): Promis
   return (await db.prepare(
     `SELECT ${PUBLIC_COLS.split(', ').map(c => `s.${c}`).join(', ')},
             (SELECT COUNT(*) FROM products p WHERE p.seller_id = s.id AND p.deleted_at IS NULL) AS product_count,
-            (SELECT COUNT(*) FROM products p WHERE p.seller_id = s.id AND p.status = 'published' AND p.deleted_at IS NULL) AS live_count
+            (SELECT COUNT(*) FROM products p WHERE p.seller_id = s.id AND p.status = 'published' AND p.deleted_at IS NULL) AS live_count,
+            (SELECT COUNT(*) FROM seller_payouts sp WHERE sp.seller_id = s.id AND sp.status = 'pending') AS payouts_pending
        FROM sellers s ${status ? 'WHERE s.status = ?' : ''} ORDER BY CASE s.status WHEN 'pending' THEN 0 ELSE 1 END, s.created_at DESC LIMIT 200`,
   ).bind(...(status ? [status] : [])).all()).results;
 }
@@ -36,9 +37,58 @@ export async function reviewSeller(db: D1Database, id: number, r: { status: 'app
   return (res.meta.changes ?? 0) > 0;
 }
 
-export async function updateSellerProfile(db: D1Database, id: number, p: { phone: string; district: string | null; address: string | null; about: string | null; payoutMethod: string | null; payoutNumber: string | null }): Promise<void> {
-  await db.prepare(`UPDATE sellers SET phone = ?, district = ?, address = ?, about = ?, payout_method = ?, payout_number = ?, updated_at = ${NOW} WHERE id = ?`)
-    .bind(p.phone, p.district, p.address, p.about, p.payoutMethod, p.payoutNumber, id).run();
+export async function updateSellerProfile(db: D1Database, id: number, p: { phone: string; district: string | null; address: string | null; about: string | null }): Promise<void> {
+  await db.prepare(`UPDATE sellers SET phone = ?, district = ?, address = ?, about = ?, updated_at = ${NOW} WHERE id = ?`)
+    .bind(p.phone, p.district, p.address, p.about, id).run();
+}
+
+// ───────────── Payment accounts (seller_payouts, migration 0008) ─────────────
+
+export interface PayoutRow {
+  id: number; seller_id: number; method: string; account_number: string; account_name: string | null; account_type: string | null; bank_name: string | null; branch: string | null;
+  status: 'pending' | 'approved' | 'rejected'; review_note: string | null; reviewed_at: string | null; created_at: string;
+}
+const PAYOUT_COLS = 'id, seller_id, method, account_number, account_name, account_type, bank_name, branch, status, review_note, reviewed_at, created_at';
+
+export async function addPayout(db: D1Database, sellerId: number, p: { method: string; accountNumber: string; accountName: string | null; accountType: string | null; bankName: string | null; branch: string | null }): Promise<number> {
+  const r = await db.prepare('INSERT INTO seller_payouts (seller_id, method, account_number, account_name, account_type, bank_name, branch) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id')
+    .bind(sellerId, p.method, p.accountNumber, p.accountName, p.accountType, p.bankName, p.branch).first<{ id: number }>();
+  return r!.id;
+}
+
+export async function sellerPayouts(db: D1Database, sellerId: number): Promise<PayoutRow[]> {
+  return (await db.prepare(`SELECT ${PAYOUT_COLS} FROM seller_payouts WHERE seller_id = ? ORDER BY id DESC LIMIT 20`).bind(sellerId).all<PayoutRow>()).results;
+}
+
+export async function payoutById(db: D1Database, id: number): Promise<PayoutRow | null> {
+  return db.prepare(`SELECT ${PAYOUT_COLS} FROM seller_payouts WHERE id = ?`).bind(id).first<PayoutRow>();
+}
+
+export async function countPayouts(db: D1Database, sellerId: number): Promise<number> {
+  return Number((await db.prepare('SELECT COUNT(*) AS n FROM seller_payouts WHERE seller_id = ?').bind(sellerId).first<{ n: number }>())?.n ?? 0);
+}
+
+/** A seller removes one of their own accounts. If it was the account in use, the latest other approved one takes over. */
+export async function removePayout(db: D1Database, sellerId: number, id: number): Promise<boolean> {
+  const r = await db.prepare('DELETE FROM seller_payouts WHERE id = ? AND seller_id = ?').bind(id, sellerId).run();
+  if (!(r.meta.changes ?? 0)) return false;
+  await syncActivePayout(db, sellerId);
+  return true;
+}
+
+/** The owner approves or turns down an account; the latest approved one is the one the shop pays. */
+export async function reviewPayout(db: D1Database, id: number, status: 'approved' | 'rejected', note: string | null, adminId: string): Promise<boolean> {
+  const r = await db.prepare(`UPDATE seller_payouts SET status = ?, review_note = ?, reviewed_by = ?, reviewed_at = ${NOW}, updated_at = ${NOW} WHERE id = ?`).bind(status, note, adminId, id).run();
+  const row = await payoutById(db, id);
+  if (row) await syncActivePayout(db, row.seller_id);
+  return (r.meta.changes ?? 0) > 0;
+}
+
+async function syncActivePayout(db: D1Database, sellerId: number): Promise<void> {
+  await db.prepare(`UPDATE sellers SET
+      payout_method = (SELECT method FROM seller_payouts WHERE seller_id = ?1 AND status = 'approved' ORDER BY reviewed_at DESC, id DESC LIMIT 1),
+      payout_number = (SELECT account_number FROM seller_payouts WHERE seller_id = ?1 AND status = 'approved' ORDER BY reviewed_at DESC, id DESC LIMIT 1),
+      updated_at = ${NOW} WHERE id = ?1`).bind(sellerId).run();
 }
 
 export async function setSellerPassword(db: D1Database, id: number, hash: string): Promise<void> {
@@ -76,7 +126,7 @@ export async function sellerProducts(db: D1Database, sellerId: number): Promise<
 /** Seller products waiting for the owner's approval. */
 export async function reviewQueue(db: D1Database): Promise<Row[]> {
   return (await db.prepare(
-    `SELECT p.id, p.name, p.slug, p.status, p.updated_at, s.id AS seller_id, s.shop_name, c.name AS category_name,
+    `SELECT p.id, p.name, p.slug, p.status, p.updated_at, s.id AS seller_id, s.shop_name, s.status AS seller_status, c.name AS category_name,
             (SELECT MIN(price_paisa) FROM product_variants v WHERE v.product_id = p.id AND v.is_active = 1) AS min_price,
             (SELECT url FROM product_media m WHERE m.product_id = p.id AND m.kind = 'image' ORDER BY m.sort_order, m.id LIMIT 1) AS image_url
        FROM products p JOIN sellers s ON s.id = p.seller_id JOIN categories c ON c.id = p.category_id
@@ -84,12 +134,14 @@ export async function reviewQueue(db: D1Database): Promise<Row[]> {
   ).all()).results;
 }
 
-export async function sellerCounts(db: D1Database): Promise<{ applications: number; productsToReview: number }> {
-  const [a, b] = await db.batch([
+export async function sellerCounts(db: D1Database): Promise<{ applications: number; productsToReview: number; payoutsToReview: number }> {
+  const [a, b, p] = await db.batch([
     db.prepare("SELECT COUNT(*) AS n FROM sellers WHERE status = 'pending'"),
     db.prepare("SELECT COUNT(*) AS n FROM products WHERE review_status = 'pending' AND deleted_at IS NULL"),
+    db.prepare("SELECT COUNT(*) AS n FROM seller_payouts WHERE status = 'pending'"),
   ]);
-  return { applications: Number((a.results[0] as { n: number }).n), productsToReview: Number((b.results[0] as { n: number }).n) };
+  const n = (r: D1Result) => Number((r.results[0] as { n: number }).n);
+  return { applications: n(a), productsToReview: n(b), payoutsToReview: n(p) };
 }
 
 /** The seller's sales: every order line of their products (no customer phone or name, only the area). */

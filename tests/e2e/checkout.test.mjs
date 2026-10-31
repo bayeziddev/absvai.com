@@ -49,9 +49,10 @@ describe('storefront checkout', () => {
     await page.click('[data-pdp-form] [data-pdp-order]');
     await page.waitForURL(/\/checkout\?buy=/);
     await fillContact(page, '01710000001');
-    await page.fill('input[name=postcode]', '1209'); // Jigatala TSO, Dhanmondi: district known, area to choose
+    await page.fill('input[name=postcode]', '১২০৯'); // Bangla digits for 1209 (Jigatala TSO, Dhanmondi): district known, area to choose
     await page.waitForFunction(() => document.querySelector('select[name=districtId]').selectedOptions[0]?.text === 'Dhaka');
-    assert.match(await page.textContent('[data-finder-msg]'), /Jigatala TSO post office · Dhaka, Dhaka Division/);
+    assert.equal(await page.inputValue('input[name=postcode]'), '1209');
+    assert.match(await page.textContent('[data-finder-msg]'), /Jigatala TSO \(জিগাতলা TSO\) post office · Dhaka, Dhaka Division/);
     await page.selectOption('select[name=upazilaId]', { label: 'Dhaka South City Corporation' });
     await page.waitForFunction(() => /Inside Dhaka City/.test(document.querySelector('[data-eta]').textContent));
     assert.equal(await page.textContent('[data-delivery]'), '৳85'); // 1.2kg packed: ৳70 + ৳15 for the extra kg

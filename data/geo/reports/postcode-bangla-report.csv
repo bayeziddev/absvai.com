@@ -1,0 +1,1350 @@
+postcode,post_office,post_office_bn,upazila,thana_bn,upazila_bn,match_status,result
+8710,Amtali,আমতলী,Amtali,আমতলী,আমতলী,exact,Bangla name added
+8730,Bamna,বামনা,Bamna,বামনা,বামনা,exact,Bangla name added
+8700,Barguna Sadar,বরগুনা সদর,Barguna Sadar,বরগুনা সদর,বরগুনা সদর,exact,Bangla name added
+8701,Nali Bandar,নালি বন্দর,Barguna Sadar,বরগুনা সদর,বরগুনা সদর,exact,Bangla name added
+8740,Betagi,বেতাগী,Betagi,বেতাগী,বেতাগী,exact,Bangla name added
+8741,Darul Ulam,দারুল ঊলম,Betagi,বেতাগী,বেতাগী,exact,Bangla name added
+8721,Kakchira,কাকচিড়া,Pathorghata,পাথরঘাটা,পাথরঘাটা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8720,Patharghata,পাথরঘাটা,Pathorghata,পাথরঘাটা,পাথরঘাটা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8240,Agailzhara,আগাইলঝড়া,Agailjhara,আগাইলঝড়া,আগৈলঝাড়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8241,Gaila,গাইলা,Agailjhara,আগাইলঝড়া,আগৈলঝাড়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8242,Paisarhat,পয়সারহাট,Agailjhara,আগাইলঝড়া,আগৈলঝাড়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8210,Babuganj,বাবুগঞ্জ,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8216,Barishal Cadet,বরিশাল ক্যাডেট,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8212,Chandpasha,চাঁদপাশা,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8213,Madhabpasha,মাধবপাশা,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8215,Nizamuddin College,নিজামউদ্দিন কলেজ,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8211,Rahamatpur,রহমতপুর,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8214,Thakur Mallik,ঠাকুর মল্লিক,Babuganj,বাবুগঞ্জ,বাবুগঞ্জ,exact,Bangla name added
+8260,Barajalia,বড়জালিয়া,,বড়জালিয়া,,unmatched,Bangla name added
+8261,Osman Manjil,ওসমান মঞ্জিল,,বড়জালিয়া,,unmatched,Bangla name added
+8200,Barishal Sadar,বরিশাল সদর,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8201,Bukhainagar,বুখায়নগর,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8206,Jaguarhat,জাগুয়ারহাট,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8205,Kashipur,কাশীপুর,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8204,Patang,পাতাং,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8202,Saheberhat,সাহেবেরহাট,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8203,Sugandia,সুগন্দিয়া,Barisal Sadar,বরিশাল সদর,বরিশাল সদর,alias,Bangla name added
+8233,Batajor,বাটাজোর,Gournadi,গৌরনদী,গৌরনদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8230,Gouranadi,গৌরনদী,Gournadi,গৌরনদী,গৌরনদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8232,Kashemabad,কাসেমাবাদ,Gournadi,গৌরনদী,গৌরনদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8231,Tarki Bandar,তার্কি বন্দর,Gournadi,গৌরনদী,গৌরনদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8274,Langutia,লেঙ্গুটিয়া,Mehendiganj,মেহেন্দিগঞ্জ,মেহেন্দিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8271,Laskarpur,লস্করপুর,Mehendiganj,মেহেন্দিগঞ্জ,মেহেন্দিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8270,Mahendiganj,মেহেন্দিগঞ্জ,Mehendiganj,মেহেন্দিগঞ্জ,মেহেন্দিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8273,Nalgora,নালগোরা,Mehendiganj,মেহেন্দিগঞ্জ,মেহেন্দিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8272,Ulania,উলানিয়া,Mehendiganj,মেহেন্দিগঞ্জ,মেহেন্দিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8252,Charkalekhan,চরকালেখাঁ,Muladi,মুলাদী,মুলাদী,exact,Bangla name added
+8251,Kazirchar,কাজিরচর,Muladi,মুলাদী,মুলাদী,exact,Bangla name added
+8250,Muladi,মুলাদী,Muladi,মুলাদী,মুলাদী,exact,Bangla name added
+8281,Charamandi,চরামন্ডি,,সাহেবগঞ্জ,,unmatched,Bangla name added
+8284,kalaskati,কলসকাঠী,,সাহেবগঞ্জ,,unmatched,Bangla name added
+8282,Padri Shibpur,পাদ্রি শিবপুর,,সাহেবগঞ্জ,,unmatched,Bangla name added
+8280,Sahebganj,সাহেবগঞ্জ,,সাহেবগঞ্জ,,unmatched,Bangla name added
+8283,Shialguni,শিয়ালগুনী,,সাহেবগঞ্জ,,unmatched,Bangla name added
+8223,Dakuarhat,ডাকুয়ারহাট,Wazirpur,উজিরপুর,উজিরপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8221,Dhamura,ধামুরা,Wazirpur,উজিরপুর,উজিরপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8222,Jugirkanda,জুগিরকান্দা,Wazirpur,উজিরপুর,উজিরপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8224,Shikarpur,শিকারপুর,Wazirpur,উজিরপুর,উজিরপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8220,Uzirpur,উজিরপুর,Wazirpur,উজিরপুর,উজিরপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8300,Bhola Sadar,ভোলা সদর,Bhola Sadar,ভোলা সদর,ভোলা সদর,exact,Bangla name added
+8301,Joynagar,জয়নগর,Bhola Sadar,ভোলা সদর,ভোলা সদর,exact,Bangla name added
+8320,Borhanuddin UPO,বোরহানউদ্দিন Upo,Borhan Sddin,বোরহানউদ্দিন Upo,বোরহান উদ্দিন,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8321,Mirzakalu,,Borhan Sddin,বোরহানউদ্দিন Upo,বোরহান উদ্দিন,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+8340,Charfashion,চরফ্যাশন,Charfesson,চরফ্যাশন,চরফ্যাশন,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8341,Dularhat,দুলারহাট,Charfesson,চরফ্যাশন,চরফ্যাশন,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8342,Keramatganj,কেরামতগঞ্জ,Charfesson,চরফ্যাশন,চরফ্যাশন,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8310,Doulatkhan,দৌলতখান,Doulatkhan,দৌলতখান,দৌলতখান,exact,Bangla name added
+8311,Hajipur,হাজীপুর,Doulatkhan,দৌলতখান,দৌলতখান,exact,Bangla name added
+8360,Hajirhat,হাজিরহাট,,হাজিরহাট,,unmatched,Bangla name added
+8350,Hatshoshiganj,হাটশশীগঞ্জ,,হাটশশীগঞ্জ,,unmatched,Bangla name added
+8331,Daurihat,দৌড়ীহাট,Lalmohan,লালমোহন Upo,লালমোহন,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8332,Gazaria,গজারিয়া,Lalmohan,লালমোহন Upo,লালমোহন,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8330,Lalmohan UPO,লালমোহন Upo,Lalmohan,লালমোহন Upo,লালমোহন,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8402,Baukathi,বাউকাঠি,Jhalakathi Sadar,ঝালকাঠি সদর,ঝালকাঠি সদর,alias,Bangla name added
+8403,Gabha,গাভা,Jhalakathi Sadar,ঝালকাঠি সদর,ঝালকাঠি সদর,alias,Bangla name added
+8400,Jhalokathi Sadar,ঝালকাঠি সদর,Jhalakathi Sadar,ঝালকাঠি সদর,ঝালকাঠি সদর,alias,Bangla name added
+8401,Nabagram,নবগ্রাম,Jhalakathi Sadar,ঝালকাঠি সদর,ঝালকাঠি সদর,alias,Bangla name added
+8404,Shekherhat,শেখেরহাট,Jhalakathi Sadar,ঝালকাঠি সদর,ঝালকাঠি সদর,alias,Bangla name added
+8431,Amua,আমুয়া,Kathalia,কাঁঠালিয়া,কাঠালিয়া,exact,Bangla name added
+8430,Kathalia,কাঁঠালিয়া,Kathalia,কাঁঠালিয়া,কাঠালিয়া,exact,Bangla name added
+8432,Niamatee,নিয়ামাতেই,Kathalia,কাঁঠালিয়া,কাঠালিয়া,exact,Bangla name added
+8433,Shoulajalia,শৌলজালিয়া,Kathalia,কাঁঠালিয়া,কাঠালিয়া,exact,Bangla name added
+8421,Beerkathi,বীরকাঠি,Nalchity,নলছিটি,নলছিটি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8420,Nalchhiti,নলছিটি,Nalchity,নলছিটি,নলছিটি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8410,Rajapur,রাজাপুর,Rajapur,রাজাপুর,রাজাপুর,exact,Bangla name added
+8621,Bagabandar,বাগাবন্দর,Bauphal,বাউফল,বাউফল,exact,Bangla name added
+8620,Bauphal,বাউফল,Bauphal,বাউফল,বাউফল,exact,Bangla name added
+8622,Birpasha,বীরপাশা,Bauphal,বাউফল,বাউফল,exact,Bangla name added
+8624,Kalaia,কালাইয়া,Bauphal,বাউফল,বাউফল,exact,Bangla name added
+8623,Kalishari,কালীশুরী,Bauphal,বাউফল,বাউফল,exact,Bangla name added
+8630,Dashmina,দশমিনা,Dashmina,দশমিনা,দশমিনা,exact,Bangla name added
+8640,Galachipa,গলাচিপা,Galachipa,গলাচিপা,গলাচিপা,exact,Bangla name added
+8641,Gazipur Bandar,গাজীপুর বন্দর,Galachipa,গলাচিপা,গলাচিপা,exact,Bangla name added
+8650,Khepupara,খেপুপাড়া,,খেপুপাড়া,,unmatched,Bangla name added
+8651,Mahipur,মহীপুর,,খেপুপাড়া,,unmatched,Bangla name added
+8602,Dumkee,দুমকী,Patuakhali Sadar,পটুয়াখালী সদর,পটুয়াখালী সদর,exact,Bangla name added
+8601,Moukaran,মৌকরণ,Patuakhali Sadar,পটুয়াখালী সদর,পটুয়াখালী সদর,exact,Bangla name added
+8600,Patuakhali Sadar,পটুয়াখালী সদর,Patuakhali Sadar,পটুয়াখালী সদর,পটুয়াখালী সদর,exact,Bangla name added
+8603,Rahimabad,রহিমাবাদ,Patuakhali Sadar,পটুয়াখালী সদর,পটুয়াখালী সদর,exact,Bangla name added
+8610,Subidkhali,সুবিদখালী,,সুবিদখালী,,unmatched,Bangla name added
+8530,Banaripara,বানারীপাড়া,,বানারীপাড়া,,unmatched,Bangla name added
+8531,Chakhar,চাখার,,বানারীপাড়া,,unmatched,Bangla name added
+8550,Bhandaria,ভান্ডারিয়া,Bhandaria,ভান্ডারিয়া,ভান্ডারিয়া,exact,Bangla name added
+8552,Dhaoa,ধাওয়া,Bhandaria,ভান্ডারিয়া,ভান্ডারিয়া,exact,Bangla name added
+8551,Kanudashkathi,কানুদাসকাঠি,Bhandaria,ভান্ডারিয়া,ভান্ডারিয়া,exact,Bangla name added
+8513,Jolagati,জোলাগাতি,Kawkhali,কাউখালী,কাউখালী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8512,Joykul,জয়কুল,Kawkhali,কাউখালী,কাউখালী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8510,Kaukhali,কাউখালী,Kawkhali,কাউখালী,কাউখালী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8511,Keundia,কেউন্দিয়া,Kawkhali,কাউখালী,কাউখালী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8565,Betmor Natun Hat,বেতমোর নতুন হাট,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8563,Gulishakhali,গুলিশাখালী,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8562,Halta,হাল্টা,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8560,Mathbaria,মঠবাড়িয়া,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8566,Shilarganj,শিলারগঞ্জ,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8564,Tiarkhali,টিয়ারখালী,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8561,Tushkhali,তুষখালি,Mathbaria,মঠবাড়িয়া,মঠবাড়ীয়া,exact,Bangla name added
+8540,Nazirpur,নাজিরপুর,Nazirpur,নাজিরপুর,নাজিরপুর,exact,Bangla name added
+8541,Sriramkathi,শ্রীরামকাঠি,Nazirpur,নাজিরপুর,নাজিরপুর,exact,Bangla name added
+8501,Hularhat,হুলারহাট,Pirojpur Sadar,পিরোজপুর সদর,পিরোজপুর সদর,exact,Bangla name added
+8502,Parerhat,পারেরহাট,Pirojpur Sadar,পিরোজপুর সদর,পিরোজপুর সদর,exact,Bangla name added
+8500,Pirojpur Sadar,পিরোজপুর সদর,Pirojpur Sadar,পিরোজপুর সদর,পিরোজপুর সদর,exact,Bangla name added
+8521,Darus Sunnat,দারুস সুন্নাত,,স্বরূপকাঠি,,unmatched,Bangla name added
+8523,Jalabari,জালাবাড়ি,,স্বরূপকাঠি,,unmatched,Bangla name added
+8522,Kaurikhara,কৌরিখাড়া,,স্বরূপকাঠি,,unmatched,Bangla name added
+8520,Swarupkathi,স্বরূপকাঠি,,স্বরূপকাঠি,,unmatched,Bangla name added
+4650,Alikadam,আলিকদম,Alikadam,আলিকদম,আলীকদম,exact,Bangla name added
+4600,Bandarban Sadar,বান্দরবান সদর,Bandarban Sadar,বান্দরবান সদর,বান্দরবান সদর,exact,Bangla name added
+4660,Naikhong,নাইখং,,নাইখং,,unmatched,Bangla name added
+4610,Roanchhari,রংছড়ি,Rowangchhari,রংছড়ি,রোয়াংছড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+4620,Ruma,রুমা,Ruma,রুমা,রুমা,exact,Bangla name added
+4641,Lama,লামা,Thanchi,থানচি,থানচি,exact,Bangla name added
+4630,Thanchi,থানচি,Thanchi,থানচি,থানচি,exact,Bangla name added
+3450,Akhaura,আখাউড়া,Akhaura,আখাউড়া,আখাউড়া,exact,Bangla name added
+3451,Azampur,আজমপুর,Akhaura,আখাউড়া,আখাউড়া,exact,Bangla name added
+3452,Gangasagar,গঙ্গাসাগর,Akhaura,আখাউড়া,আখাউড়া,exact,Bangla name added
+3420,Banchharampur,বাঞ্ছারামপুর,Bancharampur,বাঞ্ছারামপুর,বাঞ্ছারামপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3402,Ashuganj,আশুগঞ্জ,Brahmanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,ব্রাহ্মণবাড়িয়া সদর,alias,Bangla name added
+3403,Ashuganj Share,আশুগঞ্জ সেয়ার,Brahmanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,ব্রাহ্মণবাড়িয়া সদর,alias,Bangla name added
+3400,Brahamanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,Brahmanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,ব্রাহ্মণবাড়িয়া সদর,alias,Bangla name added
+3404,Poun,,Brahmanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,ব্রাহ্মণবাড়িয়া সদর,alias,no Bangla name in postcode-bd
+3401,Talshahar,,Brahmanbaria Sadar,ব্রাহ্মণবাড়িয়া সদর,ব্রাহ্মণবাড়িয়া সদর,alias,no Bangla name in postcode-bd
+3462,Chandidar,,Kasba,কসবা,কসবা,exact,no Bangla name in postcode-bd
+3463,Chargachh,,Kasba,কসবা,কসবা,exact,no Bangla name in postcode-bd
+3464,Gopinathpur,গোপীনাথপুর,Kasba,কসবা,কসবা,exact,Bangla name added
+3460,Kasba,কসবা,Kasba,কসবা,কসবা,exact,Bangla name added
+3461,Kuti,কুটি,Kasba,কসবা,কসবা,exact,Bangla name added
+3419,Jibanganj,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3417,Kaitala,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3411,Laubfatehpur,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3410,Nabinagar,নবীনগর,Nabinagar,নবীনগর,নবীনগর,exact,Bangla name added
+3412,Rasullabad,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3414,Ratanpur,রতনপুর,Nabinagar,নবীনগর,নবীনগর,exact,Bangla name added
+3418,Salimganj,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3415,Shahapur,শাহ্পুর,Nabinagar,নবীনগর,নবীনগর,exact,Bangla name added
+3413,Shamgram,,Nabinagar,নবীনগর,নবীনগর,exact,no Bangla name in postcode-bd
+3441,Fandauk,,Nasirnagar,নাসিরনগর,নাসিরনগর,exact,no Bangla name in postcode-bd
+3440,Nasirnagar,নাসিরনগর,Nasirnagar,নাসিরনগর,নাসিরনগর,exact,Bangla name added
+3432,Chandura,,Sarail,সরাইল,সরাইল,exact,no Bangla name in postcode-bd
+3430,Sarial,,Sarail,সরাইল,সরাইল,exact,no Bangla name in postcode-bd
+3431,Shahbajpur,শাহবাজপুর,Sarail,সরাইল,সরাইল,exact,Bangla name added
+3602,Baburhat,বাবুরহাট,Chandpur Sadar,চাঁদপুর সদর,চাঁদপুর সদর,exact,Bangla name added
+3600,Chandpur Sadar,চাঁদপুর সদর,Chandpur Sadar,চাঁদপুর সদর,চাঁদপুর সদর,exact,Bangla name added
+3601,Puranbazar,পুরানবাজারের,Chandpur Sadar,চাঁদপুর সদর,চাঁদপুর সদর,exact,Bangla name added
+3603,Sahatali,,Chandpur Sadar,চাঁদপুর সদর,চাঁদপুর সদর,exact,no Bangla name in postcode-bd
+3651,Chandra,চন্দ্র,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3650,Faridganj,ফরিদগঞ্জ,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3653,Gridkaliandia,,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3655,Islampur Shah Isain,ইসলামপুর শাহ Isain,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3654,Rampurbazar,,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3652,Rupsha,রূপসা,Faridgonj,ফরিদগঞ্জ,ফরিদগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3611,Bolakhal,,Hajiganj,হাজীগঞ্জ,হাজীগঞ্জ,exact,no Bangla name in postcode-bd
+3610,Hajiganj,হাজীগঞ্জ,Hajiganj,হাজীগঞ্জ,হাজীগঞ্জ,exact,Bangla name added
+3661,Gandamara,,Haimchar,হাইমচর,হাইমচর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3660,Hayemchar,হাইমচর,Haimchar,হাইমচর,হাইমচর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3630,Kachua,কচুয়া,Kachua,কচুয়া,কচুয়া,exact,Bangla name added
+3631,Pak Shrirampur,পাক শ্রীরামপুর,Kachua,কচুয়া,কচুয়া,exact,Bangla name added
+3632,Rahima Nagar,রহিমা নগর,Kachua,কচুয়া,কচুয়া,exact,Bangla name added
+3633,Shachar,,Kachua,কচুয়া,কচুয়া,exact,no Bangla name in postcode-bd
+3642,Kalipur,,,মতলবগঞ্জ,,unmatched,no Bangla name in postcode-bd
+3640,Matlobganj,মতলবগঞ্জ,,মতলবগঞ্জ,,unmatched,Bangla name added
+3641,Mohanpur,মোহনপুর,,মতলবগঞ্জ,,unmatched,Bangla name added
+3623,Chotoshi,,Shahrasti,শাহরাস্তি,শাহরাস্তি,exact,no Bangla name in postcode-bd
+3624,Islamia Madrasha,ইসলামিয়া মাদ্রাসা,Shahrasti,শাহরাস্তি,শাহরাস্তি,exact,Bangla name added
+3621,Khilabazar,,Shahrasti,শাহরাস্তি,শাহরাস্তি,exact,no Bangla name in postcode-bd
+3622,Pashchim Kherihar Al,পশ্চিম Kherihar আল,Shahrasti,শাহরাস্তি,শাহরাস্তি,exact,Bangla name added
+3620,Shahrasti,শাহরাস্তি,Shahrasti,শাহরাস্তি,শাহরাস্তি,exact,Bangla name added
+4376,Anowara,আনোয়ারা,Anwara,আনোয়ারা,আনোয়ারা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4378,Battali,,Anwara,আনোয়ারা,আনোয়ারা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4377,Paroikora,,Anwara,আনোয়ারা,আনোয়ারা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4366,Boalkhali,বোয়ালখালী,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,Bangla name added
+4369,Charandwip,,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,no Bangla name in postcode-bd
+4365,Iqbal Park,ইকবাল পার্কে,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,Bangla name added
+4368,Kadurkhal,,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,no Bangla name in postcode-bd
+4363,Kanungopara,কানুনগোপাড়া,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,Bangla name added
+4367,Sakpura,,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,no Bangla name in postcode-bd
+4364,Saroatoli,,Boalkhali,বোয়ালখালী,বোয়ালখালী,exact,no Bangla name in postcode-bd
+4221,Al- Amin Baria Madra,আল আমিন Baria Madra,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4211,Amin Jute Mills,আমিন জুট মিলস,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4215,Anandabazar,আনন্দবাজার,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4210,Bayezid Bostami,বায়েজিদ বোস্তামী,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4212,Chandgaon,চাঁদগাও,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4203,Chawkbazar,চকবাজার,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4220,Chitt. Cantonment,Chitt. সেনানিবাস,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4219,Chitt. Customs Acca,Chitt. কাস্টমস Acca,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4209,Chitt. Politechnic In,Chitt. Politechnic ইন,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4218,Chitt. Sailers Colon,Chitt. Sailers কোলন,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4205,Chittagong Airport,চট্টগ্রাম বিমানবন্দর,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4100,Chittagong Bandar,চট্টগ্রাম বন্দর,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4000,Chittagong GPO,চট্টগ্রাম জিপিও,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4223,Export Processing,রপ্তানি প্রক্রিয়াকরণ,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4207,Firozshah,,,চট্টগ্রাম সদর,,unmatched,no Bangla name in postcode-bd
+4216,Halishahar,হালিশহর,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4225,Halishshar,,,চট্টগ্রাম সদর,,unmatched,no Bangla name in postcode-bd
+4214,Jalalabad,জালালাবাদ,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4206,Jaldia Merine Accade,জলদিa Merine Accade,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4222,Middle Patenga,মধ্য পতেঙ্গা,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4208,Mohard,,,চট্টগ্রাম সদর,,unmatched,no Bangla name in postcode-bd
+4226,North Halishahar,উত্তর হালিশহর,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4217,North Katuli,উত্তর Katuli,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4202,Pahartoli,পাহাড়তলী,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4204,Patenga,পতেঙ্গা,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4224,Rampura TSO,রামপুরা TSO,,চট্টগ্রাম সদর,,unmatched,Bangla name added
+4213,Wazedia,,,চট্টগ্রাম সদর,,unmatched,no Bangla name in postcode-bd
+4383,Barma,বর্মা,,পূর্ব জোয়ারা,,unmatched,Bangla name added
+4382,Dohazari,দোহাজারী,,পূর্ব জোয়ারা,,unmatched,Bangla name added
+4380,East Joara,পূর্ব জোয়ারা,,পূর্ব জোয়ারা,,unmatched,Bangla name added
+4381,Gachbaria,,,পূর্ব জোয়ারা,,unmatched,no Bangla name in postcode-bd
+4352,Bhandar Sharif,ভাণ্ডার শরীফ,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,Bangla name added
+4350,Fatikchhari,ফটিকছড়ি,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,Bangla name added
+4354,Harualchhari,,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,no Bangla name in postcode-bd
+4353,Najirhat,,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,no Bangla name in postcode-bd
+4351,Nanupur,,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,no Bangla name in postcode-bd
+4355,Narayanhat,,Fatikchhari,ফটিকছড়ি,ফটিকছড়ি,exact,no Bangla name in postcode-bd
+4331,Chitt.University,,Hathazari,হাটহাজারী,হাটহাজারী,exact,no Bangla name in postcode-bd
+4335,Fatahabad,,Hathazari,হাটহাজারী,হাটহাজারী,exact,no Bangla name in postcode-bd
+4332,Gorduara,,Hathazari,হাটহাজারী,হাটহাজারী,exact,no Bangla name in postcode-bd
+4330,Hathazari,হাটহাজারী,Hathazari,হাটহাজারী,হাটহাজারী,exact,Bangla name added
+4333,Katirhat,,Hathazari,হাটহাজারী,হাটহাজারী,exact,no Bangla name in postcode-bd
+4339,Madrasa,মাদ্রাসা,Hathazari,হাটহাজারী,হাটহাজারী,exact,Bangla name added
+4334,Mirzapur,মির্জাপুর,Hathazari,হাটহাজারী,হাটহাজারী,exact,Bangla name added
+4337,Nuralibari,,Hathazari,হাটহাজারী,হাটহাজারী,exact,no Bangla name in postcode-bd
+4338,Yunus Nagar,ইউনূস নগর,Hathazari,হাটহাজারী,হাটহাজারী,exact,Bangla name added
+4393,Banigram,,,জলদি,,unmatched,no Bangla name in postcode-bd
+4392,Gunagari,,,জলদি,,unmatched,no Bangla name in postcode-bd
+4390,Jaldi,জলদি,,জলদি,,unmatched,Bangla name added
+4391,Khan Bahadur,খান বাহাদুর,,জলদি,,unmatched,Bangla name added
+4398,Chunti,,Lohagara,লোহাগাড়া,লোহাগাড়া,exact,no Bangla name in postcode-bd
+4396,Lohagara,লোহাগাড়া,Lohagara,লোহাগাড়া,লোহাগাড়া,exact,Bangla name added
+4397,Padua,পদুয়া,Lohagara,লোহাগাড়া,লোহাগাড়া,exact,Bangla name added
+4321,Abutorab,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4325,Azampur,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4323,Bharawazhat,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4322,Darrogahat,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4324,Joarganj,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4327,Korerhat,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4320,Mirsharai,মীরসরাই,Mirsharai,মীরসরাই,মীরসরাই,exact,Bangla name added
+4328,Mohazanhat,,Mirsharai,মীরসরাই,মীরসরাই,exact,no Bangla name in postcode-bd
+4371,Budhpara,,Patiya,পটিয়া,পটিয়া,exact,no Bangla name in postcode-bd
+4370,Patiya Head Office,পটিয়া প্রধান কার্যালয়,Patiya,পটিয়া,পটিয়া,exact,Bangla name added
+4361,Dhamair,,Rangunia,রাঙ্গুনিয়া,রাঙ্গুনিয়া,exact,no Bangla name in postcode-bd
+4360,Rangunia,রাঙ্গুনিয়া,Rangunia,রাঙ্গুনিয়া,রাঙ্গুনিয়া,exact,Bangla name added
+4349,B.I.T Post Office,B.I.T পোস্ট অফিস,Raozan,রাউজান,রাউজান,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4341,Beenajuri,,Raozan,রাউজান,রাউজান,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4347,Dewanpur,,Raozan,রাউজান,রাউজান,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4345,Fatepur,,Raozan,রাউজান,রাউজান,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4343,Gahira,,Raozan,রাউজান,রাউজান,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4346,Guzra Noapara,Guzra নোয়াপাড়া,Raozan,রাউজান,রাউজান,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4344,jagannath Hat,জগন্নাথ হাট,Raozan,রাউজান,রাউজান,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4342,Kundeshwari,কুন্ডেশ্বরী,Raozan,রাউজান,রাউজান,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4348,Mohamuni,,Raozan,রাউজান,রাউজান,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4340,Rouzan,রাউজান,Raozan,রাউজান,রাউজান,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4300,Sandwip,সন্দ্বীপ,Sandwip,সন্দ্বীপ,সন্দ্বীপ,exact,Bangla name added
+4301,Shiberhat,,Sandwip,সন্দ্বীপ,সন্দ্বীপ,exact,no Bangla name in postcode-bd
+4302,Urirchar,সন্দ্বীপ,Sandwip,সন্দ্বীপ,সন্দ্বীপ,exact,Bangla name added
+4387,Baitul Ijjat,বায়তুল Ijjat,Satkania,সাতকানিয়া,সাতকানিয়া,exact,Bangla name added
+4388,Bazalia,বাজালিয়া,Satkania,সাতকানিয়া,সাতকানিয়া,exact,Bangla name added
+4386,Satkania,সাতকানিয়া,Satkania,সাতকানিয়া,সাতকানিয়া,exact,Bangla name added
+4312,Barabkunda,,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,no Bangla name in postcode-bd
+4311,Baroidhala,,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,no Bangla name in postcode-bd
+4313,Bawashbaria,,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,no Bangla name in postcode-bd
+4315,Bhatiari,ভাটিয়ারী,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,Bangla name added
+4316,Fouzdarhat,ফৌজদারহাট,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,Bangla name added
+4317,Jafrabad,জাফরাবাদ,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,Bangla name added
+4314,Kumira,কুমিরা,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,Bangla name added
+4310,Sitakunda,সীতাকুন্ড,Sitakunda,সীতাকুন্ড,সীতাকুন্ড,exact,Bangla name added
+3560,Barura,বরুড়া,Barura,বরুড়া,বরুড়া,exact,Bangla name added
+3562,Murdafarganj,,Barura,বরুড়া,বরুড়া,exact,no Bangla name in postcode-bd
+3561,Poyalgachha,,Barura,বরুড়া,বরুড়া,exact,no Bangla name in postcode-bd
+3526,Brahmanpara,ব্রাহ্মণপাড়া,Brahmanpara,ব্রাহ্মণপাড়া,ব্রাহ্মণপাড়া,exact,Bangla name added
+3520,Burichang,বুড়িচং,Burichang,বুড়িচং,বুড়িচং,exact,Bangla name added
+3521,Maynamoti bazar,Maynamoti বাজার,Burichang,বুড়িচং,বুড়িচং,exact,Bangla name added
+3510,Chandia,চান্দিয়া,Chandina,চান্দিনা,চান্দিনা,exact,Bangla name added
+3511,Madhaiabazar,,Chandina,চান্দিনা,চান্দিনা,exact,no Bangla name in postcode-bd
+3551,Batisa,,Chauddagram,চৌদ্দগ্রাম,চৌদ্দগ্রাম,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3552,Chiora,,Chauddagram,চৌদ্দগ্রাম,চৌদ্দগ্রাম,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3550,Chouddagram,চৌদ্দগ্রাম,Chauddagram,চৌদ্দগ্রাম,চৌদ্দগ্রাম,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3501,Comilla Contoment,কুমিল্লা Contoment,Comilla Sadar,কুমিল্লা সদর,কুমিল্লা সদর,exact,Bangla name added
+3500,Comilla Sadar,কুমিল্লা সদর,Comilla Sadar,কুমিল্লা সদর,কুমিল্লা সদর,exact,Bangla name added
+3503,Courtbari,,Comilla Sadar,কুমিল্লা সদর,কুমিল্লা সদর,exact,no Bangla name in postcode-bd
+3502,Halimanagar,,Comilla Sadar,কুমিল্লা সদর,কুমিল্লা সদর,exact,no Bangla name in postcode-bd
+3504,Suaganj,,Comilla Sadar,কুমিল্লা সদর,কুমিল্লা সদর,exact,no Bangla name in postcode-bd
+3518,Dashpara,,Daudkandi,দাউদকান্দি,দাউদকান্দি,exact,no Bangla name in postcode-bd
+3516,Daudkandi,দাউদকান্দি,Daudkandi,দাউদকান্দি,দাউদকান্দি,exact,Bangla name added
+3519,Eliotganj,,Daudkandi,দাউদকান্দি,দাউদকান্দি,exact,no Bangla name in postcode-bd
+3517,Gouripur,গৌরীপুর,Daudkandi,দাউদকান্দি,দাউদকান্দি,exact,Bangla name added
+3532,Barashalghar,,Debidwar,দাবিদার,দেবিদ্বার,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3530,Davidhar,দাবিদার,Debidwar,দাবিদার,দেবিদ্বার,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3533,Dhamtee,,Debidwar,দাবিদার,দেবিদ্বার,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3531,Gangamandal,,Debidwar,দাবিদার,দেবিদ্বার,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3546,Homna,হোমনা,Homna,হোমনা,হোমনা,exact,Bangla name added
+3572,Bipulasar,,Laksam,লাকসাম,লাকসাম,exact,no Bangla name in postcode-bd
+3570,Laksam,লাকসাম,Laksam,লাকসাম,লাকসাম,exact,Bangla name added
+3571,Lakshamanpur,,Laksam,লাকসাম,লাকসাম,exact,no Bangla name in postcode-bd
+3582,Chhariabazar,,Nangalkot,লাঙ্গলকোট,নাঙ্গলকোট,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3581,Dhalua,,Nangalkot,লাঙ্গলকোট,নাঙ্গলকোট,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3583,Gunabati,,Nangalkot,লাঙ্গলকোট,নাঙ্গলকোট,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3580,Langalkot,লাঙ্গলকোট,Nangalkot,লাঙ্গলকোট,নাঙ্গলকোট,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3543,Bangra,,Muradnagar,মুরাদনগর,মুরাদনগর,exact,no Bangla name in postcode-bd
+3542,Companyganj,কোম্পানীগঞ্জ,Muradnagar,মুরাদনগর,মুরাদনগর,exact,Bangla name added
+3540,Muradnagar,মুরাদনগর,Muradnagar,মুরাদনগর,মুরাদনগর,exact,Bangla name added
+3545,Pantibazar,,Muradnagar,মুরাদনগর,মুরাদনগর,exact,no Bangla name in postcode-bd
+3541,Ramchandarpur,,Muradnagar,মুরাদনগর,মুরাদনগর,exact,no Bangla name in postcode-bd
+3544,Sonakanda,,Muradnagar,মুরাদনগর,মুরাদনগর,exact,no Bangla name in postcode-bd
+4742,Badarkali,,,চিরিঙ্গা,,unmatched,no Bangla name in postcode-bd
+4740,Chiringga,চিরিঙ্গা,,চিরিঙ্গা,,unmatched,Bangla name added
+4741,Chiringga S.O,চিরিঙ্গা S.O,,চিরিঙ্গা,,unmatched,Bangla name added
+4743,Malumghat,,,চিরিঙ্গা,,unmatched,no Bangla name in postcode-bd
+4700,Coxs Bazar Sadar,কক্সবাজার সদর,Coxsbazar Sadar,কক্সবাজার সদর,কক্সবাজার সদর,exact,Bangla name added
+4702,Eidga,,Coxsbazar Sadar,কক্সবাজার সদর,কক্সবাজার সদর,exact,no Bangla name in postcode-bd
+4701,Zhilanja,,Coxsbazar Sadar,কক্সবাজার সদর,কক্সবাজার সদর,exact,no Bangla name in postcode-bd
+4710,Gorakghat,,,Gorakghat,,unmatched,no Bangla name in postcode-bd
+4720,Kutubdia,কুতুবদিয়া,Kutubdia,কুতুবদিয়া,কুতুবদিয়া,exact,Bangla name added
+4730,Ramu,রামু,Ramu,রামু,রামু,exact,Bangla name added
+4761,Hnila,,Teknaf,টেকনাফ,টেকনাফ,exact,no Bangla name in postcode-bd
+4762,St.Martin,,Teknaf,টেকনাফ,টেকনাফ,exact,no Bangla name in postcode-bd
+4760,Teknaf,টেকনাফ,Teknaf,টেকনাফ,টেকনাফ,exact,Bangla name added
+4750,Ukhia,উখিয়া,Ukhiya,উখিয়া,উখিয়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3910,Chhagalnaia,,Chhagalnaiya,Chhagalnaia,ছাগলনাইয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3912,Daraga Hat,Daraga হাট,Chhagalnaiya,Chhagalnaia,ছাগলনাইয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3911,Maharajganj,মহারাজগঞ্জ,Chhagalnaiya,Chhagalnaia,ছাগলনাইয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3913,Puabashimulia,,Chhagalnaiya,Chhagalnaia,ছাগলনাইয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3922,Chhilonia,,Daganbhuiyan,দাগনভূইয়া,দাগনভূঞা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3920,Dagondhuia,,Daganbhuiyan,দাগনভূইয়া,দাগনভূঞা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3921,Dudmukha,,Daganbhuiyan,দাগনভূইয়া,দাগনভূঞা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+3923,Rajapur,রাজাপুর,Daganbhuiyan,দাগনভূইয়া,দাগনভূঞা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3901,Fazilpur,,Feni Sadar,ফেনী সদর,ফেনী সদর,exact,no Bangla name in postcode-bd
+3900,Feni Sadar,ফেনী সদর,Feni Sadar,ফেনী সদর,ফেনী সদর,exact,Bangla name added
+3903,Laskarhat,,Feni Sadar,ফেনী সদর,ফেনী সদর,exact,no Bangla name in postcode-bd
+3902,Sharshadie,,Feni Sadar,ফেনী সদর,ফেনী সদর,exact,no Bangla name in postcode-bd
+3942,Fulgazi,ফুলগাজী,,পশুরামপুর,,unmatched,Bangla name added
+3943,Munshirhat,,,পশুরামপুর,,unmatched,no Bangla name in postcode-bd
+3940,Pashurampur,পশুরামপুর,,পশুরামপুর,,unmatched,Bangla name added
+3941,Shuarbazar,,,পশুরামপুর,,unmatched,no Bangla name in postcode-bd
+3932,Ahmadpur,আহমদপুর,Sonagazi,সোনাগাজী,সোনাগাজী,exact,Bangla name added
+3933,Kazirhat,,Sonagazi,সোনাগাজী,সোনাগাজী,exact,no Bangla name in postcode-bd
+3931,Motiganj,,Sonagazi,সোনাগাজী,সোনাগাজী,exact,no Bangla name in postcode-bd
+3930,Sonagazi,সোনাগাজী,Sonagazi,সোনাগাজী,সোনাগাজী,exact,Bangla name added
+4420,Diginala,,Dighinala,Diginala,দিঘীনালা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4400,Khagrachari Sadar,খাগড়াছড়ি সদর,Khagrachhari Sadar,খাগড়াছড়ি সদর,খাগড়াছড়ি সদর,alias,Bangla name added
+4470,Laxmichhari,,Laxmichhari,Laxmichhari,লক্ষীছড়ি,exact,no Bangla name in postcode-bd
+4430,Mahalchhari,,Mohalchari,Mahalchhari,মহালছড়ি,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4460,Manikchhari,মানিকছড়ি,Manikchari,মানিকছড়ি,মানিকছড়ি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4450,Matiranga,মাটিরাঙ্গা,Matiranga,মাটিরাঙ্গা,মাটিরাঙ্গা,exact,Bangla name added
+4410,Panchhari,পানছড়ি,Panchari,পানছড়ি,পানছড়ি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+4440,Ramghar Head Office,রামগড়ে প্রধান কার্যালয়,,রামগড়ে প্রধান কার্যালয়,,unmatched,Bangla name added
+3730,Char Alexgander,চর আলেক্সজান্ডার,,চর আলেক্সজান্ডার,,unmatched,Bangla name added
+3731,Hajirghat,,,চর আলেক্সজান্ডার,,unmatched,no Bangla name in postcode-bd
+3732,Ramgatirhat,,,চর আলেক্সজান্ডার,,unmatched,no Bangla name in postcode-bd
+3709,Amani Lakshimpur,Amani থেকে লক্ষ্মীপুর,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,Bangla name added
+3702,Bhabaniganj,ভবানীগঞ্জ,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,Bangla name added
+3708,Chandraganj,চন্দ্রগঞ্জ,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,Bangla name added
+3707,Choupalli,,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,no Bangla name in postcode-bd
+3701,Dalal Bazar,দালাল বাজার,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,Bangla name added
+3706,Duttapara,,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,no Bangla name in postcode-bd
+3704,Keramatganj,,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,no Bangla name in postcode-bd
+3700,Lakshimpur Sadar,লক্ষ্মীপুর সদর,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,Bangla name added
+3703,Mandari,,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,no Bangla name in postcode-bd
+3705,Rupchara,,Lakshmipur Sadar,লক্ষ্মীপুর সদর,লক্ষ্মীপুর সদর,alias,no Bangla name in postcode-bd
+3721,Alipur,আলীপুর,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,Bangla name added
+3725,Dolta,,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,no Bangla name in postcode-bd
+3723,Kanchanpur,কাঞ্চনপুর,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,Bangla name added
+3724,Naagmud,,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,no Bangla name in postcode-bd
+3722,Panpara,,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,no Bangla name in postcode-bd
+3720,Ramganj,রামগঞ্জ,Ramganj,রামগঞ্জ,রামগঞ্জ,exact,Bangla name added
+3714,Bhuabari,,Raipur,রায়পুর,রায়পুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3713,Haydarganj,,Raipur,রায়পুর,রায়পুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3712,Nagerdighirpar,,Raipur,রায়পুর,রায়পুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3711,Rakhallia,,Raipur,রায়পুর,রায়পুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3710,Raypur,রায়পুর,Raipur,রায়পুর,রায়পুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3850,Basur Hat,Basur হাট,,Basurhat,,unmatched,Bangla name added
+3851,Charhajari,,,Basurhat,,unmatched,no Bangla name in postcode-bd
+3831,Alaiarpur,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3847,Amisha Para,Amisha পাড়া,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3822,Banglabazar,বাংলাবাজার,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3824,Bazra,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3820,Begumganj,বেগমগঞ্জ,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3837,Bhabani Jibanpur,ভবানী Jibanpur,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3821,Choumohani,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3843,Dauti,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3848,Durgapur,দুর্গাপুর,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3828,Gopalpur,গোপালপুর,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3825,Jamidar Hat,Jamidar হাট,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3844,Joyag,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3829,Joynarayanpur,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3833,Khalafat Bazar,Khalafat বাজার,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3842,Khalishpur,খালিশপুর,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3838,Maheshganj,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3823,Mir Owarishpur,মীর Owarishpur,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3839,Nadona,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3841,Nandiapara,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3835,Oachhekpur,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3834,Rajganj,রাজগঞ্জ,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3827,Sonaimuri,সোনাইমুড়ি,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3832,Tangirpar,,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,no Bangla name in postcode-bd
+3845,Thanar Hat,Thanar হাট,Begumganj,বেগমগঞ্জ,বেগমগঞ্জ,exact,Bangla name added
+3879,Bansa Bazar,Bansa বাজার,Chatkhil,চাটখিল,চাটখিল,exact,Bangla name added
+3873,Bodalcourt,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3870,Chatkhil,চাটখিল,Chatkhil,চাটখিল,চাটখিল,exact,Bangla name added
+3878,Dosh Gharia,দশদিন Gharia,Chatkhil,চাটখিল,চাটখিল,exact,Bangla name added
+3877,Karihati,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3872,Khilpara,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3871,Palla,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3874,Rezzakpur,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3881,Sahapur,সাহাপুর,Chatkhil,চাটখিল,চাটখিল,exact,Bangla name added
+3882,Sampara,শম্পার,Chatkhil,চাটখিল,চাটখিল,exact,Bangla name added
+3883,Shingbahura,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3875,Solla,,Chatkhil,চাটখিল,চাটখিল,exact,no Bangla name in postcode-bd
+3891,Afazia,,Hatia,হাতিয়া,হাতিয়া,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3890,Hatiya,হাতিয়া,Hatia,হাতিয়া,হাতিয়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3892,Tamoraddi,,Hatia,হাতিয়া,হাতিয়া,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3811,Chaprashir Hat,Chaprashir হাট,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3812,Char Jabbar,চর জব্বার,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3809,Charam Tua,Charam Tua থেকে,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3803,Din Monir Hat,দীন মনির হাট,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3807,Kabirhat,কবিরহাট,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3808,Khalifar Hat,Khalifar হাট,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3806,Mriddarhat,,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,no Bangla name in postcode-bd
+3801,Noakhali College,নোয়াখালী কলেজ,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3800,Noakhali Sadar,নোয়াখালী সদর,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3804,Pak Kishoreganj,পাক কিশোরগঞ্জ,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3802,Sonapur,সোনাপুর,Noakhali Sadar,নোয়াখালী সদর,নোয়াখালী সদর,exact,Bangla name added
+3862,Beezbag,,Senbug,সেনবাগ,সেনবাগ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3864,Chatarpaia,,Senbug,সেনবাগ,সেনবাগ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3861,Kallyandi,,Senbug,সেনবাগ,সেনবাগ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3863,Kankirhat,,Senbug,সেনবাগ,সেনবাগ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+3860,Senbag,সেনবাগ,Senbug,সেনবাগ,সেনবাগ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3865,T.P. Lamua,,Senbug,সেনবাগ,সেনবাগ,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+4570,Barakal,,Barkal,Barakal,বরকল,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4550,Bilaichhari,,Belaichari,Bilaichhari,বিলাইছড়ি,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4560,Jarachhari,,Juraichari,Jarachhari,জুরাছড়ি,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4511,Betbunia,বেতবুনিয়া,,Kalampati,,unmatched,Bangla name added
+4510,Kalampati,,,Kalampati,,unmatched,no Bangla name in postcode-bd
+4531,Chandraghona,চন্দ্রঘোনার,Kaptai,কাপ্তাই,কাপ্তাই,exact,Bangla name added
+4530,Kaptai,কাপ্তাই,Kaptai,কাপ্তাই,কাপ্তাই,exact,Bangla name added
+4533,Kaptai Nuton Bazar,কাপ্তাই Nuton বাজার,Kaptai,কাপ্তাই,কাপ্তাই,exact,Bangla name added
+4532,Kaptai Project,কাপ্তাই প্রকল্প,Kaptai,কাপ্তাই,কাপ্তাই,exact,Bangla name added
+4580,Longachh,,,Longachh,,unmatched,no Bangla name in postcode-bd
+4590,Marishya,,,Marishya,,unmatched,no Bangla name in postcode-bd
+4520,Nanichhar,,Naniarchar,Naniachhar,নানিয়ারচর,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4540,Rajsthali,,Rajasthali,Rajsthali,রাজস্থলী,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+4500,Rangamati Sadar,রাঙ্গামাটি সদর,Rangamati Sadar,রাঙ্গামাটি সদর,রাঙ্গামাটি সদর,exact,Bangla name added
+1360,Demra,ডেমরা,,ডেমরা,,unmatched,Bangla name added
+1362,Matuail,মাতুয়াইল,,ডেমরা,,unmatched,Bangla name added
+1361,Sarulia,সারুলিয়া,,ডেমরা,,unmatched,Bangla name added
+1206,Dhaka CantonmentTSO,ঢাকা সেনানিবাস TSO,,ঢাকা সেনানিবাস,,unmatched,Bangla name added
+1350,Dhamrai,ধামরাই,Dhamrai,ধামরাই,ধামরাই,exact,Bangla name added
+1351,Kamalpur,কমলপুর,Dhamrai,ধামরাই,ধামরাই,exact,Bangla name added
+1209,Jigatala TSO,জিগাতলা TSO,,ধানমন্ডি,,unmatched,Bangla name added
+1213,Banani TSO,বনানী TSO,,গুলশান,,unmatched,Bangla name added
+1212,Gulshan Model Town,গুলশান মডেল টাউন,,গুলশান,,unmatched,Bangla name added
+1232,Dhania TSO,ধনিয়া TSO,,যাত্রাবাড়ি,,unmatched,Bangla name added
+1330,Joypara,জয়পাড়া,,জয়পাড়া,,unmatched,Bangla name added
+1332,Narisha,নারিশা,,জয়পাড়া,,unmatched,Bangla name added
+1331,Palamganj,পালামগঞ্জ,,জয়পাড়া,,unmatched,Bangla name added
+1312,Ati,আটি,Keraniganj,কেরানীগঞ্জ,কেরাণীগঞ্জ,exact,Bangla name added
+1311,Dhaka Jute Mills,ঢাকা পাট কল,Keraniganj,কেরানীগঞ্জ,কেরাণীগঞ্জ,exact,Bangla name added
+1313,Kalatia,কালাটিয়া,Keraniganj,কেরানীগঞ্জ,কেরাণীগঞ্জ,exact,Bangla name added
+1310,Keraniganj,কেরানীগঞ্জ,Keraniganj,কেরানীগঞ্জ,কেরাণীগঞ্জ,exact,Bangla name added
+1219,KhilgaonTSO,খিলগাঁও TSO,,খিলগাঁও,,unmatched,Bangla name added
+1229,KhilkhetTSO,খিলক্ষেত TSO,,খিলক্ষেত,,unmatched,Bangla name added
+1211,Posta TSO,পোস্তা TSO,,লালবাগ,,unmatched,Bangla name added
+1216,Mirpur TSO,মিরপুর TSO,,মিরপুর,,unmatched,Bangla name added
+1207,Mohammadpur Housing,মোহাম্মদপুর হাউজিং,,মোহাম্মদপুর,,unmatched,Bangla name added
+1225,Sangsad BhabanTSO,সংসদ ভবন TSO,,মোহাম্মদপুর,,unmatched,Bangla name added
+1222,BangabhabanTSO,বঙ্গভবন TSO,,মতিঝিল,,unmatched,Bangla name added
+1223,DilkushaTSO,দিলকুশা TSO,,মতিঝিল,,unmatched,Bangla name added
+1323,Agla,আগলা,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1325,Churain,চুরাইন,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1322,Daudpur,দাউদপুর,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1321,Hasnabad,হাসনাবাদ,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1324,Khalpar,খালপাড়,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1320,Nawabganj,নবাবগঞ্জ,Nawabganj,নবাবগঞ্জ,নবাবগঞ্জ,exact,Bangla name added
+1205,New Market TSO,নিউমার্কেট TSO,,নতুন বাজার,,unmatched,Bangla name added
+1000,Dhaka GPO,ঢাকা জিপিও,,পল্টন,,unmatched,Bangla name added
+1217,Shantinagr TSO,শান্তিনগর TSO,,রমনা,,unmatched,Bangla name added
+1214,Basabo TSO,বাসাবো TSO,,সবুজবাগ,,unmatched,Bangla name added
+1348,Amin Bazar,আমিন বাজার,Savar,সাভার,সাভার,exact,Bangla name added
+1341,Dairy Farm,গব্যশালা,Savar,সাভার,সাভার,exact,Bangla name added
+1349,EPZ,ইপিজেড,Savar,সাভার,সাভার,exact,Bangla name added
+1342,Jahangirnagar Univer,জাহাঙ্গীরনগর বিশ্ববিদ্যালয়,Savar,সাভার,সাভার,exact,Bangla name added
+1346,Kashem Cotton Mills,কাশেম কটন মিলস,Savar,সাভার,সাভার,exact,Bangla name added
+1347,Rajphulbaria,রাজফুললবাড়ীয়া,Savar,সাভার,সাভার,exact,Bangla name added
+1340,Savar,সাভার,Savar,সাভার,সাভার,exact,Bangla name added
+1344,Savar Canttonment,সাভার সেনানিবাস,Savar,সাভার,সাভার,exact,Bangla name added
+1343,Saver P.A.T.C,সাভার বিপিএটিসি,Savar,সাভার,সাভার,exact,Bangla name added
+1345,Shimulia,শিমুলিয়া,Savar,সাভার,সাভার,exact,Bangla name added
+1100,Dhaka Sadar HO,ঢাকা সদর HO,,সুত্রাপুর,,unmatched,Bangla name added
+1204,Gendaria TSO,গেণ্ডারিয়া TSO,,সুত্রাপুর,,unmatched,Bangla name added
+1203,Wari TSO,ওয়ারী TSO,,সুত্রাপুর,,unmatched,Bangla name added
+1215,Tejgaon TSO,তেজগাঁও TSO,,তেজগাঁও,,unmatched,Bangla name added
+1208,Dhaka Politechnic,ঢাকা পলিটেকনিক,,তেজগাঁও শিল্প এলাকা,,unmatched,Bangla name added
+1230,Uttara Model TwonTSO,,,,,unmatched,no Bangla name in postcode-bd
+7870,Alfadanga,আলফাডাঙ্গা,Alfadanga,আলফাডাঙ্গা,আলফাডাঙ্গা,exact,Bangla name added
+7830,Bhanga,ভাঙ্গা,Bhanga,ভাঙ্গা,ভাঙ্গা,exact,Bangla name added
+7860,Boalmari,বোয়ালমারী,Boalmari,বোয়ালমারী,বোয়ালমারী,exact,Bangla name added
+7861,Rupatpat,রুপাতপাত,Boalmari,বোয়ালমারী,বোয়ালমারী,exact,Bangla name added
+7810,Charbadrashan,চরভদ্রাসন,Charbhadrasan,চরভদ্রাসন,চরভদ্রাসন,exact,Bangla name added
+7802,Ambikapur,অম্বিকাপুর,Faridpur Sadar,ফরিদপুর সদর,ফরিদপুর সদর,exact,Bangla name added
+7803,Baitulaman Politecni,বাইতুলমান পলিটেকনিক,Faridpur Sadar,ফরিদপুর সদর,ফরিদপুর সদর,exact,Bangla name added
+7800,Faridpursadar,ফরিদপুর সদর,Faridpur Sadar,ফরিদপুর সদর,ফরিদপুর সদর,exact,Bangla name added
+7801,Kanaipur,কানাইপুর,Faridpur Sadar,ফরিদপুর সদর,ফরিদপুর সদর,exact,Bangla name added
+7851,Kamarkali,কামারখালি,Madhukhali,মদুখালি,মধুখালী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7850,Madukhali,মদুখালি,Madhukhali,মদুখালি,মধুখালী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7840,Nagarkanda,নগরকান্দা,Nagarkanda,নগরকান্দা,নগরকান্দা,exact,Bangla name added
+7841,Talma,তালমা,Nagarkanda,নগরকান্দা,নগরকান্দা,exact,Bangla name added
+7822,Bishwa jaker Manjil,বিশ্বরোড জাকের মঞ্জিল,Sadarpur,সদরপুর,সদরপুর,exact,Bangla name added
+7821,Hat Krishapur,হাট ক্রিশাপুর,Sadarpur,সদরপুর,সদরপুর,exact,Bangla name added
+7820,Sadarpur,সদরপুর,Sadarpur,সদরপুর,সদরপুর,exact,Bangla name added
+7804,Shriangan,,,,,unmatched,no Bangla name in postcode-bd
+1703,B.O.F,,Gazipur Sadar,গাজীপুর সদর,গাজীপুর সদর,exact,no Bangla name in postcode-bd
+1701,B.R.R,,Gazipur Sadar,গাজীপুর সদর,গাজীপুর সদর,exact,no Bangla name in postcode-bd
+1702,Chandna,চান্দনা,Gazipur Sadar,গাজীপুর সদর,গাজীপুর সদর,exact,Bangla name added
+1700,Gazipur Sadar,গাজীপুর সদর,Gazipur Sadar,গাজীপুর সদর,গাজীপুর সদর,exact,Bangla name added
+1704,National University,জাতীয় বিশ্ববিদ্যালয়,Gazipur Sadar,গাজীপুর সদর,গাজীপুর সদর,exact,Bangla name added
+1750,Kaliakaar,কালিয়াকৈর,Kaliakair,কালিয়াকৈর,কালিয়াকৈর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1751,Safipur,সফিপুর,Kaliakair,কালিয়াকৈর,কালিয়াকৈর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1720,Kaliganj,কালীগঞ্জ,Kaliganj,কালীগঞ্জ,কালীগঞ্জ,exact,Bangla name added
+1721,Pubail,পুবাইল,Kaliganj,কালীগঞ্জ,কালীগঞ্জ,exact,Bangla name added
+1722,Santanpara,সান্তানপাড়া,Kaliganj,কালীগঞ্জ,কালীগঞ্জ,exact,Bangla name added
+1723,Vaoal Jamalpur,ভাওয়াল জামালপুর,Kaliganj,কালীগঞ্জ,কালীগঞ্জ,exact,Bangla name added
+1730,kapashia,কাপাসিয়া,Kapasia,কাপাসিয়া,কাপাসিয়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1712,Ershad Nagar,এরশাদ নগর,,মন্নুনগর,,unmatched,Bangla name added
+1710,Monnunagar,মন্নুনগর,,মন্নুনগর,,unmatched,Bangla name added
+1711,Nishat Nagar,নিশাত নগর,,মন্নুনগর,,unmatched,Bangla name added
+1743,Barmi,বারমি,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1747,Bashamur,বাশামুর,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1748,Boubi,বউবি,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1745,Kawraid,কাওরাইড,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1744,Satkhamair,সাতখামার,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1740,Sreepur,শ্রীপুর,Sreepur,শ্রীপুর,শ্রীপুর,exact,Bangla name added
+1741,Rajendrapur,রাজেন্দ্রপুর,Sreepur,শ্রীপুর,শ্রীপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1742,Rajendrapur Canttome,,Sreepur,,শ্রীপুর,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+8102,Barfa,বারফা,Gopalganj Sadar,গোপালগঞ্জ সদর,গোপালগঞ্জ সদর,exact,Bangla name added
+8013,Chandradighalia,চন্দ্রাদিঘীনালা,Gopalganj Sadar,গোপালগঞ্জ সদর,গোপালগঞ্জ সদর,exact,Bangla name added
+8100,Gopalganj Sadar,গোপালগঞ্জ সদর,Gopalganj Sadar,গোপালগঞ্জ সদর,গোপালগঞ্জ সদর,exact,Bangla name added
+8101,Ulpur,উলপুর,Gopalganj Sadar,গোপালগঞ্জ সদর,গোপালগঞ্জ সদর,exact,Bangla name added
+8133,Jonapur,জনাপুর,Kashiani,কাশিয়ানী,কাশিয়ানী,exact,Bangla name added
+8130,Kashiani,কাশিয়ানী,Kashiani,কাশিয়ানী,কাশিয়ানী,exact,Bangla name added
+8131,Ramdia College,রামদিয়া কলেজ,Kashiani,কাশিয়ানী,কাশিয়ানী,exact,Bangla name added
+8132,Ratoil,রাতোইল,Kashiani,কাশিয়ানী,কাশিয়ানী,exact,Bangla name added
+8110,Kotalipara,কোটালীপাড়া,Kotalipara,কোটালীপাড়া,কোটালীপাড়া,exact,Bangla name added
+8141,Batkiamari,বাটিকামারী,Muksudpur,মাকসুদপুর,মুকসুদপুর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8142,Khandarpara,খানদারপাড়া,Muksudpur,মাকসুদপুর,মুকসুদপুর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8140,Maksudpur,মাকসুদপুর,Muksudpur,মাকসুদপুর,মুকসুদপুর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8121,Patgati,পাটগাটি,Tungipara,টুঙ্গিপাড়া,টুংগীপাড়া,exact,Bangla name added
+8120,Tungipara,,Tungipara,,টুংগীপাড়া,exact,no Bangla name in postcode-bd
+2030,Dewangonj,দেওয়ানগঞ্জ,Dewangonj,দেওয়ানগঞ্জ,দেওয়ানগঞ্জ,exact,Bangla name added
+2031,Dewangonj S. Mills,দেওয়ানগঞ্জ এস মিলস,Dewangonj,দেওয়ানগঞ্জ,দেওয়ানগঞ্জ,exact,Bangla name added
+2021,Durmoot,ডুরমোট,Islampur,ইসলামপুর,ইসলামপুর,exact,Bangla name added
+2022,Gilabari,গিলাবাড়ি,Islampur,ইসলামপুর,ইসলামপুর,exact,Bangla name added
+2020,Islampur,ইসলামপুর,Islampur,ইসলামপুর,ইসলামপুর,exact,Bangla name added
+2000,Jamalpur,জামালপুর,Jamalpur Sadar,জামালপুর,জামালপুর সদর,alias,Bangla name added
+2001,Nandina,নানদিনা,Jamalpur Sadar,জামালপুর,জামালপুর সদর,alias,Bangla name added
+2002,Narundi,নুরুন্দী,Jamalpur Sadar,জামালপুর,জামালপুর সদর,alias,Bangla name added
+2011,Jamalpur,জামালপুর,Melandah,মেলান্দহ,মেলান্দহ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2013,Mahmoodpur,মাহমুদপুর,Melandah,মেলান্দহ,মেলান্দহ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2012,Malancha,মালঞ্চ,Melandah,মেলান্দহ,মেলান্দহ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2010,Malandah,মেলান্দহ,Melandah,মেলান্দহ,মেলান্দহ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2041,Balijhuri,বালিঝুড়ি,Madarganj,মাদারগঞ্জ,মাদারগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2040,Mathargonj,মাদারগঞ্জ,Madarganj,মাদারগঞ্জ,মাদারগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2052,Bausee,বাউসী,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2051,Gunerbari,গুনেরবাড়ি,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2053,Jagannath Ghat,জগন্নাথ ঘাট,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2055,Jamuna Sar Karkhana,যমুনা সার কারখানা,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2054,Pingna,পিংনা,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2050,Shorishabari,সরিষাবাড়ি,Sarishabari,সরিষাবাড়ি,সরিষাবাড়ী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2336,Bajitpur,বাজিতপুর,Bajitpur,বাজিতপুর,বাজিতপুর,exact,Bangla name added
+2338,Laksmipur,লক্ষ্মীপুর,Bajitpur,বাজিতপুর,বাজিতপুর,exact,Bangla name added
+2337,Sararchar,সরারচর,Bajitpur,বাজিতপুর,বাজিতপুর,exact,Bangla name added
+2350,Bhairab,ভৈরব,Bhairab,ভৈরব,ভৈরব,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2320,Hossenpur,হোসেনপুর,Hossainpur,হোসেনপুর,হোসেনপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2390,Itna,ইটনা,Itna,ইটনা,ইটনা,exact,Bangla name added
+2310,Karimganj,করিমগঞ্জ,Karimgonj,করিমগঞ্জ,করিমগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2331,Gochhihata,গচিহাটা,Katiadi,কটিয়াদি,কটিয়াদী,exact,Bangla name added
+2330,Katiadi,কটিয়াদি,Katiadi,কটিয়াদি,কটিয়াদী,exact,Bangla name added
+2301,Kishoreganj S.Mills,কিশোরগঞ্জ এস.মিলস,Kishoreganj Sadar,কিশোরগঞ্জ সদর,কিশোরগঞ্জ সদর,exact,Bangla name added
+2300,Kishoreganj Sadar,কিশোরগঞ্জ সদর,Kishoreganj Sadar,কিশোরগঞ্জ সদর,কিশোরগঞ্জ সদর,exact,Bangla name added
+2302,Maizhati,মাইজহাটি,Kishoreganj Sadar,কিশোরগঞ্জ সদর,কিশোরগঞ্জ সদর,exact,Bangla name added
+2303,Nilganj,নীলগঞ্জ,Kishoreganj Sadar,কিশোরগঞ্জ সদর,কিশোরগঞ্জ সদর,exact,Bangla name added
+2341,Chhoysuti,ছয়সুটি,Kuliarchar,কুলিয়ারচর,কুলিয়ারচর,exact,Bangla name added
+2340,Kuliarchar,কুলিয়ারচর,Kuliarchar,কুলিয়ারচর,কুলিয়ারচর,exact,Bangla name added
+2371,Abdullahpur,আব্দুল্লাহপুর,Mithamoin,মিঠামইন,মিঠামইন,exact,Bangla name added
+2370,MIthamoin,মিঠামইন,Mithamoin,মিঠামইন,মিঠামইন,exact,Bangla name added
+2360,Nikli,নিকলী,Nikli,নিকলী,নিকলী,exact,Bangla name added
+2380,Ostagram,অস্টগ্রাম,Austagram,অস্টগ্রাম,অষ্টগ্রাম,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2326,Pakundia,পাকুন্দিয়া,Pakundia,পাকুন্দিয়া,পাকুন্দিয়া,exact,Bangla name added
+2316,Tarial,,,,,unmatched,no Bangla name in postcode-bd
+7932,Bahadurpur,বাহাদুরপুর,,বারহামগঞ্জ,,unmatched,Bangla name added
+7930,Barhamganj,বারহামগঞ্জ,,বারহামগঞ্জ,,unmatched,Bangla name added
+7931,Nilaksmibandar,নিলাকসমিবান্দার,,বারহামগঞ্জ,,unmatched,Bangla name added
+7933,Umedpur,উমেদপুর,,বারহামগঞ্জ,,unmatched,Bangla name added
+7920,Kalkini,কালকিনি,Kalkini,কালকিনি,কালকিনি,exact,Bangla name added
+7921,Sahabrampur,সাহাবরামপুর,Kalkini,কালকিনি,কালকিনি,exact,Bangla name added
+7901,Charmugria,চরমুগরিয়া,Madaripur Sadar,মাদারীপুর সদর,মাদারীপুর সদর,exact,Bangla name added
+7903,Habiganj,হবিগঞ্জ,Madaripur Sadar,মাদারীপুর সদর,মাদারীপুর সদর,exact,Bangla name added
+7902,Kulpaddi,কুলপাদ্দি,Madaripur Sadar,মাদারীপুর সদর,মাদারীপুর সদর,exact,Bangla name added
+7900,Madaripur Sadar,মাদারীপুর সদর,Madaripur Sadar,মাদারীপুর সদর,মাদারীপুর সদর,exact,Bangla name added
+7904,Mustafapur,মুস্তফাপুর,Madaripur Sadar,মাদারীপুর সদর,মাদারীপুর সদর,exact,Bangla name added
+7911,Khalia,খালিয়া,Rajoir,রাজৈর,রাজৈর,exact,Bangla name added
+7910,Rajoir,,Rajoir,,রাজৈর,exact,no Bangla name in postcode-bd
+1860,Doulatpur,দৌলতপুর,Doulatpur,দৌলতপুর,দৌলতপুর,exact,Bangla name added
+1840,Gheor,ঘিওর,Gior,ঘিওর,ঘিওর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1831,Jhitka,ঝিটকা,,লেছড়াগঞ্জ,,unmatched,Bangla name added
+1830,Lechhraganj,বারহামগঞ্জ,,বারহামগঞ্জ,,unmatched,Bangla name added
+1804,Barangail,বরংগাইল,Manikganj Sadar,মানিকগঞ্জ সদর,মানিকগঞ্জ সদর,exact,Bangla name added
+1802,Gorpara,গড়পাড়া,Manikganj Sadar,মানিকগঞ্জ সদর,মানিকগঞ্জ সদর,exact,Bangla name added
+1803,Mahadebpur,মহাদেবপুর,Manikganj Sadar,মানিকগঞ্জ সদর,মানিকগঞ্জ সদর,exact,Bangla name added
+1801,Manikganj Bazar,মানিকগঞ্জ বাজার,Manikganj Sadar,মানিকগঞ্জ সদর,মানিকগঞ্জ সদর,exact,Bangla name added
+1800,Manikganj Sadar,মানিকগঞ্জ সদর,Manikganj Sadar,মানিকগঞ্জ সদর,মানিকগঞ্জ সদর,exact,Bangla name added
+1811,Baliati,বালিয়াটি,Saturia,সাটুরিয়া,সাটুরিয়া,exact,Bangla name added
+1810,Saturia,সাটুরিয়া,Saturia,সাটুরিয়া,সাটুরিয়া,exact,Bangla name added
+1851,Aricha,আরিচা,Shibaloy,শিবালয়,শিবালয়,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1850,Shibaloy,শিবালয়,Shibaloy,শিবালয়,শিবালয়,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1852,Tewta,তেওতা,Shibaloy,শিবালয়,শিবালয়,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1853,Uthli,উঠলি,Shibaloy,শিবালয়,শিবালয়,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1821,Baira,বায়রা,Singiar,সিংগাইর,সিংগাইর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1822,joymantop,জয়মন্তব,Singiar,সিংগাইর,সিংগাইর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1820,Singair,,Singiar,,সিংগাইর,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+1510,Gajaria,গজারিয়া,Gajaria,গজারিয়া,গজারিয়া,exact,Bangla name added
+1511,Hossendi,হোসেন্দি,Gajaria,গজারিয়া,গজারিয়া,exact,Bangla name added
+1512,Rasulpur,রসুলপুর,Gajaria,গজারিয়া,গজারিয়া,exact,Bangla name added
+1334,Gouragonj,,Louhajanj,,লৌহজং,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+1534,Gouragonj,গৌড়গঞ্জ,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1532,Haldia SO,হলদিয়া তাই,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1333,Haridia,হারিদিয়া,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1533,Haridia DESO,হারিদিয়া DESO,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1531,Korhati,করহাতি,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1530,Lohajang,লৌহজং,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1335,Madini Mandal,মেদিনী মণ্ডল,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1535,Medini Mandal EDSO,মেদিনী মন্ডল EDSO,Louhajanj,লৌহজং,লৌহজং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1503,Kathakhali,কাঠাখালি,Munshiganj Sadar,মুন্সীগঞ্জ সদর,মুন্সিগঞ্জ সদর,exact,Bangla name added
+1502,Mirkadim,মিরকাদিম,Munshiganj Sadar,মুন্সীগঞ্জ সদর,মুন্সিগঞ্জ সদর,exact,Bangla name added
+1500,Munshiganj Sadar,মুন্সীগঞ্জ সদর,Munshiganj Sadar,মুন্সীগঞ্জ সদর,মুন্সিগঞ্জ সদর,exact,Bangla name added
+1501,Rikabibazar,রিকাবিবাজার,Munshiganj Sadar,মুন্সীগঞ্জ সদর,মুন্সিগঞ্জ সদর,exact,Bangla name added
+1542,Ichapur,ইছাপুর,Sirajdikhan,সিরাজদিখান,সিরাজদিখান,exact,Bangla name added
+1541,Kola,কোলা,Sirajdikhan,সিরাজদিখান,সিরাজদিখান,exact,Bangla name added
+1543,Malkha Nagar,মালখানগর,Sirajdikhan,সিরাজদিখান,সিরাজদিখান,exact,Bangla name added
+1544,Shekher Nagar,শেখের নগর,Sirajdikhan,সিরাজদিখান,সিরাজদিখান,exact,Bangla name added
+1540,Sirajdikhan,সিরাজদিখান,Sirajdikhan,সিরাজদিখান,সিরাজদিখান,exact,Bangla name added
+1557,Baghra,বাঘড়া,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1551,Barikhal,বারিখাল,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1558,Bhaggyakul,ভাগ্যকুল,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1553,Hashara,হাশারা,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1554,Kolapara,কলাপাড়া,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1555,Kumarbhog,কুমারভগ,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1552,Mazpara,মাজপাড়া,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1550,Srinagar,শ্রীনগর,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1556,Vaggyakul SO,ভাগ্যকুল তাই,Sreenagar,শ্রীনগর,শ্রীনগর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1523,Bajrajugini,বিজরাজুগিনি,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1522,Baligao,বালিগাও,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1521,Betkahat,বেটকারহাট,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1525,Dighirpar,দিঘিরপাড়,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1524,Hasail,হাসাইল,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1527,Pura,পুরা,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1526,Pura EDSO,পুরা EDSO,Tongibari,টাংগিবাড়ি,টংগীবাড়ি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1520,Tangibari,,Tongibari,,টংগীবাড়ি,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+2240,Bhaluka,ভালুকা,Bhaluka,ভালুকা,ভালুকা,exact,Bangla name added
+2216,Fulbaria,ফুলবাড়িয়া,Fulbaria,ফুলবাড়িয়া,ফুলবাড়ীয়া,exact,Bangla name added
+2234,Duttarbazar,দুট্টারবাজার,Gafargaon,গফরগাঁও,গফরগাঁও,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2230,Gaforgaon,গফরগাঁও,Gafargaon,গফরগাঁও,গফরগাঁও,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2233,Kandipara,কান্দিপাড়া,Gafargaon,গফরগাঁও,গফরগাঁও,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2231,Shibganj,শিবগঞ্জ,Gafargaon,গফরগাঁও,গফরগাঁও,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2232,Usti,উস্তি,Gafargaon,গফরগাঁও,গফরগাঁও,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2270,Gouripur,গৌরীপুর,Gouripur,গৌরীপুর,গৌরীপুর,exact,Bangla name added
+2271,Ramgopalpur,রামগোপালপুর,Gouripur,গৌরীপুর,গৌরীপুর,exact,Bangla name added
+2261,Dhara,ধারা,Haluaghat,হালুয়াঘাট,হালুয়াঘাট,exact,Bangla name added
+2260,Haluaghat,হালুয়াঘাট,Haluaghat,হালুয়াঘাট,হালুয়াঘাট,exact,Bangla name added
+2262,Munshirhat,মুনশিরহাট,Haluaghat,হালুয়াঘাট,হালুয়াঘাট,exact,Bangla name added
+2282,Atharabari,আঠারবাড়ি,Iswarganj,ঈশ্বরগঞ্জ,ঈশ্বরগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2280,Isshwargonj,ঈশ্বরগঞ্জ,Iswarganj,ঈশ্বরগঞ্জ,ঈশ্বরগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2281,Sohagi,সোহাগি,Iswarganj,ঈশ্বরগঞ্জ,ঈশ্বরগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2210,Muktagachha,মুক্তাগাছা,Muktagacha,মুক্তাগাছা,মুক্তাগাছা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2202,Agriculture Universi,কৃষি বিশ্ববিদ্যালয়,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2204,Biddyaganj,বিদ্যাগঞ্জ,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2201,Kawatkhali,কাওয়াটখালি,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2200,Mymensingh Sadar,ময়মনসিংহ সদর,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2205,Pearpur,পিয়ারপুর,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2203,Shombhuganj,শম্ভুগঞ্জ,Mymensingh Sadar,ময়মনসিংহ সদর,ময়মনসিংহ সদর,exact,Bangla name added
+2291,Gangail,গানগাইল,Nandail,নান্দাইল,নান্দাইল,exact,Bangla name added
+2290,Nandail,নান্দাইল,Nandail,নান্দাইল,নান্দাইল,exact,Bangla name added
+2251,Beltia,বেলতিয়া,Phulpur,ফুলপুর,ফুলপুর,exact,Bangla name added
+2250,Phulpur,ফুলপুর,Phulpur,ফুলপুর,ফুলপুর,exact,Bangla name added
+2252,Tarakanda,তারাকান্দা,Phulpur,ফুলপুর,ফুলপুর,exact,Bangla name added
+2221,Ahmadbad,আহমাদবাদ,Trishal,ত্রিশাল,ত্রিশাল,exact,Bangla name added
+2223,Dhala,ধলা,Trishal,ত্রিশাল,ত্রিশাল,exact,Bangla name added
+2222,Ram Amritaganj,রাম অমৃতগঞ্জ,Trishal,ত্রিশাল,ত্রিশাল,exact,Bangla name added
+2220,Trishal,ত্রিশাল,Trishal,ত্রিশাল,ত্রিশাল,exact,Bangla name added
+1450,Araihazar,আড়াইহাজার,Araihazar,আড়াইহাজার,আড়াইহাজার,exact,Bangla name added
+1451,Gopaldi,গোপালদি,Araihazar,আড়াইহাজার,আড়াইহাজার,exact,Bangla name added
+1440,Baidder Bazar,,,,,unmatched,no Bangla name in postcode-bd
+1441,Bara Nagar,বারো নগর,,বাইদ্দের বাজার,,unmatched,Bangla name added
+1442,Barodi,বারোদি,,বাইদ্দের বাজার,,unmatched,Bangla name added
+1410,Bandar,বন্দর,Bandar,বন্দর,বন্দর,exact,Bangla name added
+1413,BIDS,বিআইডিএস,Bandar,বন্দর,বন্দর,exact,Bangla name added
+1411,D.C Mills,ডি.সি মিলস,Bandar,বন্দর,বন্দর,exact,Bangla name added
+1414,Madanganj,মদনগঞ্জ,Bandar,বন্দর,বন্দর,exact,Bangla name added
+1412,Nabiganj,নবীগঞ্জ,Bandar,বন্দর,বন্দর,exact,Bangla name added
+1421,Fatulla Bazar,ফতুল্লা বাজার,,ফতুল্লা,,unmatched,Bangla name added
+1420,Fatullah,ফতুল্লা,,ফতুল্লা,,unmatched,Bangla name added
+1400,Narayanganj Sadar,নারায়ণগঞ্জ সদর,Narayanganj Sadar,নারায়ণগঞ্জ সদর,নারায়নগঞ্জ সদর,exact,Bangla name added
+1462,Bhulta,ভুলতা,Rupganj,রূপগঞ্জ,রূপগঞ্জ,exact,Bangla name added
+1461,Kanchan,কাঞ্চন,Rupganj,রূপগঞ্জ,রূপগঞ্জ,exact,Bangla name added
+1464,Murapara,মুরাপাড়া,Rupganj,রূপগঞ্জ,রূপগঞ্জ,exact,Bangla name added
+1463,Nagri,নগরি,Rupganj,রূপগঞ্জ,রূপগঞ্জ,exact,Bangla name added
+1460,Rupganj,রূপগঞ্জ,Rupganj,রূপগঞ্জ,রূপগঞ্জ,exact,Bangla name added
+1431,Adamjeenagar,আদামজীনগর,,সিদ্ধিরগঞ্জ,,unmatched,Bangla name added
+1432,LN Mills,LN মিলস,,সিদ্ধিরগঞ্জ,,unmatched,Bangla name added
+1430,Siddirganj,,,,,unmatched,no Bangla name in postcode-bd
+1640,Belabo,বেলাব,Belabo,বেলাব,বেলাবো,exact,Bangla name added
+1651,Hatirdia,হাতিরদিয়া,Monohardi,মনোহরদি,মনোহরদী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1652,Katabaria,কাটাবাড়িয়া,Monohardi,মনোহরদি,মনোহরদী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1650,Monohordi,মনোহরদি,Monohardi,মনোহরদি,মনোহরদী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1605,Karimpur,করিমপুর,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1604,Madhabdi,মাধবদী,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1602,Narshingdi College,নরসিংদী কলেজ,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1600,Narshingdi Sadar,নরসিংদী সদর,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1603,Panchdona,পাঁচদোনা,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1601,UMC Jute Mills,UMC জুট মিলস,Narsingdi Sadar,নরসিংদী সদর,নরসিংদী সদর,alias,Bangla name added
+1612,Char Sindhur,চরসিন্ধুর,Palash,পলাশ,পলাশ,exact,Bangla name added
+1613,Ghorashal,ঘোড়াশাল,Palash,পলাশ,পলাশ,exact,Bangla name added
+1611,Ghorashal Urea Facto,ঘোড়াশাল ইউরিয়া ফ্যাক্টুরি,Palash,পলাশ,পলাশ,exact,Bangla name added
+1610,Palash,পলাশ,Palash,পলাশ,পলাশ,exact,Bangla name added
+1631,Bazar Hasnabad,বাজার হাসনাবাদ,Raipura,রায়পুর,রায়পুরা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1632,Radhaganj bazar,রাধাগঞ্জ বাজার,Raipura,রায়পুর,রায়পুরা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1630,Raypura,রায়পুর,Raipura,রায়পুর,রায়পুরা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+1620,Shibpur,,Shibpur,,শিবপুর,exact,no Bangla name in postcode-bd
+2420,Susnng Durgapur,সুসনঞ্জ দুর্গাপুর,,সুসনঞ্জ দুর্গাপুর,,unmatched,Bangla name added
+2470,Atpara,আটপাড়া,Atpara,আটপাড়া,আটপাড়া,exact,Bangla name added
+2440,Barhatta,বারহাট্টা,Barhatta,বারহাট্টা,বারহাট্টা,exact,Bangla name added
+2450,Dharampasha,ধর্মপাশা,,ধর্মপাশা,,unmatched,Bangla name added
+2416,Dhobaura,ধবাউরা,,ধবাউরা,,unmatched,Bangla name added
+2417,Sakoai,সাকয়াই,,ধবাউরা,,unmatched,Bangla name added
+2430,Kalmakanda,কলমাকান্দা,Kalmakanda,কলমাকান্দা,কলমাকান্দা,exact,Bangla name added
+2480,Kendua,কেন্দুয়া,Kendua,কেন্দুয়া,কেন্দুয়া,exact,Bangla name added
+2460,Khaliajhri,খালিয়াজুরী,Khaliajuri,খালিয়াজুরী,খালিয়াজুরী,exact,Bangla name added
+2462,Shaldigha,শালদিঘা,Khaliajuri,খালিয়াজুরী,খালিয়াজুরী,exact,Bangla name added
+2490,Madan,মদন,Madan,মদন,মদন,exact,Bangla name added
+2456,Moddoynagar,মধ্যনগর,,মধ্যনগর,,unmatched,Bangla name added
+2446,Mohanganj,মোহনগঞ্জ,Mohongonj,মোহনগঞ্জ,মোহনগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2401,Baikherhati,বাইখেরহাটি,Netrokona Sadar,নেত্রকোণা সদর,নেত্রকোণা সদর,alias,Bangla name added
+2400,Netrakona Sadar,নেত্রকোণা সদর,Netrokona Sadar,নেত্রকোণা সদর,নেত্রকোণা সদর,alias,Bangla name added
+2412,Jaria Jhanjhail,জারিয়া ঝানঝাইল,Purbadhala,পুর্বধোলা,পূর্বধলা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2410,Purbadhola,পুর্বধোলা,Purbadhala,পুর্বধোলা,পূর্বধলা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+2411,Shamgonj,,Purbadhala,,পূর্বধলা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+7730,Baliakandi,বালিয়াকান্দি,Baliakandi,বালিয়াকান্দি,বালিয়াকান্দি,exact,Bangla name added
+7731,Nalia,নালিয়া থেকে,Baliakandi,বালিয়াকান্দি,বালিয়াকান্দি,exact,Bangla name added
+7723,Mrigibazar,মৃগিবাজার,Pangsa,পাংশা,পাংশা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7720,Pangsha,পাংশা,Pangsa,পাংশা,পাংশা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7721,Ramkol,রামকল,Pangsa,পাংশা,পাংশা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7722,Ratandia,রতনদিয়া,Pangsa,পাংশা,পাংশা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7710,Goalanda,গোয়ালন্দ,Rajbari Sadar,রাজবাড়ী সদর,রাজবাড়ী সদর,exact,Bangla name added
+7711,Khankhanapur,খনখনাপুর,Rajbari Sadar,রাজবাড়ী সদর,রাজবাড়ী সদর,exact,Bangla name added
+7700,Rajbari Sadar,,Rajbari Sadar,,রাজবাড়ী সদর,exact,no Bangla name in postcode-bd
+8030,Bhedorganj,ভেদোরগঞ্জ,Bhedarganj,ভেদোরগঞ্জ,ভেদরগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8040,Damudhya,দামুধ্যা,Damudya,দামুধ্যা,ডামুড্যা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+8050,Gosairhat,গোসাইরহাট,Gosairhat,গোসাইরহাট,গোসাইরহাট,exact,Bangla name added
+8010,Jajira,জাজিরা,Zajira,জাজিরা,জাজিরা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+8021,Bhozeshwar,ভোজেশ্বর,Naria,নড়িয়া,নড়িয়া,exact,Bangla name added
+8022,Gharisar,ঘারিসার,Naria,নড়িয়া,নড়িয়া,exact,Bangla name added
+8024,Kartikpur,কার্তিকপুর,Naria,নড়িয়া,নড়িয়া,exact,Bangla name added
+8020,Naria,নড়িয়া,Naria,নড়িয়া,নড়িয়া,exact,Bangla name added
+8023,Upshi,উপশি,Naria,নড়িয়া,নড়িয়া,exact,Bangla name added
+8001,Angaria,আঙ্গারিয়া,Shariatpur Sadar,শরীয়তপুর সদর,শরিয়তপুর সদর,exact,Bangla name added
+8002,Chikandi,চিকান্দি,Shariatpur Sadar,শরীয়তপুর সদর,শরিয়তপুর সদর,exact,Bangla name added
+8000,Shariatpur Sadar,,Shariatpur Sadar,,শরিয়তপুর সদর,exact,no Bangla name in postcode-bd
+2140,Bakshigonj,বকশীগঞ্জ,,বকশীগঞ্জ,,unmatched,Bangla name added
+2120,Jhinaigati,ঝিনাইগাতী,Jhenaigati,ঝিনাইগাতী,ঝিনাইগাতী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2151,Gonopaddi,গণপাদ্দি,Nokla,নকলা,নকলা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2150,Nakla,নকলা,Nokla,নকলা,নকলা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2111,Hatibandha,হাতীবান্ধা,Nalitabari,নালিতাবাড়ী,নালিতাবাড়ী,exact,Bangla name added
+2110,Nalitabari,নালিতাবাড়ী,Nalitabari,নালিতাবাড়ী,নালিতাবাড়ী,exact,Bangla name added
+2100,Sherpur Shadar,শেরপুর সদর,Sherpur Sadar,শেরপুর সদর,শেরপুর সদর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+2130,Shribardi,শ্রীবরদী,Sreebordi,শ্রীবরদী,শ্রীবরদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+1920,Basail,বাসাইল,Basail,বাসাইল,বাসাইল,exact,Bangla name added
+1960,Bhuapur,ভূঞাপুর,Bhuapur,ভূঞাপুর,ভুয়াপুর,exact,Bangla name added
+1910,Delduar,দেলদুয়ার,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1913,Elasin,ইলাসিন,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1914,Hinga Nagar,হিংগা নগর,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1911,Jangalia,জাঙ্গালিয়া,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1915,Lowhati,লউহাটি,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1912,Patharail,পাঠারাইল,Delduar,দেলদুয়ার,দেলদুয়ার,exact,Bangla name added
+1982,D. Pakutia,ডি পাকুটিয়া,Ghatail,ঘাটাইল,ঘাটাইল,exact,Bangla name added
+1983,Dhalapara,ধলাপাড়া,Ghatail,ঘাটাইল,ঘাটাইল,exact,Bangla name added
+1980,Ghatial,ঘাটাইল,Ghatail,ঘাটাইল,ঘাটাইল,exact,Bangla name added
+1984,Lohani,লোহানী,Ghatail,ঘাটাইল,ঘাটাইল,exact,Bangla name added
+1981,Zahidganj,জাহিদগঞ্জ,Ghatail,ঘাটাইল,ঘাটাইল,exact,Bangla name added
+1990,Gopalpur,গোপালপুর,Gopalpur,গোপালপুর,গোপালপুর,exact,Bangla name added
+1992,Hemnagar,হেমনগর,Gopalpur,গোপালপুর,গোপালপুর,exact,Bangla name added
+1991,Jhowail,চাতুতিয়া,Gopalpur,গোপালপুর,গোপালপুর,exact,Bangla name added
+1973,Ballabazar,বাল্লাবাজার,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1974,Elinga,ইলিংগা,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1970,Kalihati,কালিহাতী,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1977,Nagarbari,নগরবাড়ী,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1976,Nagarbari SO,নগরবাড়ী তাই,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1972,Nagbari,নাগবাড়ি,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1975,Palisha,পালিশা,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1971,Rajafair,রাজাফাইর,Kalihati,কালিহাতী,কালিহাতী,exact,Bangla name added
+1930,Kashkawlia,কাশকাওলিয়া,,কাশকাওলিয়া,,unmatched,Bangla name added
+1997,Dhobari,ধবাড়ি,Madhupur,মধুপুর,মধুপুর,exact,Bangla name added
+1996,Madhupur,মধুপুর,Madhupur,মধুপুর,মধুপুর,exact,Bangla name added
+1941,Gorai,গড়াই,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1944,Jarmuki,জারমুকি,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1942,M.C. College,এম.সি. কলেজ,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1940,Mirzapur,মির্জাপুর,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1945,Mohera,মহেরা,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1943,Warri paikpara,ওয়ারী পাইকপাড়া,Mirzapur,মির্জাপুর,মির্জাপুর,exact,Bangla name added
+1937,Dhuburia,ধুবুরিয়া,Nagarpur,নাগরপুর,নাগরপুর,exact,Bangla name added
+1936,Nagarpur,নাগরপুর,Nagarpur,নাগরপুর,নাগরপুর,exact,Bangla name added
+1938,Salimabad,সলিমাবাদ,Nagarpur,নাগরপুর,নাগরপুর,exact,Bangla name added
+1951,Kochua,কচুয়া,Sakhipur,সখীপুর,সখিপুর,exact,Bangla name added
+1950,Sakhipur,সখীপুর,Sakhipur,সখীপুর,সখিপুর,exact,Bangla name added
+1901,Kagmari,কাগমারি,Tangail Sadar,টাঙ্গাইল সদর,টাঙ্গাইল সদর,exact,Bangla name added
+1903,Korotia,করোতিয়া,Tangail Sadar,টাঙ্গাইল সদর,টাঙ্গাইল সদর,exact,Bangla name added
+1904,Purabari,পুড়াবাড়ি,Tangail Sadar,টাঙ্গাইল সদর,টাঙ্গাইল সদর,exact,Bangla name added
+1902,Santosh,সন্তোষ,Tangail Sadar,টাঙ্গাইল সদর,টাঙ্গাইল সদর,exact,Bangla name added
+1900,Tangail Sadar,টাঙ্গাইল সদর,Tangail Sadar,টাঙ্গাইল সদর,টাঙ্গাইল সদর,exact,Bangla name added
+9300,Bagerhat Sadar,বাগেরহাট সদর,Bagerhat Sadar,বাগেরহাট সদর,বাগেরহাট সদর,exact,Bangla name added
+9301,P.C College,P.C কলেজ,Bagerhat Sadar,বাগেরহাট সদর,বাগেরহাট সদর,exact,Bangla name added
+9302,Rangdia,,Bagerhat Sadar,বাগেরহাট সদর,বাগেরহাট সদর,exact,no Bangla name in postcode-bd
+9350,Chalna Ankorage,চালনা Ankorage,,চালনা Ankorage,,unmatched,Bangla name added
+9351,Mongla Port,মংলা বন্দর,,চালনা Ankorage,,unmatched,Bangla name added
+9361,Barabaria,বড়বাডি়য়া,Chitalmari,চিতলমারী,চিতলমারী,exact,Bangla name added
+9360,Chitalmari,চিতলমারী,Chitalmari,চিতলমারী,চিতলমারী,exact,Bangla name added
+9372,Bhanganpar Bazar,Bhanganpar বাজার,Fakirhat,ফকিরহাট,ফকিরহাট,exact,Bangla name added
+9370,Fakirhat,ফকিরহাট,Fakirhat,ফকিরহাট,ফকিরহাট,exact,Bangla name added
+9371,Mansa,মানসা,Fakirhat,ফকিরহাট,ফকিরহাট,exact,Bangla name added
+9310,Kachua,কচুয়া,Kachua,কচুয়া Upo,কচুয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9311,Sonarkola,,Kachua,কচুয়া Upo,কচুয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9383,Charkulia,,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,no Bangla name in postcode-bd
+9382,Dariala,,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,no Bangla name in postcode-bd
+9381,Kahalpur,,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,no Bangla name in postcode-bd
+9380,Mollahat,মোল্লাহাট,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,Bangla name added
+9384,Nagarkandi,,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,no Bangla name in postcode-bd
+9385,Pak Gangni,পাক গাংনী,Mollahat,মোল্লাহাট,মোল্লাহাট,exact,Bangla name added
+9320,Morelganj,মোরেলগঞ্জের,Morrelganj,মোরেলগঞ্জের,মোড়েলগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9321,Sannasi Bazar,সন্ন্যাসী বাজার,Morrelganj,মোরেলগঞ্জের,মোড়েলগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9322,Telisatee,,Morrelganj,মোরেলগঞ্জের,মোড়েলগঞ্জ,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9341,Foylahat,,Rampal,রামপাল,রামপাল,exact,no Bangla name in postcode-bd
+9343,Gourambha,,Rampal,রামপাল,রামপাল,exact,no Bangla name in postcode-bd
+9340,Rampal,রামপাল,Rampal,রামপাল,রামপাল,exact,Bangla name added
+9342,Sonatunia,,Rampal,রামপাল,রামপাল,exact,no Bangla name in postcode-bd
+9330,Rayenda,,,Rayenda,,unmatched,no Bangla name in postcode-bd
+7210,Alamdanga,আলমডাঙ্গা,Alamdanga,আলমডাঙ্গা,আলমডাঙ্গা,exact,Bangla name added
+7211,Hardi,,Alamdanga,আলমডাঙ্গা,আলমডাঙ্গা,exact,no Bangla name in postcode-bd
+7200,Chuadanga Sadar,চুয়াডাঙ্গা সদর,Chuadanga Sadar,চুয়াডাঙ্গা সদর,চুয়াডাঙ্গা সদর,exact,Bangla name added
+7201,Munshiganj,মুন্সিগঞ্জ,Chuadanga Sadar,চুয়াডাঙ্গা সদর,চুয়াডাঙ্গা সদর,exact,Bangla name added
+7222,Andulbaria,,Damurhuda,দামুড়হুদা,দামুড়হুদা,exact,no Bangla name in postcode-bd
+7220,Damurhuda,দামুড়হুদা,Damurhuda,দামুড়হুদা,দামুড়হুদা,exact,Bangla name added
+7221,Darshana,দর্শনা,Damurhuda,দামুড়হুদা,দামুড়হুদা,exact,Bangla name added
+7230,Doulatganj,,,Doulatganj,,unmatched,no Bangla name in postcode-bd
+7470,Bagharpara,বাঘারপাড়া,Bagherpara,বাঘারপাড়া,বাঘারপাড়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7471,Gouranagar,,Bagherpara,বাঘারপাড়া,বাঘারপাড়া,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+7410,Chougachha,চৌগাছা,Chougachha,চৌগাছা,চৌগাছা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7406,Basundia,বসুন্দিয়া,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7402,Chanchra,নগরী Chanchra,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7407,Churamankathi,,Jessore Sadar,যশোর সদর,যশোর সদর,exact,no Bangla name in postcode-bd
+7404,Jessore Airbach,যশোর Airbach,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7403,Jessore canttonment,যশোর canttonment,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7400,Jessore Sadar,যশোর সদর,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7401,Jessore Upa-Shahar,যশোর ইউপিএ-সাহারের,Jessore Sadar,যশোর সদর,যশোর সদর,exact,Bangla name added
+7405,Rupdia,,Jessore Sadar,যশোর সদর,যশোর সদর,exact,no Bangla name in postcode-bd
+7420,Jhikargachha,ঝিকরগাছা,Jhikargacha,ঝিকরগাছা,ঝিকরগাছা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7450,Keshobpur,কেশবপুর,Keshabpur,কেশবপুর,কেশবপুর,exact,Bangla name added
+7440,Monirampur,মনিরামপুর,Manirampur,মনিরামপুর,মণিরামপুর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7462,Bhugilhat,,,নোয়াপাড়া,,unmatched,no Bangla name in postcode-bd
+7460,Noapara,নোয়াপাড়া,,নোয়াপাড়া,,unmatched,Bangla name added
+7461,Rajghat,রাজঘাট,,নোয়াপাড়া,,unmatched,Bangla name added
+7433,Bag Achra,ব্যাগ Achra,Sharsha,শর্শা,শার্শা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7431,Benapole,বেনাপোল,Sharsha,শর্শা,শার্শা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7432,Jadabpur,,Sharsha,শর্শা,শার্শা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+7430,Sarsa,শর্শা,Sharsha,শর্শা,শার্শা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+7310,Harinakundu,হরিনাকুন্ডু,Harinakundu,হরিনাকুন্ডু,হরিণাকুন্ডু,exact,Bangla name added
+7301,Jinaidaha Cadet College,ঝিনাইদহ ক্যাডেট কলেজ,Jhenaidah Sadar,ঝিনাইদহ সদর,ঝিনাইদহ সদর,alias,Bangla name added
+7300,Jinaidaha Sadar,ঝিনাইদহ সদর,Jhenaidah Sadar,ঝিনাইদহ সদর,ঝিনাইদহ সদর,alias,Bangla name added
+7330,Kotchandpur,কোটচাঁদপুর,Kotchandpur,কোটচাঁদপুর,কোটচাঁদপুর,exact,Bangla name added
+7340,Maheshpur,মহেশপুর,Moheshpur,মহেশপুর,মহেশপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7351,Hatbar Bazar,হাট বারোবাজার,,নলডাঙ্গা,,unmatched,Bangla name added
+7350,Naldanga,নলডাঙ্গা,,নলডাঙ্গা,,unmatched,Bangla name added
+7321,Kumiradaha,,Shailkupa,শৈলকুপা,শৈলকুপা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+7320,Shailakupa,শৈলকুপা,Shailkupa,শৈলকুপা,শৈলকুপা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+9240,Alaipur,আলাইপুর,,আলাইপুর,,unmatched,Bangla name added
+9242,Belphulia,,,আলাইপুর,,unmatched,no Bangla name in postcode-bd
+9241,Rupsha,রূপসা,,আলাইপুর,,unmatched,Bangla name added
+9260,Batiaghat,,Botiaghata,Batiaghat,বটিয়াঘাটা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9261,Surkalee,,Botiaghata,Batiaghat,বটিয়াঘাটা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9272,Bajua,,,চালনা বাজার,,unmatched,no Bangla name in postcode-bd
+9270,Chalna Bazar,চালনা বাজার,,চালনা বাজার,,unmatched,Bangla name added
+9271,Dakup,,,চালনা বাজার,,unmatched,no Bangla name in postcode-bd
+9273,Nalian,,,চালনা বাজার,,unmatched,no Bangla name in postcode-bd
+9221,Chandni Mahal,চাঁদনি মহল,Digholia,Digalia,দিঘলিয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9220,Digalia,,Digholia,Digalia,দিঘলিয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9224,Gazirhat,,Digholia,Digalia,দিঘলিয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9223,Ghoshghati,,Digholia,Digalia,দিঘলিয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9222,Senhati,,Digholia,Digalia,দিঘলিয়া,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9207,Atra Shilpa Area,Atra শিল্পা ফোন,,খুলনা সদর,,unmatched,Bangla name added
+9203,BIT Khulna,বিআইটি খুলনা,,খুলনা সদর,,unmatched,Bangla name added
+9202,Doulatpur,দৌলতপুর,,খুলনা সদর,,unmatched,Bangla name added
+9205,Jahanabad Canttonmen,জাহানাবাদ Canttonmen,,খুলনা সদর,,unmatched,Bangla name added
+9100,Khula Sadar,Khula সদর,,খুলনা সদর,,unmatched,Bangla name added
+9000,Khulna G.P.O,খুলনা G.P.O,,খুলনা সদর,,unmatched,Bangla name added
+9201,Khulna Shipyard,খুলনা শিপইয়ার্ড,,খুলনা সদর,,unmatched,Bangla name added
+9208,Khulna University,খুলনা বিশ্ববিদ্যালয়ের,,খুলনা সদর,,unmatched,Bangla name added
+9204,Siramani,,,খুলনা সদর,,unmatched,no Bangla name in postcode-bd
+9206,Sonali Jute Mills,সোনালী জুট মিলস,,খুলনা সদর,,unmatched,Bangla name added
+9291,Amadee,,,Madinabad,,unmatched,no Bangla name in postcode-bd
+9290,Madinabad,,,Madinabad,,unmatched,no Bangla name in postcode-bd
+9284,Chandkhali,,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+9285,Garaikhali,,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+9281,Godaipur,,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+9282,Kapilmoni,,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+9283,Katipara,,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+9280,Paikgachha,পাইকগাছা,Paikgasa,পাইকগাছা,পাইকগাছা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+9210,Phultala,ফুলতলা,Fultola,ফুলতলা,ফুলতলা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+9252,Chuknagar,চুকনগর,,সাজিয়ারা,,unmatched,Bangla name added
+9251,Ghonabanda,,,সাজিয়ারা,,unmatched,no Bangla name in postcode-bd
+9250,Sajiara,সাজিয়ারা,,সাজিয়ারা,,unmatched,Bangla name added
+9253,Shahapur,শাহাপুর,,সাজিয়ারা,,unmatched,Bangla name added
+9231,Pak Barasat,পাক বারাসত,Terokhada,Terakhada,তেরখাদা,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9230,Terakhada,,Terokhada,Terakhada,তেরখাদা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+7042,Allardarga,,Bheramara,ভেড়ামারা,ভেড়ামারা,exact,no Bangla name in postcode-bd
+7040,Bheramara,ভেড়ামারা,Bheramara,ভেড়ামারা,ভেড়ামারা,exact,Bangla name added
+7041,Ganges Bheramara,গঙ্গা ভেড়ামারা,Bheramara,ভেড়ামারা,ভেড়ামারা,exact,Bangla name added
+7020,Janipur,,,Janipur,,unmatched,no Bangla name in postcode-bd
+7021,Khoksa,খোকসা,,Janipur,,unmatched,Bangla name added
+7010,Kumarkhali,কুমারখালী,Kumarkhali,কুমারখালী,কুমারখালী,exact,Bangla name added
+7011,Panti,পান্টি,Kumarkhali,কুমারখালী,কুমারখালী,exact,Bangla name added
+7003,Islami University,ইসলামী বিশ্ববিদ্যালয়,Kushtia Sadar,কুষ্টিয়া সদর,কুষ্টিয়া সদর,alias,Bangla name added
+7002,Jagati,,Kushtia Sadar,কুষ্টিয়া সদর,কুষ্টিয়া সদর,alias,no Bangla name in postcode-bd
+7001,Kushtia Mohini,কুষ্টিয়া মোহিনী,Kushtia Sadar,কুষ্টিয়া সদর,কুষ্টিয়া সদর,alias,Bangla name added
+7000,Kustia Sadar,কুষ্টিয়া সদর,Kushtia Sadar,কুষ্টিয়া সদর,কুষ্টিয়া সদর,alias,Bangla name added
+7032,Amla Sadarpur,আমলা সদরপুর,Mirpur,মিরপুর,মিরপুর,exact,Bangla name added
+7030,Mirpur,মিরপুর,Mirpur,মিরপুর,মিরপুর,exact,Bangla name added
+7031,Poradaha,,Mirpur,মিরপুর,মিরপুর,exact,no Bangla name in postcode-bd
+7052,Khasmathurapur,,,রাফায়েতপুর,,unmatched,no Bangla name in postcode-bd
+7050,Rafayetpur,রাফায়েতপুর,,রাফায়েতপুর,,unmatched,Bangla name added
+7051,Taragunia,,,রাফায়েতপুর,,unmatched,no Bangla name in postcode-bd
+7620,Arpara,আড়পাড়া,,আড়পাড়া,,unmatched,Bangla name added
+7600,Magura Sadar,মাগুরা সদর,Magura Sadar,মাগুরা সদর,মাগুরা সদর,exact,Bangla name added
+7631,Binodpur,বিনোদপুর,Mohammadpur,মোহাম্মদপুর,মহম্মদপুর,exact,Bangla name added
+7630,Mohammadpur,মোহাম্মদপুর,Mohammadpur,মোহাম্মদপুর,মহম্মদপুর,exact,Bangla name added
+7632,Nahata,,Mohammadpur,মোহাম্মদপুর,মহম্মদপুর,exact,no Bangla name in postcode-bd
+7611,Langalbadh,,Sreepur,শ্রীপুর,শ্রীপুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+7612,Nachol,,Sreepur,শ্রীপুর,শ্রীপুর,fuzzy,no Bangla name in postcode-bd; area confirmed by the Bangla thana name
+7610,Shripur,শ্রীপুর,Sreepur,শ্রীপুর,শ্রীপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+7110,Gangni,গাংনী,Gangni,গাংনী,গাংনী,exact,Bangla name added
+7101,Amjhupi,,Meherpur Sadar,মেহেরপুর সদর,মেহেরপুর সদর,exact,no Bangla name in postcode-bd
+7152,Amjhupi,,Meherpur Sadar,মেহেরপুর সদর,মেহেরপুর সদর,exact,no Bangla name in postcode-bd
+7100,Meherpur Sadar,মেহেরপুর সদর,Meherpur Sadar,মেহেরপুর সদর,মেহেরপুর সদর,exact,Bangla name added
+7102,Mujib Nagar Complex,মুজিব নগর কমপ্লেক্স,Meherpur Sadar,মেহেরপুর সদর,মেহেরপুর সদর,exact,Bangla name added
+7520,Kalia,কালিয়া,Kalia,কালিয়া,কালিয়া,exact,Bangla name added
+7514,Baradia,,,লক্ষ্মীপাশা,,unmatched,no Bangla name in postcode-bd
+7512,Itna,ইটনা,,লক্ষ্মীপাশা,,unmatched,Bangla name added
+7510,Laxmipasha,লক্ষ্মীপাশা,,লক্ষ্মীপাশা,,unmatched,Bangla name added
+7511,Lohagora,লোহাগড়া,,লক্ষ্মীপাশা,,unmatched,Bangla name added
+7513,Naldi,,,লক্ষ্মীপাশা,,unmatched,no Bangla name in postcode-bd
+7521,Mohajan,,,Mohajan,,unmatched,no Bangla name in postcode-bd
+7500,Narail Sadar,নড়াইল সদর,Narail Sadar,নড়াইল সদর,নড়াইল সদর,exact,Bangla name added
+7501,Ratanganj,,Narail Sadar,নড়াইল সদর,নড়াইল সদর,exact,no Bangla name in postcode-bd
+9460,Ashashuni,আশাশুনির,Assasuni,আশাশুনির,আশাশুনি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9461,Baradal,বড়দল,Assasuni,আশাশুনির,আশাশুনি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9430,Debbhata,,Debhata,Debbhata,দেবহাটা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9431,Gurugram,,Debhata,Debbhata,দেবহাটা,fuzzy,no Bangla name in postcode-bd; area link left as it was (Bangla name does not confirm it)
+9415,Chandanpur,,Kalaroa,কলারোয়া,কলারোয়া,exact,no Bangla name in postcode-bd
+9413,Hamidpur,,Kalaroa,কলারোয়া,কলারোয়া,exact,no Bangla name in postcode-bd
+9412,Jhaudanga,ঝাউডাঙ্গা,Kalaroa,কলারোয়া,কলারোয়া,exact,Bangla name added
+9410,kalaroa,কলারোয়া,Kalaroa,কলারোয়া,কলারোয়া,exact,Bangla name added
+9414,Khordo,,Kalaroa,কলারোয়া,কলারোয়া,exact,no Bangla name in postcode-bd
+9411,Murarikati,মুরারীকাঠী,Kalaroa,কলারোয়া,কলারোয়া,exact,Bangla name added
+9440,Kaliganj UPO,কালীগঞ্জ Upo,Kaliganj,কালীগঞ্জ Upo,কালিগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9441,Nalta Mubaroknagar,নলতা Mubaroknagar,Kaliganj,কালীগঞ্জ Upo,কালিগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9442,Ratanpur,রতনপুর,Kaliganj,কালীগঞ্জ Upo,কালিগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+9453,Buri Goalini,বুড়ি Goalini,,নকিপুর,,unmatched,Bangla name added
+9454,Gabura,গাবুরা,,নকিপুর,,unmatched,Bangla name added
+9455,Habinagar,,,নকিপুর,,unmatched,no Bangla name in postcode-bd
+9450,Nakipur,নকিপুর,,নকিপুর,,unmatched,Bangla name added
+9452,Naobeki,,,নকিপুর,,unmatched,no Bangla name in postcode-bd
+9451,Noornagar,,,নকিপুর,,unmatched,no Bangla name in postcode-bd
+9403,Budhhat,,Satkhira Sadar,সাতক্ষীরা সদর,সাতক্ষীরা সদর,exact,no Bangla name in postcode-bd
+9402,Gunakar kati,,Satkhira Sadar,সাতক্ষীরা সদর,সাতক্ষীরা সদর,exact,no Bangla name in postcode-bd
+9401,Satkhira Islamia Acc,সাতক্ষীরা ইসলামিয়া Acc,Satkhira Sadar,সাতক্ষীরা সদর,সাতক্ষীরা সদর,exact,Bangla name added
+9400,Satkhira Sadar,সাতক্ষীরা সদর,Satkhira Sadar,সাতক্ষীরা সদর,সাতক্ষীরা সদর,exact,Bangla name added
+9421,Patkelghata,পাটকেলঘাটা,Tala,তালা,তালা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+9420,Taala,তালা,Tala,তালা,তালা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5890,Adamdighi,আদমদীঘি,Adamdighi,আদমদীঘি,আদমদিঘি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5892,Nasharatpur,নশরতপুর,Adamdighi,আদমদীঘি,আদমদিঘি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5891,Santahar,সান্তাহার,Adamdighi,আদমদীঘি,আদমদিঘি,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5801,Bogra Canttonment,বগুড়া সেনানিবাস,Bogra Sadar,বগুড়া সদর,বগুড়া সদর,exact,Bangla name added
+5800,Bogra Sadar,বগুড়া সদর,Bogra Sadar,বগুড়া সদর,বগুড়া সদর,exact,Bangla name added
+5850,Dhunat,ধুনট,Dhunot,ধুনট,ধুনট,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5851,Gosaibari,গোসাইবাড়ি,Dhunot,ধুনট,ধুনট,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5880,Dupchachia,দুপচাঁচিয়া,Dupchanchia,দুপচাঁচিয়া,দুপচাচিঁয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5881,Talora,তালোড়া,Dupchanchia,দুপচাঁচিয়া,দুপচাচিঁয়া,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5820,Gabtoli,গাবতলী,Gabtali,গাবতলী,গাবতলী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5821,Sukhanpukur,সুখানপুকুর,Gabtali,গাবতলী,গাবতলী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5870,Kahalu,কাহালু,Kahaloo,কাহালু,কাহালু,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5860,Nandigram,নন্দীগ্রাম,Nondigram,নন্দীগ্রাম,নন্দিগ্রাম,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5831,Chandan Baisha,চন্দন বাইশা,Shariakandi,সারিয়াকান্দি,সারিয়াকান্দি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5830,Sariakandi,সারিয়াকান্দি,Shariakandi,সারিয়াকান্দি,সারিয়াকান্দি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5841,Chandaikona,চান্দাইকোনা,Sherpur,শেরপুর,শেরপুর,exact,Bangla name added
+5842,Palli Unnyan Accadem,পল্লী উন্নয়ন একাডেমী,Sherpur,শেরপুর,শেরপুর,exact,Bangla name added
+5840,Sherpur,শেরপুর,Sherpur,শেরপুর,শেরপুর,exact,Bangla name added
+5810,Shibganj,শিবগঞ্জ,Shibganj,শিবগঞ্জ,শিবগঞ্জ,exact,Bangla name added
+5826,Sonatola,সোনাতলা,Sonatala,সোনাতলা,সোনাতলা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6330,Bholahat,ভোলাহাট,Bholahat,ভোলাহাট,ভোলাহাট,exact,Bangla name added
+6303,Amnura,আমনুরা,Chapainawabganj Sadar,চাঁপাইনবাবগঞ্জ সদর,চাঁপাইনবাবগঞ্জ সদর,alias,Bangla name added
+6300,Chapinawbganj Sadar,চাঁপাইনবাবগঞ্জ সদর,Chapainawabganj Sadar,চাঁপাইনবাবগঞ্জ সদর,চাঁপাইনবাবগঞ্জ সদর,alias,Bangla name added
+6301,Rajarampur,রাজারামপুর,Chapainawabganj Sadar,চাঁপাইনবাবগঞ্জ সদর,চাঁপাইনবাবগঞ্জ সদর,alias,Bangla name added
+6302,Ramchandrapur,রামচন্দ্রপুর,Chapainawabganj Sadar,চাঁপাইনবাবগঞ্জ সদর,চাঁপাইনবাবগঞ্জ সদর,alias,Bangla name added
+6311,Mandumala,মন্ডুমালা,Nachol,নাচোল,নাচোল,exact,Bangla name added
+6310,Nachol,নাচোল,Nachol,নাচোল,নাচোল,exact,Bangla name added
+6321,Gomashtapur,গোমস্তাপুর,,রোহনপুর,,unmatched,Bangla name added
+6320,Rohanpur,রোহনপুর,,রোহনপুর,,unmatched,Bangla name added
+6341,Kansart,কনসার্ট,,শিবগঞ্জ U.P.O,,unmatched,Bangla name added
+6342,Manaksha,মনাকষা,,শিবগঞ্জ U.P.O,,unmatched,Bangla name added
+6340,Shibganj U.P.O,শিবগঞ্জ U.P.O,,শিবগঞ্জ U.P.O,,unmatched,Bangla name added
+5940,Akklepur,আক্কেলপুর,Akkelpur,আক্কেলপুর,আক্কেলপুর,exact,Bangla name added
+5941,jamalganj,জামালগঞ্জ,Akkelpur,আক্কেলপুর,আক্কেলপুর,exact,Bangla name added
+5942,Tilakpur,তিলকপুর,Akkelpur,আক্কেলপুর,আক্কেলপুর,exact,Bangla name added
+5900,Joypurhat Sadar,জয়পুরহাট সদর,Joypurhat Sadar,জয়পুরহাট সদর,জয়পুরহাট সদর,exact,Bangla name added
+5930,kalai,কালাই,Kalai,কালাই,কালাই,exact,Bangla name added
+5920,Khetlal,ক্ষেতলাল,Khetlal,ক্ষেতলাল,ক্ষেতলাল,exact,Bangla name added
+5910,Panchbibi,পাঁচবিবি,Panchbibi,পাঁচবিবি,পাঁচবিবি,exact,Bangla name added
+6596,Ahsanganj,আহসানগঞ্জ,,আহসানগঞ্জ,,unmatched,Bangla name added
+6597,Bandai,বান্দাই,,আহসানগঞ্জ,,unmatched,Bangla name added
+6570,Badalgachhi,বদলগাছী,Badalgachi,বদলগাছী,বদলগাছী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6580,Dhamuirhat,ধামুইরহাট,Dhamoirhat,ধামুইরহাট,ধামইরহাট,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+6530,Mahadebpur,মহাদেবপুর,Mohadevpur,মহাদেবপুর,মহাদেবপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6500,Naogaon Sadar,নওগাঁ সদর,Naogaon Sadar,নওগাঁ সদর,নওগাঁ সদর,exact,Bangla name added
+6520,Niamatpur,নিয়ামতপুর,Niamatpur,নিয়ামতপুর,নিয়ামতপুর,exact,Bangla name added
+6550,Nitpur,নিতপুর,,নিতপুর,,unmatched,Bangla name added
+6552,Panguria,পঙ্গুরিয়া,,নিতপুর,,unmatched,Bangla name added
+6551,Porsa,পরসা,,নিতপুর,,unmatched,Bangla name added
+6540,Patnitala,পত্নীতলা,Patnitala,পত্নীতলা,পত্নিতলা,exact,Bangla name added
+6512,Balihar,বলিহারের,,প্রসাদপুর,,unmatched,Bangla name added
+6511,Manda,মান্দা,,প্রসাদপুর,,unmatched,Bangla name added
+6510,Prasadpur,প্রসাদপুর,,প্রসাদপুর,,unmatched,Bangla name added
+6591,Kashimpur,কাশিমপুর,Raninagar,রানীনগর,রাণীনগর,exact,Bangla name added
+6590,Raninagar,রানীনগর,Raninagar,রানীনগর,রাণীনগর,exact,Bangla name added
+6561,Moduhil,মদুহিল,Sapahar,সাপাহার,সাপাহার,exact,Bangla name added
+6560,Sapahar,সাপাহার,Sapahar,সাপাহার,সাপাহার,exact,Bangla name added
+6422,Abdulpur,আব্দুলপুর,,গোপালপুর Upo,,unmatched,Bangla name added
+6420,Gopalpur U.P.O,গোপালপুর U.P.O,,গোপালপুর Upo,,unmatched,Bangla name added
+6421,Lalpur S.O,লালপুর S.O,,গোপালপুর Upo,,unmatched,Bangla name added
+6432,Baraigram,বড়াইগ্রামে,,হারুয়া,,unmatched,Bangla name added
+6431,Dayarampur,দয়ারামপুর,,হারুয়া,,unmatched,Bangla name added
+6430,Harua,হারুয়া,,হারুয়া,,unmatched,Bangla name added
+6440,Hatgurudaspur,হাতগুরুদাসপুর,,হাতগুরুদাসপুর,,unmatched,Bangla name added
+6410,Laxman,লক্ষ্মণ,,লক্ষ্মণ,,unmatched,Bangla name added
+6402,Baiddyabal Gharia,বাইদ্দ্যাবল ঘরিয়া,Natore Sadar,নাটোর সদর,নাটোর সদর,exact,Bangla name added
+6401,Digapatia,দিঘাপাতিয়া,Natore Sadar,নাটোর সদর,নাটোর সদর,exact,Bangla name added
+6403,Madhnagar,মাধনগর,Natore Sadar,নাটোর সদর,নাটোর সদর,exact,Bangla name added
+6400,Natore Sadar,নাটোর সদর,Natore Sadar,নাটোর সদর,নাটোর সদর,exact,Bangla name added
+6450,Singra,সিংড়া,Singra,সিংড়া,সিংড়া,exact,Bangla name added
+6650,Banwarinagar,বানওয়ারীনগর,,বানওয়ারীনগর,,unmatched,Bangla name added
+6680,Bera,বেড়া,Bera,বেড়া,বেড়া,exact,Bangla name added
+6682,Kashinathpur,কাশিনাথপুর,Bera,বেড়া,বেড়া,exact,Bangla name added
+6681,Nakalia,নাকালিয়া,Bera,বেড়া,বেড়া,exact,Bangla name added
+6683,Puran Bharenga,পুরান ভারেঙ্গা,Bera,বেড়া,বেড়া,exact,Bangla name added
+6640,Bhangura,ভাঙ্গুরা,Bhangura,ভাঙ্গুরা,ভাঙ্গুড়া,exact,Bangla name added
+6630,Chatmohar,চাটমোহর,Chatmohar,চাটমোহর,চাটমোহর,exact,Bangla name added
+6610,Debottar,দেবোত্তর,,দেবোত্তর,,unmatched,Bangla name added
+6621,Dhapari,ধাপারী,Ishurdi,ঈশ্বরদী,ঈশ্বরদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6620,Ishwardi,ঈশ্বরদী,Ishurdi,ঈশ্বরদী,ঈশ্বরদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6622,Pakshi,পাকশী,Ishurdi,ঈশ্বরদী,ঈশ্বরদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6623,Rajapur,রাজাপুর,Ishurdi,ঈশ্বরদী,ঈশ্বরদী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6602,Hamayetpur,হেমায়েতপুর,Pabna Sadar,পাবনা সদর,পাবনা সদর,exact,Bangla name added
+6601,Kaliko Cotton Mills,কালিকো কটন মিলস,Pabna Sadar,পাবনা সদর,পাবনা সদর,exact,Bangla name added
+6600,Pabna Sadar,পাবনা সদর,Pabna Sadar,পাবনা সদর,পাবনা সদর,exact,Bangla name added
+6670,Sathia,সাঁথিয়া,Santhia,সাঁথিয়া,সাঁথিয়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6661,Sagarkandi,সাগরকান্দি,Sujanagar,সুজানগর,সুজানগর,exact,Bangla name added
+6660,Sujanagar,সুজানগর,Sujanagar,সুজানগর,সুজানগর,exact,Bangla name added
+6281,Arani,আড়ানী,Bagha,বাঘা,বাঘা,exact,Bangla name added
+6280,Bagha,বাঘা,Bagha,বাঘা,বাঘা,exact,Bangla name added
+6250,Bhabaniganj,ভবানীগঞ্জ,,ভবানীগঞ্জ,,unmatched,Bangla name added
+6251,Taharpur,তাহারপুর,,ভবানীগঞ্জ,,unmatched,Bangla name added
+6270,Charghat,চারঘাট,Charghat,চারঘাট,চারঘাট,exact,Bangla name added
+6271,Sarda,সারদা,Charghat,চারঘাট,চারঘাট,exact,Bangla name added
+6240,Durgapur,দুর্গাপুর,Durgapur,দুর্গাপুর,দুর্গাপুর,exact,Bangla name added
+6290,Godagari,গোদাগাড়ী,Godagari,গোদাগাড়ী,গোদাগাড়ী,exact,Bangla name added
+6291,Premtoli,প্রেমতলী,Godagari,গোদাগাড়ী,গোদাগাড়ী,exact,Bangla name added
+6220,Khodmohanpur,খোদমোহনপুর,,খোদমোহনপুর,,unmatched,Bangla name added
+6210,Lalitganj,লালিতগঞ্জ,,লালিতগঞ্জ,,unmatched,Bangla name added
+6211,Rajshahi Sugar Mills,রাজশাহী চিনিকল,,লালিতগঞ্জ,,unmatched,Bangla name added
+6212,Shyampur,শ্যামপুর,,লালিতগঞ্জ,,unmatched,Bangla name added
+6260,Putia,পুঠিয়া,Puthia,পুঠিয়া,পুঠিয়া,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+6206,Binodpur Bazar,বিনোদপুর বাজার,,রাজশাহী সদর,,unmatched,Bangla name added
+6100,Ghuramara,ঘুড়ামারা,,রাজশাহী সদর,,unmatched,Bangla name added
+6204,Kazla,কাজলা,,রাজশাহী সদর,,unmatched,Bangla name added
+6202,Rajshahi Canttonment,রাজশাহী সেনানিবাস,,রাজশাহী সদর,,unmatched,Bangla name added
+6201,Rajshahi Court,রাজশাহী কোর্ট,,রাজশাহী সদর,,unmatched,Bangla name added
+6000,Rajshahi Sadar,রাজশাহী সদর,,রাজশাহী সদর,,unmatched,Bangla name added
+6205,Rajshahi University,রাজশাহী বিশ্ববিদ্যালয়,,রাজশাহী সদর,,unmatched,Bangla name added
+6203,Sapura,সাপুরা,,রাজশাহী সদর,,unmatched,Bangla name added
+6230,Tanor,তানোরে,Tanore,তানোরে,তানোর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+6730,Baiddya Jam Toil,বাইদ্দ্যা জ্যাম তৈল,,বাইদ্দ্যা জ্যাম তৈল,,unmatched,Bangla name added
+6740,Belkuchi,বেলকুচি,Belkuchi,বেলকুচি,বেলকুচি,exact,Bangla name added
+6751,Enayetpur,এনায়েতপুর,Belkuchi,বেলকুচি,বেলকুচি,exact,Bangla name added
+6742,Rajapur,রাজাপুর,Belkuchi,বেলকুচি,বেলকুচি,exact,Bangla name added
+6741,Sohagpur,সোহাগপুর,Belkuchi,বেলকুচি,বেলকুচি,exact,Bangla name added
+6752,Sthal,স্থল,Belkuchi,বেলকুচি,বেলকুচি,exact,Bangla name added
+6720,Dhangora,ধানগড়া,,ধানগড়া,,unmatched,Bangla name added
+6721,Malonga,মালঙ্গা,,ধানগড়া,,unmatched,Bangla name added
+6712,Gandail,গান্ধাইল,Kazipur,কাজীপুর,কাজীপুর,exact,Bangla name added
+6710,Kazipur,কাজীপুর,Kazipur,কাজীপুর,কাজীপুর,exact,Bangla name added
+6711,Shuvgachha,শুভগাছা,Kazipur,কাজীপুর,কাজীপুর,exact,Bangla name added
+6772,Jamirta,জামিরটা,Shahjadpur,শাহজাদপুর,শাহজাদপুর,exact,Bangla name added
+6773,Kaijuri,কৈজুরী,Shahjadpur,শাহজাদপুর,শাহজাদপুর,exact,Bangla name added
+6771,Porjana,পরজানা,Shahjadpur,শাহজাদপুর,শাহজাদপুর,exact,Bangla name added
+6770,Shahjadpur,শাহজাদপুর,Shahjadpur,শাহজাদপুর,শাহজাদপুর,exact,Bangla name added
+6701,Raipur,রায়পুর,Sirajganj Sadar,সিরাজগঞ্জ সদর,সিরাজগঞ্জ সদর,exact,Bangla name added
+6702,Rashidabad,রাশিদাবাদ,Sirajganj Sadar,সিরাজগঞ্জ সদর,সিরাজগঞ্জ সদর,exact,Bangla name added
+6700,Sirajganj Sadar,সিরাজগঞ্জ সদর,Sirajganj Sadar,সিরাজগঞ্জ সদর,সিরাজগঞ্জ সদর,exact,Bangla name added
+6780,Tarash,তাড়াশ,Tarash,তাড়াশ,তাড়াশ,exact,Bangla name added
+6762,Lahiri Mohanpur,লাহিড়ী মোহনপুর,Ullapara,উল্লাপাড়া,উল্লাপাড়া,exact,Bangla name added
+6763,Salap,সালাপ,Ullapara,উল্লাপাড়া,উল্লাপাড়া,exact,Bangla name added
+6760,Ullapara,উল্লাপাড়া,Ullapara,উল্লাপাড়া,উল্লাপাড়া,exact,Bangla name added
+6761,Ullapara R.S,উল্লাপাড়া R.S,Ullapara,উল্লাপাড়া,উল্লাপাড়া,exact,Bangla name added
+3360,Azmireeganj,আজমিরীগঞ্জ,Ajmiriganj,আজমিরীগঞ্জ,আজমিরীগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3310,Bahubal,মানিকা বাজার,Bahubal,বাহুবল,বাহুবল,exact,Bangla name added
+3350,Baniachang,বানিয়াচং,Baniachong,বানিয়াচং,বানিয়াচং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3351,Jatrapasha,যাত্রাপাশা,Baniachong,বানিয়াচং,বানিয়াচং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3352,Kadirganj,কাদিরগঞ্জ,Baniachong,বানিয়াচং,বানিয়াচং,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3321,Chandpurbagan,চাঁদপুরবাগান,Chunarughat,চুনারুঘাট,চুনারুঘাট,exact,Bangla name added
+3320,Chunarughat,চুনারুঘাট,Chunarughat,চুনারুঘাট,চুনারুঘাট,exact,Bangla name added
+3322,Narapati,নরপাটি,Chunarughat,চুনারুঘাট,চুনারুঘাট,exact,Bangla name added
+3302,Gopaya,গোপায়া,Habiganj Sadar,হবিগঞ্জ সদর,হবিগঞ্জ সদর,alias,Bangla name added
+3300,Hobiganj Sadar,হবিগঞ্জ সদর,Habiganj Sadar,হবিগঞ্জ সদর,হবিগঞ্জ সদর,alias,Bangla name added
+3301,Shaestaganj,শায়েস্তাগঞ্জ,Habiganj Sadar,হবিগঞ্জ সদর,হবিগঞ্জ সদর,alias,Bangla name added
+3340,Kalauk,কালাউক,,কালাউক,,unmatched,Bangla name added
+3341,Lakhai,লাখাই,,কালাউক,,unmatched,Bangla name added
+3331,Itakhola,ইটাখোলা,Madhabpur,মাধবপুর,মাধবপুর,exact,Bangla name added
+3330,Madhabpur,মাধবপুর,Madhabpur,মাধবপুর,মাধবপুর,exact,Bangla name added
+3333,Saihamnagar,সাইহাম নগর,Madhabpur,মাধবপুর,মাধবপুর,exact,Bangla name added
+3332,Shahajibazar,শাহজিবাজার,Madhabpur,মাধবপুর,মাধবপুর,exact,Bangla name added
+3373,Digalbak,দিগলবাক,Nabiganj,নবীগঞ্জ,নবীগঞ্জ,exact,Bangla name added
+3372,Golduba,গোলডুবা,Nabiganj,নবীগঞ্জ,নবীগঞ্জ,exact,Bangla name added
+3371,Goplarbazar,গোপলারবাজার,Nabiganj,নবীগঞ্জ,নবীগঞ্জ,exact,Bangla name added
+3374,Inathganj,ইনাতগঞ্জ,Nabiganj,নবীগঞ্জ,নবীগঞ্জ,exact,Bangla name added
+3370,Nabiganj,নবীগঞ্জ,Nabiganj,নবীগঞ্জ,নবীগঞ্জ,exact,Bangla name added
+3250,Baralekha,বড়লেখা,Barlekha,বড়লেখা,বড়লেখা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3252,Dhakkhinbag,দক্ষিণবাগ,Barlekha,বড়লেখা,বড়লেখা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3251,Juri,জুড়ী,Barlekha,বড়লেখা,বড়লেখা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3253,Purbashahabajpur,পূর্বাশাহাবাজপুর,Barlekha,বড়লেখা,বড়লেখা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3220,Kamalganj,কমলগঞ্জ,Kamolganj,কমলগঞ্জ,কমলগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3221,Keramatnaga,কেরামত নগর,Kamolganj,কমলগঞ্জ,কমলগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3224,Munshibazar,মুন্সীবাজার,Kamolganj,কমলগঞ্জ,কমলগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3222,Patrakhola,পাত্রখোলা,Kamolganj,কমলগঞ্জ,কমলগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3223,Shamsher Nagar,শমসের নগর,Kamolganj,কমলগঞ্জ,কমলগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3237,Baramchal,বরমচাল,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3234,Kajaldhara,কাজলধারা,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3235,Karimpur,করিমপুর,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3230,Kulaura,কুলাউড়া,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3232,Langla,লংলা,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3233,Prithimpasha,পৃথিমপাশা,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3231,Tillagaon,টিলাগাও,Kulaura,কুলাউড়া,কুলাউড়া,exact,Bangla name added
+3203,Afrozganj,আফরোজগঞ্জ,Moulvibazar Sadar,মৌলভীবাজার সদর,মৌলভীবাজার সদর,exact,Bangla name added
+3201,Barakapan,বারাকাপান,Moulvibazar Sadar,মৌলভীবাজার সদর,মৌলভীবাজার সদর,exact,Bangla name added
+3202,Monumukh,মনুমুখ,Moulvibazar Sadar,মৌলভীবাজার সদর,মৌলভীবাজার সদর,exact,Bangla name added
+3200,Moulvibazar Sadar,মৌলভীবাজার সদর,Moulvibazar Sadar,মৌলভীবাজার সদর,মৌলভীবাজার সদর,exact,Bangla name added
+3240,Rajnagar,রাজনগর,Rajnagar,রাজনগর,রাজনগর,exact,Bangla name added
+3212,Kalighat,কালীঘাট,Sreemangal,শ্রীমঙ্গল,শ্রীমঙ্গল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3213,Khejurichhara,খেজুরীছড়া,Sreemangal,শ্রীমঙ্গল,শ্রীমঙ্গল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3211,Narain Chora,নারায়ন ছড়া,Sreemangal,শ্রীমঙ্গল,শ্রীমঙ্গল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3214,Satgaon,সাতগাঁও,Sreemangal,শ্রীমঙ্গল,শ্রীমঙ্গল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3210,Srimangal,শ্রীমঙ্গল,Sreemangal,শ্রীমঙ্গল,শ্রীমঙ্গল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3010,Bishamsapur,বিশম্ভরপুর,Bishwambarpur,বিশম্ভরপুর,বিশ্বম্ভরপুর,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3080,Chhatak,ছাতক,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3081,Chhatak Cement Facto,ছাতক সিমেন্ট ফ্যাক্টরি,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3082,Chhatak Paper Mills,ছাতক পেপার মিলস,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3893,Chourangi Bazar,চৌরঙ্গী বাজার,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3083,Gabindaganj,গোবিন্দগঞ্জ,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3084,Gabindaganj Natun Ba,গোবিন্দগঞ্জ নতুন বাজার,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3088,Islamabad,ইসলামাবাদ,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3087,jahidpur,জাহিদপুর,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3085,Khurma,খুরমা,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3086,Moinpur,মৈনপুর,Chhatak,ছাতক,ছাতক,exact,Bangla name added
+3040,Dhirai Chandpur,দিরাই চাঁদপুর,,দিরাই চাঁদপুর,,unmatched,Bangla name added
+3041,Jagdal,জগদল,,দিরাই চাঁদপুর,,unmatched,Bangla name added
+3070,Duara bazar,দুয়ারা বাজার,Dowarabazar,দুয়ারা বাজার,দোয়ারাবাজার,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3050,Ghungiar,ঘুঙ্গিয়ার,,ঘুঙ্গিয়ার,,unmatched,Bangla name added
+3062,Atuajan,আতুয়াজান,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3063,Hasan Fatemapur,হাসান ফাতেমাপুর,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3060,Jagnnathpur,জগন্নাথপুর,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3064,Rasulganj,রাসূলগঞ্জ,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3065,Shiramsi,শিরামসি,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3061,Syedpur,সৈয়দপুর,Jagannathpur,জগন্নাথপুর,জগন্নাথপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3020,Sachna,সাচনা,,সাচনা,,unmatched,Bangla name added
+3001,Pagla,পাগলা,Sunamganj Sadar,সুনামগঞ্জ সদর,সুনামগঞ্জ সদর,exact,Bangla name added
+3002,Patharia,পাথারিয়া,Sunamganj Sadar,সুনামগঞ্জ সদর,সুনামগঞ্জ সদর,exact,Bangla name added
+3000,Sunamganj Sadar,সুনামগঞ্জ সদর,Sunamganj Sadar,সুনামগঞ্জ সদর,সুনামগঞ্জ সদর,exact,Bangla name added
+3030,Tahirpur,তাহিরপুর,Tahirpur,তাহিরপুর,তাহিরপুর,exact,Bangla name added
+3120,Balaganj,বালাগঞ্জ,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3125,Begumpur,বেগমপুর,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3122,Brahman Shashon,ব্রহ্ম শাসন,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3128,Gaharpur,গহরপুর,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3124,Goala Bazar,গোয়ালা বাজার,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3121,Karua,করুয়া,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3127,Kathal Khair,কাঁঠাল খাইর,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3129,Natun Bazar,নতুন বাজার,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3126,Omarpur,ওমরপুর,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3123,Tajpur,তাজপুর,Balaganj,বালাগঞ্জ,বালাগঞ্জ,exact,Bangla name added
+3170,Bianibazar,বিয়ানীবাজার,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3175,Churkai,চারখাই,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3171,jaldup,জলঢুপ,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3173,Kurar bazar,কুড়ার বাজার,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3172,Mathiura,মাথিউরা,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3174,Salia bazar,সালিয়া বাজার,Beanibazar,বিয়ানীবাজার,বিয়ানীবাজার,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3130,Bishwanath,বিশ্বনাথ,Bishwanath,বিশ্বনাথ,বিশ্বনাথ,exact,Bangla name added
+3131,Dashghar,দশঘর,Bishwanath,বিশ্বনাথ,বিশ্বনাথ,exact,Bangla name added
+3133,Deokalas,দেওকলস,Bishwanath,বিশ্বনাথ,বিশ্বনাথ,exact,Bangla name added
+3132,Doulathpur,দৌলতপুর,Bishwanath,বিশ্বনাথ,বিশ্বনাথ,exact,Bangla name added
+3134,Singer kanch,সিঙ্গার কাঞ্চ,Bishwanath,বিশ্বনাথ,বিশ্বনাথ,exact,Bangla name added
+3116,Fenchuganj,ফেঞ্চুগঞ্জ,Fenchuganj,ফেঞ্চুগঞ্জ,ফেঞ্চুগঞ্জ,exact,Bangla name added
+3117,Fenchuganj SareKarkh,ফেঞ্চুগঞ্জ সার কারখানা,Fenchuganj,ফেঞ্চুগঞ্জ,ফেঞ্চুগঞ্জ,exact,Bangla name added
+3152,Chiknagul,চিকনাগুলি,Gowainghat,গোয়াইনহাট,গোয়াইনঘাট,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3150,Goainhat,গোয়াইনহাট,Gowainghat,গোয়াইনহাট,গোয়াইনঘাট,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3151,Jaflong,জাফলং,Gowainghat,গোয়াইনহাট,গোয়াইনঘাট,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+3164,banigram,বাণীগ্রাম,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3165,Chandanpur,চন্দনপুর,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3162,Dakkhin Bhadashore,দক্ষিণ ভাদাশরে,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3161,Dhaka Dakkhin,ঢাকা দক্ষিণ,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3160,Gopalgannj,গোলাপগঞ্জ,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3163,Ranaping,রানাপিং,Golapganj,গোলাপগঞ্জ,গোলাপগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3156,Jainthapur,জৈন্তাপুর,Jaintiapur,জৈন্তাপুর,জৈন্তাপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3191,Ichhamati,ইছামতি,Zakiganj,জকিগঞ্জ,জকিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3190,Jakiganj,জকিগঞ্জ,Zakiganj,জকিগঞ্জ,জকিগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3181,Chatulbazar,চটুলবাজার,Kanaighat,কানাইঘাট,কানাইঘাট,exact,Bangla name added
+3183,Gachbari,গাছবাড়ী,Kanaighat,কানাইঘাট,কানাইঘাট,exact,Bangla name added
+3180,Kanaighat,কানাইঘাট,Kanaighat,কানাইঘাট,কানাইঘাট,exact,Bangla name added
+3182,Manikganj,মানিকগঞ্জ,Kanaighat,কানাইঘাট,কানাইঘাট,exact,Bangla name added
+3140,Kompanyganj,কোম্পানীগঞ্জ,Companiganj,কোম্পানীগঞ্জ,কোম্পানীগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+3106,Birahimpur,বিরাহিমপুর,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3107,Jalalabad,জালালাবাদ,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3104,Jalalabad Cantoment,জালালাবাদ সেনানিবাস,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3111,Kadamtali,কদমতলী,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3112,Kamalbazer,কামালবাজার,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3103,Khadimnagar,খাদিমনগর,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3113,Lalbazar,লালবাজার,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3108,Mogla,মগ্লা,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3109,Ranga Hajiganj,রাঙ্গা হাজীগঞ্জ,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3114,Shahajalal Science &,শাহ্‌জালাল বিজ্ঞান ও প্রযুক্তি,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3105,Silam,সিলাম,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3100,Sylhe Sadar,সিলেট সদর,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3102,Sylhet Biman Bondar,সিলেট বিমান বন্দর,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+3101,Sylhet Cadet Col,সিলেট ক্যাডেট কলেজ,Sylhet Sadar,সিলেট সদর,সিলেট সদর,exact,Bangla name added
+5270,Bangla Hili,বাংলা হিলি,,বাংলা হিলি,,unmatched,Bangla name added
+5210,Biral,বিরল,Birol,বিরল,বিরল,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5266,Birampur,বিরামপুর,Birampur,বিরামপুর,বিরামপুর,exact,Bangla name added
+5220,Birganj,বীরগঞ্জ,Birganj,বীরগঞ্জ,বীরগঞ্জ,exact,Bangla name added
+5240,Chrirbandar,চিরিরবন্দর,Chirirbandar,চিরিরবন্দর,চিরিরবন্দর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5241,Ranirbandar,রাণীররবন্দর,Chirirbandar,চিরিরবন্দর,চিরিরবন্দর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5201,Dinajpur Rajbari,দিনাজপুর রাজবাড়ী,Dinajpur Sadar,দিনাজপুর সদর,দিনাজপুর সদর,exact,Bangla name added
+5200,Dinajpur Sadar,দিনাজপুর সদর,Dinajpur Sadar,দিনাজপুর সদর,দিনাজপুর সদর,exact,Bangla name added
+5230,Khansama,খানসামা,Khansama,খানসামা,খানসামা,exact,Bangla name added
+5231,Pakarhat,পাকেরহাট,Khansama,খানসামা,খানসামা,exact,Bangla name added
+5226,Maharajganj,মহারাজগঞ্জ,,মহারাজগঞ্জ,,unmatched,Bangla name added
+5281,Daudpur,দাউদপুর,Nawabganj,নবাবগঞ্জ জেলায়,নবাবগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5282,Gopalpur,গোপালপুর,Nawabganj,নবাবগঞ্জ জেলায়,নবাবগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5280,Nababganj,নবাবগঞ্জ জেলায়,Nawabganj,নবাবগঞ্জ জেলায়,নবাবগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5291,Ghoraghat,ঘোড়াঘাট,,ওসমানপুর,,unmatched,Bangla name added
+5290,Osmanpur,ওসমানপুর,,ওসমানপুর,,unmatched,Bangla name added
+5250,Parbatipur,পার্বতীপুর,Parbatipur,পার্বতীপুর,পার্বতীপুর,exact,Bangla name added
+5260,Phulbari,ফুলবাড়ী,Fulbari,ফুলবাড়ী,ফুলবাড়ী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5216,Setabganj,সেতাবগঞ্জ,,সেতাবগঞ্জ,,unmatched,Bangla name added
+5750,Bonarpara,বোনারপাড়া,,বোনারপাড়া,,unmatched,Bangla name added
+5751,saghata,সাঘাটা,,বোনারপাড়া,,unmatched,Bangla name added
+5700,Gaibandha Sadar,গাইবান্ধা সদর,Gaibandha Sadar,গাইবান্ধা সদর,গাইবান্ধা সদর,exact,Bangla name added
+5740,Gobindhaganj,গোবিন্দগঞ্জ,Gobindaganj,গোবিন্দগঞ্জ,গোবিন্দগঞ্জ,exact,Bangla name added
+5741,Mahimaganj,মাহিমাগঞ্জ,Gobindaganj,গোবিন্দগঞ্জ,গোবিন্দগঞ্জ,exact,Bangla name added
+5730,Palashbari,পলাশবাড়ী,Palashbari,পলাশবাড়ী,পলাশবাড়ী,exact,Bangla name added
+5761,Bharatkhali,ভরতখালি,Phulchari,ফুলছড়ি,ফুলছড়ি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5760,Phulchhari,ফুলছড়ি,Phulchari,ফুলছড়ি,ফুলছড়ি,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5711,Naldanga,নলডাঙ্গা,Sadullapur,সাদুল্লাপুর,সাদুল্লাপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5710,Saadullapur,সাদুল্লাপুর,Sadullapur,সাদুল্লাপুর,সাদুল্লাপুর,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5721,Bamandanga,বামনডাঙ্গা,Sundarganj,সুন্দরগঞ্জ,সুন্দরগঞ্জ,exact,Bangla name added
+5720,Sundarganj,সুন্দরগঞ্জ,Sundarganj,সুন্দরগঞ্জ,সুন্দরগঞ্জ,exact,Bangla name added
+5670,Bhurungamari,ভুরুঙ্গামারী,Bhurungamari,ভুরুঙ্গামারী,ভুরুঙ্গামারী,exact,Bangla name added
+5630,Chilmari,চিলমারী,Chilmari,চিলমারী,চিলমারী,exact,Bangla name added
+5631,Jorgachh,জোড়গাছা,Chilmari,চিলমারী,চিলমারী,exact,Bangla name added
+5600,Kurigram Sadar,কুড়িগ্রাম সদর,Kurigram Sadar,কুড়িগ্রাম সদর,কুড়িগ্রাম সদর,exact,Bangla name added
+5601,Pandul,পান্ডুল,Kurigram Sadar,কুড়িগ্রাম সদর,কুড়িগ্রাম সদর,exact,Bangla name added
+5680,Phulbari,ফুলবাড়ী,Kurigram Sadar,কুড়িগ্রাম সদর,কুড়িগ্রাম সদর,exact,Bangla name added
+5660,Nageshwar,নাগেশ্বর,Nageshwari,নাগেশ্বর,নাগেশ্বরী,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5611,Nazimkhan,নাজিমখান,Rajarhat,রাজারহাট,রাজারহাট,exact,Bangla name added
+5610,Rajarhat,রাজারহাট,Rajarhat,রাজারহাট,রাজারহাট,exact,Bangla name added
+5650,Rajibpur,রাজিবপুর,,রাজিবপুর,,unmatched,Bangla name added
+5640,Roumari,রৌমারী,Rowmari,রৌমারী,রৌমারী,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5621,Bazarhat,বাজারহাট,Ulipur,উলিপুর,উলিপুর,exact,Bangla name added
+5620,Ulipur,উলিপুর,Ulipur,উলিপুর,উলিপুর,exact,Bangla name added
+5510,Aditmari,আদিতমারী,Aditmari,আদিতমারী,আদিতমারী,exact,Bangla name added
+5530,Hatibandha,হাতীবান্ধা,Hatibandha,হাতীবান্ধা,হাতীবান্ধা,exact,Bangla name added
+5502,Kulaghat SO,Kulaghat তাই,Lalmonirhat Sadar,লালমনিরহাট সদর,লালমনিরহাট সদর,exact,Bangla name added
+5500,Lalmonirhat Sadar,লালমনিরহাট সদর,Lalmonirhat Sadar,লালমনিরহাট সদর,লালমনিরহাট সদর,exact,Bangla name added
+5501,Moghalhat,মোঘলহাট,Lalmonirhat Sadar,লালমনিরহাট সদর,লালমনিরহাট সদর,exact,Bangla name added
+5541,Baura,বাউরা,Patgram,পাটগ্রাম,পাটগ্রাম,exact,Bangla name added
+5542,Burimari,বুড়িমারী,Patgram,পাটগ্রাম,পাটগ্রাম,exact,Bangla name added
+5540,Patgram,পাটগ্রাম,Patgram,পাটগ্রাম,পাটগ্রাম,exact,Bangla name added
+5520,Tushbhandar,তুষভান্ডার,,তুষভান্ডার,,unmatched,Bangla name added
+5350,Dimla,ডিমলা,Dimla,ডিমলা,ডিমলা,exact,Bangla name added
+5351,Ghaga Kharibari,ঘাগা খড়িবাড়ি,Dimla,ডিমলা,ডিমলা,exact,Bangla name added
+5341,Chilahati,চিলাহাটি,Domar,ডোমার,ডোমার,exact,Bangla name added
+5340,Domar,ডোমার,Domar,ডোমার,ডোমার,exact,Bangla name added
+5330,Jaldhaka,জলঢাকা,Jaldhaka,জলঢাকা,জলঢাকা,exact,Bangla name added
+5320,Kishoriganj,কিশোরীগঞ্জ,Kishorganj,কিশোরীগঞ্জ,কিশোরগঞ্জ,fuzzy,Bangla name added; area link left as it was (Bangla name does not confirm it)
+5300,Nilphamari Sadar,নীলফামারী সদর,Nilphamari Sadar,নীলফামারী সদর,নীলফামারী সদর,exact,Bangla name added
+5301,Nilphamari Sugar Mil,নীলফামারী চিনি মিল,Nilphamari Sadar,নীলফামারী সদর,নীলফামারী সদর,exact,Bangla name added
+5310,Syedpur,সৈয়দপুর,Syedpur,সৈয়দপুর,সৈয়দপুর,exact,Bangla name added
+5311,Syedpur Upashahar,সৈয়দপুর উপশহর,Syedpur,সৈয়দপুর,সৈয়দপুর,exact,Bangla name added
+5010,Boda,বোদা,Boda,বোদা,বোদা,exact,Bangla name added
+5040,Chotto Dab,ছোট্ট ডাবের,,ছোট্ট ডাবের,,unmatched,Bangla name added
+5041,Mirjapur,মির্জাপুর,,ছোট্ট ডাবের,,unmatched,Bangla name added
+5020,Dabiganj,দেবীগঞ্জ,Debiganj,দেবীগঞ্জ,দেবীগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5000,Panchagar Sadar,পঞ্চগড় সদর,Panchagarh Sadar,পঞ্চগড় সদর,পঞ্চগড় সদর,alias,Bangla name added
+5030,Tetulia,তেঁতুলিয়া,Tetulia,তেঁতুলিয়া,তেতুলিয়া,exact,Bangla name added
+5430,Badarganj,বদরগঞ্জ,Badargonj,বদরগঞ্জ,বদরগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5431,Shyampur,শ্যামপুর,Badargonj,বদরগঞ্জ,বদরগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5410,Gangachara,গঙ্গাচড়া,Gangachara,গঙ্গাচড়া,গংগাচড়া,exact,Bangla name added
+5441,Haragachh,হারাগাছ,Kaunia,কাউনিয়া,কাউনিয়া,exact,Bangla name added
+5440,Kaunia,কাউনিয়া,Kaunia,কাউনিয়া,কাউনিয়া,exact,Bangla name added
+5460,Mithapukur,মিঠাপুকুর,Mithapukur,মিঠাপুকুর,মিঠাপুকুর,exact,Bangla name added
+5450,Pirgachha,পীরগাছা,Pirgacha,পীরগাছা,পীরগাছা,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5402,Alamnagar,আলামনাগার,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5403,Mahiganj,মাহিগঞ্জ,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5404,Rangpur Cadet Colleg,রংপুর ক্যাডেট কলেজ,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5405,Rangpur Carmiecal Col,রংপুর কারমাইকেল কলেজ,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5400,Rangpur Sadar,রংপুর সদর,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5401,Rangpur Upa-Shahar,রংপুর উপশহর,Rangpur Sadar,রংপুর সদর,রংপুর সদর,exact,Bangla name added
+5420,Taraganj,তারাগঞ্জ,Taragonj,তারাগঞ্জ,তারাগঞ্জ,fuzzy,Bangla name added; area confirmed by the Bangla thana name
+5140,Baliadangi,বালিয়াডাঙ্গী,Baliadangi,বালিয়াডাঙ্গী,বালিয়াডাঙ্গী,exact,Bangla name added
+5141,Lahiri,লাহিড়ি,Baliadangi,বালিয়াডাঙ্গী,বালিয়াডাঙ্গী,exact,Bangla name added
+5130,Jibanpur,জীবনপুর,,জীবনপুর,,unmatched,Bangla name added
+5110,Pirganj,পীরগঞ্জ,Pirganj,পীরগঞ্জ,পীরগঞ্জ,exact,Bangla name added
+5470,Pirganj,পীরগঞ্জ,Pirganj,পীরগঞ্জ,পীরগঞ্জ,exact,Bangla name added
+5121,Nekmarad,নেকমরদ,Ranisankail,রাণীশংকৈল,রাণীশংকৈল,exact,Bangla name added
+5120,Rani Sankail,রাণীশংকৈল,Ranisankail,রাণীশংকৈল,রাণীশংকৈল,exact,Bangla name added
+5103,Ruhia,রুহিয়া,Thakurgaon Sadar,ঠাকুরগাঁও সদর,ঠাকুরগাঁও সদর,exact,Bangla name added
+5102,Shibganj,শিবগঞ্জ,Thakurgaon Sadar,ঠাকুরগাঁও সদর,ঠাকুরগাঁও সদর,exact,Bangla name added
+5101,Thakurgaon Road,ঠাকুরগাঁও রোড,Thakurgaon Sadar,ঠাকুরগাঁও সদর,ঠাকুরগাঁও সদর,exact,Bangla name added
+5100,Thakurgaon Sadar,ঠাকুরগাঁও সদর,Thakurgaon Sadar,ঠাকুরগাঁও সদর,ঠাকুরগাঁও সদর,exact,Bangla name added

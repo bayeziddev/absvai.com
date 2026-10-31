@@ -6,14 +6,15 @@ const parse = (raw, fallback) => { try { return JSON.parse(raw || '') ?? fallbac
 const GROUPS = [
   ['store', 'Store', 'Contact numbers and social media links. The shop name, logo and banners are in Website & banners.'],
   ['branding', 'Colours', 'The shop’s colours. Every page refreshes at the edge when you save.'],
-  ['delivery', 'Delivery', 'Free-delivery threshold, the Cash on Delivery fee and the checkout map.'],
+  ['delivery', 'Delivery charges', 'What customers pay for delivery. Checkout picks the charge from the customer’s district by itself.'],
   ['payments', 'Payments', 'Wallet numbers customers send advances to.'],
   ['tracking', 'Tracking', 'IDs only (never paste script code). Tags load only on public pages, never on checkout, cart or account pages.'],
   ['fraud', 'Fraud protection', 'Holds go to “On hold” for a human to look at; nothing is rejected automatically.'],
   ['incomplete', 'Incomplete orders & manual orders', ''],
   ['sms', 'SMS', 'The SMS provider itself is chosen in the deployment; these are the account details.'],
   ['ai', 'AI assistants', 'The shop chat and the admin assistant run on Cloudflare Workers AI. These limits keep it inside the free daily allowance.'],
-  ['couriers', 'Courier credentials', 'Saved encrypted for the Phase 2 courier booking. Confirm each provider’s API with them before switching it on.'],
+  ['couriers', 'Courier credentials', 'The same keys as on the Couriers page (easier there, with a Test button).'],
+  ['map', 'Checkout map', 'The map customers can use to show their location. Leave it as it is unless your developer asks.'],
 ];
 const COLOR_LABELS = { chili: 'Main (buttons, prices)', turmeric: 'Accent (badges)', cream: 'Page background', leaf: 'Success / in season', clove: 'Text', husk: 'Lines and borders' };
 
@@ -37,8 +38,28 @@ function fieldHtml(f, value, { write, canSecrets }) {
   }
 }
 
+// Delivery charges per zone, in plain words: the charge, each extra kg and the delivery time. Which districts are in which
+// zone rarely changes, so it stays one link away (#/zones).
+function zoneAreas(z, zd) {
+  const over = zd.overrides.filter(o => o.zone_id === z.id).map(o => o.name.replace(' City Corporation', ' City'));
+  const dists = zd.districts.filter(x => x.zone_id === z.id).map(x => x.name);
+  const all = [...over, ...dists];
+  if (z.is_default) return all.length ? `${all.join(', ')} and every other district` : 'Every district not in another zone';
+  return all.join(', ') || 'No district yet';
+}
+function zonesHtml(zd, write) {
+  const dis = write ? '' : 'disabled';
+  return `<h3>Charge by area</h3><div class="zone-rows">${zd.zones.map(z => `<div class="zone-row" data-zone="${z.id}">
+      <div><b>${esc(z.name)}</b><span class="small muted">${esc(zoneAreas(z, zd))}</span></div>
+      <label class="f">Charge up to ${z.base_weight_grams / 1000} kg (৳)<input data-zf="base" inputmode="decimal" value="${esc(fromPaisa(z.base_charge_paisa))}" ${dis}></label>
+      <label class="f">Each extra kg (৳)<input data-zf="extra" inputmode="decimal" value="${esc(fromPaisa(z.extra_per_kg_paisa))}" ${dis}></label>
+      <label class="f">Delivery time<input data-zf="eta" maxlength="40" value="${esc(z.eta_text)}" ${dis}></label></div>`).join('')}</div>
+    <p class="small muted">To move a district to another zone (rarely needed): <a href="#/zones">zone details</a>.</p><h3 style="margin-top:14px">Free delivery and the COD fee</h3>`;
+}
+
 export async function settings(v) {
-  const d = await api('/settings');
+  const [d, zd] = await Promise.all([api('/settings'), api('/zones').catch(() => null)]);
+  const zoneWrite = can('geo:write');
   const write = can('settings:write');
   const ctx = { write, canSecrets: d.canEditSecrets };
   const val = d.values;
@@ -47,19 +68,21 @@ export async function settings(v) {
   const DEFAULTS = { chili: '#B3261E', turmeric: '#F2B705', cream: '#FFF8EC', leaf: '#2E7D32', clove: '#2A1F1A', husk: '#E9DCC6' };
   const special = new Set(['manual_wallets', 'brand_colors', 'brand_logo_url', 'social_links', 'default_banners', 'promo_banner', 'popup_banner', 'store_name', 'tagline', 'announcement']);
   const social = parse(val.social_links, {});
-  const group = g => d.fields.filter(f => f.group === g && !special.has(f.key));
+  const groupOf = f => (f.key.startsWith('map_') ? 'map' : f.group);
+  const group = g => d.fields.filter(f => groupOf(f) === g && !special.has(f.key));
   // Everyday groups first; tracking, fraud, SMS and courier settings live in one closed "Advanced" section.
-  const ADVANCED = new Set(['tracking', 'fraud', 'incomplete', 'sms', 'ai', 'couriers']);
+  const ADVANCED = new Set(['tracking', 'fraud', 'incomplete', 'sms', 'ai', 'couriers', 'map']);
   const card = ([g, title, intro]) => `<div class="card"><h2>${esc(title)}</h2>${intro ? `<p class="small muted">${esc(intro)}</p>` : ''}`;
-  v.innerHTML = `<div class="page-head"><div><h1>Settings</h1><p>${write ? 'Contact details, delivery charges and payments. Change what you need, then press <b>Save</b> at the bottom of the screen.' : 'Read only. Ask a Manager or the Super Admin to change settings.'}</p></div>
+  v.innerHTML = `<div class="page-head"><div><h1>Settings</h1><p>${write ? 'Contact details, delivery charges and payment numbers. Change what you need, then press <b>Save</b> at the bottom of the screen.' : 'Read only. Ask a Manager or the Super Admin to change settings.'}</p></div>
       ${write ? '<button class="btn btn-outline" id="purge">Refresh every page now</button>' : ''}</div>
     <a class="notice ws-link" href="#/website"><b>Shop name, logo, homepage banners and the popup</b> are in <u>Website &amp; banners</u>.</a>
-    <form id="f">${GROUPS.map(([g, title, intro], idx) => `${g === [...ADVANCED][0] ? '<details class="adv-settings"><summary>Advanced settings: tracking, fraud protection, SMS, AI, couriers</summary>' : ''}${card([g, title, intro])}
+    <form id="f">${GROUPS.map(([g, title, intro], idx) => `${g === [...ADVANCED][0] ? '<details class="adv-settings"><summary>Advanced settings: tracking, fraud protection, SMS, AI, couriers, map</summary>' : ''}${card([g, title, intro])}
       ${g === 'branding' ? `<div class="grid-3">${Object.keys(DEFAULTS).map(k => `<label class="f">${esc(COLOR_LABELS[k])}<span class="row"><input type="color" data-color="${k}" value="${esc(colors[k] ?? DEFAULTS[k])}" ${write ? '' : 'disabled'}><code class="small">${esc(colors[k] ?? DEFAULTS[k])}</code></span></label>`).join('')}</div>
         <div id="contrast">${d.contrastWarnings.map(w => `<p class="notice err small">${esc(w)}</p>`).join('')}</div>
         ${write ? '<button class="btn btn-ghost btn-sm" type="button" id="reset-colors">Back to the default colours</button>' : ''}` : ''}
       ${g === 'store' ? `<h3>Social media</h3><p class="small muted">Paste the link to each page. They show in the footer of every page. Leave empty if you don’t use it.</p>
         <div class="grid-2">${SOCIAL.map(([k, label, eg]) => `<label class="f">${esc(label)}<input data-social="${k}" value="${esc(social[k] ?? '')}" placeholder="${esc(eg)}" inputmode="url" ${write ? '' : 'disabled'}></label>`).join('')}</div><h3 style="margin-top:14px">Store details</h3>` : ''}
+      ${g === 'delivery' && zd ? zonesHtml(zd, write && zoneWrite) : ''}
       ${g === 'payments' ? `<h3>bKash / Nagad / Rocket numbers for advances</h3><div id="wallets">${[...wallets, {}, {}].slice(0, Math.max(4, wallets.length + 1)).map(w => `<div class="grid-3 wallet"><input class="i" placeholder="Wallet (bKash)" value="${esc(w.wallet ?? '')}" ${write ? '' : 'disabled'}><input class="i" placeholder="Number" value="${esc(w.number ?? '')}" ${write ? '' : 'disabled'}><input class="i" placeholder="Merchant / Personal" value="${esc(w.type ?? '')}" ${write ? '' : 'disabled'}></div>`).join('')}</div>` : ''}
       <div class="grid-2">${group(g).map(f => fieldHtml(f, val[f.key], ctx)).join('')}</div></div>${idx === GROUPS.length - 1 ? '</details>' : ''}`).join('')}
     </form>
@@ -82,6 +105,17 @@ export async function settings(v) {
     body.brand_colors = Object.entries(picked).every(([k, x]) => x === DEFAULTS[k]) ? '' : JSON.stringify(picked);
     f.querySelectorAll('[data-secret]').forEach(i => { if (i.value.trim()) body[i.dataset.secret] = i.value.trim(); });
     f.querySelectorAll('[data-clear]:checked').forEach(c => { body[c.dataset.clear] = { clear: true }; });
+    if (zd && zoneWrite) {
+      for (const row of f.querySelectorAll('[data-zone]')) {
+        const z = zd.zones.find(x => x.id === Number(row.dataset.zone));
+        const val = k => row.querySelector(`[data-zf="${k}"]`).value.trim();
+        const next = { base: toPaisa(val('base') || '0'), extra: toPaisa(val('extra') || '0'), eta: val('eta') };
+        if (next.base === null || next.extra === null) throw new Error(`Check the charges for ${z.name}: numbers only.`);
+        if (next.base === z.base_charge_paisa && next.extra === z.extra_per_kg_paisa && next.eta === z.eta_text) continue;
+        await api(`/zones/${z.id}`, 'PUT', { name: z.name, baseChargePaisa: next.base, baseWeightGrams: z.base_weight_grams, extraPerKgPaisa: next.extra, bulkyChargePaisa: z.bulky_charge_paisa, etaText: next.eta, isDefault: Boolean(z.is_default), sortOrder: z.sort_order, defaultCourier: z.default_courier ?? null });
+        Object.assign(z, { base_charge_paisa: next.base, extra_per_kg_paisa: next.extra, eta_text: next.eta });
+      }
+    }
     const r = await api('/settings', 'PUT', body);
     toast(r.changed.length ? `Saved ${r.changed.length} change(s).` : 'Saved.');
     $('#contrast').innerHTML = r.contrastWarnings.map(w => `<p class="notice err small">${esc(w)}</p>`).join('');
@@ -118,10 +152,14 @@ export function soon(v) {
 }
 
 export function help(v) {
-  v.innerHTML = `<div class="page-head"><div><h1>Help Center</h1><p>Short guides for the team. The full owner guide is in the repository under docs/.</p></div></div>
-    <div class="card"><h2>Add a product</h2><ol><li>Products → <b>+ Add product</b>. Pick the category first: it decides the form.</li><li>Fill the basics, then the details (fields marked * are needed to publish).</li><li>In <b>Options & prices</b>, tap the choices you sell (e.g. 500g, 1kg), press <b>Update option rows</b>, and enter price, stock and the <b>packed weight for delivery</b> for each.</li><li>Add photos (your own or your supplier’s with permission).</li><li>Step 9 shows what is missing. Publish, or schedule it for the season start.</li></ol></div>
-    <div class="card"><h2>Start a season</h2><ol><li>Seasons → open the season → set this year’s start and end dates (Ramadan and Eid change every year).</li><li>Add banners. Tick the season on each product (step 6) and on seasonal categories.</li><li>On the start date the homepage, the “In Season Now” rail and the menu switch by themselves, and “Notify me” customers get an SMS.</li></ol></div>
-    <div class="card"><h2>Confirm a Cash on Delivery order</h2><ol><li>If the customer entered the SMS code, you can confirm right away.</li><li>Otherwise call them, then <b>Log call</b> with the outcome “Confirmed”.</li><li>Confirming creates the invoice number (INV-…) and texts the customer.</li><li>Pre-orders and large items need the advance marked as received first.</li></ol></div>
-    <div class="card"><h2>Fix a postcode</h2><p>Postcodes & Geo → <b>unmatched</b>. Pick the district, tick the postcodes of one area (for example the Dhaka city thanas), choose the area and press <b>Assign</b>.</p></div>
-    <div class="card"><h2>What is coming next</h2><p><b>Phase 2:</b> bKash/Nagad/Rocket/SSLCommerz gateways, courier booking and tracking, courier fraud check, Meta Pixel + Conversions API, landing pages with order forms, coupons and reviews.<br><b>Phase 3:</b> Business Starter Kits, Recipes & Business Ideas, AI chat, season planning report, offline app.</p></div>`;
+  v.innerHTML = `<div class="page-head"><div><h1>Help Center</h1><p>Short guides for the team. The full guide in Bangla has a direct link to every page.</p></div></div>
+    <a class="card guide-card" href="/admin/guide-bn.html" target="_blank" rel="noopener"><span class="guide-ico">📘</span><span><b>সম্পূর্ণ বাংলা গাইড (Full guide in Bangla)</b><br><span class="small muted">অ্যাডমিন ড্যাশবোর্ডের প্রতিটি পেইজ কীভাবে ব্যবহার করবেন, ধাপে ধাপে, সরাসরি লিংকসহ। Opens in a new tab.</span></span></a>
+    <div class="card"><h2>Confirm a Cash on Delivery order</h2><ol><li><a href="#/orders?status=new">Orders → New</a>: open the order and call the customer.</li><li>Choose the result (Confirmed, No answer…) and press <b>Log call</b>.</li><li>Move it to <b>Confirmed</b>: the invoice number (INV-…) is created and the customer is told.</li><li>Pre-orders and large items need the advance marked as received first.</li></ol></div>
+    <div class="card"><h2>Send parcels</h2><ol><li>Pack the confirmed orders, then <b>Move to → Packed</b>.</li><li>Open a packed order → <b>Book with Steadfast</b> or <b>Book with Pathao</b> (or tick several and book them together).</li><li>The tracking ID comes back by itself and the order moves to In Courier. Set up the courier keys once in <a href="#/courier">Couriers</a>.</li></ol></div>
+    <div class="card"><h2>Add a product</h2><ol><li><a href="#/products?new=1">Products → + Add product</a>. Pick the category first: it decides the form.</li><li>Add photos, sizes, prices, stock and the parcel weight.</li><li>Press <b>Save and publish</b>; it tells you if something is missing.</li></ol></div>
+    <div class="card"><h2>Order tracking</h2><p>Customers type their <b>mobile number or order number</b> at <a href="/track" target="_blank">/track</a> and see every step. To tell a customer something, open the order → <b>Message for the customer</b> → <b>Post</b>.</p></div>
+    <div class="card"><h2>Sellers</h2><p>Turn seller registration on or off at the top of <a href="#/sellers">Sellers</a>. Approve the seller, then each product (Products to approve) and each payment account before you pay into it.</p></div>
+    <div class="card"><h2>Delivery charges</h2><p><a href="#/settings">Settings → Delivery charges</a>: the charge for Inside Dhaka City, Dhaka Suburbs (Dhaka, Gazipur, Narayanganj) and Outside Dhaka, the free-delivery amount and the COD fee. Postcodes and areas need no setup.</p></div>
+    <div class="card"><h2>Start a season</h2><ol><li><a href="#/seasons">Seasons</a> → open the season → set this year’s start and end dates (Ramadan and Eid change every year).</li><li>Add banners and tick the season on its products.</li><li>On the start date the homepage and menu switch by themselves, and “Notify me” customers get an SMS.</li></ol></div>
+    <div class="card"><h2>Stuck?</h2><p>Press <b>Assistant</b> (bottom right) and ask in Bangla or English, for example “কীভাবে অর্ডার কনফার্ম করব?”.</p></div>`;
 }

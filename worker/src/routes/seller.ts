@@ -1,6 +1,8 @@
 /**
- * Seller portal API (/api/seller). Two steps: a seller registers on /sell, the owner approves them in Admin → Sellers,
- * then they sign in at /seller/ and add their products. Each product goes live only after the owner approves it.
+ * Seller portal API (/api/seller). A seller registers on /sell and can sign in at /seller/ straight away: they add
+ * their products and payment accounts while the owner reviews the application. Nothing they add is used until the
+ * owner approves it in Admin → Sellers: the seller account first, then each product (before it shows in the shop)
+ * and each payment account (before the shop pays into it).
  *
  * Sellers have their own sign-in (separate cookie and sessions from staff) and can only ever see or change their own
  * products. Product saving uses exactly the same code as the admin (SKUs, stock held by orders, the publish
@@ -16,8 +18,8 @@ import { localPhone, normalizeBdPhone } from '../lib/phone';
 import * as cat from '../repo/catalog-admin';
 import { loadSettings, settingInt } from '../repo/settings';
 import {
-  assignProductSeller, createSeller, productSeller, sellerByEmail, sellerById, sellerOrderLines, sellerProducts, sellerSalesTotals, sellerSlugTaken, setReview,
-  setSellerPassword, touchSellerLogin, updateSellerProfile, type SellerRow,
+  addPayout, assignProductSeller, countPayouts, createSeller, productSeller, removePayout, sellerByEmail, sellerById, sellerOrderLines, sellerPayouts, sellerProducts,
+  sellerSalesTotals, sellerSlugTaken, setReview, setSellerPassword, touchSellerLogin, updateSellerProfile, type PayoutRow, type SellerRow,
 } from '../repo/sellers';
 import { ownerAlert, validEmail } from '../services/email';
 import { createProduct, deleteMediaItem, loadAdminProduct, reorderProductMedia, unpublishProduct, updateProduct, uploadMedia } from './admin-catalog';
@@ -29,23 +31,54 @@ const SELLER_TTL = 60 * 60 * 24 * 7;
 interface SellerSession { sellerId: number; csrf: string }
 
 const PAYOUT = ['bkash', 'nagad', 'rocket', 'bank'];
+const WALLET_TYPES = ['personal', 'merchant', 'agent'];
+/** Who can sign in: approved sellers, and new sellers whose application is being reviewed. */
+const CAN_SIGN_IN = new Set(['approved', 'pending']);
 const STATUS_TEXT: Record<string, string> = {
-  pending: 'Your application is waiting for approval. We will email you (and call if needed) once it is approved.',
   rejected: 'Your application was not approved.',
   suspended: 'Your seller account is paused. Please contact the shop.',
 };
+
+/** A payment account as the seller and the owner see it. */
+export function payoutView(p: PayoutRow) {
+  return {
+    id: p.id, method: p.method, accountNumber: p.account_number, accountName: p.account_name, accountType: p.account_type, bankName: p.bank_name, branch: p.branch,
+    status: p.status, reviewNote: p.review_note, reviewedAt: p.reviewed_at, createdAt: p.created_at,
+  };
+}
+
+/** Checks a payment account typed by a seller (registration or the portal). Returns null when nothing was typed. */
+function readPayout(b: Record<string, unknown>): { method: string; accountNumber: string; accountName: string | null; accountType: string | null; bankName: string | null; branch: string | null } | null {
+  const method = str(b.method ?? b.payoutMethod, 20);
+  const raw = str(b.accountNumber ?? b.payoutNumber, 40);
+  if (!raw) return null;
+  if (!PAYOUT.includes(method)) throw bad('Choose bKash, Nagad, Rocket or Bank account.');
+  const accountName = str(b.accountName, 100) || null;
+  if (method === 'bank') {
+    const number = raw.replace(/[\s-]/g, '');
+    if (!/^\d{6,20}$/.test(number)) throw bad('Type the bank account number (numbers only).');
+    const bankName = str(b.bankName, 80);
+    if (!bankName) throw bad('Type the bank name.');
+    if (!accountName) throw bad('Type the name on the bank account.');
+    return { method, accountNumber: number, accountName, accountType: null, bankName, branch: str(b.branch, 80) || null };
+  }
+  const phone = normalizeBdPhone(raw);
+  if (!phone) throw bad(`Type the ${method === 'bkash' ? 'bKash' : method === 'nagad' ? 'Nagad' : 'Rocket'} number like 01712345678.`);
+  const type = str(b.accountType, 20);
+  return { method, accountNumber: localPhone(phone), accountName, accountType: WALLET_TYPES.includes(type) ? type : 'personal', bankName: null, branch: null };
+}
 
 function sellerView(s: SellerRow) {
   return {
     id: s.id, shopName: s.shop_name, slug: s.slug, ownerName: s.owner_name, email: s.email, phone: localPhone(s.phone), district: s.district, address: s.address,
     businessType: s.business_type, sells: s.sells, about: s.about, payoutMethod: s.payout_method, payoutNumber: s.payout_number, status: s.status,
-    reviewNote: s.review_note, commissionPercent: Number(s.commission_percent),
+    reviewNote: s.review_note, commissionPercent: Number(s.commission_percent), approved: s.status === 'approved',
   };
 }
 
 // ───────────── Registration and sign-in (no session needed) ─────────────
 
-/** Step 1: the seller applies. The account can't sign in until the owner approves it. */
+/** Step 1: the seller applies and can sign in at once; what they add waits for the owner's approval. */
 seller.post('/register', async c => {
   if (!(await rateLimit(c.env.KV, `seller-reg:${clientIp(c)}`, 5, 3600))) throw new HttpError(429, 'Too many applications from this connection. Try again later.');
   const b = await readJson(c);
@@ -64,16 +97,17 @@ seller.post('/register', async c => {
   const pw = passwordProblem(password);
   if (pw) throw bad(`Password: ${pw}`);
   if (await sellerByEmail(c.env.DB, email)) throw bad('A seller with this email already exists. Sign in at /seller/ instead.');
-  const payout = PAYOUT.includes(str(b.payoutMethod)) ? str(b.payoutMethod) : null;
+  const payout = readPayout(b);
   let slug = slugify(shopName) || 'seller';
   for (let i = 2; await sellerSlugTaken(c.env.DB, slug); i++) slug = `${slugify(shopName) || 'seller'}-${i}`;
   const id = await createSeller(c.env.DB, {
     shopName, slug, ownerName, email, phone, passwordHash: await hashPassword(password), district: str(b.district, 60) || null, address: str(b.address, 300) || null,
-    businessType: str(b.businessType, 60) || null, sells: str(b.sells, 500) || null, payoutMethod: payout, payoutNumber: str(b.payoutNumber, 40) || null,
+    businessType: str(b.businessType, 60) || null, sells: str(b.sells, 500) || null,
     commission: settingInt(s, 'seller_commission_percent', 10),
   });
+  if (payout) await addPayout(c.env.DB, id, { ...payout, accountName: payout.accountName ?? ownerName });
   await ownerAlert(c.env, 'seller application', [['Shop', shopName], ['Name', ownerName], ['Phone', localPhone(phone)], ['Email', email], ['District', str(b.district, 60)], ['Sells', str(b.sells, 500)]].filter(([, v]) => v) as Array<[string, string]>, `#/sellers?id=${id}`);
-  return c.json({ ok: true, message: 'Thank you! Your application is sent. When the shop approves it, you can sign in and add your products.' }, 201);
+  return c.json({ ok: true, message: 'Thank you! Your application is sent. You can sign in to the seller portal now and add your products and payment account. They are used after the shop approves them.' }, 201);
 });
 
 seller.post('/login', async c => {
@@ -83,7 +117,7 @@ seller.post('/login', async c => {
   const s = await sellerByEmail(c.env.DB, email);
   const ok = s ? await verifyPassword(str(b.password, 200), s.password_hash) : (await hashPassword('timing-equaliser'), false);
   if (!s || !ok) throw new HttpError(401, 'Email or password is not right.');
-  if (s.status !== 'approved') throw new HttpError(403, `${STATUS_TEXT[s.status] ?? 'Your account cannot sign in.'}${s.status === 'rejected' && s.review_note ? ` Reason: ${s.review_note}` : ''}`, { status: s.status });
+  if (!CAN_SIGN_IN.has(s.status)) throw new HttpError(403, `${STATUS_TEXT[s.status] ?? 'Your account cannot sign in.'}${s.status === 'rejected' && s.review_note ? ` Reason: ${s.review_note}` : ''}`, { status: s.status });
   const token = randomToken();
   const session: SellerSession = { sellerId: s.id, csrf: randomToken(16) };
   await c.env.KV.put(`ssess:${token}`, JSON.stringify(session), { expirationTtl: SELLER_TTL });
@@ -99,7 +133,7 @@ seller.post('/logout', async c => {
   return c.json({ ok: true });
 });
 
-// ───────────── Everything below needs an approved seller ─────────────
+// ───────────── Everything below needs a signed-in seller (approved, or waiting for approval) ─────────────
 
 seller.use('*', async (c, next) => {
   const token = getCookie(c, SELLER_COOKIE);
@@ -107,7 +141,7 @@ seller.use('*', async (c, next) => {
   if (!session) throw new HttpError(401, 'Please sign in.');
   const s = await sellerById(c.env.DB, session.sellerId);
   // A seller paused by the owner is signed out at once.
-  if (!s || s.status !== 'approved') { if (token) await c.env.KV.delete(`ssess:${token}`); throw new HttpError(401, s ? STATUS_TEXT[s.status] ?? 'Please sign in.' : 'Please sign in.'); }
+  if (!s || !CAN_SIGN_IN.has(s.status)) { if (token) await c.env.KV.delete(`ssess:${token}`); throw new HttpError(401, s ? STATUS_TEXT[s.status] ?? 'Please sign in.' : 'Please sign in.'); }
   if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
     const origin = c.req.header('origin');
     if (origin && new URL(origin).host !== new URL(c.req.url).host) throw forbidden('Cross-site request blocked.');
@@ -131,11 +165,26 @@ seller.put('/profile', async c => {
   const b = await readJson(c);
   const phone = normalizeBdPhone(str(b.phone, 20));
   if (!phone) throw bad('Type a Bangladeshi mobile number like 01712345678.');
-  await updateSellerProfile(c.env.DB, me(c), {
-    phone, district: str(b.district, 60) || null, address: str(b.address, 300) || null, about: str(b.about, 600) || null,
-    payoutMethod: PAYOUT.includes(str(b.payoutMethod)) ? str(b.payoutMethod) : null, payoutNumber: str(b.payoutNumber, 40) || null,
-  });
+  await updateSellerProfile(c.env.DB, me(c), { phone, district: str(b.district, 60) || null, address: str(b.address, 300) || null, about: str(b.about, 600) || null });
   return c.json({ ok: true, seller: sellerView((await sellerById(c.env.DB, me(c)))!) });
+});
+
+// Payment accounts: the seller adds bKash / Nagad / Rocket / bank; the shop pays into one only after the owner approves it.
+seller.get('/payouts', async c => c.json((await sellerPayouts(c.env.DB, me(c))).map(payoutView)));
+
+seller.post('/payouts', async c => {
+  const p = readPayout(await readJson(c));
+  if (!p) throw bad('Type the account number.');
+  if ((await countPayouts(c.env.DB, me(c))) >= 10) throw bad('You can keep up to 10 payment accounts. Remove one you no longer use first.');
+  const id = await addPayout(c.env.DB, me(c), p);
+  const s = (await sellerById(c.env.DB, me(c)))!;
+  await ownerAlert(c.env, 'seller payment account', [['Seller', s.shop_name], ['Account', `${p.method} ${p.accountNumber}`], ['Name', p.accountName ?? '']].filter(([, v]) => v) as Array<[string, string]>, `#/sellers?id=${s.id}`);
+  return c.json({ ok: true, id, message: 'Added. The shop pays into it after approving it.' }, 201);
+});
+
+seller.delete('/payouts/:id', async c => {
+  if (!(await removePayout(c.env.DB, me(c), posInt(c.req.param('id')) ?? 0))) throw notFound('Account not found.');
+  return c.json({ ok: true });
 });
 
 seller.put('/password', async c => {

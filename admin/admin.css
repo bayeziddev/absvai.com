@@ -85,7 +85,25 @@ input.i, select.i, textarea.i, .f input, .f select, .f textarea { width: 100%; m
 .table-wrap { overflow-x: auto; background: #fff; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--line); }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-th { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: #FCFAF6; position: sticky; top: 0; }
+th { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: #FCFAF6; position: sticky; top: 0; white-space: nowrap; }
+/* Words never break letter by letter inside tables (the page allows it elsewhere for long links and codes). */
+th, td { overflow-wrap: normal; word-break: normal; }
+td { min-width: 0; }
+@media (max-width: 760px) {
+  .table-wrap table.cards, .table-wrap table.cards tbody, .table-wrap table.cards tfoot, .table-wrap table.cards tr { display: block; width: 100%; }
+  .table-wrap table.cards thead { display: none; }
+  .table-wrap table.cards tr { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .table-wrap table.cards tr:last-child { border-bottom: 0; }
+  .table-wrap table.cards td { display: block; position: relative; padding: 5px 0 5px calc(34% + 10px); min-height: 28px; border: 0; text-align: left; overflow-wrap: anywhere; }
+  .table-wrap table.cards td::before { content: attr(data-label); position: absolute; left: 0; top: 7px; width: 34%; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); overflow-wrap: normal; }
+  .table-wrap table.cards td[data-label=""] { padding-left: 0; }
+  .table-wrap table.cards td[data-label=""]::before { display: none; }
+  .table-wrap table.cards td :is(select, input.i) { max-width: 100%; }
+  .table-wrap table.cards td:empty { display: none; }
+  .table-wrap table.cards td.row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .table-wrap table.cards td.row:not([data-label=""]) { padding-left: calc(34% + 10px); }
+  .table-wrap table.cards tr:hover td { background: none; }
+}
 tr:hover td { background: #FFFDF8; }
 tr.clickable { cursor: pointer; }
 td img.thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--cream); }
@@ -184,13 +202,23 @@ body:has(.save-bar) .toast { bottom: 92px; }
 .tree-row.drop-before { box-shadow: 0 -3px 0 var(--chili); }
 .tree-row.drop-inside { outline: 2px solid var(--chili); }
 .tree-row.drop-after { box-shadow: 0 3px 0 var(--chili); }
-.tree-row .name { flex: 1; font-weight: 600; }
+.tree-row .name { flex: 1; font-weight: 600; min-width: 0; }
+/* Phones: the category name gets its own line; template, season, count and buttons wrap under it. */
+@media (max-width: 760px) {
+  .tree-row { flex-wrap: wrap; row-gap: 4px; padding: 8px 10px; }
+  .tree-row .name { flex: 1 1 calc(100% - 40px); }
+  .tree-row .name .small { display: block; }
+  .tree-row > .small:empty { display: none; }
+  .tree .tree { padding-left: 10px; margin-left: 6px; }
+}
 .nav-mode { margin: 10px 12px 18px; width: calc(100% - 24px); background: transparent; border: 1px dashed var(--line); border-radius: 10px; padding: 8px; font: 600 .8rem var(--body); color: var(--muted); cursor: pointer; }
 .nav-mode:hover { border-color: var(--clove); color: var(--clove); }
 .collapsed .nav-mode { display: none; }
 
 /* Overview charts */
-.ch-grid { display: grid; gap: 14px; grid-template-columns: 1fr; margin-bottom: 16px; }
+.ch-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); margin-bottom: 16px; }
+.ch-card { min-width: 0; }
+.ch-card svg { display: block; max-width: 100%; }
 @media (min-width: 1000px) { .ch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ch-wide { grid-column: 1 / -1; } }
 .ch-card { margin: 0; }
 .ch-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -305,3 +333,35 @@ body:has(.over) .ai-fab, body:has(.over) .ai-panel, body:has(dialog[open]) .ai-f
 .copy-row code { overflow-wrap: anywhere; background: var(--bg); padding: 6px 8px; border-radius: 8px; font-size: 12px; }
 @media (max-width: 640px) { .copy-row { grid-template-columns: 1fr auto; } .copy-row span { grid-column: 1 / -1; } }
 .book-card .row { gap: 8px; flex-wrap: wrap; }
+
+/* Settings → Delivery charges: one row per zone */
+.zone-rows { display: grid; gap: 10px; margin-bottom: 8px; }
+.zone-row { display: grid; gap: 0 12px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #FFFDF8; }
+.zone-row > div { display: grid; gap: 2px; margin-bottom: 8px; }
+@media (min-width: 900px) { .zone-row { grid-template-columns: 1.4fr 1fr 1fr 1fr; align-items: end; } .zone-row > div { margin-bottom: 12px; } }
+
+/* Count bubble on tabs and lists */
+.pill { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--chili); color: #fff; font-size: .72rem; font-weight: 700; line-height: 1; }
+
+/* On/off switch (Sellers → registration) */
+.switch { position: relative; display: inline-block; width: 52px; height: 30px; flex-shrink: 0; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--husk); transition: background .15s; }
+.switch span::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s; }
+.switch input:checked + span { background: var(--leaf); }
+.switch input:checked + span::after { transform: translateX(22px); }
+.switch input:focus-visible + span { outline: 2px solid var(--chili); outline-offset: 2px; }
+.sell-switch { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.sell-switch p { margin: 2px 0 0; }
+.sell-switch .com { grid-column: 1 / -1; margin: 6px 0 0; max-width: 260px; }
+@media (min-width: 900px) { .sell-switch { grid-template-columns: auto minmax(0, 1fr) 220px; } .sell-switch .com { grid-column: auto; margin: 0; } }
+
+/* Seller payment accounts */
+.payout { display: flex; flex-wrap: wrap; gap: 8px 12px; justify-content: space-between; align-items: center; padding: 10px 12px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.payout.pending { border-color: var(--turmeric); background: #FFFBEB; }
+.payout.rejected { opacity: .75; }
+
+/* Help center: the Bangla guide card */
+.guide-card { display: flex; gap: 14px; align-items: center; text-decoration: none; color: inherit; border: 2px solid var(--turmeric); background: #FFFBEB; }
+.guide-card:hover { border-color: var(--chili); }
+.guide-ico { font-size: 2rem; line-height: 1; }

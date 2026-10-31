@@ -1,4 +1,7 @@
 /** Courier bookings and their status updates on orders (consignment and tracking ids, courier sub-statuses). */
+import { courierLine } from '../lib/tracking';
+import { trackStmt } from './tracking';
+
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 
 /** The courier's city / zone / area ids saved for one of our upazilas (Courier area mapping). */
@@ -21,10 +24,11 @@ export async function orderByConsignment(db: D1Database, courier: string, consig
 }
 
 /** A courier status that does not change our stage (in transit, on hold…): the sub-status, the time and a timeline note. */
-export async function courierProgress(db: D1Database, orderId: number, subStatus: string | null, note: string): Promise<void> {
+export async function courierProgress(db: D1Database, orderId: number, subStatus: string | null, note: string, courier?: { name: string; words: string }): Promise<void> {
   await db.batch([
     db.prepare(`UPDATE orders SET sub_status = COALESCE(?, sub_status), last_courier_update_at = ${NOW}, updated_at = ${NOW} WHERE id = ?`).bind(subStatus, orderId),
     db.prepare("INSERT INTO order_events (order_id, kind, note, actor_type) VALUES (?, 'note', ?, 'courier')").bind(orderId, note),
+    trackStmt(db, orderId, courierLine(courier?.name ?? null, subStatus, courier?.words ?? null)),
   ]);
 }
 

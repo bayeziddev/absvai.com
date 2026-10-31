@@ -4,8 +4,11 @@
  */
 const BANGLA_DIGITS = '০১২৩৪৫৬৭৮৯';
 
+/** Bangla digits (০-৯) as ASCII digits; everything else unchanged. */
+export const asciiDigits = (s: string) => String(s).replace(/[০-৯]/g, d => String(BANGLA_DIGITS.indexOf(d)));
+
 function clean(input: string): string {
-  return String(input).replace(/[\s\-().]/g, '').replace(/[০-৯]/g, d => String(BANGLA_DIGITS.indexOf(d)));
+  return asciiDigits(String(input).replace(/[\s\-().]/g, ''));
 }
 
 export function normalizeBdPhone(input: string | null | undefined): string | null {

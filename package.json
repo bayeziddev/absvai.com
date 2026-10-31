@@ -15,6 +15,7 @@
   "scripts": {
     "gen:geo": "tsx scripts/import-geo.ts",
     "gen:seed": "tsx scripts/gen-seed.ts",
+    "gen:postcode-bn": "tsx scripts/gen-postcode-bn.ts",
     "build": "node scripts/build-assets.mjs",
     "typecheck": "tsc -p worker/tsconfig.json --noEmit && tsc -p tsconfig.json",
     "dev": "npm run build && wrangler dev -c worker/wrangler.toml",

@@ -2,7 +2,7 @@
  * Dynamic settings (Section 19): what the owner can change without code, how each value is validated, and which
  * values are secrets (encrypted at rest, masked after saving, Super Admin only).
  */
-export type SettingGroup = 'store' | 'branding' | 'delivery' | 'payments' | 'sms' | 'tracking' | 'fraud' | 'incomplete' | 'couriers' | 'ai' | 'email';
+export type SettingGroup = 'store' | 'branding' | 'delivery' | 'payments' | 'sms' | 'tracking' | 'fraud' | 'incomplete' | 'couriers' | 'ai' | 'email' | 'sellers';
 
 export interface SettingDef {
   key: string;
@@ -134,6 +134,9 @@ export const SETTINGS: SettingDef[] = [
   { key: 'manual_discount_max_percent', group: 'incomplete', label: 'Largest discount a Sales Agent may give on a manual order (%)', kind: 'int' },
 
   // Secrets: encrypted with SETTINGS_KEY, masked after saving, Super Admin only. Used by the Phase 2 integrations.
+  // Marketplace (edited on Admin → Sellers, not on the Settings page).
+  { key: 'sellers_open', group: 'sellers', label: 'Sellers can register ("Sell with us" shows in the shop menu)', kind: 'bool' },
+  { key: 'seller_commission_percent', group: 'sellers', label: 'Commission for new sellers (%)', kind: 'int' },
   { key: 'otp_enabled', group: 'sms', label: 'Ask for an SMS code on Cash on Delivery orders', kind: 'bool', help: 'Works only once an SMS gateway is connected. Until then (and while this is off) customers are not asked for a code: your team calls them to confirm.' },
   { key: 'sms_api_key', group: 'sms', label: 'SMS gateway API key', kind: 'secret' },
   { key: 'sms_sender_id', group: 'sms', label: 'SMS sender ID', kind: 'text', validate: re(/^[A-Za-z0-9 ]{3,11}$/, 'Sender IDs are 3–11 letters or numbers.') },
@@ -159,7 +162,7 @@ export const SECRET_KEYS = new Set(SETTINGS.filter(s => s.kind === 'secret').map
 
 /** Changing one of these changes what every cached page shows. */
 export const SITEWIDE_KEYS = new Set(['store_name', 'tagline', 'announcement', 'support_phone', 'whatsapp_number', 'messenger_page', 'social_links',
-  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner', 'popup_banner']);
+  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner', 'popup_banner', 'sellers_open']);
 
 export function validateSetting(def: SettingDef, value: string): string | null {
   switch (def.kind) {

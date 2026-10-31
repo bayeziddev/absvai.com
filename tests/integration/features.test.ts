@@ -235,6 +235,13 @@ describe('couriers: Steadfast and Pathao', () => {
     expect((await statusOf(id)).status).toBe('delivered');
     // A repeat of the same news changes nothing.
     expect((await (await hook(`Bearer ${token}`, { consignment_id: cid, status: 'delivered' })).json() as { result: string }).result).toBe('ignored');
+    // The customer's tracking page gets each step in plain words.
+    const lines = await t.sql<{ step: string; title: string; detail: string | null; source: string }>('SELECT step, title, detail, source FROM order_tracking WHERE order_id = ? ORDER BY id', id);
+    expect(lines.slice(-3)).toEqual([
+      { step: 'in_courier', title: 'Handed to the courier', detail: `Steadfast · tracking ${booked.body.trackingId}`, source: 'shop' },
+      { step: 'courier_update', title: 'Delivery on hold: the courier will call you', detail: 'Steadfast: hold', source: 'courier' },
+      { step: 'delivered', title: 'Delivered', detail: null, source: 'courier' },
+    ]);
   });
 
   it('books with Pathao after the area is chosen once, and Pathao webhooks update the order', async () => {

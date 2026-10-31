@@ -9,7 +9,7 @@ import { bdDate } from '../lib/dates';
 import { bad, HttpError, int, notFound, parseJson, posInt, readJson, str } from '../lib/http';
 import { buildInvoicePdf } from '../lib/invoice';
 import { formatTaka } from '../lib/money';
-import { extractPhones, localPhone, maskPhone, normalizeBdPhone, phonePrefixRange } from '../lib/phone';
+import { asciiDigits, extractPhones, localPhone, maskPhone, normalizeBdPhone, phonePrefixRange } from '../lib/phone';
 import { labelsHtml, pickingListHtml, PRINT_CSP } from '../lib/print';
 import { buildSlipsPdf, type SlipData } from '../lib/slips';
 import { confirmBlockers, isOrderStatus, nextStatuses, RETURN_REASONS, STAGE_MEANING, STATUS_LABELS, SUB_STATUSES, type OrderStatus } from '../lib/state-machine';
@@ -29,6 +29,8 @@ import { allowed, audit, need, needAny } from './admin-helpers';
 import { API_COURIERS, bookOrder, isApiCourier, pathaoLookup, PATHAO_DEFAULT_URL, STEADFAST_DEFAULT_URL, testCourier, webhookToken } from '../services/couriers';
 import { getSecret, loadSettings } from '../repo/settings';
 import { saveCourierArea } from '../repo/geo';
+import { addTrackNote } from '../repo/tracking';
+import { shopNoteLine } from '../lib/tracking';
 import { settingsOf } from './context';
 
 export const adminOrders = new Hono<AppEnv>();
@@ -221,6 +223,17 @@ adminOrders.post('/orders/:id/note', need('orders:write'), async c => {
   const note = str((await readJson(c)).note, 1000);
   if (!note) throw bad('Write a note.');
   await addOrderEvent(c.env.DB, { orderId: id, kind: 'note', note, adminId: c.var.session.adminId });
+  return c.json({ ok: true });
+});
+
+/** A message for the customer: it shows on their tracking page (/track) and in the staff history. */
+adminOrders.post('/orders/:id/customer-update', need('orders:write'), async c => {
+  const id = posInt(c.req.param('id')) ?? 0;
+  const text = str((await readJson(c)).text, 300);
+  if (!text) throw bad('Write the message for the customer.');
+  if (!(await orderById(c.env.DB, id))) throw notFound('Order not found.');
+  await addTrackNote(c.env.DB, id, shopNoteLine(text), c.var.session.adminId);
+  await audit(c, 'order.customer_update', 'order', id, { text });
   return c.json({ ok: true });
 });
 
@@ -501,7 +514,7 @@ function manualInput(b: Record<string, unknown>) {
   return {
     phone: str(b.phone, 20), name: str(b.name, 120),
     divisionId: int(b.divisionId) ?? 0, districtId: int(b.districtId) ?? 0, upazilaId: int(b.upazilaId) ?? 0, unionId: posInt(b.unionId),
-    postcode: str(b.postcode, 4) || null, addressLine: str(b.addressLine, 300), landmark: str(b.landmark, 200) || null, note: str(b.note, 500) || null,
+    postcode: asciiDigits(str(b.postcode, 4)) || null, addressLine: str(b.addressLine, 300), landmark: str(b.landmark, 200) || null, note: str(b.note, 500) || null,
     paymentMethod: (b.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod') as 'cod' | 'manual_mobile',
     advanceTrxId: str(b.advanceTrxId, 40) || null, advanceWallet: str(b.advanceWallet, 20) || null,
     lines: sanitizeLines(b.lines), source: str(b.source, 30), sourceDetail: str(b.sourceDetail, 200) || null, utm: {},

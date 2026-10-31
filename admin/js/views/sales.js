@@ -121,6 +121,7 @@ export async function manual(v) {
   f.districtId.addEventListener('change', () => setArea(f.divisionId.value, f.districtId.value, null));
   f.upazilaId.addEventListener('change', quoteSoon);
   f.postcode.addEventListener('input', () => {
+    f.postcode.value = f.postcode.value.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)).replace(/\D/g, '').slice(0, 4);
     const hits = g.postcodes[f.postcode.value] ?? [];
     $('#pc-msg').textContent = f.postcode.value.length === 4 ? (hits.length ? hits.map(h => h[0]).join(', ') : 'Postcode not found: choose the area below.') : '';
     if (hits[0]) setArea(hits[0][1], hits[0][2], hits[0][3]);

@@ -1,4 +1,4 @@
-/** Admin operations: dashboard, customers, seasons, delivery zones & geo, couriers, synonyms, inventory, outbox, audit. */
+/** Admin operations: dashboard, customers, seasons, delivery zones, synonyms, inventory, outbox, audit. */
 import { Hono, type Context } from 'hono';
 import { bannerProblem } from '../lib/settings-schema';
 import type { AppEnv } from '../env';
@@ -16,14 +16,13 @@ import { listCustomers, setTrusted } from '../repo/customers';
 import { dashboardCharts, dashboardFigures, stageCounts } from '../repo/dashboard';
 import { attemptsToday } from '../repo/fraud';
 import {
-  addPostcode, assignDistrictZone, assignUpazilaZone, bulkAssignPostcodes, courierAreas, deleteZone, districtById, fixPostcode, listPostcodes, postcodeDistrict, postcodeSummary,
-  saveCourierArea, saveZone as saveZoneRow, unmatchedPostcodeCounts, upazilaDistrict, upazilasOf, zoneIsDefault, zonesOverview, zoneUsedByOrders,
+  assignDistrictZone, assignUpazilaZone, deleteZone, saveZone as saveZoneRow, upazilasOf, zoneIsDefault, zonesOverview, zoneUsedByOrders,
 } from '../repo/geo';
 import { newIncompleteCount } from '../repo/incomplete';
 import { ADJUST_REASONS, adjustStock, inventoryList, lowStock, movements, productAvailable, stockValue, variantProduct } from '../repo/inventory';
 import { addSynonym, deleteSynonym, listSynonyms, listWholesale, markNotified, notifySummary, setWholesaleStatus, waitingNotify } from '../repo/misc';
 import { createSeason, deleteSeason, resetEndedSeasons, seasonReadiness, seasonsOfProduct, seasonsWithCounts, updateSeason } from '../repo/seasons';
-import { bumpGeoVersion, getSecret, loadSettings, settingInt } from '../repo/settings';
+import { getSecret, loadSettings, settingInt } from '../repo/settings';
 import { sellerCounts } from '../repo/sellers';
 import { adminSystemPrompt, askModel, cleanTurns, guideSections, matchGuide, ownerGuide } from '../services/assistant';
 import { listOutbox } from '../repo/sms';
@@ -49,11 +48,10 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
   const [start, end] = bdDayRange(today);
   const chartStart = bdDayRange(new Date(Date.now() - 13 * 86_400_000 + 6 * 3_600_000).toISOString().slice(0, 10))[0];
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const [stages, fig, low, geo, attempts, incomplete, backlog, charts] = await Promise.all([
+  const [stages, fig, low, attempts, incomplete, backlog, charts] = await Promise.all([
     stageCounts(db, new Date(Date.now() - 30 * 86_400_000).toISOString()),
     dashboardFigures(db, { todayStartIso: start, todayEndIso: end, chartStartIso: chartStart, weekAgoIso: weekAgo, todayBd: today }),
     lowStock(db),
-    unmatchedPostcodeCounts(db),
     attemptsToday(db, start),
     newIncompleteCount(db, weekAgo),
     purgeBacklog(db),
@@ -70,6 +68,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
   if (stages.new) attention.push({ level: 'alert', text: `${stages.new} new order(s) waiting for confirmation`, href: '#/orders?status=new' });
   const market = await sellerCounts(db);
   if (market.applications) attention.push({ level: 'warn', text: `${market.applications} seller application(s) to review`, href: '#/sellers' });
+  if (market.payoutsToReview) attention.push({ level: 'warn', text: `${market.payoutsToReview} seller payment account(s) to approve`, href: '#/sellers' });
   if (market.productsToReview) attention.push({ level: 'warn', text: `${market.productsToReview} seller product(s) waiting for your approval`, href: '#/sellers?tab=products' });
   if (stages.held) attention.push({ level: 'alert', text: `${stages.held} order(s) on hold for review (possible duplicate or too many orders)`, href: '#/orders?status=held' });
   if (incomplete) attention.push({ level: 'info', text: `${incomplete} incomplete checkout(s) to call in the last 7 days`, href: '#/incomplete' });
@@ -77,7 +76,6 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
   if (stages.awaitingReturnScan) attention.push({ level: 'warn', text: `${stages.awaitingReturnScan} returned parcel(s) not scanned in yet (stock comes back on scan)`, href: '#/returns' });
   if (low.length) attention.push({ level: 'warn', text: `${low.length} option(s) with 5 or fewer available`, href: '#/inventory' });
   if (fig.preordersToDispatch) attention.push({ level: 'info', text: `${fig.preordersToDispatch} confirmed pre-order(s) to dispatch`, href: '#/preorders' });
-  if (geo.unmatched) attention.push({ level: 'info', text: `${geo.unmatched} postcode(s) not linked to an area yet`, href: '#/geo?status=unmatched' });
   if (attempts) attention.push({ level: 'info', text: `${attempts} blocked or held attempt(s) today to glance through`, href: '#/security' });
   if (undated.length) attention.push({ level: 'warn', text: `Set this year's dates for: ${undated.join(', ')}`, href: '#/seasons' });
   if (next && next.daysUntil <= 30) {
@@ -107,7 +105,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
       awaitingConfirmation: stages.new, lowStock: low.length, ...(allowed(c, 'cost:read') ? { stockValuePaisa: (await stockValue(db)).valuePaisa } : {}),
     },
     seasons: { active, next: next ? { name: next.season.name, startsOn: next.season.starts_on, daysUntil: next.daysUntil } : null, undated },
-    chart: fig.chart, recentOrders: fig.recent, lowStock: low, attention, health, fuzzyPostcodes: geo.fuzzy,
+    chart: fig.chart, recentOrders: fig.recent, lowStock: low, attention, health,
     charts: {
       ...charts,
       // Sales Agents see masked numbers, as everywhere else.
@@ -188,7 +186,9 @@ adminOps.post('/assistant', async c => {
   const found = matchGuide(guideSections(guide), question);
   return c.json({
     ai: false,
-    reply: found.length ? 'Here is what the owner guide says:' : 'I couldn’t find that in the owner guide. Try a word like product, category, banner, order, courier, season or email.',
+    reply: /[\u0980-\u09FF]/.test(question)
+      ? (found.length ? 'গাইডে যা লেখা আছে:' : 'গাইডে এটা খুঁজে পেলাম না। প্রোডাক্ট, অর্ডার, কুরিয়ার, সেলার, ব্যানার বা ইমেইল এর মতো একটা শব্দ লিখে দেখুন।')
+      : (found.length ? 'Here is what the owner guide says:' : 'I couldn’t find that in the owner guide. Try a word like product, category, banner, order, courier, season or email.'),
     sections: found.map(s => ({ title: s.title, body: s.body.slice(0, 1800) })),
   });
 });
@@ -305,80 +305,10 @@ adminOps.put('/zones/assign-upazila', need('geo:write'), async c => {
   return c.json({ ok: true });
 });
 
-adminOps.get('/geo/summary', need('settings:read'), async c => c.json(await postcodeSummary(c.env.DB)));
-
-adminOps.get('/geo/postcodes', need('settings:read'), async c => {
-  const status = c.req.query('status');
-  return c.json(await listPostcodes(c.env.DB, {
-    status: status && ['exact', 'alias', 'fuzzy', 'unmatched', 'manual'].includes(status) ? status : undefined,
-    districtId: posInt(c.req.query('district')), q: str(c.req.query('q'), 40) || undefined, page: Math.max(1, Number(c.req.query('page')) || 1),
-  }));
-});
-
 adminOps.get('/geo/districts/:id/upazilas', need('settings:read'), async c => c.json(await upazilasOf(c.env.DB, posInt(c.req.param('id')) ?? 0)));
 
-async function checkUpazila(db: D1Database, districtId: number, upazilaId: number | null) {
-  if (!upazilaId) return;
-  if ((await upazilaDistrict(db, upazilaId)) !== districtId) throw bad('That area is not in the postcode’s district.');
-}
-
-adminOps.put('/geo/postcodes/:id', need('geo:write'), async c => {
-  const id = posInt(c.req.param('id')) ?? 0;
-  const b = await readJson(c);
-  const district = await postcodeDistrict(c.env.DB, id);
-  if (!district) throw notFound();
-  const upazilaId = posInt(b.upazilaId);
-  await checkUpazila(c.env.DB, district, upazilaId);
-  await fixPostcode(c.env.DB, id, upazilaId, str(b.postOffice, 80) || null);
-  await bumpGeoVersion(c.env.DB);
-  await audit(c, 'geo.postcode_fix', 'postcode', id, { upazilaId });
-  return c.json({ ok: true });
-});
-
-adminOps.post('/geo/postcodes/bulk-assign', need('geo:write'), async c => {
-  const b = await readJson(c);
-  const ids = Array.isArray(b.ids) ? (b.ids as unknown[]).map(Number).filter(Number.isInteger).slice(0, 200) : [];
-  const upazilaId = posInt(b.upazilaId);
-  if (!ids.length || !upazilaId) throw bad('Choose postcodes and an area.');
-  const district = await upazilaDistrict(c.env.DB, upazilaId);
-  if (!district) throw bad('Unknown area.');
-  const updated = await bulkAssignPostcodes(c.env.DB, ids, upazilaId, district);
-  await bumpGeoVersion(c.env.DB);
-  await audit(c, 'geo.postcode_bulk', 'upazila', upazilaId, { ids });
-  return c.json({ ok: true, updated });
-});
-
-adminOps.post('/geo/postcodes', need('geo:write'), async c => {
-  const b = await readJson(c);
-  const postcode = str(b.postcode, 4);
-  if (!/^\d{4}$/.test(postcode)) throw bad('Postcodes have 4 digits.');
-  const office = str(b.postOffice, 80);
-  if (!office) throw bad('Add the post office name.');
-  const d = await districtById(c.env.DB, posInt(b.districtId) ?? 0);
-  if (!d) throw bad('Choose the district.');
-  const upazilaId = posInt(b.upazilaId);
-  await checkUpazila(c.env.DB, d.id, upazilaId);
-  await addPostcode(c.env.DB, { postcode, postOffice: office, divisionId: d.division_id, districtId: d.id, upazilaId });
-  await bumpGeoVersion(c.env.DB);
-  await audit(c, 'geo.postcode_add', 'postcode', postcode);
-  return c.json({ ok: true }, 201);
-});
-
-adminOps.get('/courier-areas', need('settings:read'), async c => {
-  const courier = str(c.req.query('courier'), 30) || 'steadfast';
-  const district = posInt(c.req.query('district'));
-  return c.json(district ? await courierAreas(c.env.DB, courier, district) : []);
-});
-
-adminOps.put('/courier-areas', need('geo:write'), async c => {
-  const b = await readJson(c);
-  const courier = str(b.courier, 30);
-  const upazilaId = posInt(b.upazilaId);
-  if (!courier || !upazilaId) throw bad('Choose the courier and area.');
-  await saveCourierArea(c.env.DB, { courier, upazilaId, cityId: str(b.cityId, 20) || null, zoneId: str(b.zoneId, 20) || null, areaId: str(b.areaId, 20) || null, label: str(b.label, 80) || null });
-  await audit(c, 'courier.map', 'upazila', upazilaId, { courier });
-  return c.json({ ok: true });
-});
+// Postcodes and courier areas have no admin screens: postcodes come from the imported data (migrations 0002 and 0007)
+// and the Pathao area is picked once per area while booking (routes/admin-orders.ts).
 
 // ───────────── Synonyms, inventory, outbox, audit ─────────────
 

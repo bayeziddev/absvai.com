@@ -54,6 +54,3 @@ export async function rawSecretValue(db: D1Database, key: string): Promise<strin
   return (await db.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first<{ value: string }>())?.value ?? null;
 }
 
-export async function bumpGeoVersion(db: D1Database): Promise<void> {
-  await db.prepare(`UPDATE settings SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT), updated_at = ${NOW} WHERE key = 'geo_postcode_version'`).run();
-}

@@ -1,5 +1,7 @@
 import type { CategoryNode, ProductCard, ProductDetail } from '../repo/catalog';
-import { formatDate } from '../lib/dates';
+import { formatDate, formatDateTime } from '../lib/dates';
+import { TRACK_STAGES } from '../lib/tracking';
+import type { TrackedOrder, TrackResult } from '../services/tracking';
 import { SIZES, smallOf, srcsetOf } from '../lib/images';
 import { formatTaka, formatUnitPrice, unitPrice } from '../lib/money';
 import { localPhone, maskPhone } from '../lib/phone';
@@ -503,25 +505,80 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
   );
 }
 
-export function TrackPage(p: { phone?: string; orderNo?: string; result?: { orderNo: string; status: OrderStatus; courier: string | null; trackingId: string | null; eta: string | null; timeline: Array<{ status: OrderStatus; at: string }> } | null; error?: string }) {
+export function TrackPage(p: { q?: string; result?: TrackResult | null; error?: string }) {
+  const orders = p.result?.orders ?? [];
   return (
-    <div class="container narrow">
+    <div class="container track-page">
       <h1>Track your order</h1>
       <form class="card-box track-form" method="get" action="/track">
-        <label class="field"><span>Mobile number</span><input name="phone" type="tel" inputmode="numeric" value={p.phone ?? ''} placeholder="01XXXXXXXXX" required /></label>
-        <label class="field"><span>Order number</span><input name="order" value={p.orderNo ?? ''} placeholder="AV-261030-0001" required /></label>
+        <label class="field"><span>Mobile number or order number</span>
+          <input name="q" value={p.q ?? ''} placeholder="01XXXXXXXXX or AV-261030-0001" required maxlength={40} autocomplete="tel" enterkeyhint="search" />
+        </label>
         <button class="btn btn-primary" type="submit">Track</button>
+        <p class="small muted track-hint">Type either one: the mobile number you ordered with shows all its recent orders; an order number (or invoice or courier tracking code) shows that order. মোবাইল নম্বর অথবা অর্ডার নম্বর, যেকোনো একটি দিন।</p>
       </form>
       {p.error && <p class="notice notice-error" role="alert">{p.error}</p>}
-      {p.result && (
-        <div class="card-box">
-          <h2>{p.result.orderNo}: {STATUS_LABELS[p.result.status]}</h2>
-          {p.result.trackingId && <p>Courier: <strong>{p.result.courier}</strong> · Tracking: <strong>{p.result.trackingId}</strong></p>}
-          {p.result.eta && <p class="muted">Usual delivery time: {p.result.eta}</p>}
-          <ol class="timeline">{p.result.timeline.map(t => <li><strong>{STATUS_LABELS[t.status]}</strong><span>{formatDate(t.at)}</span></li>)}</ol>
-        </div>
+      {orders.length > 1 && (
+        <section class="card-box">
+          <h2>{orders.length} orders on {orders[0].phone}</h2>
+          <div class="table-wrap"><table class="track-table">
+            <thead><tr><th>Order</th><th>Date</th><th>Items</th><th class="num">Total</th><th>Status</th></tr></thead>
+            <tbody>{orders.map(o => (
+              <tr><td><a href={`#o-${o.orderNo}`}><b>{o.orderNo}</b></a></td><td>{formatDate(o.placedAt)}</td><td>{o.items.reduce((s, i) => s + i.qty, 0)}</td><td class="num">{formatTaka(o.totalPaisa)}</td><td><span class={`track-status st-${o.status}`}>{o.statusLabel}</span></td></tr>
+            ))}</tbody>
+          </table></div>
+        </section>
       )}
+      {orders.map(o => <TrackedOrderCard o={o} />)}
     </div>
+  );
+}
+
+function TrackedOrderCard({ o }: { o: TrackedOrder }) {
+  const steps = [...o.steps].reverse();
+  return (
+    <section class="card-box tracked" id={`o-${o.orderNo}`}>
+      <div class="tracked-head"><h2>{o.orderNo}</h2><span class={`track-status st-${o.status}`}>{o.statusLabel}</span></div>
+      {o.stage >= 0 ? (
+        <ol class="track-bar" aria-label="Order progress">{TRACK_STAGES.map(([, en, bn], i) => (
+          <li class={i <= o.stage ? 'done' : ''} aria-current={i === o.stage ? 'step' : undefined}><span>{en}</span><small lang="bn">{bn}</small></li>
+        ))}</ol>
+      ) : <p class="notice">{o.status === 'cancelled' ? 'This order was cancelled.' : 'This parcel came back to the shop.'} Questions? Call or WhatsApp us.</p>}
+      <h3>Order details</h3>
+      <div class="table-wrap"><table class="track-table track-kv"><tbody>
+        <tr><th>Order number</th><td>{o.orderNo}{o.invoiceNo ? ` · Invoice ${o.invoiceNo}` : ''}{o.preOrder ? ' · Pre-order' : ''}</td></tr>
+        <tr><th>Placed on</th><td>{formatDateTime(o.placedAt)}</td></tr>
+        <tr><th>Name</th><td>{o.name}</td></tr>
+        <tr><th>Mobile</th><td>{o.phone}</td></tr>
+        <tr><th>Delivery area</th><td>{o.area || '—'}</td></tr>
+        <tr><th>Payment</th><td>{o.payment} · {o.paymentState}</td></tr>
+        <tr><th>Courier</th><td>{o.courier ?? 'Not handed over yet'}{o.trackingCode ? <> · Tracking code <b>{o.trackingCode}</b></> : ''}</td></tr>
+        {o.eta && <tr><th>Usual delivery time</th><td>{o.eta}</td></tr>}
+      </tbody></table></div>
+      <h3>Items</h3>
+      <div class="table-wrap"><table class="track-table">
+        <thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr></thead>
+        <tbody>{o.items.map(i => (
+          <tr><td>{i.name}{i.variant ? <span class="muted"> · {i.variant}</span> : ''}{i.returned ? <span class="muted"> ({i.returned} returned)</span> : ''}</td><td class="num">{i.qty}</td><td class="num">{formatTaka(i.unitPaisa)}</td><td class="num">{formatTaka(i.linePaisa)}</td></tr>
+        ))}</tbody>
+        <tfoot>
+          <tr><th colspan={3}>Subtotal</th><td class="num">{formatTaka(o.subtotalPaisa)}</td></tr>
+          <tr><th colspan={3}>Delivery</th><td class="num">{o.deliveryPaisa ? formatTaka(o.deliveryPaisa) : 'Free'}</td></tr>
+          {o.codFeePaisa > 0 && <tr><th colspan={3}>Cash on Delivery fee</th><td class="num">{formatTaka(o.codFeePaisa)}</td></tr>}
+          {o.discountPaisa > 0 && <tr><th colspan={3}>Discount</th><td class="num">−{formatTaka(o.discountPaisa)}</td></tr>}
+          <tr class="grand"><th colspan={3}>Total</th><td class="num">{formatTaka(o.totalPaisa)}</td></tr>
+          {o.paidPaisa > 0 && <tr><th colspan={3}>Paid</th><td class="num">{formatTaka(o.paidPaisa)}</td></tr>}
+          {o.stage >= 0 && <tr class="grand"><th colspan={3}>To pay on delivery</th><td class="num">{formatTaka(o.duePaisa)}</td></tr>}
+        </tfoot>
+      </table></div>
+      <h3>Tracking history</h3>
+      <div class="table-wrap"><table class="track-table">
+        <thead><tr><th>Date & time</th><th>Update</th></tr></thead>
+        <tbody>{steps.map(s => (
+          <tr><td class="track-when">{formatDateTime(s.at)}</td><td><b>{s.title}</b>{s.titleBn && <small class="muted" lang="bn"><br />{s.titleBn}</small>}{s.detail && <><br /><span class="track-detail">{s.detail}</span></>}</td></tr>
+        ))}</tbody>
+      </table></div>
+    </section>
   );
 }
 
@@ -534,11 +591,11 @@ export function SellPage(p: { settings: Record<string, string>; open: boolean })
         <p>Add your products to our shop. We take the orders, call the customers, deliver all over Bangladesh with Cash on Delivery, and pay you for every delivered sale.</p>
         <ol class="sell-steps">
           <li><b>Register</b> with the form below.</li>
-          <li><b>We approve</b> your seller account (usually within 1–2 days).</li>
-          <li><b>Sign in</b> to the <a href="/seller/">seller portal</a> and add your products with photos and prices.</li>
-          <li><b>We check each product</b> and it goes live in the shop. You see every order and your earnings.</li>
+          <li><b>Sign in</b> to the <a href="/seller/">seller portal</a> right away and add your products, photos, prices and your bKash, Nagad, Rocket or bank account.</li>
+          <li><b>We approve</b> your seller account (usually within 1–2 days), then <b>each product</b> before it shows in the shop and <b>your payment account</b> before we pay into it.</li>
+          <li><b>We sell and deliver.</b> You see every order and your earnings in the portal.</li>
         </ol>
-        <p class="small">Already approved? <a href="/seller/">Sign in to the seller portal</a>.</p>
+        <p class="small">Already registered? <a href="/seller/">Sign in to the seller portal</a>.</p>
       </div>
       {p.open ? (
         <form class="card-box sell-form" data-sell novalidate>
@@ -551,9 +608,10 @@ export function SellPage(p: { settings: Record<string, string>; open: boolean })
             <label class="field"><span>Password (10+ characters with a number)</span><input name="password" type="password" required minlength={10} autocomplete="new-password" /></label>
             <label class="field"><span>District</span><input name="district" maxlength={60} placeholder="e.g. Jashore" /></label>
             <label class="field"><span>What kind of business?</span><select name="businessType"><option value="">Choose…</option><option>Home business</option><option>Shop</option><option>Farmer / producer</option><option>Wholesaler</option><option>Brand</option></select></label>
-            <label class="field"><span>Get paid by</span><select name="payoutMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="bank">Bank account</option></select></label>
-            <label class="field"><span>Payment number / account</span><input name="payoutNumber" maxlength={40} placeholder="01XXXXXXXXX" /></label>
+            <label class="field"><span>Get paid by</span><select name="payoutMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option></select></label>
+            <label class="field"><span>bKash / Nagad / Rocket number (optional)</span><input name="payoutNumber" type="tel" inputmode="numeric" maxlength={20} placeholder="01XXXXXXXXX" /></label>
           </div>
+          <p class="small muted sell-note">Bank account instead? Add it in the seller portal after you sign in.</p>
           <label class="field"><span>Address</span><input name="address" maxlength={300} /></label>
           <label class="field"><span>What do you want to sell?</span><textarea name="sells" rows={3} maxlength={500} placeholder="e.g. Khejur gur from our own trees, about 200 kg each winter" /></label>
           <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>

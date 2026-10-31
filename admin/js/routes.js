@@ -4,7 +4,7 @@ import { incomplete, manual, returns } from './views/sales.js';
 import { products } from './views/products.js';
 import { attributes, categories, labels, synonyms, templates } from './views/catalog.js';
 import { audit, customers, inventory, outbox, preorders, seasons, wholesale } from './views/ops.js';
-import { couriers, geo, zones } from './views/geo.js';
+import { zones } from './views/geo.js';
 import { security } from './views/security.js';
 import { help, settings, soon, staff } from './views/settings.js';
 import { website } from './views/website.js';
@@ -13,6 +13,8 @@ import { courier } from './views/courier.js';
 import { sellers } from './views/sellers.js';
 
 // `simple: true` items are the everyday screens shown in simple mode (the default); "Show all tools" reveals the rest.
+// Postcodes, cities and courier areas work by themselves (imported data, picked per order), so they have no screens;
+// delivery charges are edited in Settings, which links to the zone details (#/zones) for the rare district change.
 export const NAV = [
   { route: 'dashboard', simple: true, label: 'Overview', icon: 'dash' },
   { group: 'Sales' },
@@ -31,9 +33,6 @@ export const NAV = [
   { route: 'inventory', simple: true, label: 'Inventory', icon: 'box' },
   { group: 'Delivery' },
   { route: 'courier', simple: true, label: 'Couriers', icon: 'truck' },
-  { route: 'zones', label: 'Delivery zones', icon: 'truck' },
-  { route: 'geo', label: 'Postcodes & geo', icon: 'pin' },
-  { route: 'couriers', label: 'Courier area mapping', icon: 'truck' },
   { group: 'Marketing' },
   { route: 'website', simple: true, label: 'Website & banners', icon: 'image' },
   { route: 'emails', simple: true, label: 'Emails', icon: 'mail' },
@@ -59,5 +58,5 @@ export const NAV = [
 
 export const routes = {
   dashboard, orders, incomplete, manual, returns, preorders, customers, wholesale, products, categories, templates, attributes, labels,
-  inventory, seasons, synonyms, zones, geo, couriers, settings, staff, security, outbox, audit, help, soon, website, emails, courier, sellers,
+  inventory, seasons, synonyms, zones, settings, staff, security, outbox, audit, help, soon, website, emails, courier, sellers,
 };

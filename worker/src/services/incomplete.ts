@@ -4,7 +4,7 @@
  */
 import type { Env } from '../env';
 import { signingKey, signToken, verifyToken } from '../lib/crypto';
-import { normalizeBdPhone } from '../lib/phone';
+import { asciiDigits, normalizeBdPhone } from '../lib/phone';
 import { upsertCapture } from '../repo/incomplete';
 import { customerByPhone } from '../repo/orders';
 import { priceCart, sanitizeLines } from './cart';
@@ -67,7 +67,7 @@ export async function captureIncomplete(env: Env, sid: string, id: Identity, bod
   }
   const saved = await upsertCapture(env.DB, {
     sessionId: sid, phone, name: s(body.name, 120) || null,
-    address: { divisionId: n(body.divisionId), districtId: n(body.districtId), upazilaId: n(body.upazilaId), postcode: s(body.postcode, 4) || null, line: s(body.addressLine, 300) || null, landmark: s(body.landmark, 200) || null },
+    address: { divisionId: n(body.divisionId), districtId: n(body.districtId), upazilaId: n(body.upazilaId), postcode: asciiDigits(s(body.postcode, 4)) || null, line: s(body.addressLine, 300) || null, landmark: s(body.landmark, 200) || null },
     cart: priced.lines.map(l => ({ variantId: l.variantId, qty: l.qty, pricePaisa: l.unitPaisa, name: l.name + (l.variantLabel ? ` (${l.variantLabel})` : ''), sku: l.sku })),
     subtotalPaisa: priced.subtotalPaisa, source: { landingPageId: n(body.landingPageId), utm }, deviceHash: id.deviceHash, ipHash: id.ipHash, riskLevel: risk, riskReasons: reasons,
   });

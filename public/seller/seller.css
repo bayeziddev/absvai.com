@@ -39,3 +39,11 @@
 .sp-ready { color: var(--leaf); font-weight: 700; margin: 0 0 6px; }
 .sp-actions { z-index: 5; }
 body:has(.sp-actions) .toast { bottom: 96px; }
+
+/* Waiting for approval, and payment accounts */
+.sp-wait { margin: 0 0 14px; }
+.sp-pay-list { display: grid; gap: 10px; margin-bottom: 16px; }
+.sp-pay { display: flex; gap: 10px; justify-content: space-between; align-items: flex-start; padding: 12px 14px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+.sp-pay > div { display: grid; gap: 4px; justify-items: start; min-width: 0; }
+.sp-pay.pending { border-color: var(--turmeric); }
+.sp-pay small { color: var(--muted); }

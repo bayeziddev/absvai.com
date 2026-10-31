@@ -7,6 +7,7 @@
 | `upazilas.json` | `upazilas/upazilas.json` | 494 |
 | `unions.json` | `unions/unions.json` (key is spelled `upazilla_id`) | 4,540 |
 | `postcode.csv` | `postcode-bd/postcode.csv` (division, district, thana, post office, postcode) | 1,349 |
+| `postcode.json` | `postcode-bd/postcode.json` (English + Bangla division, district, thana, post office per postcode; pinned at `8718ada2f7f34b075b7a23d90cb8bbbe615c4b1e`, 2026-10-30) | 1,368 |
 | `districts.geojson.txt` | `geojson/districts.geojson.txt` (64 `MultiPolygon` district outlines) | 64 |
 | `LICENSE` | `LICENSE` (MIT) | |
 
@@ -30,11 +31,26 @@ Bangladesh-geocode is MIT licensed. Its `postcode-bd` folder was produced by `po
 Wikipedia's "List of postal codes in Bangladesh". Wikipedia text is CC BY-SA 4.0. Postcode facts themselves are generally
 not copyrightable, but keep the attribution line in the site footer's credits page and confirm with the client.
 
+## Bangla postcode names (migration 0007)
+
+`npm run gen:postcode-bn` reads `postcode.json` and writes `worker/migrations/0007_postcode_bangla.sql` and
+`data/geo/reports/postcode-bangla-report.csv`:
+
+- **1,110** postcodes get their Bangla post office name (checkout shows "Board Bazar (বোর্ড বাজার)"). 224 entries in
+  `postcode.json` carry English text in the Bangla field and 15 have no Bangla entry; those are left without one.
+- **213 of the 323** postcodes linked to an area by spelling similarity (`fuzzy`) are confirmed (`alias`): their Bangla
+  thana name is exactly the linked upazila's Bangla name. The other 110 stay as they are; no Bangla name pointed to a
+  different upazila.
+- The **239 unmatched** postcodes (mostly city thanas such as Dhaka's) get no area from the Bangla names either: their
+  thanas are not upazilas in `upazilas.json`. Checkout still fills the division and district for them and asks the
+  customer to pick the area, so nobody has to fix them by hand.
+- Customers can type the postcode in Bangla digits (১২০৬); checkout and the server read it as 1206.
+
 ## Regenerating
 
 ```bash
 npm run gen:geo      # writes worker/migrations/0002_geo_data.sql, data/geo/generated/*, data/geo/reports/*
 ```
 
-Only regenerate before the first production migration. After launch, postcode fixes are made in admin
-(they live in D1), and any new upstream data goes in as a new, additive migration.
+Only regenerate `gen:geo` before the first production migration. After launch, new upstream data goes in as a new,
+additive migration (like `0007_postcode_bangla.sql`); the shop owner never has to manage postcodes.

@@ -81,19 +81,20 @@ function say(text, tone = '') { finderMsg.textContent = text; finderMsg.classNam
 // ── 1. Postcode ──
 const picker = $('[data-po-picker]');
 form.postcode.addEventListener('input', () => {
-  form.postcode.value = form.postcode.value.replace(/\D/g, '').slice(0, 4);
+  // Bangla digits (১২০৬) work too.
+  form.postcode.value = form.postcode.value.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)).replace(/\D/g, '').slice(0, 4);
   picker.hidden = true;
   if (form.postcode.value.length !== 4 || !geo) { if (form.postcode.value.length < 4) say(''); return; }
   const hits = geo.postcodes[form.postcode.value];
   if (!hits) { say('We don’t know this postcode yet. Please choose your area below.', 'warn'); return; }
-  const use = ([office, div, dis, upa]) => {
+  const use = ([office, div, dis, upa, officeBn]) => {
     applyArea(div, dis, upa);
     const n = names();
-    say(`${office} post office · ${n.upazila ? `${n.upazila}, ` : ''}${n.district}, ${n.division} Division${upa ? '' : '. Please choose your area.'}`, upa ? 'ok' : 'warn');
+    say(`${office}${officeBn ? ` (${officeBn})` : ''} post office · ${n.upazila ? `${n.upazila}, ` : ''}${n.district}, ${n.division} Division${upa ? '' : '. Please choose your area.'}`, upa ? 'ok' : 'warn');
     picker.hidden = true;
   };
   if (hits.length === 1) { use(hits[0]); return; }
-  picker.innerHTML = '<p class="small">This postcode covers several post offices. Which is yours?</p>' + hits.map((h, i) => `<button class="btn btn-outline btn-sm" type="button" data-i="${i}">${esc(h[0])}</button>`).join('');
+  picker.innerHTML = '<p class="small">This postcode covers several post offices. Which is yours?</p>' + hits.map((h, i) => `<button class="btn btn-outline btn-sm" type="button" data-i="${i}">${esc(h[0])}${h[4] ? ` · ${esc(h[4])}` : ''}</button>`).join('');
   picker.hidden = false;
   picker.querySelectorAll('button').forEach(b => b.addEventListener('click', () => use(hits[Number(b.dataset.i)])));
 });

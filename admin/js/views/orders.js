@@ -144,6 +144,8 @@ export async function openOrder(id, { onChange } = {}) {
           </div>
           <div class="card"><h2>History</h2><ul class="timeline">${d.events.map(e => `<li class="${esc(e.kind)}"><b>${e.kind === 'status' ? `${esc((e.from_status ?? 'placed').replace(/_/g, ' '))} → ${esc(e.to_status.replace(/_/g, ' '))}` : e.kind === 'rejected_transition' ? `Refused: ${esc(e.from_status)} → ${esc(e.to_status)}` : e.kind === 'call' ? `Call: ${esc(e.outcome.replace(/_/g, ' '))}` : esc(e.kind.replace(/_/g, ' '))}</b> <span class="small muted">${date(e.created_at)} · ${esc(e.admin_name ?? e.actor_type)}</span>${e.note ? `<br><span class="small">${esc(e.note)}</span>` : ''}</li>`).join('')}</ul>
             ${write ? `<div class="row" style="margin-top:8px"><input class="i" id="note" placeholder="Add an internal note" style="flex:1"><button class="btn btn-outline btn-sm" id="note-go">Add note</button></div>` : ''}</div>
+          <div class="card"><h2>Message for the customer</h2><p class="small muted">Shows on the customer’s tracking page (<a href="/track?q=${encodeURIComponent(o.order_no)}" target="_blank" rel="noopener">see it</a>). For example: “Delayed by rain, it arrives tomorrow.”</p>
+            ${write ? `<div class="row"><input class="i" id="cnote" maxlength="300" placeholder="Write a short update" style="flex:1"><button class="btn btn-outline btn-sm" id="cnote-go">Post</button></div>` : ''}</div>
           <div class="card"><h2>SMS sent</h2>${d.sms.length ? d.sms.map(s => `<p class="small"><b>${esc(s.kind)}</b> ${badge(s.status)} <span class="muted">${date(s.created_at)}</span><br>${esc(s.body)}</p>`).join('') : '<p class="muted small">None.</p>'}</div>
         </div>
         <div>
@@ -181,6 +183,7 @@ export async function openOrder(id, { onChange } = {}) {
     if ($('#merge')) busy($('#merge'), async () => { if (await confirmBox('Cancel this order as a duplicate?')) { await api(`/orders/${id}/merge`, 'POST', {}); await after('Cancelled as a duplicate.'); } });
     if ($('#dc-go')) busy($('#dc-go'), async () => { await api(`/orders/${id}/delivery-charge`, 'POST', { chargePaisa: toPaisa($('#dc').value) }); await after('Delivery charge set.'); });
     if ($('#note-go')) busy($('#note-go'), async () => { await api(`/orders/${id}/note`, 'POST', { note: $('#note').value }); await after('Note added.'); });
+    if ($('#cnote-go')) busy($('#cnote-go'), async () => { await api(`/orders/${id}/customer-update`, 'POST', { text: $('#cnote').value }); await after('Posted: the customer sees it when they track the order.'); });
     if ($('#adv-ok')) busy($('#adv-ok'), async () => { await api(`/orders/${id}/advance`, 'POST', { action: 'verify', amountPaisa: toPaisa($('#adv-amt').value) }); await after('Advance marked as received.'); });
     if ($('#adv-no')) busy($('#adv-no'), async () => { await api(`/orders/${id}/advance`, 'POST', { action: 'reject', note: 'Transaction not found' }); await after('Customer asked to pay again.'); });
     if ($('#call-go')) busy($('#call-go'), async () => { await api(`/orders/${id}/call`, 'POST', { outcome: $('#call-out').value, note: $('#call-note').value }); await after('Call logged.'); });

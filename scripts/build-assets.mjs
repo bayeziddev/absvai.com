@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { guidePage } from './md-html.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
@@ -14,8 +15,11 @@ mkdirSync(dist, { recursive: true });
 for (const entry of readdirSync(dist)) rmSync(join(dist, entry), { recursive: true, force: true });
 cpSync(join(root, 'public'), dist, { recursive: true });
 cpSync(join(root, 'admin'), join(dist, 'admin'), { recursive: true });
-// The owner guide, for the admin assistant (worker/src/services/assistant.ts reads it from the static assets).
-cpSync(join(root, 'docs/OWNER-GUIDE.md'), join(dist, 'admin/guide.md'));
+// The owner guides. The admin assistant (worker/src/services/assistant.ts) reads both, English and Bangla, from
+// /admin/guide.md; the Bangla guide is also a page of its own for the owner (/admin/guide-bn.html, Help center).
+const guideBn = readFileSync(join(root, 'docs/ADMIN-GUIDE-BN.md'), 'utf8');
+writeFileSync(join(dist, 'admin/guide.md'), `${readFileSync(join(root, 'docs/OWNER-GUIDE.md'), 'utf8').trim()}\n\n${guideBn.replace(/^# .*\n/, '').trim()}\n`);
+writeFileSync(join(dist, 'admin/guide-bn.html'), guidePage(guideBn, { title: 'বাংলা গাইড · Abs Vai Admin' }));
 const geo = join(dist, 'geo', version);
 mkdirSync(geo, { recursive: true });
 cpSync(join(root, 'data/geo/generated/outlines'), join(geo, 'outlines'), { recursive: true });

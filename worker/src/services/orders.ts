@@ -9,6 +9,7 @@ import { formatTaka } from '../lib/money';
 import { maskPhone, normalizeBdPhone } from '../lib/phone';
 import { assessRisk } from '../lib/risk';
 import { SMS } from '../lib/sms';
+import { COURIERS, courierLabel } from '../lib/tracking';
 import { canTransition, confirmBlockers, RESERVED_STAGES, RETURN_REASONS, STATUS_LABELS, validatePartialReturn, type Actor, type OrderStatus } from '../lib/state-machine';
 import { validateAddress } from '../repo/geo';
 import { nextInvoiceNo, nextOrderNo } from '../repo/numbering';
@@ -333,8 +334,7 @@ export async function changeStatus(env: Env, orderId: number, to: OrderStatus, o
   return result;
 }
 
-export const COURIERS: Record<string, string> = { steadfast: 'Steadfast', pathao: 'Pathao', redx: 'RedX', carrybee: 'Carrybee', own_delivery: 'Own delivery' };
-export const courierLabel = (c: string) => COURIERS[c] ?? c;
+export { COURIERS, courierLabel };
 
 /** Warehouse scan of a returned parcel: the only way stock comes back (Section 9.1, stage 8). */
 export async function receiveReturnScan(env: Env, code: string, adminId: string): Promise<{ orderId: number; orderNo: string; restocked: Array<{ sku: string; qty: number }> }> {

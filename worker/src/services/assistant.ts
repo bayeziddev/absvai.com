@@ -79,7 +79,7 @@ export async function shopFacts(db: D1Database, settings: Record<string, string>
     settings.whatsapp_number ? `WhatsApp: +${settings.whatsapp_number} (the team answers there).` : '',
     'Payment: Cash on Delivery all over Bangladesh (pay the rider when the parcel arrives). Some pre-orders and large items need a small advance by bKash, Nagad or Rocket; the team tells the customer when they call to confirm.',
     `Delivery charges by area: ${zones.map(z => `${z.name} ${formatTaka(Number(z.base_charge_paisa))} (${z.eta_text})`).join('; ')}.${free ? ` Free delivery on orders over ${formatTaka(free)}.` : ''}${cod ? ` Cash on Delivery fee: ${formatTaka(cod)}.` : ''} Heavy or large items can cost more; the exact charge shows at checkout.`,
-    'Orders: after ordering, the team calls the customer to confirm, then packs and sends it with the courier. Customers can track with the order number and phone at /track.',
+    'Orders: after ordering, the team calls the customer to confirm, then packs and sends it with the courier. Customers can track at /track with either their mobile number or their order number (one is enough).',
     `Returns: ${POLICIES.returns.body.join(' ')}`,
     activeSeason ? `In season now: ${activeSeason}.` : '',
     cats.length ? `Matching categories: ${cats.map(c => `${c.name} (/c/${c.slug})`).join(', ')}.` : '',
@@ -117,7 +117,7 @@ export function builtInShopReply(question: string, f: ShopFacts, settings: Recor
     return 'You can pay Cash on Delivery all over Bangladesh: pay the rider when the parcel arrives. A few pre-orders and large items need a small advance by bKash, Nagad or Rocket; we tell you when we call to confirm.';
   }
   if (has(question, /return|refund|exchange|damage|broken|ফেরত|রিটার্ন|বদল/)) return POLICIES.returns.body.slice(0, 2).join(' ');
-  if (has(question, /track|status|where is|my order|order no|অর্ডার|কোথায়/)) return `You can track your order at /track with your order number and phone number.${wa}`;
+  if (has(question, /track|status|where is|my order|order no|অর্ডার|কোথায়/)) return `You can track your order at /track: type your mobile number or your order number (either one).${wa}`;
   if (f.products.length) return `Here is what I found:\n${f.products.slice(0, 4).map(p => `- ${p.name}, ${p.variantCount > 1 ? 'from ' : ''}${formatTaka(p.pricePaisa)}: /p/${p.slug}`).join('\n')}`;
   if (has(question, /^(hi|hello|hey|salam|assalam|আসসালামু|হ্যালো|হাই)\b/)) return `Hello! I can help you find products and answer questions about delivery, payment and returns. What are you looking for?`;
   return `Sorry, I couldn't find that. Try a product name (for example "gur" or "masala"), or ask about delivery, payment or returns.${wa}`;

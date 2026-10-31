@@ -3,9 +3,8 @@ import { Hono, type Context } from 'hono';
 import type { AppEnv } from '../env';
 import { GEO_VERSION } from '../generated/geo-version';
 import { bad, clientIp, int, notFound, posInt, rateLimit, readJson, str, HttpError } from '../lib/http';
-import { maskPhone, normalizeBdPhone } from '../lib/phone';
+import { asciiDigits, maskPhone, normalizeBdPhone } from '../lib/phone';
 import { expandQuery } from '../lib/search';
-import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
 import { effectiveVariantAttributes } from '../lib/templates';
 import { activeSeasonIds, getProductDetail, getSeasons, liveProducts, productExists, queryProducts, suggestCategories, synonymGroups, type ProductQuery } from '../repo/catalog';
 import { settingInt } from '../repo/settings';
@@ -14,7 +13,7 @@ import { askModel, builtInShopReply, cleanTurns, shopFacts, shopSystemPrompt } f
 import { geoHierarchy, postcodeMap, unionsOf } from '../repo/geo';
 import { sessionStatus } from '../repo/incomplete';
 import { addNotifyRequest, addWholesaleInquiry } from '../repo/misc';
-import { customerByPhone, orderByNo, orderByNoAndPhone, statusTimeline, submitAdvance } from '../repo/orders';
+import { customerByPhone, orderByNo, submitAdvance } from '../repo/orders';
 import { priceCart, sanitizeLines } from '../services/cart';
 import { quote } from '../services/checkout';
 import { recordAttempt } from '../services/fraud';
@@ -22,6 +21,7 @@ import { captureIncomplete, checkCheckoutToken, issueCheckoutToken, MIN_FILL_SEC
 import { issueOtp, placeOrder, verifyOtp } from '../services/orders';
 import { otpActive } from '../services/sms';
 import { inquiryEmail } from '../services/email';
+import { trackOrders } from '../services/tracking';
 import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf } from './context';
 
 export const api = new Hono<AppEnv>();
@@ -247,7 +247,7 @@ api.post('/checkout/place', async c => {
   const placed = await placeOrder(c.env, await settingsOf(c), {
     phone: str(body.phone, 20), name: str(body.name, 120),
     divisionId: int(body.divisionId) ?? 0, districtId: int(body.districtId) ?? 0, upazilaId: int(body.upazilaId) ?? 0, unionId: posInt(body.unionId),
-    postcode: str(body.postcode, 4) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
+    postcode: asciiDigits(str(body.postcode, 4)) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,
     lines: sanitizeLines(body.lines), source: landing ? 'landing' : 'web', sourceDetail: landing ? `Landing page ${landing}` : null, utm,
@@ -295,15 +295,13 @@ api.post('/orders/:orderNo/advance', async c => {
 api.post('/orders/track', async c => {
   if (!(await rateLimit(c.env.KV, limiterKeys(c, 'track').ip, 20, 600))) throw new HttpError(429, 'Too many lookups. Please try again in a few minutes.');
   const body = await readJson(c);
-  const phone = normalizeBdPhone(str(body.phone));
-  const orderNo = str(body.orderNo, 20).toUpperCase();
-  if (!phone || !orderNo) throw bad('Enter your phone number and order number.');
-  const o = await orderByNoAndPhone(c.env.DB, orderNo, phone);
-  if (!o) throw notFound('We could not find an order with that phone number and order number.');
-  const events = await statusTimeline(c.env.DB, Number(o.id));
+  const r = await trackOrders(c.env, { q: str(body.query ?? body.q, 60), phone: str(body.phone, 30), orderNo: str(body.orderNo, 40) });
+  // The first order's main facts stay at the top level for older callers.
+  const first = r.orders[0];
   return c.json({
-    orderNo: o.order_no, status: o.status, statusLabel: STATUS_LABELS[o.status as OrderStatus], totalPaisa: o.total_paisa, courier: o.courier, trackingId: o.tracking_id,
-    etaText: o.eta_text, timeline: events.map(e => ({ status: e.to_status, label: STATUS_LABELS[e.to_status], at: e.created_at })),
+    by: r.by, orders: r.orders,
+    orderNo: first.orderNo, status: first.status, statusLabel: first.statusLabel, totalPaisa: first.totalPaisa, courier: first.courier, trackingId: first.trackingCode,
+    etaText: first.eta, timeline: first.steps,
   });
 });
 

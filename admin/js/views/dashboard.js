@@ -37,7 +37,6 @@ export async function dashboard(v) {
           ${s.undated.length ? `<p class="muted">Needs dates: ${s.undated.map(esc).join(', ')}</p>` : ''}
           <a class="btn btn-sm" style="background:#fff;color:#2A1F1A" href="#/seasons">Open season calendar</a></div>
         <div class="card"><h2>Low stock</h2>${d.lowStock.length ? `<ul class="attention">${d.lowStock.map(l => `<li><a href="#/products/${l.product_id}"><span class="dot ${l.stock === 0 ? 'alert' : 'warn'}"></span><span>${esc(l.name)}<br><span class="small muted">${esc(l.sku)} · ${l.stock} available</span></span></a></li>`).join('')}</ul>` : '<p class="muted">All options have stock.</p>'}</div>
-        ${d.fuzzyPostcodes ? `<div class="card"><h2>Postcodes</h2><p class="small">${d.fuzzyPostcodes} postcode(s) were linked by spelling match during import. <a href="#/geo?status=fuzzy">Review them</a>.</p></div>` : ''}
       </div>
     </div>`;
   v.querySelectorAll('[data-href]').forEach(r => r.addEventListener('click', () => { location.hash = r.dataset.href; }));

@@ -1,14 +1,16 @@
 # Abs Vai owner guide
 
-Plain steps for running the store from `absvai.com/admin/`. No coding needed.
+Plain steps for running the store from `absvai.com/admin/`. No coding needed. A full guide in Bangla with a direct link for
+every page is in [ADMIN-GUIDE-BN.md](ADMIN-GUIDE-BN.md), and inside the admin at **Help center → বাংলা গাইড** (`/admin/guide-bn.html`).
 
 ## First sign-in
 
 1. Open `absvai.com/admin/`. The first time, it asks for the **setup token** (your developer gives it to you once), your name,
    email and a password (10+ characters with a number). This creates the **Super Admin**.
 2. Go to **Settings** and fill in: support phone, WhatsApp number, social media links, **bKash/Nagad/Rocket numbers** (for advances),
-   company address (printed on invoices), the free-delivery amount and the announcement bar text. Under **Branding**, upload your
-   logo and (if you like) change the colours; the page warns you if a colour would make text hard to read. Under **Tracking**, paste
+   company address (printed on invoices), the delivery charges and the free-delivery amount. Under **Colours** you can change
+   the shop's colours; the page warns you if a colour would make text hard to read. The shop name, logo, banners and the
+   announcement bar are in **Website & banners**. Under **Tracking**, paste
    only the ID (for example `GTM-AB12CD3`), never script code. Credentials (SMS, courier, payment) show as `••••1234` once saved.
 3. Go to **Staff & roles** and add your team:
    - **Manager**: products, orders, discounts, settings, security.
@@ -23,8 +25,9 @@ Plain steps for running the store from `absvai.com/admin/`. No coding needed.
 ## The menu
 
 The admin opens in a **simple menu** with the everyday screens: Overview, Orders, Products, Categories, Inventory, Customers,
-Seasons and Settings. Press **Show all tools** at the bottom of the menu for everything else (delivery zones, templates, security,
-audit log…), and **Simple menu** to go back. The Overview shows the last 30 days: sales and orders per day, how many website
+Seasons and Settings. Press **Show all tools** at the bottom of the menu for everything else (templates, security, audit log…),
+and **Simple menu** to go back. Postcodes, cities and courier areas need no screen: they come with the shop and work by themselves.
+On a phone, every list (orders, products, stock…) shows one card per row, so nothing is squeezed. The Overview shows the last 30 days: sales and orders per day, how many website
 customers go from checkout to delivery, the districts that order most, your best customers and where orders come from.
 
 ## Add a product (the quick way)
@@ -103,20 +106,30 @@ the domain, change **Emails come from** to an address on it, such as `Abs Vai <o
 
 Other sellers can sell through your shop. You stay in charge: orders, calls, delivery and money still go through you.
 
-1. **A seller registers** at `/sell` (the footer has a "Sell on Abs Vai" link): shop name, their name, mobile, email,
-   password, district, what they sell and how they want to be paid (bKash, Nagad, Rocket or bank).
-2. **You approve the seller** in **Sellers** (in the menu). Open the seller, set the **commission** (%) you keep on each
-   delivered sale, and press **Approve seller**, or **Don’t approve** with a short reason. Until you approve, they can’t sign in.
-3. **The seller signs in** at `/seller/` and adds products with photos, details, prices, stock and parcel weight, then presses
-   **Send for approval**. Sellers can’t set cost prices, the homepage, seasons, free delivery or Abs Vai Originals.
+**On / off**: the switch at the top of **Sellers** turns seller registration on or off. When it is on, **Sell with us** shows
+in the shop menu and footer; when it is off the link is hidden and `/sell` says registration is closed (sellers you already
+have keep working). The same card sets the commission new sellers start with.
+
+1. **A seller registers** at `/sell`: shop name, their name, mobile, email, password, district, what they sell and
+   (optionally) their bKash / Nagad / Rocket number.
+2. **The seller signs in at once** at `/seller/` and adds products (photos, details, prices, stock, parcel weight) and their
+   **payment accounts** (bKash, Nagad, Rocket or a bank account). The portal tells them it is waiting for your approval.
+   Sellers can’t set cost prices, the homepage, seasons, free delivery or Abs Vai Originals.
+3. **You approve the seller** in **Sellers** (in the menu). Open the seller, set the **commission** (%) you keep on each
+   delivered sale, and press **Approve seller**, or **Don’t approve** with a short reason (they see it when they sign in).
 4. **You approve each product** in **Sellers → Products to approve**: **Open** to check it, then **Approve & publish**, or
-   **Send back** with what to change. Approved products show in the shop with “Sold by …” and on the seller’s store page
+   **Send back** with what to change. A product can go live only after its seller is approved (the button says **Approve the
+   seller first** until then). Approved products show in the shop with “Sold by …” and on the seller’s store page
    `/store/<their-name>`.
+5. **You approve each payment account** in the seller’s page → **Payment accounts**: **Approve**, or **Don’t approve** with
+   the reason. Pay a seller only into an approved account (call them to check the name and number first). The latest approved
+   account is the one shown as theirs.
 
 After that, the seller can change **price and stock** at any time (live at once). Any other change hides the product until
 you approve it again. Sellers see their **orders** (product, quantity, area, status; never the customer’s phone) and their
 **earnings** after commission for delivered sales. **Pause seller** hides all their products and signs them out; **Re-open**
-brings them back. You get an email for every new application and every product waiting for approval.
+brings them back. You get an email for every new application, every product waiting for approval and every new payment
+account, and the Overview lists them under “Needs your attention”.
 
 ## Couriers: Steadfast and Pathao
 
@@ -274,24 +287,30 @@ an order or an attempt. Connection blocks always expire, because many mobile cus
 **Blocked attempts** lists everything the system stopped or held. If a real customer was caught, press **Review**, add a note and
 remove the block in one step.
 
-## Fix a postcode
+## Order tracking for customers
 
-![Postcodes](screenshots/admin-postcodes.png)
+Customers open **Track Order** (`/track`) and type **either** their mobile number **or** the order number (the invoice number
+or the courier's tracking code work too; Bangla digits are fine). A mobile number shows all its recent orders; an order number
+shows that order. Each order shows its progress (Placed → Confirmed → Packed → With courier → Delivered), the details, the
+items with the money to pay on delivery, the courier and tracking code, and the full tracking history. The name, number and
+address are partly hidden (for example "Rafiq H.", 017XXXXX001, only the area), because anyone can type a number.
 
-Most postcodes fill the customer's area automatically. About 240 (mostly city thanas like Palton, Dhanmondi, Mirpur) only fill the
-district, so the customer picks the area themselves. To fix them:
+Every stage change, every courier update and every **message for the customer** is saved in the tracking table. To tell a
+customer something ("Delayed by rain, it arrives tomorrow"), open the order → **Message for the customer** → **Post**; **see
+it** opens their tracking page.
 
-1. **Postcodes & Geo → unmatched**, choose the district (for example Dhaka).
-2. Tick the postcodes that belong to one area (for example the Dhaka South city thanas) and choose the area in **Bulk assign**.
-3. Press **Assign**. Checkout uses the fix immediately.
+## Postcodes
 
-The **fuzzy** tab lists postcodes linked by similar spelling. Glance through it once.
+Postcodes fill the customer's area at checkout by themselves; there is nothing to set up. Customers can type them in Bangla
+digits too (১২০৬), and the post office shows in English and Bangla ("Gazipur Sadar (গাজীপুর সদর)"). For the city thanas that
+have no area of their own, checkout fills the division and district and the customer picks the area.
 
 ## Delivery charges
 
-**Delivery Zones**: change the base charge, the weight it covers, the price per extra kg, the large-item charge and the delivery
-time. Move a district to another zone with its dropdown, or give one area (like Dhaka North City) its own zone with **Area
-overrides**.
+**Settings → Delivery charges**: for each zone (Inside Dhaka City, Dhaka Suburbs with Dhaka, Gazipur and Narayanganj, and
+Outside Dhaka for every other district) type the charge up to 1 kg, each extra kg and the delivery time, then **Save**.
+Free delivery from (৳) and the Cash on Delivery fee are just below. To move a district to another zone (rarely needed), use the
+**zone details** link there.
 
 ## Good to know
 

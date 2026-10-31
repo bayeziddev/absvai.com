@@ -51,6 +51,24 @@ describe('geo data and address detection', () => {
     expect(map['0000']).toBeUndefined(); // unknown postcode → the page falls back to dropdowns
   });
 
+  it('adds the Bangla post office names from postcode-bd and confirms spelling-matched areas by their Bangla name', async () => {
+    const v = (await t.json('/api/geo/version')).body.version as string;
+    expect(v.endsWith('-2')).toBe(true); // migration 0007 bumped the postcode list version
+    const map = (await (await t.fetch(`/api/geo/${v}/postcodes.json`)).json()) as Record<string, Array<unknown[]>>;
+    expect(map['1970'][0]).toEqual(['Kalihati', ids.dhakaDivision, ids.tangail, ids.kalihati, 'কালিহাতী']);
+    expect(map['1000'][0][4]).toBe('ঢাকা জিপিও');
+    const rows = await t.sql<{ match_status: string; post_office_bn: string }>("SELECT match_status, post_office_bn FROM geo_postcodes WHERE postcode = '8721'");
+    expect(rows[0]).toEqual({ match_status: 'alias', post_office_bn: 'কাকচিড়া' });
+    const counts = Object.fromEntries((await t.sql<{ match_status: string; n: number }>('SELECT match_status, COUNT(*) AS n FROM geo_postcodes GROUP BY match_status')).map(r => [r.match_status, r.n]));
+    expect(counts).toMatchObject({ fuzzy: 110, unmatched: 239 });
+  });
+
+  it('takes a postcode typed in Bangla digits', async () => {
+    const r = await order([{ variantId: await variant('SPC-MMSL-500G-0002'), qty: 1 }], { postcode: '১৯৭০' });
+    expect(r.status).toBe(201);
+    expect((await t.sql('SELECT postcode FROM orders WHERE id = ?', r.body.orderId))[0].postcode).toBe('1970');
+  });
+
   it('hierarchy includes the city-corporation areas so Dhaka city customers can pick one', async () => {
     const v = (await t.json('/api/geo/version')).body.version;
     const h = (await t.json(`/api/geo/${v}/hierarchy.json`)).body;

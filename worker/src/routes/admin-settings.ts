@@ -52,6 +52,8 @@ adminSettings.put('/settings', need('settings:write'), async c => {
       continue;
     }
     const value = typeof raw === 'object' && raw !== null ? JSON.stringify(raw) : str(raw, 4000);
+    // An empty number box that was never set keeps the built-in default instead of blocking the whole save.
+    if (def.kind === 'int' && value === '' && !before[k]) continue;
     const err = validateSetting(def, value);
     if (err) throw bad(err);
     if (k === 'brand_colors') plain[k] = JSON.stringify(parseBrandColors(JSON.parse(value || '{}')));

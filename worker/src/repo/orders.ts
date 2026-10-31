@@ -1,5 +1,7 @@
 /** Orders, items, status history, OTP codes, payments and the stock movements that go with each pipeline stage. */
 import type { OrderStatus, Actor } from '../lib/state-machine';
+import { courierLine, sourceFor, stageLine } from '../lib/tracking';
+import { trackNewOrderStmt, trackStmt } from './tracking';
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 export type Row = Record<string, unknown>;
@@ -88,6 +90,7 @@ export async function insertOrder(db: D1Database, o: NewOrder): Promise<number> 
     stmts.push(db.prepare('UPDATE products SET sold_count = sold_count + ? WHERE id = ?').bind(l.qty, l.productId));
   }
   stmts.push(db.prepare(`INSERT INTO order_events (order_id, kind, to_status, note, actor_type, admin_id) VALUES (${idSql}, 'status', 'new', ?, ?, ?)`).bind(o.orderNo, o.placedNote, o.actor, o.createdBy));
+  stmts.push(trackNewOrderStmt(db, o.orderNo, stageLine('new', sourceFor(o.actor))));
   if (o.holdReason) stmts.push(db.prepare(`INSERT INTO order_events (order_id, kind, note, actor_type) VALUES (${idSql}, 'hold', ?, 'system')`).bind(o.orderNo, o.holdReason));
   for (const r of o.riskReasons) stmts.push(db.prepare(`INSERT INTO risk_flags (order_id, customer_id, code, detail) VALUES (${idSql}, (SELECT id FROM customers WHERE phone = ?), ?, ?)`).bind(o.orderNo, o.phone, r.code, r.detail));
   if (o.advanceTrxId && o.advanceAmountPaisa) {
@@ -115,16 +118,8 @@ export async function orderByNo(db: D1Database, orderNo: string): Promise<Row | 
   return db.prepare('SELECT * FROM orders WHERE order_no = ?').bind(orderNo).first<Row>();
 }
 
-export async function orderByNoAndPhone(db: D1Database, orderNo: string, phone: string): Promise<Row | null> {
-  return db.prepare('SELECT * FROM orders WHERE order_no = ? AND phone = ?').bind(orderNo, phone).first<Row>();
-}
-
 export async function orderItems(db: D1Database, orderId: number): Promise<Row[]> {
   return (await db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY id').bind(orderId).all<Row>()).results;
-}
-
-export async function statusTimeline(db: D1Database, orderId: number): Promise<Array<{ to_status: OrderStatus; created_at: string }>> {
-  return (await db.prepare("SELECT to_status, created_at FROM order_events WHERE order_id = ? AND kind = 'status' ORDER BY id").bind(orderId).all<{ to_status: OrderStatus; created_at: string }>()).results;
 }
 
 export async function hasConfirmedCall(db: D1Database, orderId: number): Promise<boolean> {
@@ -309,6 +304,9 @@ export async function commitTransition(db: D1Database, t: TransitionWrite): Prom
   if (t.customer?.returned) stmts.push(db.prepare(`UPDATE customers SET returned_count = returned_count + 1 WHERE id = ? AND ${guard}`).bind(t.customer.id));
   stmts.push(db.prepare(`INSERT INTO order_events (order_id, kind, from_status, to_status, note, actor_type, admin_id) SELECT ?, 'status', ?, ?, ?, ?, ? WHERE ${guard}`)
     .bind(t.orderId, t.from, t.to, t.note, t.actor, t.adminId));
+  const courier = typeof t.fields.courier === 'string' ? t.fields.courier : null;
+  const code = typeof t.fields.tracking_id === 'string' ? t.fields.tracking_id : null;
+  stmts.push(trackStmt(db, t.orderId, stageLine(t.to, sourceFor(t.actor), courier, code), guard));
   const results = await db.batch(stmts);
   return (results[0].meta.changes ?? 0) > 0;
 }
@@ -369,6 +367,7 @@ export async function setSubStatus(db: D1Database, orderId: number, subStatus: s
   await db.batch([
     db.prepare(`UPDATE orders SET sub_status = ?, updated_at = ${NOW} WHERE id = ?`).bind(subStatus, orderId),
     db.prepare("INSERT INTO order_events (order_id, kind, note, actor_type, admin_id) VALUES (?, 'note', ?, 'staff', ?)").bind(orderId, `Courier status: ${subStatus.replace(/_/g, ' ')}`, adminId),
+    trackStmt(db, orderId, { ...courierLine(null, subStatus, null), source: 'shop' }),
   ]);
 }
 

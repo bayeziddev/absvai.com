@@ -31,3 +31,12 @@ export function formatDate(iso: string): string {
 export function nowIso(): string {
   return new Date().toISOString();
 }
+
+/** A UTC timestamp as Bangladesh date and time: "30 Oct 2026, 3:05 PM". */
+export function formatDateTime(iso: string): string {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return formatDate(iso);
+  const bd = new Date(t + 6 * 3600_000).toISOString();
+  const h = Number(bd.slice(11, 13));
+  return `${formatDate(bd)}, ${h % 12 || 12}:${bd.slice(14, 16)} ${h < 12 ? 'AM' : 'PM'}`;
+}

@@ -5,21 +5,20 @@ import {
   facets, flatten, getCategoryTree, getProductDetail, getSeasons, getTemplate, queryProducts, seasonalCategoryIds, sitemapEntries, synonymGroups, visibleTree, zoneSummaries,
   type CategoryNode, type ProductCard, type ProductQuery,
 } from '../repo/catalog';
-import { orderByNo, orderByNoAndPhone, orderItems, otpRow, statusTimeline } from '../repo/orders';
+import { orderByNo, orderItems, otpRow } from '../repo/orders';
 import { loadSettings, settingInt, settingJson } from '../repo/settings';
 import { TAG, tagHeader } from '../lib/cache-tags';
 import { bdDate, monthName } from '../lib/dates';
-import { clientIp, parseJson, rateLimit } from '../lib/http';
-import { normalizeBdPhone } from '../lib/phone';
+import { clientIp, HttpError, parseJson, rateLimit } from '../lib/http';
 import { pageCss } from '../lib/page-css';
 import { POLICIES } from '../lib/policies';
 import { approvedSellerBySlug, productSellerPublic } from '../repo/sellers';
 import { checkUnsubscribe } from '../services/email';
+import { trackOrders, type TrackResult } from '../services/tracking';
 import { unsubscribeCustomer } from '../repo/email';
 import { expandQuery } from '../lib/search';
 import { isSeasonActive, nextSeason } from '../lib/seasons';
 import { DEFAULT_COLORS, parseBrandColors } from '../lib/settings-schema';
-import { type OrderStatus } from '../lib/state-machine';
 import { EDGE_HTML } from '../services/cache';
 import { parseListingQuery } from './api';
 import { GEO_VERSION } from '../generated/geo-version';
@@ -265,24 +264,23 @@ pages.get('/order/:orderNo', async c => {
 
 pages.get('/track', async c => {
   const sh = await shell(c);
-  const phoneRaw = c.req.query('phone');
-  const orderNo = (c.req.query('order') ?? '').trim().toUpperCase();
-  let result: Parameters<typeof TrackPage>[0]['result'] = null;
+  // One box: mobile number OR order number. The older links (?phone=…&order=…) still work.
+  const q = (c.req.query('q') ?? '').trim();
+  const phone = (c.req.query('phone') ?? '').trim();
+  const order = (c.req.query('order') ?? '').trim();
+  const asked = q || phone || order;
+  let result: TrackResult | null = null;
   let error: string | undefined;
-  if (phoneRaw || orderNo) {
-    const phone = normalizeBdPhone(phoneRaw);
+  if (asked) {
     if (!(await rateLimit(c.env.KV, `track:${clientIp(c)}`, 20, 600))) error = 'Too many lookups. Please try again in a few minutes.';
-    else if (!phone || !orderNo) error = 'Enter your mobile number and order number.';
     else {
-      const o = await orderByNoAndPhone(c.env.DB, orderNo, phone);
-      if (!o) error = 'We could not find an order with that mobile number and order number.';
-      else {
-        const ev = await statusTimeline(c.env.DB, Number(o.id));
-        result = { orderNo: String(o.order_no), status: o.status as OrderStatus, courier: (o.courier as string) ?? null, trackingId: (o.tracking_id as string) ?? null, eta: (o.eta_text as string) ?? null, timeline: ev.map(e => ({ status: e.to_status, at: e.created_at })) };
+      try { result = await trackOrders(c.env, { q, phone, orderNo: order }); } catch (e) {
+        if (!(e instanceof HttpError) || e.status >= 500) throw e;
+        error = e.message;
       }
     }
   }
-  return render(c, sh, { title: 'Track your order', path: '/track', noindex: Boolean(phoneRaw), tab: 'account', children: <TrackPage phone={phoneRaw} orderNo={orderNo} result={result} error={error} /> });
+  return render(c, sh, { title: 'Track your order', path: '/track', noindex: Boolean(asked), tab: 'account', children: <TrackPage q={q || order || phone} result={result} error={error} /> });
 });
 
 pages.get('/wishlist', async c => {

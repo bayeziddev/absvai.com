@@ -26,6 +26,20 @@ export function fillDays(rows, n = 30) {
   });
 }
 
+// The charts are drawn for the width they have; when that changes (phone turned, window resized) they are drawn again.
+function redrawOnResize(el, draw) {
+  if (el._chartObserver || typeof ResizeObserver === 'undefined') return;
+  let last = el.clientWidth;
+  let timer;
+  el._chartObserver = new ResizeObserver(() => {
+    if (!el.isConnected) { el._chartObserver.disconnect(); return; }
+    if (Math.abs(el.clientWidth - last) < 8) return;
+    last = el.clientWidth;
+    clearTimeout(timer); timer = setTimeout(draw, 120);
+  });
+  el._chartObserver.observe(el);
+}
+
 function tip(el) {
   let t = el.querySelector('.ch-tip');
   if (!t) { t = document.createElement('div'); t.className = 'ch-tip'; t.hidden = true; el.append(t); }
@@ -49,7 +63,9 @@ function yAxis(max, h, pad, w, fmt) {
 }
 
 /** Area/line over days (single series, so the title names it and there is no legend). */
-export function lineChart(el, points, { value, fmt, tipFmt }) {
+export function lineChart(el, points, opts) {
+  redrawOnResize(el, () => lineChart(el, points, opts));
+  const { value, fmt, tipFmt } = opts;
   const w = Math.max(280, el.clientWidth);
   const h = 220;
   const pad = { t: 14, r: 12, b: 26, l: 52 };
@@ -87,7 +103,9 @@ export function lineChart(el, points, { value, fmt, tipFmt }) {
 }
 
 /** Vertical bars over days: rounded tops, square base on the axis, 2 px gaps. */
-export function barChart(el, points, { value, fmt, tipFmt }) {
+export function barChart(el, points, opts) {
+  redrawOnResize(el, () => barChart(el, points, opts));
+  const { value, fmt, tipFmt } = opts;
   const w = Math.max(280, el.clientWidth);
   const h = 220;
   const pad = { t: 14, r: 12, b: 26, l: 40 };

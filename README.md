@@ -13,6 +13,9 @@ Cache**: public pages are answered at the edge and refreshed by tag when an admi
 |---|---|
 | **Store** | https://absvai.absvai.workers.dev |
 | **Admin dashboard** | https://absvai.absvai.workers.dev/admin/ (first visit: enter the `SETUP_TOKEN` once to create the Super Admin) |
+| **বাংলা গাইড (admin manual in Bangla)** | https://absvai.absvai.workers.dev/admin/guide-bn.html (source: [docs/ADMIN-GUIDE-BN.md](docs/ADMIN-GUIDE-BN.md)) |
+| **Order tracking** | https://absvai.absvai.workers.dev/track (mobile number or order number) |
+| **Seller registration / portal** | https://absvai.absvai.workers.dev/sell · https://absvai.absvai.workers.dev/seller/ |
 | After the domain is connected | https://absvai.com and https://absvai.com/admin/ (the next deploy switches over by itself) |
 
 Every push to `main` runs the tests and, when they pass, updates the live site on Cloudflare through GitHub Actions

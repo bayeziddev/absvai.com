@@ -1,6 +1,10 @@
-// Seller portal: sign in, overview, products (add / edit / photos / price and stock), orders and profile.
+// Seller portal: sign in, overview, products (add / edit / photos / price and stock), orders, payment accounts and profile.
+// New sellers can sign in right after registering; what they add is used once the shop approves it.
 // Talks only to /api/seller, which limits every request to the signed-in seller's own products.
+import { autoLabelTables } from '/admin/js/tables.js';
+
 const app = document.getElementById('app');
+autoLabelTables();
 const S = { csrf: '', seller: null, attrTypes: null, cats: null };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -63,7 +67,7 @@ function login(message) {
     <form id="lf"><label class="f">Email<input name="email" type="email" autocomplete="username" required></label>
       <label class="f">Password<input name="password" type="password" autocomplete="current-password" required></label>
       <button class="btn btn-primary" style="width:100%">Sign in</button></form>
-    <p class="small" style="margin-top:14px">New seller? <a href="/sell">Register here</a>. Your account works after the shop approves it.</p></div>`;
+    <p class="small" style="margin-top:14px">New seller? <a href="/sell">Register here</a>, then sign in right away to add your products. They show in the shop after the shop approves them.</p></div>`;
   const f = app.querySelector('#lf');
   f.addEventListener('submit', async e => {
     e.preventDefault();
@@ -78,13 +82,15 @@ function login(message) {
 
 // ───────────── Shell and pages ─────────────
 
-const PAGES = { overview: 'Overview', products: 'Products', orders: 'Orders', profile: 'Profile' };
+const PAGES = { overview: 'Overview', products: 'Products', orders: 'Orders', payments: 'Payments', profile: 'Profile' };
+const METHOD = { bkash: 'bKash', nagad: 'Nagad', rocket: 'Rocket', bank: 'Bank account' };
+const waitingNote = () => (S.seller.approved ? '' : `<p class="notice sp-wait"><b>Your seller account is waiting for the shop’s approval.</b> You can add your products and payment account now. Products show in the shop after the shop approves your account and each product.</p>`);
 
 function shell() {
   app.innerHTML = `<header class="sp-top"><a class="wordmark" href="#/overview">${esc(S.seller.shopName)}<small>Seller</small></a>
-      <a class="btn btn-outline btn-sm" href="/store/${esc(S.seller.slug)}" target="_blank" rel="noopener">My store page</a><button class="btn btn-ghost btn-sm" id="out">Sign out</button></header>
+      ${S.seller.approved ? `<a class="btn btn-outline btn-sm" href="/store/${esc(S.seller.slug)}" target="_blank" rel="noopener">My store page</a>` : ''}<button class="btn btn-ghost btn-sm" id="out">Sign out</button></header>
     <nav class="sp-tabs">${Object.entries(PAGES).map(([k, l]) => `<a href="#/${k}" data-tab="${k}">${l}</a>`).join('')}</nav>
-    <main class="sp-main" id="view"></main>`;
+    <main class="sp-main"><div id="wait">${waitingNote()}</div><div id="view"></div></main>`;
   app.querySelector('#out').onclick = async () => { await api('/logout', 'POST', {}).catch(() => {}); S.seller = null; login(); };
   route();
 }
@@ -95,7 +101,7 @@ function route() {
   app.querySelectorAll('[data-tab]').forEach(a => a.classList.toggle('on', a.dataset.tab === page));
   const v = document.getElementById('view');
   v.innerHTML = '<p class="muted">Loading…</p>';
-  const run = page === 'product' ? editProduct(v, Number(id)) : page === 'products' ? products(v) : page === 'orders' ? orders(v) : page === 'profile' ? profile(v) : overview(v);
+  const run = page === 'product' ? editProduct(v, Number(id)) : page === 'products' ? products(v) : page === 'orders' ? orders(v) : page === 'payments' ? payments(v) : page === 'profile' ? profile(v) : overview(v);
   run.catch(err => { v.innerHTML = `<p class="notice">${esc(err.message)}</p>`; });
 }
 addEventListener('hashchange', route);
@@ -111,7 +117,7 @@ async function overview(v) {
       <div class="kpi"><span>On the way to customers</span><b>${taka(d.onTheWayPaisa)}</b><span class="small muted">paid once delivered</span></div>
     </div>
     ${d.changesNeeded ? `<p class="notice">${d.changesNeeded} product(s) need changes before they can go live. <a href="#/products">See what to change</a>.</p>` : ''}
-    <div class="card"><h2>How it works</h2><ol><li><b>Add a product</b> with photos, a clear name, prices and stock.</li><li>Press <b>Send for approval</b>. The shop checks it and puts it live.</li><li>Customers order on the shop; the shop calls them, delivers and collects the money.</li><li>You see every sale under <b>Orders</b>, and get paid for delivered sales (after commission) to your ${esc(({ bkash: 'bKash', nagad: 'Nagad', rocket: 'Rocket', bank: 'bank' })[S.seller.payoutMethod] ?? 'payment')} account.</li></ol>
+    <div class="card"><h2>How it works</h2><ol><li><b>Add a product</b> with photos, a clear name, prices and stock.</li><li>Press <b>Send for approval</b>. The shop checks it and puts it live.</li><li>Add your <b>payment account</b> (bKash, Nagad, Rocket or bank) under <a href="#/payments">Payment accounts</a>. The shop pays into it after approving it.</li><li>Customers order on the shop; the shop calls them, delivers and collects the money.</li><li>You see every sale under <b>Orders</b>, and get paid for delivered sales (after commission)${S.seller.payoutMethod ? ` to your ${esc(METHOD[S.seller.payoutMethod] ?? '')} account ${esc(S.seller.payoutNumber ?? '')}` : ''}.</li></ol>
       <a class="btn btn-primary" href="#/products">+ Add a product</a></div>`;
 }
 
@@ -258,12 +264,49 @@ async function profile(v) {
       <div class="grid-2"><label class="f">Mobile<input id="phone" value="${esc(s.phone)}"></label><label class="f">District<input id="district" value="${esc(s.district ?? '')}"></label></div>
       <label class="f">Address<input id="address" value="${esc(s.address ?? '')}"></label>
       <label class="f">About your shop <span class="help">Shown on your store page.</span><textarea id="about" rows="3" maxlength="600">${esc(s.about ?? '')}</textarea></label>
-      <div class="grid-2"><label class="f">Get paid by<select id="pm">${['bkash', 'nagad', 'rocket', 'bank'].map(m => `<option value="${m}" ${s.payoutMethod === m ? 'selected' : ''}>${m === 'bank' ? 'Bank account' : m[0].toUpperCase() + m.slice(1)}</option>`).join('')}</select></label><label class="f">Payment number / account<input id="pn" value="${esc(s.payoutNumber ?? '')}"></label></div>
+      <p class="small muted">Your bKash, Nagad, Rocket or bank account is under <a href="#/payments">Payment accounts</a>.</p>
       <button class="btn btn-primary" id="save">Save</button></div>
     <div class="card"><h2>Change password</h2><div class="grid-2"><label class="f">Current password<input id="cur" type="password" autocomplete="current-password"></label><label class="f">New password <span class="help">10+ characters with a number</span><input id="nw" type="password" autocomplete="new-password"></label></div><button class="btn btn-outline" id="pw">Change password</button></div>`;
   const g = s2 => v.querySelector(s2).value.trim();
-  busy(v.querySelector('#save'), async () => { const r = await api('/profile', 'PUT', { phone: g('#phone'), district: g('#district'), address: g('#address'), about: g('#about'), payoutMethod: g('#pm'), payoutNumber: g('#pn') }); S.seller = r.seller; toast('Saved.'); });
+  busy(v.querySelector('#save'), async () => { const r = await api('/profile', 'PUT', { phone: g('#phone'), district: g('#district'), address: g('#address'), about: g('#about') }); S.seller = r.seller; toast('Saved.'); });
   busy(v.querySelector('#pw'), async () => { await api('/password', 'PUT', { current: g('#cur'), next: g('#nw') }); toast('Password changed.'); v.querySelector('#cur').value = ''; v.querySelector('#nw').value = ''; });
+}
+
+// ───────────── Payment accounts ─────────────
+
+const PAY_STATE = { pending: ['b-yellow', 'Waiting for the shop’s approval'], approved: ['b-green', 'Approved: the shop pays into this'], rejected: ['b-red', 'Not approved'] };
+
+async function payments(v) {
+  const list = await api('/payouts');
+  v.innerHTML = `<h1>Payment accounts</h1><p class="muted">Where the shop pays your earnings. Add your bKash, Nagad, Rocket or bank account; the shop checks it and approves it before paying into it. You can add more than one.</p>
+    <div class="sp-pay-list">${list.map(a => `<div class="sp-pay ${a.status}"><div><span><b>${esc(METHOD[a.method] ?? a.method)}</b> · ${esc(a.accountNumber)}${a.method !== 'bank' && a.accountType ? ` <span class="small muted">(${esc(a.accountType)})</span>` : ''}</span>
+        <small>${esc([a.accountName, a.bankName, a.branch].filter(Boolean).join(' · '))}</small>
+        <span class="badge ${PAY_STATE[a.status][0]}">${PAY_STATE[a.status][1]}</span>${a.reviewNote ? `<small style="color:#B3261E">${esc(a.reviewNote)}</small>` : ''}</div>
+        <button class="btn btn-ghost btn-sm" data-del="${a.id}">Remove</button></div>`).join('') || '<p class="notice">No payment account yet. Add one below so the shop can pay you.</p>'}</div>
+    <form class="card" id="pf"><h2>Add a payment account</h2>
+      <div class="grid-2"><label class="f">Type<select name="method"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="bank">Bank account</option></select></label>
+        <label class="f" data-wallet>Account type<select name="accountType"><option value="personal">Personal</option><option value="merchant">Merchant</option><option value="agent">Agent</option></select></label></div>
+      <div class="grid-2"><label class="f"><span data-num-label>Number</span><input name="accountNumber" inputmode="numeric" required maxlength="40" placeholder="01XXXXXXXXX"></label>
+        <label class="f">Name on the account<input name="accountName" maxlength="100" value="${esc(S.seller.ownerName ?? '')}"></label></div>
+      <div class="grid-2" data-bank hidden><label class="f">Bank name<input name="bankName" maxlength="80" placeholder="e.g. Dutch-Bangla Bank"></label><label class="f">Branch<input name="branch" maxlength="80"></label></div>
+      <button class="btn btn-primary" id="padd">Add account</button></form>`;
+  const f = v.querySelector('#pf');
+  const sync = () => {
+    const bank = f.method.value === 'bank';
+    f.querySelector('[data-bank]').hidden = !bank; f.querySelector('[data-wallet]').hidden = bank;
+    f.querySelector('[data-num-label]').textContent = bank ? 'Account number' : `${METHOD[f.method.value]} number`;
+    f.accountNumber.placeholder = bank ? 'Account number' : '01XXXXXXXXX';
+  };
+  f.method.addEventListener('change', sync); sync();
+  busy(v.querySelector('#padd'), async () => {
+    const body = Object.fromEntries(new FormData(f));
+    const r = await api('/payouts', 'POST', body);
+    toast(r.message); payments(v);
+  });
+  v.querySelectorAll('[data-del]').forEach(b => busy(b, async () => {
+    if (!confirm('Remove this payment account?')) return;
+    await api(`/payouts/${b.dataset.del}`, 'DELETE'); toast('Removed.'); payments(v);
+  }));
 }
 
 // ───────────── Start ─────────────

@@ -85,10 +85,12 @@ export async function geoHierarchy(db: D1Database) {
   };
 }
 
-export async function postcodeMap(db: D1Database): Promise<Record<string, Array<[string, number, number, number | null]>>> {
-  const rows = await db.prepare('SELECT postcode, post_office, division_id, district_id, upazila_id FROM geo_postcodes ORDER BY postcode').all<{ postcode: string; post_office: string; division_id: number; district_id: number; upazila_id: number | null }>();
-  const map: Record<string, Array<[string, number, number, number | null]>> = {};
-  for (const r of rows.results) (map[r.postcode] ??= []).push([r.post_office, r.division_id, r.district_id, r.upazila_id]);
+/** postcode → [post office, division, district, upazila (or null), Bangla post office name (when known)] for checkout. */
+export async function postcodeMap(db: D1Database): Promise<Record<string, Array<[string, number, number, number | null] | [string, number, number, number | null, string]>>> {
+  const rows = await db.prepare('SELECT postcode, post_office, post_office_bn, division_id, district_id, upazila_id FROM geo_postcodes ORDER BY postcode')
+    .all<{ postcode: string; post_office: string; post_office_bn: string | null; division_id: number; district_id: number; upazila_id: number | null }>();
+  const map: Record<string, Array<[string, number, number, number | null] | [string, number, number, number | null, string]>> = {};
+  for (const r of rows.results) (map[r.postcode] ??= []).push(r.post_office_bn ? [r.post_office, r.division_id, r.district_id, r.upazila_id, r.post_office_bn] : [r.post_office, r.division_id, r.district_id, r.upazila_id]);
   return map;
 }
 
@@ -146,63 +148,7 @@ export async function assignUpazilaZone(db: D1Database, upazilaId: number, zoneI
 
 // ───────────── Postcodes (admin fixes) ─────────────
 
-export async function postcodeSummary(db: D1Database) {
-  return (await db.prepare('SELECT match_status, COUNT(*) AS n FROM geo_postcodes GROUP BY match_status').all()).results;
-}
-
-export async function listPostcodes(db: D1Database, f: { status?: string; districtId?: number | null; q?: string; page: number }) {
-  const where = ['1 = 1'];
-  const params: unknown[] = [];
-  if (f.status) { where.push('p.match_status = ?'); params.push(f.status); }
-  if (f.districtId) { where.push('p.district_id = ?'); params.push(f.districtId); }
-  if (f.q) { where.push('(p.postcode LIKE ? OR p.post_office LIKE ? OR p.source_upazila_name LIKE ?)'); params.push(`${f.q}%`, `%${f.q}%`, `%${f.q}%`); }
-  return (await db.prepare(
-    `SELECT p.*, d.name AS district_name, u.name AS upazila_name FROM geo_postcodes p JOIN geo_districts d ON d.id = p.district_id LEFT JOIN geo_upazilas u ON u.id = p.upazila_id
-      WHERE ${where.join(' AND ')} ORDER BY d.name, p.postcode LIMIT 100 OFFSET ${(f.page - 1) * 100}`,
-  ).bind(...params).all()).results;
-}
-
-export async function postcodeDistrict(db: D1Database, id: number): Promise<number | null> {
-  return (await db.prepare('SELECT district_id FROM geo_postcodes WHERE id = ?').bind(id).first<{ district_id: number }>())?.district_id ?? null;
-}
-
-export async function upazilaDistrict(db: D1Database, upazilaId: number): Promise<number | null> {
-  return (await db.prepare('SELECT district_id FROM geo_upazilas WHERE id = ?').bind(upazilaId).first<{ district_id: number }>())?.district_id ?? null;
-}
-
-export async function districtById(db: D1Database, id: number): Promise<{ id: number; division_id: number } | null> {
-  return db.prepare('SELECT id, division_id FROM geo_districts WHERE id = ?').bind(id).first<{ id: number; division_id: number }>();
-}
-
-export async function fixPostcode(db: D1Database, id: number, upazilaId: number | null, postOffice: string | null): Promise<void> {
-  await db.prepare(`UPDATE geo_postcodes SET upazila_id = ?, post_office = COALESCE(?, post_office), match_status = ?, match_note = 'Fixed in admin', updated_at = ${NOW} WHERE id = ?`)
-    .bind(upazilaId, postOffice, upazilaId ? 'manual' : 'unmatched', id).run();
-}
-
-export async function bulkAssignPostcodes(db: D1Database, ids: number[], upazilaId: number, districtId: number): Promise<number> {
-  const r = await db.prepare(`UPDATE geo_postcodes SET upazila_id = ?, match_status = 'manual', match_note = 'Bulk-assigned in admin', updated_at = ${NOW} WHERE id IN (${ids.map(() => '?').join(',')}) AND district_id = ?`)
-    .bind(upazilaId, ...ids, districtId).run();
-  return r.meta.changes ?? 0;
-}
-
-export async function addPostcode(db: D1Database, p: { postcode: string; postOffice: string; divisionId: number; districtId: number; upazilaId: number | null }): Promise<void> {
-  await db.prepare("INSERT INTO geo_postcodes (postcode, post_office, division_id, district_id, upazila_id, match_status, match_note) VALUES (?, ?, ?, ?, ?, ?, 'Added in admin')")
-    .bind(p.postcode, p.postOffice, p.divisionId, p.districtId, p.upazilaId, p.upazilaId ? 'manual' : 'unmatched').run();
-}
-
-export async function unmatchedPostcodeCounts(db: D1Database): Promise<{ unmatched: number; fuzzy: number }> {
-  const r = await db.prepare("SELECT SUM(match_status = 'unmatched') AS unmatched, SUM(match_status = 'fuzzy') AS fuzzy FROM geo_postcodes").first<{ unmatched: number; fuzzy: number }>();
-  return { unmatched: Number(r?.unmatched ?? 0), fuzzy: Number(r?.fuzzy ?? 0) };
-}
-
 // ───────────── Courier area mapping ─────────────
-
-export async function courierAreas(db: D1Database, courier: string, districtId: number) {
-  return (await db.prepare(
-    `SELECT u.id AS upazila_id, u.name, m.courier_city_id, m.courier_zone_id, m.courier_area_id, m.label FROM geo_upazilas u
-       LEFT JOIN courier_area_map m ON m.upazila_id = u.id AND m.courier = ? WHERE u.district_id = ? ORDER BY u.kind ASC, u.name`,
-  ).bind(courier, districtId).all()).results;
-}
 
 export async function saveCourierArea(db: D1Database, m: { courier: string; upazilaId: number; cityId: string | null; zoneId: string | null; areaId: string | null; label: string | null }): Promise<void> {
   await db.prepare(

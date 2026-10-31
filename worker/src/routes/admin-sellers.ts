@@ -1,8 +1,12 @@
-/** Admin → Sellers: approve seller applications, set their commission, and approve each seller product before it goes live. */
+/**
+ * Admin → Sellers: approve seller applications, set their commission, approve each seller product before it goes live
+ * and each seller payment account before the shop pays into it.
+ */
 import { Hono } from 'hono';
 import type { AppEnv } from '../env';
 import { bad, HttpError, notFound, posInt, readJson, str } from '../lib/http';
-import { listSellers, productSeller, reviewQueue, reviewSeller, sellerById, sellerProducts, setReview } from '../repo/sellers';
+import { listSellers, payoutById, productSeller, reviewPayout, reviewQueue, reviewSeller, sellerById, sellerPayouts, sellerProducts, setReview } from '../repo/sellers';
+import { payoutView } from './seller';
 import { sellerEmail } from '../services/email';
 import { audit, need } from './admin-helpers';
 import { loadAdminProduct, publishProduct, unpublishProduct } from './admin-catalog';
@@ -18,7 +22,30 @@ adminSellers.get('/sellers/:id', need('catalog:read'), async c => {
   const id = posInt(c.req.param('id')) ?? 0;
   const s = await sellerById(c.env.DB, id);
   if (!s) throw notFound();
-  return c.json({ seller: s, products: await sellerProducts(c.env.DB, id) });
+  const [products, payouts] = await Promise.all([sellerProducts(c.env.DB, id), sellerPayouts(c.env.DB, id)]);
+  return c.json({ seller: s, products, payouts: payouts.map(payoutView) });
+});
+
+/** Approve or turn down a seller's payment account (bKash, Nagad, Rocket or bank). Only approved ones are paid into. */
+adminSellers.post('/seller-payouts/:id/review', need('catalog:write'), async c => {
+  const id = posInt(c.req.param('id')) ?? 0;
+  const b = await readJson(c);
+  const action = str(b.action, 20);
+  if (action !== 'approve' && action !== 'reject') throw bad('Choose approve or not approve.');
+  const note = str(b.note, 300) || null;
+  if (action === 'reject' && !note) throw bad('Write why, so the seller knows what to fix.');
+  const p = await payoutById(c.env.DB, id);
+  if (!p) throw notFound('Account not found.');
+  await reviewPayout(c.env.DB, id, action === 'approve' ? 'approved' : 'rejected', note, c.var.session.adminId);
+  await audit(c, `seller_payout.${action}`, 'seller', p.seller_id, { payout: id, method: p.method, note });
+  const owner = await sellerById(c.env.DB, p.seller_id);
+  const label = `${p.method === 'bank' ? 'Bank account' : p.method === 'bkash' ? 'bKash' : p.method === 'nagad' ? 'Nagad' : 'Rocket'} ${p.account_number}`;
+  if (owner) {
+    await sellerEmail(c.env, owner.email, action === 'approve' ? `Payment account approved: ${label}` : `Payment account not approved: ${label}`,
+      action === 'approve' ? 'Your payment account is approved' : 'Please check your payment account',
+      action === 'approve' ? [`The shop will pay your earnings into ${label}.`] : [note!, 'Open the seller portal, fix it and add it again.'], { label: 'Open the seller portal', href: `${c.env.SITE_URL}/seller/` });
+  }
+  return c.json({ ok: true });
 });
 
 /** Approve, reject, pause or re-open a seller (with a note the seller sees), and set their commission. */
@@ -42,7 +69,7 @@ adminSellers.post('/sellers/:id/review', need('catalog:write'), async c => {
   }
   await audit(c, `seller.${action}`, 'seller', id, { note, commission });
   const portal = `${c.env.SITE_URL}/seller/`;
-  if (to === 'approved' && action === 'approve') await sellerEmail(c.env, s.email, 'Your seller account is approved', `Welcome, ${s.shop_name}!`, ['Your seller account is approved. Sign in with your email and password, add your products, and send each one for approval. Once the shop approves a product, it shows in the shop.'], { label: 'Open the seller portal', href: portal });
+  if (to === 'approved' && action === 'approve') await sellerEmail(c.env, s.email, 'Your seller account is approved', `Welcome, ${s.shop_name}!`, ['Your seller account is approved. Products you have sent are being checked now; each one shows in the shop once the shop approves it. Your payment account is used after it is approved too.'], { label: 'Open the seller portal', href: portal });
   if (to === 'rejected') await sellerEmail(c.env, s.email, 'About your seller application', 'Your application was not approved', [note!, 'You can reply to this email if you have questions.']);
   if (to === 'suspended') await sellerEmail(c.env, s.email, 'Your seller account is paused', 'Your seller account is paused', [note ?? 'Please contact the shop.']);
   return c.json({ ok: true });
@@ -57,7 +84,7 @@ adminSellers.post('/seller-products/:id/approve', need('catalog:write'), async c
   const p = await productSeller(c.env.DB, id);
   if (!p?.seller_id) throw notFound();
   const owner = await sellerById(c.env.DB, p.seller_id);
-  if (owner?.status !== 'approved') throw new HttpError(409, 'Approve the seller first.');
+  if (owner?.status !== 'approved') throw new HttpError(409, `Approve the seller first: ${owner?.shop_name ?? 'this seller'} is not approved yet (Sellers tab).`);
   const r = await publishProduct(c, id, '');
   await setReview(c.env.DB, id, 'approved', null);
   await audit(c, 'seller_product.approve', 'product', id);

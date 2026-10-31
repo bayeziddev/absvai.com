@@ -37,6 +37,7 @@ jobs:
         run: |
           npm run gen:seed
           npm run gen:geo
+          npm run gen:postcode-bn
           git diff --exit-code -- worker/migrations worker/seed data/geo worker/src/generated
       - name: Unit and integration tests (real D1/KV/R2 via local workerd)
         run: npm test
