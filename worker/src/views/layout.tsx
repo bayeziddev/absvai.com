@@ -185,6 +185,7 @@ export function Layout(p: LayoutProps) {
               <li><a href="/categories">Categories</a></li>
               <li><a href="/track">Track your order</a></li>
               <li><a href="/contact">Contact &amp; wholesale</a></li>
+              <li><a href="/sell">Sell on {store}</a></li>
             </ul>
             <ul>
               <li><a href="/policies/delivery">Delivery &amp; payment</a></li>

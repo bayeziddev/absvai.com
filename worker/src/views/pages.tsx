@@ -150,7 +150,7 @@ export function ListingPage(p: {
 
 const youtubeId = (url: string) => url.match(/(?:v=|youtu\.be\/)([\w-]{6,})/)?.[1] ?? null;
 
-export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones: Array<{ name: string; eta_text: string; base_charge_paisa: number }>; freeThresholdPaisa: number; settings: Record<string, string> }) {
+export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones: Array<{ name: string; eta_text: string; base_charge_paisa: number }>; freeThresholdPaisa: number; settings: Record<string, string>; soldBy?: { shop_name: string; slug: string } | null }) {
   const { d } = p;
   const prod = d.product as Record<string, string | number | null>;
   const attrs = effectiveVariantAttributes(d.template, d.promotedSpecKeys).filter(a => d.variants.some(v => v.attributes[a.attributeTypeId]));
@@ -186,6 +186,7 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
         <div class="pdp-info">
           {prod.is_original ? <OriginalsSeal /> : null}
           <h1 class="pdp-title">{prod.name}</h1>
+          {p.soldBy && <p class="sold-by"><Icon name="shield" size={14} />Sold by <a href={`/store/${p.soldBy.slug}`}>{p.soldBy.shop_name}</a> · delivered by {p.settings.store_name || 'Abs Vai'}</p>}
           {prod.short_description && <p class="pdp-short">{prod.short_description}</p>}
           {d.claims.length > 0 && <ul class="claims">{d.claims.map(c => <li><Icon name="shield" size={14} />{c.claim}</li>)}</ul>}
 
@@ -520,6 +521,47 @@ export function TrackPage(p: { phone?: string; orderNo?: string; result?: { orde
           <ol class="timeline">{p.result.timeline.map(t => <li><strong>{STATUS_LABELS[t.status]}</strong><span>{formatDate(t.at)}</span></li>)}</ol>
         </div>
       )}
+    </div>
+  );
+}
+
+export function SellPage(p: { settings: Record<string, string>; open: boolean }) {
+  const store = p.settings.store_name || 'Abs Vai';
+  return (
+    <div class="container narrow sell-page">
+      <div class="sell-hero">
+        <h1>Sell on {store}</h1>
+        <p>Add your products to our shop. We take the orders, call the customers, deliver all over Bangladesh with Cash on Delivery, and pay you for every delivered sale.</p>
+        <ol class="sell-steps">
+          <li><b>Register</b> with the form below.</li>
+          <li><b>We approve</b> your seller account (usually within 1–2 days).</li>
+          <li><b>Sign in</b> to the <a href="/seller/">seller portal</a> and add your products with photos and prices.</li>
+          <li><b>We check each product</b> and it goes live in the shop. You see every order and your earnings.</li>
+        </ol>
+        <p class="small">Already approved? <a href="/seller/">Sign in to the seller portal</a>.</p>
+      </div>
+      {p.open ? (
+        <form class="card-box sell-form" data-sell novalidate>
+          <h2>Seller registration</h2>
+          <div class="sell-grid">
+            <label class="field"><span>Shop or business name</span><input name="shopName" required maxlength={80} autocomplete="organization" /></label>
+            <label class="field"><span>Your name</span><input name="ownerName" required maxlength={100} autocomplete="name" /></label>
+            <label class="field"><span>Mobile number</span><input name="phone" type="tel" inputmode="numeric" required placeholder="01XXXXXXXXX" autocomplete="tel" /></label>
+            <label class="field"><span>Email (you sign in with it)</span><input name="email" type="email" required maxlength={120} autocomplete="email" /></label>
+            <label class="field"><span>Password (10+ characters with a number)</span><input name="password" type="password" required minlength={10} autocomplete="new-password" /></label>
+            <label class="field"><span>District</span><input name="district" maxlength={60} placeholder="e.g. Jashore" /></label>
+            <label class="field"><span>What kind of business?</span><select name="businessType"><option value="">Choose…</option><option>Home business</option><option>Shop</option><option>Farmer / producer</option><option>Wholesaler</option><option>Brand</option></select></label>
+            <label class="field"><span>Get paid by</span><select name="payoutMethod"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="bank">Bank account</option></select></label>
+            <label class="field"><span>Payment number / account</span><input name="payoutNumber" maxlength={40} placeholder="01XXXXXXXXX" /></label>
+          </div>
+          <label class="field"><span>Address</span><input name="address" maxlength={300} /></label>
+          <label class="field"><span>What do you want to sell?</span><textarea name="sells" rows={3} maxlength={500} placeholder="e.g. Khejur gur from our own trees, about 200 kg each winter" /></label>
+          <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>
+          <label class="check-line"><input type="checkbox" name="agree" required /> <span>I sell only genuine products I am allowed to sell, and I agree that {store} takes a commission on delivered sales.</span></label>
+          <button class="btn btn-primary btn-block" type="submit">Send my application</button>
+          <p class="form-msg" data-msg aria-live="polite" />
+        </form>
+      ) : <p class="notice">Seller registration is closed right now. Please check back soon.</p>}
     </div>
   );
 }

@@ -65,6 +65,7 @@ writeFileSync(join(dist, '_headers'), [
   '/css/*', '  Cache-Control: public, max-age=600, stale-while-revalidate=86400',
   '/js/*', '  Cache-Control: public, max-age=600, stale-while-revalidate=86400',
   '/admin/*', '  Cache-Control: no-cache', '  X-Robots-Tag: noindex',
+  '/seller/*', '  Cache-Control: no-cache', '  X-Robots-Tag: noindex',
   // Static files (including the admin app) get the same security headers the Worker sets on its own responses.
   '/*', '  X-Content-Type-Options: nosniff', '  Referrer-Policy: strict-origin-when-cross-origin', '  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload',
   "  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",

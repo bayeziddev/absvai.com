@@ -99,6 +99,25 @@ Actions); the deploy copies it to the Worker. Until your own domain (for example
 Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
 the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@absvai.com>`.
 
+## Sellers (marketplace)
+
+Other sellers can sell through your shop. You stay in charge: orders, calls, delivery and money still go through you.
+
+1. **A seller registers** at `/sell` (the footer has a "Sell on Abs Vai" link): shop name, their name, mobile, email,
+   password, district, what they sell and how they want to be paid (bKash, Nagad, Rocket or bank).
+2. **You approve the seller** in **Sellers** (in the menu). Open the seller, set the **commission** (%) you keep on each
+   delivered sale, and press **Approve seller**, or **Don’t approve** with a short reason. Until you approve, they can’t sign in.
+3. **The seller signs in** at `/seller/` and adds products with photos, details, prices, stock and parcel weight, then presses
+   **Send for approval**. Sellers can’t set cost prices, the homepage, seasons, free delivery or Abs Vai Originals.
+4. **You approve each product** in **Sellers → Products to approve**: **Open** to check it, then **Approve & publish**, or
+   **Send back** with what to change. Approved products show in the shop with “Sold by …” and on the seller’s store page
+   `/store/<their-name>`.
+
+After that, the seller can change **price and stock** at any time (live at once). Any other change hides the product until
+you approve it again. Sellers see their **orders** (product, quantity, area, status; never the customer’s phone) and their
+**earnings** after commission for delivered sales. **Pause seller** hides all their products and signs them out; **Re-open**
+brings them back. You get an email for every new application and every product waiting for approval.
+
 ## Couriers: Steadfast and Pathao
 
 **Couriers** (in the menu, under Delivery) connects your courier accounts. Keys are saved encrypted; only the Owner / Super

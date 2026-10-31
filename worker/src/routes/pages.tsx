@@ -13,6 +13,7 @@ import { clientIp, parseJson, rateLimit } from '../lib/http';
 import { normalizeBdPhone } from '../lib/phone';
 import { pageCss } from '../lib/page-css';
 import { POLICIES } from '../lib/policies';
+import { approvedSellerBySlug, productSellerPublic } from '../repo/sellers';
 import { checkUnsubscribe } from '../services/email';
 import { unsubscribeCustomer } from '../repo/email';
 import { expandQuery } from '../lib/search';
@@ -25,7 +26,7 @@ import { GEO_VERSION } from '../generated/geo-version';
 import type { Banner } from '../views/components';
 import { Layout, type LayoutProps } from '../views/layout';
 import {
-  AccountPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SimplePage, TrackPage, WishlistPage,
+  AccountPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
 } from '../views/pages';
 
 export const pages = new Hono<AppEnv>();
@@ -155,6 +156,27 @@ for (const l of simpleListings) {
   });
 }
 
+/** A marketplace seller's store: their live products. */
+pages.get('/store/:slug', async c => {
+  const sh = await shell(c);
+  const s = await approvedSellerBySlug(c.env.DB, c.req.param('slug'));
+  if (!s) return notFound(c, sh);
+  return listing(c, sh, {
+    title: String(s.shop_name), description: String(s.about ?? `Products from ${s.shop_name}${s.district ? `, ${s.district}` : ''}, sold on ${sh.settings.store_name || 'Abs Vai'} with Cash on Delivery.`),
+    path: `/store/${s.slug}`, crumbs: [{ name: 'Home', href: '/' }, { name: 'Sellers' }, { name: String(s.shop_name) }], query: { sellerId: Number(s.id) },
+    emptyText: 'This seller’s products will show here soon.', cache: [TAG.listing],
+  });
+});
+
+/** Step 1 of selling here: the application form (the owner approves it in Admin → Sellers). */
+pages.get('/sell', async c => {
+  const sh = await shell(c);
+  return render(c, sh, {
+    title: `Sell on ${sh.settings.store_name || 'Abs Vai'}`, description: 'Register as a seller: add your products, we handle orders, Cash on Delivery and delivery all over Bangladesh.',
+    path: '/sell', tab: 'account', scripts: ['/js/sell.js'], children: <SellPage settings={sh.settings} open={sh.settings.sellers_open !== '0'} />,
+  }, { cache: [] });
+});
+
 pages.get('/search', async c => {
   const sh = await shell(c);
   const q = (c.req.query('q') ?? '').trim().slice(0, 80);
@@ -183,9 +205,10 @@ pages.get('/p/:slug', async c => {
   const d = await getProductDetail(c.env.DB, c.req.param('slug'));
   if (!d) return notFound(c, sh);
   const prod = d.product as Record<string, string | number | null>;
-  const [related, zones] = await Promise.all([
+  const [related, zones, soldBy] = await Promise.all([
     queryProducts(c.env.DB, { categoryIds: [d.category.id], excludeId: Number(prod.id), limit: 8 }),
     zoneSummaries(c.env.DB),
+    prod.seller_id ? productSellerPublic(c.env.DB, Number(prod.id)) : Promise.resolve(null),
   ]);
   const crumbs = [{ name: 'Home', href: '/' }, ...(d.category.parent ? [{ name: d.category.parent.name, href: `/c/${d.category.parent.slug}` }] : []), { name: d.category.name, href: `/c/${d.category.slug}` }, { name: String(prod.name) }];
   const image = d.media.find(m => m.kind === 'image')?.url;
@@ -203,7 +226,7 @@ pages.get('/p/:slug', async c => {
   return render(c, sh, {
     title: String(prod.meta_title ?? prod.name), description: String(prod.meta_description ?? prod.short_description ?? ''), path: `/p/${prod.slug}`, image,
     jsonLd: [productLd, crumbLd(c.env.SITE_URL, crumbs)], pageData: productPageData(d), scripts: ['/js/product.js'], bodyClass: 'pdp-page',
-    children: <ProductPage d={d} related={related.items} zones={zones} freeThresholdPaisa={settingInt(sh.settings, 'free_delivery_threshold_paisa')} settings={sh.settings} />,
+    children: <ProductPage d={d} related={related.items} zones={zones} freeThresholdPaisa={settingInt(sh.settings, 'free_delivery_threshold_paisa')} settings={sh.settings} soldBy={soldBy} />,
   }, { cache: [TAG.product(Number(prod.id)), TAG.category(d.category.id), 'zones', ...d.seasons.map(x => TAG.season(x.slug)), ...cardTags(related.items)] });
 });
 

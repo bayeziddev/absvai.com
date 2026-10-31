@@ -10,6 +10,7 @@ import { adminCatalog } from './admin-catalog';
 import { adminOps } from './admin-ops';
 import { adminOrders } from './admin-orders';
 import { adminSettings } from './admin-settings';
+import { adminSellers } from './admin-sellers';
 
 export const admin = new Hono<AppEnv>();
 
@@ -132,3 +133,4 @@ admin.route('/', adminCatalog);
 admin.route('/', adminOrders);
 admin.route('/', adminSettings);
 admin.route('/', adminOps);
+admin.route('/', adminSellers);

@@ -3,7 +3,7 @@
  * at 100,000 iterations (the Workers maximum) with a per-password random salt.
  * Sessions are random tokens stored in KV; the cookie is HttpOnly, Secure, SameSite=Strict.
  */
-export type Role = 'super_admin' | 'manager' | 'order_processor' | 'warehouse' | 'accountant' | 'viewer';
+export type Role = 'super_admin' | 'manager' | 'order_processor' | 'warehouse' | 'accountant' | 'viewer' | 'seller';
 
 export const ROLES: Role[] = ['super_admin', 'manager', 'order_processor', 'warehouse', 'accountant', 'viewer'];
 export const ROLE_LABELS: Record<Role, string> = {
@@ -13,6 +13,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   warehouse: 'Warehouse',
   accountant: 'Accountant',
   viewer: 'Viewer',
+  seller: 'Seller (marketplace)',
 };
 
 const ITERATIONS = 100_000;
@@ -73,6 +74,8 @@ const PERMISSIONS: Record<Role, string[]> = {
   warehouse: ['dashboard', 'orders:read', 'orders:pack', 'catalog:read', 'inventory:write', 'settings:read'],
   accountant: ['dashboard', 'orders:read', 'orders:export', 'catalog:read', 'customers:read', 'settings:read', 'cost:read', 'reports:read', 'audit:read'],
   viewer: ['dashboard', 'orders:read', 'catalog:read', 'customers:read', 'settings:read', 'reports:read'],
+  // Marketplace sellers never use the admin API: they have their own portal, limited to their own products.
+  seller: [],
 };
 
 export function can(role: Role, permission: string): boolean {

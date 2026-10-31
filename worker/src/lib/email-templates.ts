@@ -98,6 +98,15 @@ export function ownerInquiry(shop: ShopInfo, kind: string, fields: Array<[string
   };
 }
 
+/** A short message with an optional button (seller approvals and the like). */
+export function noticeMail(shop: ShopInfo, subject: string, title: string, paragraphs: string[], cta?: { label: string; href: string }): Mail {
+  return {
+    subject,
+    html: layout(shop, title, `${heading(title)}${paragraphs.map(t => p(h(t))).join('')}${cta ? button(cta.href, cta.label) : ''}`),
+    text: `${title}\n\n${paragraphs.join('\n\n')}${cta ? `\n\n${cta.label}: ${cta.href}` : ''}`,
+  };
+}
+
 export function testMail(shop: ShopInfo): Mail {
   return {
     subject: `Test email from ${shop.store}`,

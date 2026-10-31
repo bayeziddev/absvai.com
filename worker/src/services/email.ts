@@ -84,6 +84,22 @@ export async function orderEmails(env: Env, orderId: number, event: OrderEmailEv
   }
 }
 
+/** An alert to the owner about something to review (a seller application, a seller product…). */
+export async function ownerAlert(env: Env, kind: string, fields: Array<[string, string]>, adminPath: string): Promise<void> {
+  try {
+    const s = await loadSettings(env.DB);
+    if (on(s, 'email_owner_updates')) await toOwner(env, s, 'owner_inquiry', T.ownerInquiry(shopInfo(env, s), kind, fields, `${env.SITE_URL}/admin/${adminPath}`));
+  } catch { /* the record is saved even if its email is not */ }
+}
+
+/** A message to a marketplace seller (sent once the shop's own email domain is verified, like customer emails). */
+export async function sellerEmail(env: Env, to: string, subject: string, title: string, paragraphs: string[], cta?: { label: string; href: string }): Promise<void> {
+  try {
+    const s = await loadSettings(env.DB);
+    await toCustomer(env, s, 'seller', to, T.noticeMail(shopInfo(env, s), subject, title, paragraphs, cta));
+  } catch { /* never blocks the action */ }
+}
+
 export async function inquiryEmail(env: Env, kind: string, fields: Array<[string, string]>): Promise<void> {
   try {
     const s = await loadSettings(env.DB);

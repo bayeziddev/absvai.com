@@ -96,6 +96,8 @@ export const PUBLISHED_SQL = "p.deleted_at IS NULL AND (p.status = 'published' O
 
 export interface ProductQuery {
   categoryIds?: number[];
+  /** A marketplace seller's store page. */
+  sellerId?: number;
   productIds?: number[];
   terms?: string[];
   seasonIds?: number[];
@@ -123,6 +125,7 @@ export async function queryProducts(db: D1Database, q: ProductQuery, now = new D
 
   if (q.categoryIds?.length) inList('p.category_id', q.categoryIds);
   if (q.productIds?.length) inList('p.id', q.productIds);
+  if (q.sellerId) { where.push('p.seller_id = ?'); params.push(q.sellerId); }
   if (q.seasonIds) {
     if (!q.seasonIds.length) return { items: [], total: 0 };
     where.push(`EXISTS (SELECT 1 FROM product_seasons ps WHERE ps.product_id = p.id AND ps.season_id IN (${q.seasonIds.map(() => '?').join(',')}))`);

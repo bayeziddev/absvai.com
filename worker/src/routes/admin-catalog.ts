@@ -442,7 +442,7 @@ async function categoryTemplate(db: D1Database, categoryId: number): Promise<{ c
   return templateId && code ? { category, templateId, code } : null;
 }
 
-async function loadAdminProduct(c: Context<AppEnv>, id: number) {
+export async function loadAdminProduct(c: Context<AppEnv>, id: number) {
   const db = c.env.DB;
   const rows = await cat.adminProductRows(db, id);
   if (!rows) throw notFound('Product not found.');
@@ -488,8 +488,10 @@ async function uniqueSlug(db: D1Database, base: string, exceptId: number | null)
   return `${base}-${Date.now()}`;
 }
 
-adminCatalog.post('/products', need('catalog:write'), async c => {
-  const b = await readJson(c);
+adminCatalog.post('/products', need('catalog:write'), async c => c.json({ id: await createProduct(c, await readJson(c)) }, 201));
+
+/** A new draft product in a category (shared by the admin and the seller portal). */
+export async function createProduct(c: Context<AppEnv>, b: Record<string, unknown>): Promise<number> {
   const ct = await categoryTemplate(c.env.DB, posInt(b.categoryId) ?? 0);
   if (!ct) throw bad('Pick a category first.');
   const t = await loadTemplate(c.env.DB, ct.templateId);
@@ -500,8 +502,8 @@ adminCatalog.post('/products', need('catalog:write'), async c => {
     shippingProfile: t.defaultShippingProfile, brand: b.isOriginal ? 'Abs Vai' : null, isOriginal: Boolean(b.isOriginal),
   });
   await audit(c, 'product.create', 'product', id, { name });
-  return c.json({ id }, 201);
-});
+  return id;
+}
 
 interface VariantIn {
   id: number | null; attributes: Record<string, string>; pricePaisa: number; compareAtPricePaisa: number | null; costPaisa: number | null; stock: number; packedWeightGrams: number;
@@ -542,8 +544,15 @@ function parseVariants(raw: unknown, allowedKeys: string[]): VariantIn[] {
 adminCatalog.put('/products/:id', need('catalog:write'), async c => {
   const id = posInt(c.req.param('id'));
   if (!id) throw notFound();
+  return c.json(await updateProduct(c, id, await readJson(c)));
+});
+
+/**
+ * Saves the whole product form: details, specs, options with prices and stock, SKUs. Shared by the admin and the
+ * seller portal (which first limits what a seller may change). Live products must keep passing the checklist.
+ */
+export async function updateProduct(c: Context<AppEnv>, id: number, b: Record<string, unknown>) {
   const db = c.env.DB;
-  const b = await readJson(c);
   const existing = await cat.productRow(db, id);
   if (!existing) throw notFound();
 
@@ -645,30 +654,30 @@ adminCatalog.put('/products/:id', need('catalog:write'), async c => {
   }
   await audit(c, 'product.update', 'product', id, { name, variants: variants.length });
   await catalogChanged(c, [...new Set([...(await productTags(db, id, ct.category.id)), ...(await productTags(db, id, Number(existing.category_id)))])]);
-  return c.json(await loadAdminProduct(c, id));
-});
+  return loadAdminProduct(c, id);
+}
 
-adminCatalog.post('/products/:id/publish', need('catalog:write'), async c => {
-  const id = posInt(c.req.param('id')) ?? 0;
-  const b = await readJson(c);
+adminCatalog.post('/products/:id/publish', need('catalog:write'), async c => c.json(await publishProduct(c, posInt(c.req.param('id')) ?? 0, str((await readJson(c)).publishAt, 30))));
+
+/** Puts a product live (or schedules it) once its checklist is complete. */
+export async function publishProduct(c: Context<AppEnv>, id: number, at: string) {
   const data = await loadAdminProduct(c, id);
   if (!data.checklist.ready) throw new HttpError(409, data.checklist.items.find(i => !i.ok)!.message, { checklist: data.checklist });
-  const at = str(b.publishAt, 30);
   const scheduled = Boolean(at && Date.parse(at) > Date.now());
   await cat.setPublishState(c.env.DB, id, scheduled ? 'scheduled' : 'published', scheduled ? new Date(at).toISOString() : null);
   await audit(c, scheduled ? 'product.schedule' : 'product.publish', 'product', id, scheduled ? { at } : undefined);
   await catalogChanged(c, await productTags(c.env.DB, id, Number(data.product.category_id)));
-  return c.json({ ok: true, status: scheduled ? 'scheduled' : 'published' });
-});
+  return { ok: true, status: scheduled ? 'scheduled' : 'published' };
+}
 
-adminCatalog.post('/products/:id/unpublish', need('catalog:write'), async c => {
-  const id = posInt(c.req.param('id')) ?? 0;
+adminCatalog.post('/products/:id/unpublish', need('catalog:write'), async c => { await unpublishProduct(c, posInt(c.req.param('id')) ?? 0); return c.json({ ok: true }); });
+
+export async function unpublishProduct(c: Context<AppEnv>, id: number) {
   const p = await cat.productRow(c.env.DB, id);
   await cat.setPublishState(c.env.DB, id, 'draft', null);
   await audit(c, 'product.unpublish', 'product', id);
   await catalogChanged(c, await productTags(c.env.DB, id, p ? Number(p.category_id) : null));
-  return c.json({ ok: true });
-});
+}
 
 /** Copies everything except SKUs, barcodes and stock. */
 adminCatalog.post('/products/:id/duplicate', need('catalog:write'), async c => {
@@ -715,8 +724,10 @@ adminCatalog.post('/skus/check', need('catalog:read'), async c => {
 
 const MEDIA_TYPES: Record<string, string> = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/avif': 'avif', 'application/pdf': 'pdf' };
 
-adminCatalog.post('/media', need('catalog:write'), async c => {
-  const form = await c.req.formData();
+adminCatalog.post('/media', need('catalog:write'), async c => c.json(await uploadMedia(c, await c.req.formData()), 201));
+
+/** Saves a product photo (with its 480/960 px copies) or document. Shared by the admin and the seller portal. */
+export async function uploadMedia(c: Context<AppEnv>, form: FormData) {
   const file = form.get('file');
   const productId = posInt(form.get('productId'));
   const kind = ['image', 'manual', 'claim_doc', 'spec_file'].includes(String(form.get('kind'))) ? String(form.get('kind')) : 'image';
@@ -735,28 +746,27 @@ adminCatalog.post('/media', need('catalog:write'), async c => {
   const r = await cat.insertMedia(c.env.DB, { productId, kind, key, url: `/media/${key}`, alt: str(form.get('alt'), 200) || null, width: int(form.get('width')), height: int(form.get('height')), sortOrder: await cat.nextMediaSort(c.env.DB, productId) });
   await audit(c, 'media.upload', 'product', productId, { kind, key });
   await catalogChanged(c, await productTags(c.env.DB, productId, Number(p.category_id)));
-  return c.json(r, 201);
-});
+  return r;
+}
 
-adminCatalog.delete('/media/:id', need('catalog:write'), async c => {
-  const id = posInt(c.req.param('id')) ?? 0;
+adminCatalog.delete('/media/:id', need('catalog:write'), async c => { await deleteMediaItem(c, posInt(c.req.param('id')) ?? 0); return c.json({ ok: true }); });
+
+export async function deleteMediaItem(c: Context<AppEnv>, id: number, productId?: number) {
   const m = await cat.mediaById(c.env.DB, id);
-  if (!m) throw notFound();
+  if (!m || (productId !== undefined && m.product_id !== productId)) throw notFound();
   if (await cat.mediaSupportsClaim(c.env.DB, id)) throw bad('This document supports a claim badge. Remove the badge first.');
   await cat.deleteMedia(c.env.DB, id);
   if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete([...new Set([m.r2_key, ...COPY_WIDTHS.map(w => copyOf(m.r2_key!, w))])]);
   await audit(c, 'media.delete', 'product', m.product_id, { id });
   await catalogChanged(c, await productTags(c.env.DB, m.product_id, null));
-  return c.json({ ok: true });
-});
+}
 
-adminCatalog.put('/products/:id/media-order', need('catalog:write'), async c => {
-  const b = await readJson(c);
-  const id = posInt(c.req.param('id')) ?? 0;
-  await cat.reorderMedia(c.env.DB, id, Array.isArray(b.ids) ? (b.ids as unknown[]).map(Number).filter(Number.isInteger) : []);
+adminCatalog.put('/products/:id/media-order', need('catalog:write'), async c => { await reorderProductMedia(c, posInt(c.req.param('id')) ?? 0, (await readJson(c)).ids); return c.json({ ok: true }); });
+
+export async function reorderProductMedia(c: Context<AppEnv>, id: number, ids: unknown) {
+  await cat.reorderMedia(c.env.DB, id, Array.isArray(ids) ? (ids as unknown[]).map(Number).filter(Number.isInteger) : []);
   await catalogChanged(c, await productTags(c.env.DB, id, null));
-  return c.json({ ok: true });
-});
+}
 
 // ───────────── Claim badges (earned, not typed) ─────────────
 

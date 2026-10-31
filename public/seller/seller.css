@@ -1,0 +1,41 @@
+/* Seller portal: the admin look, simplified for one seller on a phone. */
+.sp-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--line); }
+.sp-top .wordmark { font: 800 1.2rem/1 Poppins, sans-serif; color: var(--clove); text-decoration: none; margin-right: auto; }
+.sp-top .wordmark small { font: 600 .72rem var(--body); color: var(--muted); margin-left: 6px; }
+.sp-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 8px 12px; background: #fff; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.sp-tabs a { padding: 8px 14px; border-radius: 999px; text-decoration: none; color: var(--clove); font-weight: 600; white-space: nowrap; }
+.sp-tabs a.on { background: var(--clove); color: #fff; }
+.sp-main { max-width: 980px; margin: 0 auto; padding: 16px; }
+.sp-login { max-width: 400px; margin: 8vh auto; background: #fff; padding: 26px; border-radius: 16px; box-shadow: var(--shadow); }
+.sp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.sp-cards .kpi b { display: block; font: 800 1.4rem Poppins, sans-serif; }
+.sp-list { display: grid; gap: 10px; }
+.sp-item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.sp-item img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; background: var(--cream); }
+.sp-item small { display: block; color: var(--muted); }
+.sp-photos { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.sp-photos figure { position: relative; margin: 0; width: 96px; }
+.sp-photos img { width: 96px; height: 96px; object-fit: cover; border-radius: 12px; background: var(--cream); display: block; }
+.sp-photos button { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .65); color: #fff; cursor: pointer; }
+.sp-add-photo { width: 96px; height: 96px; border: 2px dashed var(--husk); border-radius: 12px; display: grid; place-items: center; text-align: center; font-size: .8rem; cursor: pointer; color: var(--muted); }
+.sp-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+.sp-chips button { border: 1px solid var(--husk); background: #fff; border-radius: 999px; padding: 6px 12px; font: 600 .85rem var(--body); cursor: pointer; }
+.sp-chips button[aria-pressed="true"] { background: var(--clove); border-color: var(--clove); color: #fff; }
+.sp-rows { width: 100%; border-collapse: collapse; }
+.sp-rows th, .sp-rows td { padding: 6px 4px; text-align: left; font-size: .85rem; }
+.sp-rows input { width: 100%; min-width: 70px; padding: 8px; border: 1px solid var(--husk); border-radius: 8px; font: inherit; }
+.sp-check li { list-style: none; margin: 4px 0; }
+.sp-check li::before { content: '✗ '; color: var(--chili); font-weight: 700; } .sp-check li.ok::before { content: '✓ '; color: var(--leaf); }
+.sp-check { padding: 0; margin: 0 0 10px; }
+.sp-state { padding: 10px 14px; border-radius: 12px; margin-bottom: 14px; background: var(--bg); border-left: 4px solid var(--husk); }
+.sp-state.live { border-color: var(--leaf); } .sp-state.pending { border-color: var(--turmeric); } .sp-state.rejected { border-color: var(--chili); }
+.sp-actions { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; padding: 12px 0; background: linear-gradient(to top, var(--bg) 75%, transparent); }
+.sp-opt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; padding: 12px; margin: 8px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.sp-opt b { grid-column: 1 / -1; }
+.sp-opt label { display: grid; gap: 4px; font-size: .8rem; font-weight: 600; }
+.sp-opt small { font-weight: 400; color: var(--muted); }
+.sp-opt input { width: 100%; padding: 9px 10px; border: 1px solid var(--husk); border-radius: 8px; font: inherit; font-size: 16px; background: #fff; }
+@media (min-width: 720px) { .sp-opt { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.sp-ready { color: var(--leaf); font-weight: 700; margin: 0 0 6px; }
+.sp-actions { z-index: 5; }
+body:has(.sp-actions) .toast { bottom: 96px; }

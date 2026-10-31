@@ -24,4 +24,4 @@ export interface Env {
   SMS_API_KEY?: string;
 }
 
-export type AppEnv = { Bindings: Env; Variables: { session: Session; settings: Record<string, string> } };
+export type AppEnv = { Bindings: Env; Variables: { session: Session; settings: Record<string, string>; sellerId?: number } };

@@ -24,6 +24,7 @@ import { ADJUST_REASONS, adjustStock, inventoryList, lowStock, movements, produc
 import { addSynonym, deleteSynonym, listSynonyms, listWholesale, markNotified, notifySummary, setWholesaleStatus, waitingNotify } from '../repo/misc';
 import { createSeason, deleteSeason, resetEndedSeasons, seasonReadiness, seasonsOfProduct, seasonsWithCounts, updateSeason } from '../repo/seasons';
 import { bumpGeoVersion, getSecret, loadSettings, settingInt } from '../repo/settings';
+import { sellerCounts } from '../repo/sellers';
 import { adminSystemPrompt, askModel, cleanTurns, guideSections, matchGuide, ownerGuide } from '../services/assistant';
 import { listOutbox } from '../repo/sms';
 import { productRow } from '../repo/catalog-admin';
@@ -67,6 +68,9 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
   // "Needs your attention today" (Section 31).
   const attention: Array<{ level: 'info' | 'warn' | 'alert'; text: string; href: string }> = [];
   if (stages.new) attention.push({ level: 'alert', text: `${stages.new} new order(s) waiting for confirmation`, href: '#/orders?status=new' });
+  const market = await sellerCounts(db);
+  if (market.applications) attention.push({ level: 'warn', text: `${market.applications} seller application(s) to review`, href: '#/sellers' });
+  if (market.productsToReview) attention.push({ level: 'warn', text: `${market.productsToReview} seller product(s) waiting for your approval`, href: '#/sellers?tab=products' });
   if (stages.held) attention.push({ level: 'alert', text: `${stages.held} order(s) on hold for review (possible duplicate or too many orders)`, href: '#/orders?status=held' });
   if (incomplete) attention.push({ level: 'info', text: `${incomplete} incomplete checkout(s) to call in the last 7 days`, href: '#/incomplete' });
   if (fig.advancesToVerify) attention.push({ level: 'warn', text: `${fig.advancesToVerify} advance payment(s) to verify`, href: '#/orders?advance=submitted' });
