@@ -43,12 +43,19 @@ describe('order pipeline', () => {
     expect(canTransition('cancelled', 'confirmed')).toBe(false);
   });
 
-  it('blocks COD confirmation without OTP or a logged confirmation call', () => {
-    const base = { paymentMethod: 'cod', otpVerifiedAt: null, hasConfirmedCall: false, advanceRequired: false, advanceStatus: 'not_required', deliveryChargeStatus: 'final' as const };
+  it('while the SMS code is on, blocks COD confirmation without the code or a logged confirmation call', () => {
+    const base = { paymentMethod: 'cod', otpVerifiedAt: null, hasConfirmedCall: false, advanceRequired: false, advanceStatus: 'not_required', deliveryChargeStatus: 'final' as const, verificationRequired: true };
     expect(confirmBlockers(base)).toHaveLength(1);
     expect(confirmBlockers({ ...base, hasConfirmedCall: true })).toEqual([]);
     expect(confirmBlockers({ ...base, otpVerifiedAt: '2026-10-30T10:00:00Z' })).toEqual([]);
     expect(confirmBlockers({ ...base, hasConfirmedCall: true, advanceRequired: true, advanceStatus: 'submitted' })[0]).toMatch(/advance/);
+  });
+
+  it('while the SMS code is off, staff confirm a COD order directly (advances and holds still count)', () => {
+    const base = { paymentMethod: 'cod', otpVerifiedAt: null, hasConfirmedCall: false, advanceRequired: false, advanceStatus: 'not_required', deliveryChargeStatus: 'final' as const, verificationRequired: false };
+    expect(confirmBlockers(base)).toEqual([]);
+    expect(confirmBlockers({ ...base, advanceRequired: true, advanceStatus: 'submitted' })[0]).toMatch(/advance/);
+    expect(confirmBlockers({ ...base, holdReason: 'Possible duplicate.' })[0]).toMatch(/on hold/);
   });
 });
 

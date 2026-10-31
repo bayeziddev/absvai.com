@@ -39,7 +39,9 @@ describe('tracking table', () => {
   it('writes a line when the order is placed and every time it moves', async () => {
     first = await place('01811000001', 2);
     second = await place('01811000001');
-    await t.adminJson(`/orders/${first.orderId}/call`, 'POST', { outcome: 'confirmed' });
+    // SMS codes are off (no gateway): the order is confirmed straight away, no code and no call log needed.
+    const detail = await t.adminJson(`/orders/${first.orderId}`);
+    expect(detail.body).toMatchObject({ verificationRequired: false, confirmBlockers: [] });
     expect((await t.adminJson(`/orders/${first.orderId}/status`, 'POST', { to: 'confirmed' })).status).toBe(200);
     await t.adminJson(`/orders/${first.orderId}/status`, 'POST', { to: 'packed' });
     expect((await t.adminJson(`/orders/${first.orderId}/status`, 'POST', { to: 'in_courier', courier: 'steadfast', trackingId: 'SF778899' })).status).toBe(200);

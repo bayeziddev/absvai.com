@@ -217,9 +217,10 @@ assistants** sets how many AI answers per day each may use; after that they use 
 
 ## SMS code at checkout
 
-The SMS code (OTP) on Cash on Delivery orders is **off** until an SMS gateway is connected. Customers are not asked for a
-code; the order page says “We’ll call you to confirm”. When the SMS gateway is connected, tick **Settings → Advanced → SMS →
-Ask for an SMS code on Cash on Delivery orders**.
+There is **no code check at order time**: customers just order, the order page says “We’ll call you to confirm”, and staff
+move the order to **Confirmed** directly. The SMS code (OTP) only comes on if you connect an SMS gateway and tick **Settings →
+Advanced → SMS → Ask for an SMS code on Cash on Delivery orders**; then confirming needs the customer's code or a logged
+"Confirmed" call.
 
 ## Add a product (full editor, every detail)
 
@@ -290,8 +291,10 @@ use its parent's template ("inherits"). The menu on every page updates within se
 | **Returned** | Refused or undeliverable | **Scan it in** when it reaches you (stock comes back only then) |
 
 **Confirm an order**
-1. If the customer typed the SMS code, the order shows "Verified" and you can move it to **Confirmed** right away.
-2. If not, call them, choose the result (Confirmed / No answer / Call back / Wrong number / Wants to cancel) and press **Log call**.
+1. Call the customer, then move the order to **Confirmed**. No code or verification is needed while the SMS code is off.
+2. If you like, note how the call went under **Confirmation call** (Confirmed / No answer / Call back / Wrong number / Wants
+   to cancel) and press **Log call**. It is optional, for the team's record. (Only if you switch the SMS code on later does
+   confirming need the customer's code or a logged "Confirmed" call.)
 3. Pre-orders and large items need the advance: check the transaction ID in your bKash/Nagad app, then **Mark received**.
 4. **On hold** means the same phone or device ordered again within 10 minutes, or more than 3 times in a day. Call, then **Release
    hold** with a short note, or cancel it as a duplicate. Nothing is rejected without a person looking.

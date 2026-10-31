@@ -17,7 +17,7 @@ describe('8-stage order state machine (Section 9.1)', () => {
     expect(nextStatuses('partial_delivered')).toEqual([]);
   });
   it('blocks confirmation while an order is on hold', () => {
-    const base = { paymentMethod: 'cod', otpVerifiedAt: '2026-10-30T10:00:00Z', hasConfirmedCall: false, advanceRequired: false, advanceStatus: 'not_required', deliveryChargeStatus: 'final' as const };
+    const base = { paymentMethod: 'cod', otpVerifiedAt: '2026-10-30T10:00:00Z', hasConfirmedCall: false, advanceRequired: false, advanceStatus: 'not_required', deliveryChargeStatus: 'final' as const, verificationRequired: true };
     expect(confirmBlockers(base)).toEqual([]);
     expect(confirmBlockers({ ...base, holdReason: 'Second order from this phone within 10 minutes.' })[0]).toMatch(/on hold/);
   });

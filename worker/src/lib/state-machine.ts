@@ -86,13 +86,18 @@ export interface ConfirmGuardInput {
   advanceStatus: string;
   deliveryChargeStatus: 'final' | 'to_confirm';
   holdReason?: string | null;
+  /** The SMS code is switched on (Settings and a connected gateway). Only then must a COD customer be verified first. */
+  verificationRequired: boolean;
 }
 
-/** A COD order cannot be confirmed without OTP or a logged confirmation call; advances must be paid; holds released. */
+/**
+ * Advances must be paid and holds released before confirming. While the SMS code is on, a COD order also needs the
+ * customer's code or a logged "Confirmed" call; while it is off (no SMS gateway yet), staff confirm it directly.
+ */
 export function confirmBlockers(i: ConfirmGuardInput): string[] {
   const blockers: string[] = [];
   if (i.holdReason) blockers.push(`This order is on hold: ${i.holdReason} Review it and release the hold first.`);
-  if (i.paymentMethod === 'cod' && !i.otpVerifiedAt && !i.hasConfirmedCall) {
+  if (i.verificationRequired && i.paymentMethod === 'cod' && !i.otpVerifiedAt && !i.hasConfirmedCall) {
     blockers.push('Verify the customer: they enter the SMS code, or you log a confirmation call with outcome "Confirmed".');
   }
   if (i.advanceRequired && i.advanceStatus !== 'paid') blockers.push('The advance payment has not been verified yet.');

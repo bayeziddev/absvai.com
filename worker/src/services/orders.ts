@@ -18,7 +18,7 @@ import {
   NOW_VALUE, orderByCode, orderById, orderItems, otpRow, receiveReturn, recentActivity, saveOtp, type Row, type TransitionWrite,
 } from '../repo/orders';
 import { variantAvailability } from '../repo/inventory';
-import { settingInt } from '../repo/settings';
+import { loadSettings, settingInt } from '../repo/settings';
 import type { CartLineIn } from './cart';
 import { quote } from './checkout';
 import { blockedError, findBlock, minutesBetween, otpAllowed, otpSent, recordAttempt, type Identity } from './fraud';
@@ -277,6 +277,7 @@ export async function changeStatus(env: Env, orderId: number, to: OrderStatus, o
 
   if (to === 'confirmed') {
     const blockers = confirmBlockers({
+      verificationRequired: otpActive(env, await loadSettings(db)),
       paymentMethod: String(o.payment_method), otpVerifiedAt: (o.otp_verified_at as string) ?? null, hasConfirmedCall: await hasConfirmedCall(db, orderId),
       advanceRequired: Boolean(o.advance_required), advanceStatus: String(o.advance_status), deliveryChargeStatus: o.delivery_charge_status as 'final' | 'to_confirm',
       holdReason: (o.hold_reason as string) ?? null,

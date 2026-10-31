@@ -32,6 +32,7 @@ import { saveCourierArea } from '../repo/geo';
 import { addTrackNote } from '../repo/tracking';
 import { shopNoteLine } from '../lib/tracking';
 import { settingsOf } from './context';
+import { otpActive } from '../services/sms';
 
 export const adminOrders = new Hono<AppEnv>();
 
@@ -113,13 +114,16 @@ adminOrders.get('/orders/:id', need('orders:read'), async c => {
   if (!d) throw notFound();
   const o = d.order;
   const hasCall = d.events.some(e => e.kind === 'call' && e.outcome === 'confirmed');
+  const verificationRequired = otpActive(c.env, await settingsOf(c));
   return c.json({
+    verificationRequired,
     order: { ...o, phone: phoneFor(c, o), utm: parseJson(o.utm, {}), risk_reasons: parseJson(o.risk_reasons, []) },
     items: d.items, events: d.events, payments: d.payments, riskFlags: d.riskFlags, sms: d.sms, customer: d.customer ? { ...d.customer, phone: phoneFor(c, o) } : null,
     assignee: d.assignee, creator: d.creator,
     nextStatuses: nextStatuses(o.status as OrderStatus).map(s => ({ value: s, label: STATUS_LABELS[s] })),
     subStatuses: SUB_STATUSES[o.status as OrderStatus] ?? null,
     confirmBlockers: confirmBlockers({
+      verificationRequired,
       paymentMethod: String(o.payment_method), otpVerifiedAt: (o.otp_verified_at as string) ?? null, hasConfirmedCall: hasCall,
       advanceRequired: Boolean(o.advance_required), advanceStatus: String(o.advance_status), deliveryChargeStatus: o.delivery_charge_status as 'final', holdReason: (o.hold_reason as string) ?? null,
     }),

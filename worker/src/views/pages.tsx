@@ -517,7 +517,7 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
         <p class="small"><Icon name="pin" size={16} />{String(o.address_line)}, {String(o.upazila_name)}, {String(o.district_name)}{o.eta_text ? ` · usually ${String(o.eta_text)}` : ''}</p>
       </div>
       <ol class="next-steps">
-        <li><strong>We confirm</strong> by SMS code or a quick call.</li>
+        <li><strong>We confirm</strong> with a quick call.</li>
         <li><strong>We pack and ship</strong>, and text you the tracking number.</li>
         <li><strong>You check the parcel</strong> in front of the delivery person, then pay.</li>
       </ol>
@@ -675,7 +675,7 @@ export function AccountPage() {
         <a class="card-box link-box" href="/contact"><Icon name="phone" /><span><strong>Help & contact</strong><small>WhatsApp, Messenger or call</small></span></a>
         <a class="card-box link-box" href="/policies/returns"><Icon name="return" /><span><strong>Returns & refunds</strong><small>How returns work</small></span></a>
       </div>
-      <p class="muted small">Sign-in with an SMS code, saved addresses and one-tap reorder are coming next.</p>
+      <p class="muted small">Saved addresses and one-tap reorder are coming next.</p>
     </div>
   );
 }
