@@ -16,6 +16,10 @@ export interface Env {
   SETTINGS_KEY?: string;
   TURNSTILE_SECRET?: string;
   TURNSTILE_SITE_KEY?: string;
+  /** Cloudflare Workers AI, for the shop and admin assistants. Added at deploy; missing locally and in tests. */
+  AI?: Ai;
+  /** Resend API key for email (the GitHub secret RESEND_API_KEY, passed to the Worker at deploy). */
+  RESEND_API_KEY?: string;
   SMS_PROVIDER?: string;
   SMS_API_KEY?: string;
 }

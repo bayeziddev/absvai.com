@@ -21,7 +21,9 @@ import { settingInt } from '../repo/settings';
 import type { CartLineIn } from './cart';
 import { quote } from './checkout';
 import { blockedError, findBlock, minutesBetween, otpAllowed, otpSent, recordAttempt, type Identity } from './fraud';
-import { sendSms } from './sms';
+import { orderEmails, validEmail, type OrderEmailEvent } from './email';
+import { otpActive, sendSms } from './sms';
+import { saveCustomerEmail } from '../repo/email';
 
 export const ORDER_SOURCES: Record<string, string> = {
   web: 'Website', landing: 'Landing page', facebook_comment: 'Facebook comment', messenger: 'Messenger', whatsapp: 'WhatsApp',
@@ -47,6 +49,10 @@ export interface PlaceOrderInput {
   source: string;
   sourceDetail: string | null;
   utm: Record<string, string>;
+  /** Optional: the customer gets the receipt, the invoice and delivery updates by email. */
+  email?: string | null;
+  /** Ticked "email me offers". */
+  emailOffers?: boolean;
 }
 
 /** Who is placing the order and from where. Web orders come from the checkout; manual orders from a signed-in staff member. */
@@ -86,6 +92,8 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
   if (name.length < 2) throw bad('Enter your name.');
   if (input.addressLine.trim().length < 5) throw bad('Enter your house, road or village so the courier can find you.');
   if (!input.lines.length) throw bad('Your cart is empty.');
+  const email = (input.email ?? '').trim().toLowerCase();
+  if (email && !validEmail(email)) throw bad('Check your email address, or leave it empty.');
   if (manual && !MANUAL_SOURCES.includes(input.source)) throw bad('Choose where this order came from (Facebook comment, Messenger, WhatsApp, phone call…).');
 
   // Layer 2–4: phone, device and IP block list.
@@ -176,9 +184,11 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     await recordAttempt(env, { layer: h.layer, action: 'held', route: ctx.route, reason: h.reason, phoneHint: maskPhone(phone), deviceHash: ctx.identity.deviceHash, ipHash: ctx.identity.ipHash, orderId });
   }
 
+  if (email) await saveCustomerEmail(db, orderId, phone, email, Boolean(input.emailOffers));
+  await orderEmails(env, orderId, 'placed');
   await sendSms(env, { to: phone, body: SMS.orderReceived(orderNo, q.totalPaisa === null ? 'charge to confirm' : formatTaka(q.totalPaisa)), kind: 'order_received', orderId });
   let otp = false;
-  if (input.paymentMethod === 'cod') otp = (await issueOtp(env, settings, { orderId, orderNo, phone, identity: ctx.identity, route: ctx.route })).sent;
+  if (input.paymentMethod === 'cod' && otpActive(env, settings)) otp = (await issueOtp(env, settings, { orderId, orderNo, phone, identity: ctx.identity, route: ctx.route })).sent;
 
   return { orderId, orderNo, accessToken, totalPaisa: q.totalPaisa, advance: { required: q.advance.required, amountPaisa: q.advance.amountPaisa }, riskLevel: risk.level, held: holds.length > 0, otpSent: otp };
 }
@@ -316,6 +326,10 @@ export async function changeStatus(env: Env, orderId: number, to: OrderStatus, o
     await sendSms(env, { to: phone, body: courier === 'own_delivery' ? SMS.ownDelivery(String(o.order_no)) : SMS.shipped(String(o.order_no), courierLabel(courier), String(t.fields.tracking_id)), kind: 'shipped', orderId });
   }
   if (to === 'delivered') await sendSms(env, { to: phone, body: SMS.delivered(String(o.order_no)), kind: 'delivered', orderId });
+  // Emails (invoice, on the way, delivered, and the owner's cancelled/returned alerts) are queued here and sent after the response.
+  if (['confirmed', 'in_courier', 'delivered', 'partial_delivered', 'cancelled', 'returned'].includes(to)) {
+    await orderEmails(env, orderId, to as OrderEmailEvent, opts.cancelReason ?? opts.returnReason ?? null);
+  }
   return result;
 }
 

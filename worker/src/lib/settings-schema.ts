@@ -2,7 +2,7 @@
  * Dynamic settings (Section 19): what the owner can change without code, how each value is validated, and which
  * values are secrets (encrypted at rest, masked after saving, Super Admin only).
  */
-export type SettingGroup = 'store' | 'branding' | 'delivery' | 'payments' | 'sms' | 'tracking' | 'fraud' | 'incomplete' | 'couriers';
+export type SettingGroup = 'store' | 'branding' | 'delivery' | 'payments' | 'sms' | 'tracking' | 'fraud' | 'incomplete' | 'couriers' | 'ai' | 'email';
 
 export interface SettingDef {
   key: string;
@@ -52,6 +52,23 @@ function validateBanners(v: string): string | null {
   for (const [i, b] of list.entries()) { const e = bannerProblem(b, `Banner ${i + 1}`); if (e) return e; }
   return null;
 }
+/** How often the popup banner shows: once a day, once per customer, or every visit (browser session). */
+export const POPUP_FREQUENCIES = ['day', 'once', 'visit'] as const;
+export interface PopupBanner { enabled?: boolean; headline: string; subline?: string; cta_text?: string; cta_href?: string; theme?: string; image?: string; delay?: number; frequency?: (typeof POPUP_FREQUENCIES)[number]; where?: 'home' | 'all' }
+
+function validatePopup(v: string): string | null {
+  const p = JSON.parse(v || 'null') as unknown;
+  if (p === null) return null;
+  if (typeof p !== 'object' || Array.isArray(p)) return 'The popup banner is not valid.';
+  const x = p as Record<string, unknown>;
+  if (x.enabled !== undefined && typeof x.enabled !== 'boolean') return 'The popup banner is not valid.';
+  if (x.delay !== undefined && !(Number.isInteger(x.delay) && (x.delay as number) >= 0 && (x.delay as number) <= 60)) return 'Show the popup after 0 to 60 seconds.';
+  if (x.frequency !== undefined && !(POPUP_FREQUENCIES as readonly unknown[]).includes(x.frequency)) return 'Choose how often the popup shows.';
+  if (x.where !== undefined && !['home', 'all'].includes(String(x.where))) return 'Choose where the popup shows.';
+  if (!x.enabled && !x.headline) return null;
+  return bannerProblem(x, 'The popup banner');
+}
+
 function validatePromo(v: string): string | null {
   const b = JSON.parse(v || 'null') as unknown;
   return b === null ? null : bannerProblem(b, 'The second banner');
@@ -76,6 +93,7 @@ export const SETTINGS: SettingDef[] = [
   { key: 'company_address', group: 'store', label: 'Company address (invoices)', kind: 'longtext' },
   { key: 'default_banners', group: 'store', label: 'Homepage banners', kind: 'json', validate: validateBanners },
   { key: 'promo_banner', group: 'store', label: 'Second banner', kind: 'json', validate: validatePromo },
+  { key: 'popup_banner', group: 'store', label: 'Popup banner', kind: 'json', validate: validatePopup },
 
   { key: 'brand_logo_url', group: 'branding', label: 'Logo', kind: 'url', validate: re(/^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/, 'Upload the logo here instead of pasting a link.') },
   { key: 'brand_colors', group: 'branding', label: 'Brand colours', kind: 'json' },
@@ -100,11 +118,23 @@ export const SETTINGS: SettingDef[] = [
   { key: 'otp_max_per_device_day', group: 'fraud', label: 'SMS codes per device per day', kind: 'int' },
   { key: 'otp_daily_cap', group: 'fraud', label: 'SMS codes per day for the whole store', kind: 'int' },
 
+  { key: 'notify_email', group: 'email', label: 'Send shop alerts to', kind: 'text', validate: re(/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i, 'Type one email address, like absvai1020@gmail.com.') },
+  { key: 'email_from', group: 'email', label: 'Emails come from', kind: 'text', help: 'Until your domain is verified in Resend, keep Abs Vai <onboarding@resend.dev>.', validate: re(/^([^<>@]{1,60}<[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}>|[^\s@<>]+@[^\s@<>]+\.[a-z]{2,})$/i, 'Write it like Abs Vai <orders@absvai.com>.') },
+  { key: 'email_reply_to', group: 'email', label: 'Customer replies go to', kind: 'text', validate: re(/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i, 'Type one email address.') },
+  { key: 'email_owner_new_order', group: 'email', label: 'Email me every new order', kind: 'bool' },
+  { key: 'email_owner_updates', group: 'email', label: 'Email me when an order is cancelled, returned or delivered, and about wholesale inquiries', kind: 'bool' },
+  { key: 'email_owner_daily', group: 'email', label: 'Email me a summary every morning', kind: 'bool' },
+  { key: 'email_customer_updates', group: 'email', label: 'Email customers their receipt, invoice and delivery updates (when they give an email)', kind: 'bool' },
+
+  { key: 'assistant_daily_limit', group: 'ai', label: 'Shop assistant AI answers per day', kind: 'int', help: 'Cloudflare gives about 400 free answers a day. After this many, the chat uses its built-in answers until tomorrow. 0 turns the AI off.' },
+  { key: 'admin_assistant_daily_limit', group: 'ai', label: 'Admin assistant AI answers per day', kind: 'int', help: '0 turns it off; the assistant then searches the owner guide instead.' },
+
   { key: 'incomplete_conversion_window_hours', group: 'incomplete', label: 'Link an order to an incomplete checkout from the same phone within (hours)', kind: 'int' },
   { key: 'incomplete_retention_days', group: 'incomplete', label: 'Delete unconverted incomplete checkouts after (days)', kind: 'int' },
   { key: 'manual_discount_max_percent', group: 'incomplete', label: 'Largest discount a Sales Agent may give on a manual order (%)', kind: 'int' },
 
   // Secrets: encrypted with SETTINGS_KEY, masked after saving, Super Admin only. Used by the Phase 2 integrations.
+  { key: 'otp_enabled', group: 'sms', label: 'Ask for an SMS code on Cash on Delivery orders', kind: 'bool', help: 'Works only once an SMS gateway is connected. Until then (and while this is off) customers are not asked for a code: your team calls them to confirm.' },
   { key: 'sms_api_key', group: 'sms', label: 'SMS gateway API key', kind: 'secret' },
   { key: 'sms_sender_id', group: 'sms', label: 'SMS sender ID', kind: 'text', validate: re(/^[A-Za-z0-9 ]{3,11}$/, 'Sender IDs are 3–11 letters or numbers.') },
   { key: 'capi_access_token', group: 'tracking', label: 'Meta Conversions API access token', kind: 'secret' },
@@ -122,7 +152,7 @@ export const SECRET_KEYS = new Set(SETTINGS.filter(s => s.kind === 'secret').map
 
 /** Changing one of these changes what every cached page shows. */
 export const SITEWIDE_KEYS = new Set(['store_name', 'tagline', 'announcement', 'support_phone', 'whatsapp_number', 'messenger_page', 'social_links',
-  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner']);
+  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner', 'popup_banner']);
 
 export function validateSetting(def: SettingDef, value: string): string | null {
   switch (def.kind) {

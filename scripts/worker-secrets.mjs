@@ -10,7 +10,7 @@ import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 const out = process.argv[2];
 if (!out) { console.error('Usage: node scripts/worker-secrets.mjs <out.json>'); process.exit(1); }
 
-const PASS_THROUGH = ['SETUP_TOKEN', 'TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET', 'SMS_PROVIDER', 'SMS_API_KEY'];
+const PASS_THROUGH = ['SETUP_TOKEN', 'TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET', 'SMS_PROVIDER', 'SMS_API_KEY', 'RESEND_API_KEY'];
 const AUTO = ['OTP_PEPPER', 'SIGNING_KEY', 'SETTINGS_KEY'];
 
 /**
@@ -37,6 +37,7 @@ async function existingSecretNames() {
 const secrets = {};
 const notes = [];
 for (const k of PASS_THROUGH) if (process.env[k]) secrets[k] = process.env[k];
+notes.push(process.env.RESEND_API_KEY ? 'RESEND_API_KEY: from GitHub secrets (email is on)' : 'RESEND_API_KEY: not set in GitHub secrets (email is off)');
 
 // Half a Turnstile setup would block every checkout: the secret makes the server demand a token the page can't produce.
 if (Boolean(process.env.TURNSTILE_SITE_KEY) !== Boolean(process.env.TURNSTILE_SECRET)) {

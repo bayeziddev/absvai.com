@@ -13,6 +13,26 @@ import { markSeasonStarted, publishDue } from '../repo/seasons';
 import { loadSettings, settingInt } from '../repo/settings';
 import { sendBackInSeason } from '../routes/admin-ops';
 import { flushPurges, purge } from '../services/cache';
+import { dailySummary, flushEmails, trimOldEmails } from '../services/email';
+import { stageCounts } from '../repo/dashboard';
+import { newIncompleteCount } from '../repo/incomplete';
+import { lowStock } from '../repo/inventory';
+
+/** What the owner's morning email lists under "Needs your attention". */
+export async function attentionToday(env: Env, now = new Date()): Promise<string[]> {
+  const [stages, incomplete, low] = await Promise.all([
+    stageCounts(env.DB, new Date(now.getTime() - 30 * 86_400_000).toISOString()), newIncompleteCount(env.DB, new Date(now.getTime() - 7 * 86_400_000).toISOString()), lowStock(env.DB),
+  ]);
+  return [
+    stages.new && `${stages.new} new order(s) waiting for confirmation`,
+    stages.held && `${stages.held} order(s) on hold for review`,
+    stages.confirmed && `${stages.confirmed} confirmed order(s) to pack`,
+    stages.packed && `${stages.packed} packed order(s) to hand to the courier`,
+    stages.awaitingReturnScan && `${stages.awaitingReturnScan} returned parcel(s) to scan in`,
+    incomplete && `${incomplete} incomplete checkout(s) to call`,
+    low.length && `${low.length} product option(s) with 5 or fewer in stock`,
+  ].filter((x): x is string => Boolean(x));
+}
 
 export async function publishScheduled(env: Env, now = new Date()): Promise<number[]> {
   return publishDue(env.DB, now.toISOString());
@@ -48,7 +68,11 @@ export async function scheduled(controller: ScheduledController, env: Env, ctx?:
     await seasonSwitch(env);
     await purgeOldIncomplete(env);
     tags.push(TAG.site);
+    await dailySummary(env, await attentionToday(env)).catch(e => console.warn('daily summary failed', e));
+    await trimOldEmails(env);
   }
+  // Emails that could not go out right away (Resend busy, a rate limit) are retried here.
+  await flushEmails(env, 40).catch(e => console.warn('email flush failed', e));
   await purge(env, undefined, tags);
   await flushPurges(env, ctx);
 }

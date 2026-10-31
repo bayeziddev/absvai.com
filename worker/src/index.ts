@@ -8,6 +8,7 @@ import type { AppEnv } from './env';
 import { buildCsp } from './lib/csp';
 import { HttpError } from './lib/http';
 import { originalOf } from './lib/images';
+import { flushEmails } from './services/email';
 import { admin } from './routes/admin';
 import { api } from './routes/api';
 import { notFound, pages } from './routes/pages';
@@ -42,6 +43,13 @@ app.onError(async (err, c) => {
   }
   if (status === 404) return notFound(c);
   return c.text(status === 500 ? 'Something went wrong on our side. Please try again in a minute.' : err.message, status as 400);
+});
+
+// Emails queued while placing or changing orders (and from the Emails page) go out right after the response.
+const SENDS_EMAIL = /^\/api\/(checkout\/place|wholesale-inquiry|admin\/(orders|manual|emails|returns))/;
+app.use('/api/*', async (c, next) => {
+  await next();
+  if (c.req.method !== 'GET' && SENDS_EMAIL.test(c.req.path) && c.res.status < 400) c.executionCtx.waitUntil(flushEmails(c.env).catch(e => console.warn('email flush failed', e)));
 });
 
 app.route('/api/admin', admin);

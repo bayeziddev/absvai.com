@@ -4,7 +4,7 @@ import { bannerProblem } from '../lib/settings-schema';
 import type { AppEnv } from '../env';
 import { TAG } from '../lib/cache-tags';
 import { bdDate, daysBetween, isIsoDate } from '../lib/dates';
-import { bad, HttpError, int, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
+import { bad, HttpError, int, notFound, parseJson, posInt, rateLimit, readJson, slugify, str } from '../lib/http';
 import { localPhone, maskPhone, phonePrefixRange } from '../lib/phone';
 import { isSeasonActive, nextSeason, productAvailability } from '../lib/seasons';
 import { STAGE_MEANING, STAGES, STATUS_LABELS } from '../lib/state-machine';
@@ -23,7 +23,8 @@ import { newIncompleteCount } from '../repo/incomplete';
 import { ADJUST_REASONS, adjustStock, inventoryList, lowStock, movements, productAvailable, stockValue, variantProduct } from '../repo/inventory';
 import { addSynonym, deleteSynonym, listSynonyms, listWholesale, markNotified, notifySummary, setWholesaleStatus, waitingNotify } from '../repo/misc';
 import { createSeason, deleteSeason, resetEndedSeasons, seasonReadiness, seasonsOfProduct, seasonsWithCounts, updateSeason } from '../repo/seasons';
-import { bumpGeoVersion, loadSettings } from '../repo/settings';
+import { bumpGeoVersion, loadSettings, settingInt } from '../repo/settings';
+import { adminSystemPrompt, askModel, cleanTurns, guideSections, matchGuide, ownerGuide } from '../services/assistant';
 import { listOutbox } from '../repo/sms';
 import { productRow } from '../repo/catalog-admin';
 import { sendSms } from '../services/sms';
@@ -90,6 +91,7 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
     { label: 'Bot check', ok: Boolean(c.env.TURNSTILE_SECRET), text: c.env.TURNSTILE_SECRET ? 'Turnstile on checkout' : 'Turnstile not configured' },
     { label: 'Edge cache', ok: backlog < 50, text: backlog ? `${backlog} page tag(s) waiting to refresh` : 'Pages up to date at the edge' },
     { label: 'Photo storage', ok: Boolean(c.env.MEDIA), text: c.env.MEDIA ? 'Photo storage (R2) on' : 'Photo storage off: switch on R2 in Cloudflare' },
+    { label: 'Email', ok: Boolean(c.env.RESEND_API_KEY), text: c.env.RESEND_API_KEY ? 'Email (Resend) connected' : 'Email not connected (add RESEND_API_KEY in GitHub secrets)' },
     { label: 'Courier', ok: false, text: 'Courier API not connected yet (Phase 2)' },
   ];
 
@@ -156,6 +158,35 @@ adminOps.put('/wholesale/:id', need('orders:write'), async c => {
   if (!['new', 'contacted', 'won', 'lost'].includes(status)) throw bad('Unknown status.');
   await setWholesaleStatus(c.env.DB, posInt(c.req.param('id')) ?? 0, status);
   return c.json({ ok: true });
+});
+
+// ───────────── Admin assistant ─────────────
+
+/**
+ * Guides any signed-in staff member from the owner guide and the shop's live numbers, on Workers AI when available.
+ * Without it, the best-matching sections of the guide are shown instead. It can read, never change, anything.
+ */
+adminOps.post('/assistant', async c => {
+  if (!(await rateLimit(c.env.KV, `admin-assist:${c.var.session.adminId}`, 30, 600))) throw new HttpError(429, 'Too many questions in a few minutes. Please wait a little.');
+  const b = await readJson(c);
+  const turns = cleanTurns(b.messages);
+  if (!turns.length) throw bad('Type your question.');
+  const db = c.env.DB;
+  const [settings, guide, stages, incomplete, low] = await Promise.all([
+    loadSettings(db), ownerGuide(c.env.ASSETS), stageCounts(db, new Date(Date.now() - 30 * 86_400_000).toISOString()),
+    newIncompleteCount(db, new Date(Date.now() - 7 * 86_400_000).toISOString()), lowStock(db),
+  ]);
+  const live = `orders waiting to be confirmed ${stages.new} (on hold ${stages.held}), confirmed ${stages.confirmed}, packed ${stages.packed}, with the courier ${stages.in_courier}, returns to scan ${stages.awaitingReturnScan}, incomplete checkouts in the last 7 days ${incomplete}, options with 5 or fewer in stock ${low.length}.`;
+  const question = turns[turns.length - 1].content;
+  const ai = await askModel(c.env, adminSystemPrompt({ store: settings.store_name || 'Abs Vai', role: c.var.session.role, page: str(b.page, 40) || 'Overview', guide: guide.slice(0, 80_000), live }), turns,
+    { budgetKey: 'admin', dailyLimit: settingInt(settings, 'admin_assistant_daily_limit', 100), maxTokens: 700 });
+  if (ai) return c.json({ ai: true, reply: ai, sections: [] });
+  const found = matchGuide(guideSections(guide), question);
+  return c.json({
+    ai: false,
+    reply: found.length ? 'Here is what the owner guide says:' : 'I couldn’t find that in the owner guide. Try a word like product, category, banner, order, courier, season or email.',
+    sections: found.map(s => ({ title: s.title, body: s.body.slice(0, 1800) })),
+  });
 });
 
 // ───────────── Seasons ─────────────

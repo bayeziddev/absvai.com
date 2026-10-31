@@ -142,7 +142,24 @@ describe('baseline fraud: block list, repeat orders, OTP caps', () => {
     await t.sql("INSERT INTO block_list (type, value_hash, reason, expires_at) VALUES ('ip', 'h2', 'spam', '2099-01-01T00:00:00Z')");
   });
 
+  it('does not ask for an SMS code while no SMS gateway is connected; the page says we will call', async () => {
+    const r = await place({ phone: '01877700009' });
+    expect(r.status).toBe(201);
+    expect(r.body.otpSent).toBe(false);
+    expect(await t.sql("SELECT kind FROM sms_outbox WHERE order_id = ? AND kind = 'otp'", r.body.orderId)).toEqual([]);
+    const page = await (await t.fetch(`/order/${r.body.orderNo}?t=${r.body.accessToken}`)).text();
+    expect(page).toContain('data-call-confirm');
+    expect(page).not.toContain('data-otp');
+    // Even with the setting on, no code is sent until a gateway is connected.
+    await t.adminJson('/settings', 'PUT', { otp_enabled: '1' });
+    expect((await place({ phone: '01877700008' })).body.otpSent).toBe(false);
+    const resend = await t.json(`/api/orders/${r.body.orderNo}/otp/resend`, { method: 'POST', body: { t: r.body.accessToken } });
+    expect(resend.status).toBe(409);
+  });
+
   it('caps SMS codes per phone per hour', async () => {
+    Object.assign(t.env, { SMS_PROVIDER: 'test-gateway', SMS_API_KEY: 'test-key' });
+    await t.adminJson('/settings', 'PUT', { otp_enabled: '1' });
     const r = await place({ phone: '01877700003' });
     const results: boolean[] = [];
     for (let i = 0; i < 4; i++) {
@@ -153,6 +170,8 @@ describe('baseline fraud: block list, repeat orders, OTP caps', () => {
     expect(results.at(-1)).toBe(false);
     const log = await t.sql<{ status: string }>("SELECT status FROM otp_log WHERE phone = '8801877700003' ORDER BY id");
     expect(log.filter(l => l.status === 'sent').length).toBeLessThanOrEqual(3);
+    Object.assign(t.env, { SMS_PROVIDER: undefined, SMS_API_KEY: undefined });
+    await t.adminJson('/settings', 'PUT', { otp_enabled: '0' });
   });
 });
 

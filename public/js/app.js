@@ -219,7 +219,11 @@ function setupCards() {
 function setupMisc() {
   const fab = $('.chat-fab');
   const panel = $('#chat-panel');
-  fab?.addEventListener('click', () => { panel.hidden = !panel.hidden; fab.setAttribute('aria-expanded', String(!panel.hidden)); });
+  const setChat = open => { panel.hidden = !open; fab.setAttribute('aria-expanded', String(open)); $('[data-chat]').classList.toggle('open', open); };
+  fab?.addEventListener('click', () => setChat(panel.hidden));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && panel && !panel.hidden) setChat(false); });
+  // The shop assistant's code loads only when someone opens it.
+  $('[data-chat-ai]')?.addEventListener('click', () => import('./assistant.js').then(m => m.openAssistant()));
 
   $$('[data-autosubmit]').forEach(s => s.addEventListener('change', () => s.form.requestSubmit()));
   const filters = $('[data-filters]');
@@ -327,6 +331,63 @@ function setupPrefetch() {
   $$('a[href^="/p/"], a[href^="/c/"]').forEach(a => io.observe(a));
 }
 
+/**
+ * Scroll motion: sections, cards and banners glide up as they come into view, cards side by side one after another.
+ * Only things below the first screen are animated (nothing on screen ever blinks out, and the first paint is
+ * untouched), only opacity and transform move (no layout shifts), and nothing moves for people who turn motion off.
+ */
+function setupMotion() {
+  const root = document.documentElement;
+  const onScroll = () => root.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
+  onScroll();
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      io.unobserve(e.target);
+      e.target.classList.add('in');
+      // Hand the element back to its normal hover transitions once every part of it has arrived.
+      setTimeout(() => e.target.classList.remove('rv', 'in'), 1400);
+    }
+  }, { rootMargin: '0px 0px -6% 0px' });
+  let lastTop = null;
+  let n = 0;
+  for (const el of $$('main .section-head, main .section-lead, main .card, main .biz-band, main .promo, main .trust > *, main .cat-tile, .pdp-info > *, .site-footer .footer-inner > *')) {
+    const r = el.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) continue;
+    n = lastTop !== null && Math.abs(r.top - lastTop) < 2 ? n + 1 : 0;
+    lastTop = r.top;
+    el.style.setProperty('--rv-delay', `${Math.min(n, 5) * 70}ms`);
+    el.classList.add('rv');
+    io.observe(el);
+  }
+}
+
+/** Popup banner (Admin → Website & banners): after a short delay, as often as the owner chose; never over another dialog. */
+function setupPopup() {
+  const d = $('[data-popup]');
+  if (!d || typeof d.showModal !== 'function') return;
+  const seen = store(`absvai.popup.${d.dataset.key}`, 0);
+  const freq = d.dataset.freq;
+  let visit = false;
+  try { visit = sessionStorage.getItem('absvai.popup.visit') === d.dataset.key; } catch { /* private mode */ }
+  const last = Number(seen.get());
+  if ((freq === 'once' && last) || (freq === 'day' && Date.now() - last < 86400000) || (freq === 'visit' && visit)) return;
+  const mark = () => { seen.set(Date.now()); try { sessionStorage.setItem('absvai.popup.visit', d.dataset.key); } catch { /* ignore */ } };
+  const close = () => { d.close(); mark(); };
+  d.querySelector('[data-popup-close]').addEventListener('click', close);
+  d.addEventListener('click', e => { if (e.target === d) close(); });
+  d.addEventListener('cancel', mark);
+  d.querySelector('[data-popup-go]').addEventListener('click', mark);
+  const show = () => setTimeout(() => {
+    if (document.querySelector('dialog[open], .sheet:not([hidden]), .drawer:not([hidden])') || document.visibilityState !== 'visible') return;
+    d.showModal();
+  }, Number(d.dataset.delay || 4) * 1000);
+  // A prerendered page waits until the customer actually opens it.
+  if (document.prerendering) document.addEventListener('prerenderingchange', show, { once: true }); else show();
+}
+
 setupDrawer();
 setupSearch();
 setupCarousels();
@@ -335,6 +396,8 @@ setupMisc();
 badges();
 setupLive();
 setupPrefetch();
+setupPopup();
+setupMotion();
 if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 if ($('[data-pdp-form]')) {
   let pid = null;

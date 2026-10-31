@@ -168,6 +168,15 @@ describe('seasons, pre-orders and notify-me', () => {
 });
 
 describe('COD orders: OTP, confirmation call, invoice', () => {
+  // SMS codes need a connected gateway and the setting switched on (both are off by default).
+  beforeAll(async () => {
+    Object.assign(t.env, { SMS_PROVIDER: 'test-gateway', SMS_API_KEY: 'test-key' });
+    expect((await t.adminJson('/settings', 'PUT', { otp_enabled: '1' })).status).toBe(200);
+  });
+  afterAll(async () => {
+    Object.assign(t.env, { SMS_PROVIDER: undefined, SMS_API_KEY: undefined });
+    await t.adminJson('/settings', 'PUT', { otp_enabled: '0' });
+  });
   let orderNo = '';
   let token = '';
   let orderId = 0;

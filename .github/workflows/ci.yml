@@ -114,6 +114,8 @@ jobs:
           TURNSTILE_SECRET: ${{ secrets.TURNSTILE_SECRET }}
           SMS_PROVIDER: ${{ secrets.SMS_PROVIDER }}
           SMS_API_KEY: ${{ secrets.SMS_API_KEY }}
+          # Email (Resend). Also accepts the secret under a similar name.
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || secrets.RESEND_API || secrets.RESEND_KEY || secrets.RESEND }}
           WORKERS_DEV_URL: ${{ steps.resources.outputs.workers_dev_url }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
         run: |

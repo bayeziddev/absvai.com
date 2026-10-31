@@ -50,11 +50,17 @@ everything else: SEO, seasons, wholesale prices, barcodes, video.
 **Categories → + Add category**: type the name, add a picture, choose whether it sits inside another category, and what kind of
 products it holds (a subcategory uses its main category's kind). Press **Save**. The short code is made for you.
 
-## Homepage banners and social media
+## Website & banners: shop name, logo, banners and the popup
 
 ![Homepage banners](screenshots/admin-banners.png)
 
-**Settings → Homepage banners**: each banner shows a live preview while you type.
+**Website & banners** (in the menu) is where you change how the shop looks:
+
+- **Shop name and logo**: type the shop name (it shows at the top of every page when there is no logo), a short line about the
+  shop, and press **+ Upload logo**. **Remove logo** goes back to showing the name. The running message at the very top is here too.
+- **Big banners at the top of the homepage**, the **popup banner** and the **second banner** use the same banner editor below.
+
+Each banner shows a live preview while you type.
 
 1. Press **+ Add picture** and choose a photo from your phone or computer (wide photos look best; it is made smaller for you).
 2. Type a **headline**, and if you like a short line under it and the button text.
@@ -62,6 +68,10 @@ products it holds (a subcategory uses its main category's kind). Press **Save**.
    your own.
 4. Pick a colour. Use **Move up / Move down** to change the order, **Remove** to delete one.
 5. Press **Save** at the bottom of the screen.
+
+**Popup banner**: tick **Show the popup**, make the banner, then choose after how many seconds it appears, how often (once a day,
+only once per customer, or every visit) and where (homepage only or every page). It never shows on the cart, checkout or account
+pages, and customers can close it.
 
 The **second banner** sits further down the homepage. While a season is live, the season's own banners show at the top instead
 (the page tells you so); change those in **Seasons**, which uses the same banner editor.
@@ -71,6 +81,41 @@ The **second banner** sits further down the homepage. While a season is live, th
 
 Tracking, fraud protection, SMS, couriers and incomplete orders are under **Advanced settings** at the bottom. You only need them
 once, while setting up.
+
+## Emails
+
+**Emails** (in the menu) shows whether email is connected and lists every email the shop sent, with the reason if one failed.
+
+- **To you** (the address in “Send shop alerts to”, absvai1020@gmail.com): every new order, cancelled / returned / delivered
+  orders, wholesale inquiries, and a summary every morning at about 12:05 am (yesterday’s orders and what needs your attention).
+- **To customers** who type their email at checkout (it is optional): the receipt when they order, the **invoice** when you
+  confirm, “on the way” with the courier and tracking ID, and “delivered”.
+- **Offers**: customers can tick “Email me offers” at checkout. **Send an offer** emails them all; each email has an
+  unsubscribe link and you get a copy.
+- Press **Send me a test email** to check it works.
+
+Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
+Actions); the deploy copies it to the Worker. Until your own domain (for example absvai.com) is verified in **Resend → Domains**,
+Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
+the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@absvai.com>`.
+
+## Chat and the assistants
+
+The green chat button on the shop opens a small menu: **Ask our shop assistant** (instant answers about products, delivery
+charges, Cash on Delivery and returns, in Bangla or English) and **Chat on WhatsApp**. The assistant only uses your shop’s
+own products, prices and rules; for anything about an order it sends customers to Track order, WhatsApp or a call.
+
+In the admin, the **Assistant** button (bottom right, on every page) answers “how do I…?” questions step by step from this
+guide and your live numbers (orders waiting, stock running low…).
+
+Both run on Cloudflare Workers AI, inside the free daily allowance (about 400 answers a day). **Settings → Advanced → AI
+assistants** sets how many AI answers per day each may use; after that they use their built-in answers until the next day.
+
+## SMS code at checkout
+
+The SMS code (OTP) on Cash on Delivery orders is **off** until an SMS gateway is connected. Customers are not asked for a
+code; the order page says “We’ll call you to confirm”. When the SMS gateway is connected, tick **Settings → Advanced → SMS →
+Ask for an SMS code on Cash on Delivery orders**.
 
 ## Add a product (full editor, every detail)
 

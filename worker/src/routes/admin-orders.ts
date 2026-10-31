@@ -431,6 +431,7 @@ function manualInput(b: Record<string, unknown>) {
     paymentMethod: (b.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod') as 'cod' | 'manual_mobile',
     advanceTrxId: str(b.advanceTrxId, 40) || null, advanceWallet: str(b.advanceWallet, 20) || null,
     lines: sanitizeLines(b.lines), source: str(b.source, 30), sourceDetail: str(b.sourceDetail, 200) || null, utm: {},
+    email: str(b.email, 120) || null,
   };
 }
 

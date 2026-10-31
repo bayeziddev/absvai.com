@@ -3,12 +3,14 @@ import { Hono } from 'hono';
 import type { AppEnv } from '../env';
 import { TAG } from '../lib/cache-tags';
 import { maskSecret } from '../lib/crypto';
-import { bad, mediaBucket, notFound, posInt, readJson, str } from '../lib/http';
+import { bad, HttpError, mediaBucket, notFound, posInt, readJson, str } from '../lib/http';
 import { maskPhone, normalizeBdPhone } from '../lib/phone';
 import { contrastWarnings, parseBrandColors, SETTING_BY_KEY, SETTINGS, SITEWIDE_KEYS, validateSetting } from '../lib/settings-schema';
 import { attemptById, listAttempts, listBlocks, removeBlock, reviewAttempt } from '../repo/fraud';
 import { getSecret, loadSettings, saveSecret, saveSettings, secretStatus } from '../repo/settings';
 import { blockValue } from '../services/fraud';
+import { canEmailCustomers, emailConnected, flushEmails, queueOffers, queueTest } from '../services/email';
+import { emailCounts, offersAudience, recentEmails } from '../repo/email';
 import { audit, need, refresh } from './admin-helpers';
 
 export const adminSettings = new Hono<AppEnv>();
@@ -83,6 +85,44 @@ adminSettings.post('/brand-asset', need('settings:write'), async c => {
   await audit(c, 'settings.logo', 'settings', 'brand_logo_url', { key });
   await refresh(c, [TAG.site]);
   return c.json({ ok: true, url: `/media/${key}` }, 201);
+});
+
+// ───────────── Emails (Resend) ─────────────
+
+const EMAIL_KEYS = ['notify_email', 'email_from', 'email_reply_to', 'email_owner_new_order', 'email_owner_updates', 'email_owner_daily', 'email_customer_updates'];
+
+adminSettings.get('/emails', need('settings:read'), async c => {
+  const s = await loadSettings(c.env.DB);
+  const [recent, counts, audience] = await Promise.all([recentEmails(c.env.DB, 60), emailCounts(c.env.DB, new Date(Date.now() - 7 * 86_400_000).toISOString()), offersAudience(c.env.DB)]);
+  return c.json({
+    connected: emailConnected(c.env), canEmailCustomers: canEmailCustomers(s), values: Object.fromEntries(EMAIL_KEYS.map(k => [k, s[k] ?? ''])),
+    recent, counts, offersCount: audience.length,
+  });
+});
+
+/** Sends a test email to the alerts address now and says whether Resend accepted it. */
+adminSettings.post('/emails/test', need('settings:write'), async c => {
+  if (!(await queueTest(c.env))) throw bad('Type the email address for shop alerts first, then save.');
+  await flushEmails(c.env, 5);
+  const [last] = await recentEmails(c.env.DB, 1);
+  return c.json({ status: last?.status ?? 'queued', error: last?.error ?? null });
+});
+
+/** An offer email to every customer who ticked "email me offers" (a copy goes to the owner). */
+adminSettings.post('/emails/offers', need('settings:write'), async c => {
+  const b = await readJson(c);
+  const subject = str(b.subject, 120);
+  const message = str(b.message, 4000);
+  const ctaText = str(b.ctaText, 40);
+  const ctaHref = str(b.ctaHref, 300);
+  if (subject.length < 3 || message.length < 10) throw bad('Write a subject and a message.');
+  if (ctaText && !/^(\/[\w/?=&.-]*|https:\/\/\S+)$/.test(ctaHref)) throw bad('The button link should be a page of the shop (starting with /) or an https:// link.');
+  if (!canEmailCustomers(await loadSettings(c.env.DB))) throw new HttpError(409, 'Customers can get emails once your own domain is verified in Resend. Until then only you receive emails.');
+  const audience = await offersAudience(c.env.DB);
+  if (!audience.length) throw bad('No customer has asked for offers by email yet.');
+  const n = await queueOffers(c.env, audience, { subject, message, ctaText, ctaHref: ctaHref.startsWith('/') ? `${c.env.SITE_URL}${ctaHref}` : ctaHref });
+  await audit(c, 'email.offers', 'settings', null, { subject, recipients: n });
+  return c.json({ ok: true, queued: n });
 });
 
 // ───────────── Security: block list and blocked attempts ─────────────

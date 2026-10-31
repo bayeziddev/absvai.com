@@ -82,12 +82,14 @@ export const can = perm => {
 };
 
 export function badge(status) {
-  const colors = { new: 'b-yellow', in_courier: 'b-green', partial_delivered: 'b-red', blocked: 'b-red', held: 'b-red', not_interested: 'b-grey', unreachable: 'b-grey', spam: 'b-red', received: 'b-dark', rate_limited: 'b-yellow', silently_rejected: 'b-red', confirmed: 'b-green', packed: 'b-green', delivered: 'b-dark', cancelled: 'b-grey', returned: 'b-red', draft: 'b-grey', published: 'b-green', scheduled: 'b-yellow', archived: 'b-grey', low: 'b-green', medium: 'b-yellow', high: 'b-red', active: 'b-green', upcoming: 'b-yellow', past: 'b-grey', needs_dates: 'b-red', off: 'b-grey', exact: 'b-green', alias: 'b-green', fuzzy: 'b-yellow', unmatched: 'b-red', manual: 'b-dark', submitted: 'b-yellow', paid: 'b-green', not_required: 'b-grey', open: 'b-yellow', contacted: 'b-green', converted: 'b-dark', dismissed: 'b-grey', waiting: 'b-yellow', sent: 'b-green', retired: 'b-grey', won: 'b-green', lost: 'b-grey' };
+  const colors = { new: 'b-yellow', in_courier: 'b-green', partial_delivered: 'b-red', blocked: 'b-red', held: 'b-red', not_interested: 'b-grey', unreachable: 'b-grey', spam: 'b-red', received: 'b-dark', rate_limited: 'b-yellow', silently_rejected: 'b-red', confirmed: 'b-green', packed: 'b-green', delivered: 'b-dark', cancelled: 'b-grey', returned: 'b-red', draft: 'b-grey', published: 'b-green', scheduled: 'b-yellow', archived: 'b-grey', low: 'b-green', medium: 'b-yellow', high: 'b-red', active: 'b-green', upcoming: 'b-yellow', past: 'b-grey', needs_dates: 'b-red', off: 'b-grey', exact: 'b-green', alias: 'b-green', fuzzy: 'b-yellow', unmatched: 'b-red', manual: 'b-dark', submitted: 'b-yellow', paid: 'b-green', not_required: 'b-grey', open: 'b-yellow', contacted: 'b-green', converted: 'b-dark', dismissed: 'b-grey', waiting: 'b-yellow', sent: 'b-green', retired: 'b-grey', won: 'b-green', lost: 'b-grey', queued: 'b-grey', failed: 'b-red', skipped: 'b-yellow' };
   return `<span class="badge ${colors[status] ?? ''}">${esc(String(status ?? '').replace(/_/g, ' '))}</span>`;
 }
 
 // ── Icons (simple strokes) ──
 const ICONS = {
+  image: 'M3 3h18v18H3zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 21',
+  mail: 'M4 4h16v16H4zM4 6l8 7 8-7',
   dash: 'M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z', orders: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0',
   box: 'M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8', tag: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z', layers: 'm12 2 10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5',
   sun: 'M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2', users: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
@@ -168,12 +170,16 @@ function renderShell() {
         <div class="content" id="view"></div>
       </div>
       <aside class="rightbar" id="rightbar"></aside>
-    </div>`;
+    </div>
+    <button class="ai-fab" id="ai-fab" type="button" aria-expanded="false" aria-controls="ai-panel">${icon('chat')}<span>Assistant</span></button>
+    <section class="ai-panel" id="ai-panel" role="dialog" aria-label="Admin assistant" hidden></section>`;
   document.getElementById('collapse').onclick = () => { const s = document.querySelector('.shell'); s.classList.toggle('collapsed'); localStorage.setItem('absvai.admin.collapsed', s.classList.contains('collapsed') ? '1' : '0'); };
   document.getElementById('menu').onclick = () => document.getElementById('side').classList.toggle('open');
   document.getElementById('nav-mode').onclick = () => { try { localStorage.setItem('absvai.admin.simple', simpleMode() ? '0' : '1'); } catch { /* private mode */ } renderShell(); };
   document.getElementById('logout').onclick = async () => { await api('/logout', 'POST').catch(() => {}); state.user = null; renderLogin('Signed out.'); };
   document.getElementById('gsearch').addEventListener('submit', e => { e.preventDefault(); const q = e.target.q.value.trim(); location.hash = /^(AV|PRE|INV)-|^01\d/i.test(q) || /^\d+$/.test(q) ? `#/orders?q=${encodeURIComponent(q)}` : `#/products?q=${encodeURIComponent(q)}`; });
+  // The admin assistant's code loads the first time someone opens it.
+  document.getElementById('ai-fab').onclick = () => import('./views/assistant.js').then(m => m.toggleAssistant());
   renderRightbar();
   route();
 }

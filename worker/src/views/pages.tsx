@@ -385,6 +385,8 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
             </div>
             <label class="field"><span>House, road / village</span><input name="addressLine" autocomplete="street-address" placeholder="House 12, Road 5, Block C" maxlength={300} required /></label>
             <label class="field"><span>Nearby landmark (optional)</span><input name="landmark" placeholder="Opposite the mosque, next to Sonali Bank" maxlength={200} /></label>
+            <label class="field"><span>Email (optional) <small class="muted">for your receipt and invoice</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength={120} placeholder="you@example.com" /></label>
+            <label class="check-line"><input type="checkbox" name="emailOffers" /> <span>Email me offers and new arrivals (you can stop any time)</span></label>
             <label class="field"><span>Note for us (optional)</span><textarea name="note" rows={2} maxlength={500} /></label>
           </fieldset>
           <fieldset class="co-step">
@@ -429,10 +431,11 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
   );
 }
 
-export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<string, unknown>>; wallets: Array<{ wallet: string; number: string; type?: string }> }) {
+export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<string, unknown>>; codeSent: boolean; wallets: Array<{ wallet: string; number: string; type?: string }> }) {
   const o = p.o;
   const status = o.status as OrderStatus;
-  const needsOtp = o.payment_method === 'cod' && !o.otp_verified_at && status === 'new';
+  const waiting = o.payment_method === 'cod' && !o.otp_verified_at && status === 'new';
+  const needsOtp = waiting && p.codeSent;
   const needsAdvance = Boolean(o.advance_required) && (o.advance_status === 'pending');
   const phone = localPhone(String(o.phone));
   return (
@@ -457,6 +460,7 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
         </form>
       )}
       {o.otp_verified_at && <p class="notice notice-ok"><Icon name="check" size={18} />Phone verified. We’ll confirm your order shortly.</p>}
+      {waiting && !needsOtp && <p class="notice notice-ok" data-call-confirm><Icon name="phone" size={18} />We’ll call you on {maskPhone(phone)} to confirm your order. Please keep your phone nearby.</p>}
       {Boolean(o.advance_required) && (
         <div class="card-box">
           <h2>Advance payment</h2>

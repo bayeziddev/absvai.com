@@ -1,7 +1,7 @@
 import type { Child } from 'hono/jsx';
 import type { CategoryNode } from '../repo/catalog';
-import { DEFAULT_COLORS, parseBrandColors, SOCIAL_NETWORKS, TRACKING_FORMATS } from '../lib/settings-schema';
-import { smallOf } from '../lib/images';
+import { DEFAULT_COLORS, parseBrandColors, SOCIAL_NETWORKS, TRACKING_FORMATS, type PopupBanner } from '../lib/settings-schema';
+import { smallOf, srcsetOf } from '../lib/images';
 import { Icon } from './icons';
 
 export interface LayoutProps {
@@ -39,6 +39,17 @@ const SPECULATION_RULES = {
   prerender: [{ where: { href_matches: '/p/*' }, eagerness: 'conservative' }],
 };
 
+/** The popup banner for this page: on, with a headline, never on cart/checkout/account pages, homepage only unless set to every page. */
+function popupFor(s: Record<string, string>, path: string): (PopupBanner & { key: string }) | null {
+  let p: PopupBanner | null = null;
+  try { p = JSON.parse(s.popup_banner || 'null') as PopupBanner | null; } catch { return null; }
+  if (!p?.enabled || !p.headline || PRIVATE_PATHS.test(path) || (p.where !== 'all' && path !== '/')) return null;
+  // A changed popup gets a new key, so customers who closed the old one see the new one.
+  let h = 5381;
+  for (const ch of JSON.stringify(p)) h = ((h << 5) + h + ch.charCodeAt(0)) >>> 0;
+  return { ...p, key: h.toString(36) };
+}
+
 function trackingConfig(s: Record<string, string>, path: string) {
   const ok = (k: keyof typeof TRACKING_FORMATS) => (s[k] && TRACKING_FORMATS[k].test(s[k]) ? s[k] : null);
   const cfg = { pixelId: ok('pixel_id'), ga4Id: ok('ga4_id'), clarityId: ok('clarity_id'), gtmId: PRIVATE_PATHS.test(path) ? null : ok('gtm_id') };
@@ -60,8 +71,11 @@ export function Layout(p: LayoutProps) {
   // Brand colours changed in Settings (checked hex values), as CSS variables after the stylesheet.
   const brandVars = (Object.keys(DEFAULT_COLORS) as Array<keyof typeof DEFAULT_COLORS>).filter(k => colors[k] !== DEFAULT_COLORS[k]).map(k => `--${k}:${colors[k]}`).join(';');
   const tracking = trackingConfig(s, p.path);
+  const popup = popupFor(s, p.path);
+  // Without a logo the shop name is the wordmark: first word in ink, the rest in the main colour ("Abs" "Vai").
+  const [firstWord, ...restWords] = store.split(/\s+/);
   const Wordmark = (props: { light?: boolean }) => (
-    <a class={`wordmark${props.light ? ' wordmark-light' : ''}`} href="/" aria-label={`${store} home`}>{logo ? <img src={logo} alt={store} height="32" /> : <>Abs<span>Vai</span></>}</a>
+    <a class={`wordmark${props.light ? ' wordmark-light' : ''}`} href="/" aria-label={`${store} home`}>{logo ? <img src={logo} alt={store} height="32" /> : <>{firstWord}{restWords.length > 0 && <span>{restWords.join(' ')}</span>}</>}</a>
   );
   return (
     <html lang="en">
@@ -196,15 +210,46 @@ export function Layout(p: LayoutProps) {
         </nav>
 
         <div class="chat" data-chat>
-          <div class="chat-panel" id="chat-panel" hidden>
-            <p class="chat-title">How would you like to talk to us?</p>
-            {wa && <a class="chat-option" href={`https://wa.me/${wa}?text=${encodeURIComponent('Hi Abs Vai, I have a question.')}`} target="_blank" rel="noopener"><Icon name="whatsapp" />WhatsApp</a>}
-            {s.messenger_page && <a class="chat-option" href={`https://m.me/${s.messenger_page}`} target="_blank" rel="noopener"><Icon name="messenger" />Messenger</a>}
-            {s.support_phone && <a class="chat-option" href={`tel:${s.support_phone.replace(/[^\d+]/g, '')}`}><Icon name="phone" />Call {s.support_phone}</a>}
-            {!wa && !s.messenger_page && !s.support_phone && <a class="chat-option" href="/contact"><Icon name="phone" />Contact us</a>}
+          <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Chat with us" hidden>
+            <div class="chat-menu" data-chat-menu>
+              <div class="chat-hello"><b>Hi! 👋 How can we help?</b><span>Choose how you’d like to chat.</span></div>
+              <button class="chat-option chat-ai" type="button" data-chat-ai><span class="chat-ico"><Icon name="chat" /></span><span><b>Ask our shop assistant</b><small>Instant answers about products, delivery and payment</small></span></button>
+              {wa && <a class="chat-option chat-wa" href={`https://wa.me/${wa}?text=${encodeURIComponent(`Hi ${store}, I have a question.`)}`} target="_blank" rel="noopener"><span class="chat-ico"><Icon name="whatsapp" /></span><span><b>Chat on WhatsApp</b><small>Talk to our team</small></span></a>}
+              {s.messenger_page && <a class="chat-option" href={`https://m.me/${s.messenger_page}`} target="_blank" rel="noopener"><span class="chat-ico"><Icon name="messenger" /></span><span><b>Messenger</b></span></a>}
+              {s.support_phone && <a class="chat-option" href={`tel:${s.support_phone.replace(/[^\d+]/g, '')}`}><span class="chat-ico"><Icon name="phone" /></span><span><b>Call {s.support_phone}</b></span></a>}
+              {!wa && !s.messenger_page && !s.support_phone && <a class="chat-option" href="/contact"><span class="chat-ico"><Icon name="phone" /></span><span><b>Contact us</b></span></a>}
+            </div>
+            <div class="chat-box" data-chat-box hidden>
+              <div class="chat-head">
+                <button class="icon-btn" type="button" data-chat-back aria-label="Back"><Icon name="left" /></button>
+                <span><b>Shop assistant</b><small>Usually answers in seconds</small></span>
+              </div>
+              <div class="chat-log" data-chat-log aria-live="polite" />
+              <div class="chat-chips" data-chat-chips>
+                <button type="button">Delivery charge?</button><button type="button">Cash on Delivery?</button><button type="button">What’s in season?</button><button type="button">Track my order</button>
+              </div>
+              <form class="chat-form" data-chat-form>
+                <label class="sr-only" for="chat-q">Your question</label>
+                <input id="chat-q" name="q" maxlength={300} autocomplete="off" enterkeyhint="send" placeholder="Ask about a product, delivery…" />
+                <button class="chat-send" type="submit" aria-label="Send"><Icon name="right" /></button>
+              </form>
+              <p class="chat-note">Answers come from our shop’s information. For anything about your order, WhatsApp or call us.</p>
+            </div>
           </div>
-          <button class="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel" aria-label="Chat with us"><Icon name="chat" size={26} /></button>
+          <button class="chat-fab" type="button" aria-expanded="false" aria-controls="chat-panel" aria-label="Chat with us"><span class="chat-fab-open"><Icon name="chat" size={26} /></span><span class="chat-fab-close"><Icon name="close" size={24} /></span></button>
         </div>
+
+        {popup && (
+          <dialog class={`popup theme-${popup.theme ?? 'chili'}`} data-popup data-key={popup.key} data-delay={String(popup.delay ?? 4)} data-freq={popup.frequency ?? 'day'} aria-labelledby="popup-title">
+            <button class="popup-close" type="button" data-popup-close aria-label="Close"><Icon name="close" /></button>
+            {popup.image && <img class="popup-img" src={popup.image} srcset={srcsetOf(popup.image)} sizes="(max-width: 480px) 90vw, 420px" alt="" width="600" height="400" loading="lazy" decoding="async" />}
+            <div class="popup-copy">
+              <p class="popup-title" id="popup-title">{popup.headline}</p>
+              {popup.subline && <p class="popup-sub">{popup.subline}</p>}
+              <a class="btn btn-cta" href={popup.cta_href ?? '/shop'} data-popup-go>{popup.cta_text ?? 'Shop now'}<Icon name="right" size={18} /></a>
+            </div>
+          </dialog>
+        )}
 
         <div class="sheet-backdrop" data-sheet-close hidden />
         <section class="sheet" id="pick-sheet" role="dialog" aria-modal="true" aria-labelledby="pick-title" hidden>

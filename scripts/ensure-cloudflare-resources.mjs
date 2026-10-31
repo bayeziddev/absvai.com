@@ -98,12 +98,16 @@ toml = toml
   .replace(/(\[\[kv_namespaces\]\][^[]*?)id\s*=\s*"[^"]*"/, `$1id = "${kv.id}"`);
 if (!hasZone) toml = toml.replace(/^routes\s*=\s*\[[\s\S]*?^\]\n/m, '');
 if (!hasR2) toml = toml.replace(/^\[\[r2_buckets\]\]\n(?:[^\n[]*\n)*/m, '');
+// Workers AI for the shop and admin assistants. Only the deployed Worker gets it: locally and in tests the AI binding
+// would call the real account (and need a login), so there the assistants use their built-in answers.
+if (!/^\[ai\]/m.test(toml)) toml += '\n[ai]\nbinding = "AI"\n';
 writeFileSync(CONFIG, toml);
 
 const lines = [
   `D1 ${dbName}: ${db.uuid}`,
   `KV ${KV_TITLE}: ${kv.id}`,
   hasR2 ? `R2 ${bucket}: ready` : `R2: not switched on for this account yet, so photo and logo uploads are off. Dashboard → R2 Object Storage → Get started, then deploy again.`,
+  'Workers AI: on (shop chat and admin assistant, within the free daily allowance)',
   created.length ? `Created this run: ${created.join(', ')}` : 'All resources already existed.',
   hasZone ? `Custom domains: ${ZONE} and www.${ZONE}` : `The ${ZONE} zone is not in this Cloudflare account yet, so this deploy goes to https://absvai.${subdomain}.workers.dev only. Add the zone (and point the domain's nameservers to Cloudflare), then deploy again.`,
 ];

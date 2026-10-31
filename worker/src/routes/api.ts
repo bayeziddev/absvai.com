@@ -7,7 +7,10 @@ import { maskPhone, normalizeBdPhone } from '../lib/phone';
 import { expandQuery } from '../lib/search';
 import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
 import { effectiveVariantAttributes } from '../lib/templates';
-import { getProductDetail, liveProducts, productExists, queryProducts, suggestCategories, synonymGroups, type ProductQuery } from '../repo/catalog';
+import { activeSeasonIds, getProductDetail, getSeasons, liveProducts, productExists, queryProducts, suggestCategories, synonymGroups, type ProductQuery } from '../repo/catalog';
+import { settingInt } from '../repo/settings';
+import { smallOf } from '../lib/images';
+import { askModel, builtInShopReply, cleanTurns, shopFacts, shopSystemPrompt } from '../services/assistant';
 import { geoHierarchy, postcodeMap, unionsOf } from '../repo/geo';
 import { sessionStatus } from '../repo/incomplete';
 import { addNotifyRequest, addWholesaleInquiry } from '../repo/misc';
@@ -17,6 +20,8 @@ import { quote } from '../services/checkout';
 import { recordAttempt } from '../services/fraud';
 import { captureIncomplete, checkCheckoutToken, issueCheckoutToken, MIN_FILL_SECONDS, newSessionId } from '../services/incomplete';
 import { issueOtp, placeOrder, verifyOtp } from '../services/orders';
+import { otpActive } from '../services/sms';
+import { inquiryEmail } from '../services/email';
 import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf } from './context';
 
 export const api = new Hono<AppEnv>();
@@ -82,6 +87,26 @@ api.get('/search/suggest', async c => {
   const terms = expandQuery(q, await synonymGroups(c.env.DB));
   const [products, cats] = await Promise.all([queryProducts(c.env.DB, { terms, limit: 6, sort: 'best_selling' }), suggestCategories(c.env.DB, terms)]);
   return c.json({ products: products.items.map(p => ({ slug: p.slug, name: p.name, image: p.image, pricePaisa: p.pricePaisa, keySpecs: p.keySpecs })), categories: cats });
+});
+
+/**
+ * Shop assistant (the chat popup): answers from the shop's own products and rules, on Workers AI when it is
+ * available and within the daily limit, otherwise with the built-in answers. Nothing is stored.
+ */
+api.post('/assistant', async c => {
+  if (!(await rateLimit(c.env.KV, limiterKeys(c, 'assist').ip, 20, 600))) throw new HttpError(429, 'You are sending messages very fast. Please wait a minute, or WhatsApp us.');
+  const turns = cleanTurns((await readJson(c)).messages);
+  if (!turns.length) throw bad('Type your question.');
+  const settings = await settingsOf(c);
+  const seasons = await getSeasons(c.env.DB);
+  const live = activeSeasonIds(seasons);
+  const question = turns[turns.length - 1].content;
+  const facts = await shopFacts(c.env.DB, settings, question, seasons.find(s => live.includes(s.id))?.name ?? null);
+  const ai = await askModel(c.env, shopSystemPrompt(facts), turns, { budgetKey: 'shop', dailyLimit: settingInt(settings, 'assistant_daily_limit', 300) });
+  const reply = ai ?? builtInShopReply(question, facts, settings);
+  // Product cards under the answer: the ones it mentions (all matches for the built-in answer).
+  const shown = facts.products.filter(p => !ai || reply.includes(`/p/${p.slug}`)).slice(0, 3);
+  return c.json({ reply, ai: Boolean(ai), products: shown.map(p => ({ slug: p.slug, name: p.name, image: smallOf(p.image), pricePaisa: p.pricePaisa })) }, 200, { 'Cache-Control': 'private, no-store' });
 });
 
 api.post('/cart/price', async c => {
@@ -226,6 +251,7 @@ api.post('/checkout/place', async c => {
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,
     lines: sanitizeLines(body.lines), source: landing ? 'landing' : 'web', sourceDetail: landing ? `Landing page ${landing}` : null, utm,
+    email: str(body.email, 120) || null, emailOffers: body.emailOffers === true,
   }, { channel: 'web', identity: id, checkoutSessionId: sid, route: '/api/checkout/place' });
   return c.json(placed, 201);
 });
@@ -250,7 +276,9 @@ api.post('/orders/:orderNo/otp/resend', async c => {
   const body = await readJson(c);
   const o = await orderByToken(c, c.req.param('orderNo'), str(body.t, 64));
   if (o.otp_verified_at) return c.json({ ok: true, message: 'Already verified.' });
-  const r = await issueOtp(c.env, await settingsOf(c), { orderId: Number(o.id), orderNo: String(o.order_no), phone: String(o.phone), identity: await requestIdentity(c), route: '/api/orders/otp/resend' });
+  const settings = await settingsOf(c);
+  if (!otpActive(c.env, settings)) return c.json({ ok: false, message: 'We will call you to confirm your order.' }, 409);
+  const r = await issueOtp(c.env, settings, { orderId: Number(o.id), orderNo: String(o.order_no), phone: String(o.phone), identity: await requestIdentity(c), route: '/api/orders/otp/resend' });
   return c.json({ ok: r.sent, message: r.message }, r.sent ? 200 : 429);
 });
 
@@ -297,5 +325,6 @@ api.post('/wholesale-inquiry', async c => {
   const name = str(body.name, 120);
   if (!phone || name.length < 2) throw bad('Enter your name and a Bangladeshi mobile number.');
   await addWholesaleInquiry(c.env.DB, { name, phone, business: str(body.business, 120) || null, district: str(body.district, 60) || null, message: str(body.message, 1000) || null });
+  await inquiryEmail(c.env, 'wholesale inquiry', [['Name', name], ['Phone', `0${phone.slice(3)}`], ['Business', str(body.business, 120)], ['District', str(body.district, 60)], ['Message', str(body.message, 1000)]].filter(([, v]) => v) as Array<[string, string]>);
   return c.json({ ok: true, message: 'Thank you! Our wholesale team will call you within one working day.' });
 });

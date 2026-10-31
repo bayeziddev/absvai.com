@@ -14,6 +14,8 @@ mkdirSync(dist, { recursive: true });
 for (const entry of readdirSync(dist)) rmSync(join(dist, entry), { recursive: true, force: true });
 cpSync(join(root, 'public'), dist, { recursive: true });
 cpSync(join(root, 'admin'), join(dist, 'admin'), { recursive: true });
+// The owner guide, for the admin assistant (worker/src/services/assistant.ts reads it from the static assets).
+cpSync(join(root, 'docs/OWNER-GUIDE.md'), join(dist, 'admin/guide.md'));
 const geo = join(dist, 'geo', version);
 mkdirSync(geo, { recursive: true });
 cpSync(join(root, 'data/geo/generated/outlines'), join(geo, 'outlines'), { recursive: true });

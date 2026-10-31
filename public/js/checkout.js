@@ -290,6 +290,7 @@ form.addEventListener('submit', async e => {
     const r = await api('/api/checkout/place', {
       phone: form.phone.value, name: form.name.value, divisionId: Number(sel.division.value), districtId: Number(sel.district.value), upazilaId: Number(sel.upazila.value),
       unionId: Number(sel.union.value) || null, postcode: form.postcode.value || null, addressLine: form.addressLine.value, landmark: form.landmark.value, note: form.note.value,
+      email: form.email.value.trim(), emailOffers: form.emailOffers.checked,
       paymentMethod: payment(), advanceTrxId: form.advanceTrxId?.value || null, advanceWallet: form.advanceWallet?.value || null,
       lines, token, utm: utm(), website: form.website?.value ?? '',
     });
