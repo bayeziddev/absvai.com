@@ -1,5 +1,5 @@
 // Cart page: the browser keeps only variant IDs and quantities; every price comes from the server.
-import { api, cart, esc, taka } from './app.js';
+import { api, cart, esc, small, taka } from './app.js';
 
 const root = document.querySelector('[data-cart-page]');
 const pd = JSON.parse(document.getElementById('page-data')?.textContent || '{}');
@@ -20,7 +20,7 @@ async function render() {
     ${r.problems.length ? `<div class="notice notice-error" role="alert">${r.problems.map(esc).join('<br>')}</div>` : ''}
     ${r.lines.map(l => `
       <article class="cart-line" data-line="${l.variantId}">
-        <a href="/p/${esc(l.slug)}"><img src="${esc(l.image)}" alt=""></a>
+        <a href="/p/${esc(l.slug)}"><img src="${esc(small(l.image))}" alt=""></a>
         <div>
           <h3><a href="/p/${esc(l.slug)}">${esc(l.name)}</a></h3>
           ${l.variantLabel ? `<p class="small muted">${esc(l.variantLabel)}</p>` : ''}

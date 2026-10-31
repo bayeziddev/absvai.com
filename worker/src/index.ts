@@ -7,6 +7,7 @@ import { Hono } from 'hono';
 import type { AppEnv } from './env';
 import { buildCsp } from './lib/csp';
 import { HttpError } from './lib/http';
+import { originalOf } from './lib/images';
 import { admin } from './routes/admin';
 import { api } from './routes/api';
 import { notFound, pages } from './routes/pages';
@@ -50,7 +51,10 @@ app.route('/api', api);
 app.get('/media/*', async c => {
   const key = c.req.path.slice('/media/'.length);
   if (!/^(p\/\d+|brand|c|b)\/[\w-]+\.(webp|jpg|png|avif|pdf|svg)$/.test(key)) return c.notFound();
-  const obj = c.env.MEDIA ? await c.env.MEDIA.get(key) : null;
+  let obj = c.env.MEDIA ? await c.env.MEDIA.get(key) : null;
+  // A photo uploaded before the 480/960 px copies existed: serve the original in the copy's place.
+  const original = obj ? null : originalOf(key);
+  if (!obj && original) obj = await c.env.MEDIA!.get(original);
   if (!obj) return c.notFound();
   const headers = new Headers();
   obj.writeHttpMetadata(headers);

@@ -4,6 +4,16 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 export const taka = paisa => `৳${Math.floor(Math.abs(paisa) / 100).toLocaleString('en-US')}${paisa % 100 ? `.${String(Math.abs(paisa) % 100).padStart(2, '0')}` : ''}`;
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+// Uploaded photos also come 480 and 960 px wide (worker/src/lib/images.ts); built-in pictures don't.
+const RESIZABLE = /^\/media\/(p\/\d+|c|b)\/[\w-]+\.(webp|jpg)$/;
+const copy = (u, w) => u.replace(/\.(webp|jpg)$/, `-${w}.$1`);
+/** The small copy of a photo, for thumbnails. */
+export const small = u => (u && RESIZABLE.test(u) ? copy(u, 480) : u);
+/** Shows a photo in an <img> that has `sizes`, letting the browser pick the right width. */
+export function showPhoto(img, u) {
+  img.srcset = u && RESIZABLE.test(u) ? `${copy(u, 480)} 480w, ${copy(u, 960)} 960w, ${u} 1600w` : '';
+  img.src = u;
+}
 
 function store(key, fallback) {
   return {
@@ -110,7 +120,7 @@ function setupSearch() {
         const r = await api(`/api/search/suggest?q=${encodeURIComponent(q)}`);
         if (mine !== seq) return;
         const cats = r.categories.map(c => `<a role="option" href="/c/${esc(c.slug)}"><span class="suggest-cat">${esc(c.name)}</span></a>`).join('');
-        const prods = r.products.map(p => `<a role="option" href="/p/${esc(p.slug)}"><img src="${esc(p.image)}" alt=""><span>${esc(p.name)}<small>${taka(p.pricePaisa)}${p.keySpecs ? ` · ${esc(p.keySpecs)}` : ''}</small></span></a>`).join('');
+        const prods = r.products.map(p => `<a role="option" href="/p/${esc(p.slug)}"><img src="${esc(small(p.image))}" alt=""><span>${esc(p.name)}<small>${taka(p.pricePaisa)}${p.keySpecs ? ` · ${esc(p.keySpecs)}` : ''}</small></span></a>`).join('');
         box.innerHTML = cats + prods || `<a href="/search?q=${encodeURIComponent(q)}"><span>Search for “${esc(q)}”</span></a>`;
         box.hidden = false;
       } catch { box.hidden = true; }
@@ -172,7 +182,7 @@ async function openPicker(slug, mode) {
     const v = match();
     const ok = v && v.availability?.canBuy && (v.stock > 0 || v.availability.state === 'made_to_order');
     body.innerHTML = `
-      <div class="sheet-product"><img src="${esc(p.image ?? '/img/placeholders/none.svg')}" alt=""><div><strong>${esc(p.name)}</strong><p class="price"><strong>${v ? taka(v.pricePaisa) : '—'}</strong>${v?.compareAtPricePaisa > v?.pricePaisa ? `<s>${taka(v.compareAtPricePaisa)}</s>` : ''}</p></div></div>
+      <div class="sheet-product"><img src="${esc(small(p.image) ?? '/img/placeholders/none.svg')}" alt=""><div><strong>${esc(p.name)}</strong><p class="price"><strong>${v ? taka(v.pricePaisa) : '—'}</strong>${v?.compareAtPricePaisa > v?.pricePaisa ? `<s>${taka(v.compareAtPricePaisa)}</s>` : ''}</p></div></div>
       ${p.attributes.map(a => `<fieldset class="opt"><legend>${esc(a.label)}</legend><div class="opt-values">${a.values.map(val => `
         <label class="opt-chip"><input type="radio" name="sheet-${esc(a.id)}" value="${esc(val)}" ${choice[a.id] === val ? 'checked' : ''}><span>${esc(val)}</span></label>`).join('')}</div></fieldset>`).join('')}
       <p class="avail ${ok ? 'avail-available' : 'avail-muted'}">${v ? esc(ok ? v.availability.label : v.stock <= 0 ? 'Out of stock' : v.availability.label) : 'This combination is not available'}</p>

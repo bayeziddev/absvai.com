@@ -11,6 +11,7 @@ import { TAG, tagHeader } from '../lib/cache-tags';
 import { bdDate, monthName } from '../lib/dates';
 import { clientIp, parseJson, rateLimit } from '../lib/http';
 import { normalizeBdPhone } from '../lib/phone';
+import { pageCss } from '../lib/page-css';
 import { expandQuery } from '../lib/search';
 import { isSeasonActive, nextSeason } from '../lib/seasons';
 import { DEFAULT_COLORS, parseBrandColors } from '../lib/settings-schema';
@@ -48,10 +49,11 @@ async function weakEtag(body: string): Promise<string> {
  * Renders a page. `cache` lists the page's tags: those pages are stored at the edge by the Storefront entrypoint and
  * refreshed by tag when an admin saves (Section 2.1). Pages without tags (cart, checkout, orders, tracking) are never cached.
  */
-async function render(c: Context<AppEnv>, sh: Shell, props: Omit<LayoutProps, 'settings' | 'categories' | 'siteUrl' | 'activeSeason'>, opts: { status?: number; cache?: string[] | null } = {}) {
+async function render(c: Context<AppEnv>, sh: Shell, props: Omit<LayoutProps, 'settings' | 'categories' | 'siteUrl' | 'activeSeason' | 'css'>, opts: { status?: number; cache?: string[] | null } = {}) {
   const status = opts.status ?? 200;
+  const css = await pageCss(c.env.ASSETS);
   const html = `<!DOCTYPE html>${await (
-    <Layout {...props} settings={sh.settings} categories={sh.visible} siteUrl={c.env.SITE_URL} activeSeason={sh.activeSeason} />
+    <Layout {...props} settings={sh.settings} categories={sh.visible} siteUrl={c.env.SITE_URL} activeSeason={sh.activeSeason} css={css} />
   ).toString()}`;
   if (!opts.cache || status !== 200) return c.html(html, status as 200, { 'Cache-Control': 'private, no-store' });
   const etag = await weakEtag(html);

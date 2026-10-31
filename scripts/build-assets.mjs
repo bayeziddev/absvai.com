@@ -32,6 +32,21 @@ for (const [family, weights] of FONT_FILES) {
   for (const w of weights) cpSync(join(root, `node_modules/@fontsource/${family}/files/${family}-latin-${w}-normal.woff2`), join(fonts, `${family}-latin-${w}-normal.woff2`));
 }
 
+// Minify the storefront CSS (the Worker puts it inside every page, see worker/src/lib/page-css.ts) and scripts.
+// esbuild comes with wrangler; without it the files are served as written.
+try {
+  const { transformSync } = await import('esbuild');
+  const css = join(dist, 'css/app.css');
+  writeFileSync(css, transformSync(readFileSync(css, 'utf8'), { loader: 'css', minify: true }).code);
+  for (const f of readdirSync(join(dist, 'js')).filter(f => f.endsWith('.js'))) {
+    const p = join(dist, 'js', f);
+    writeFileSync(p, transformSync(readFileSync(p, 'utf8'), { loader: 'js', minify: true }).code);
+  }
+} catch (e) {
+  if (e?.code !== 'ERR_MODULE_NOT_FOUND') throw e;
+  console.warn('esbuild not found: storefront CSS and JS are not minified.');
+}
+
 // The service worker's cache name follows the content of the files it caches, so a deploy refreshes it.
 const hash = createHash('sha256');
 const walk = dir => { for (const f of readdirSync(dir).sort()) { const p = join(dir, f); if (statSync(p).isDirectory()) walk(p); else hash.update(f).update(readFileSync(p)); } };

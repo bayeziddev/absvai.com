@@ -1,7 +1,7 @@
 // Banner editor for the owner: picture upload, headline, a short line, the button, where it opens and a colour, with a live
 // preview. Used for the homepage banners, the second banner and each season's banners. No codes or links to type.
 import { api, esc, toast } from '../app.js';
-import { compressImage } from './products.js';
+import { appendImage, compressImage } from './products.js';
 
 const THEMES = [['chili', 'Red', '#B3261E', '#fff'], ['turmeric', 'Yellow', '#F2B705', '#2A1F1A'], ['clove', 'Dark', '#2A1F1A', '#FFF8EC'], ['leaf', 'Green', '#2E7D32', '#fff']];
 
@@ -72,9 +72,8 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
         const file = e.target.files[0];
         if (!file) return;
         try {
-          const c = await compressImage(file);
           const fd = new FormData();
-          fd.append('file', c.file);
+          appendImage(fd, await compressImage(file));
           b.image = (await api('/banner-image', 'POST', fd)).url;
           toast('Picture added. Remember to save.');
           draw();

@@ -1,4 +1,5 @@
 import { api, badge, busy, can, confirmBox, esc, slideOver, toast } from '../app.js';
+import { appendImage, compressImage } from './products.js';
 
 // ───────────── Categories (three levels, drag and drop) ─────────────
 
@@ -136,9 +137,9 @@ function editCategory(c, cats, templates, seasons, done) {
   so.body.querySelector('#cat-file').addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file) return;
-    const fd = new FormData();
-    fd.append('file', file);
     try {
+      const fd = new FormData();
+      appendImage(fd, await compressImage(file));
       const r = await api('/category-image', 'POST', fd);
       form.iconUrl.value = r.url;
       so.body.querySelector('#cat-pic .qp-add span').textContent = 'Change picture';

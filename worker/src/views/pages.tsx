@@ -1,5 +1,6 @@
 import type { CategoryNode, ProductCard, ProductDetail } from '../repo/catalog';
 import { formatDate } from '../lib/dates';
+import { SIZES, smallOf, srcsetOf } from '../lib/images';
 import { formatTaka, formatUnitPrice, unitPrice } from '../lib/money';
 import { localPhone, maskPhone } from '../lib/phone';
 import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
@@ -13,36 +14,39 @@ export function HomePage(p: {
   banners: Banner[]; categories: CategoryNode[]; seasonal: Set<number>; activeSeason: { slug: string; name: string } | null;
   inSeason: ProductCard[]; featured: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; settings: Record<string, string>;
 }) {
+  // The first row of products is on screen on a phone, so its photos load with the page. Sections further down are
+  // drawn only as they scroll near (class "cv"), which keeps the first paint light.
+  const seasonFirst = Boolean(p.activeSeason && p.inSeason.length > 0);
   return (
     <>
       <HeroCarousel banners={p.banners} />
       <CategoryCarousel categories={p.categories} seasonal={p.seasonal} />
-      {p.activeSeason && p.inSeason.length > 0 && (
+      {seasonFirst && (
         <section class="section">
-          <SectionTitle title={`In Season Now · ${p.activeSeason.name}`} href={`/season/${p.activeSeason.slug}`} />
-          <Rail items={p.inSeason} label="In season now" />
+          <SectionTitle title={`In Season Now · ${p.activeSeason!.name}`} href={`/season/${p.activeSeason!.slug}`} />
+          <Rail items={p.inSeason} label="In season now" eagerCount={2} />
         </section>
       )}
       {p.featured.length > 0 && (
-        <section class="section">
+        <section class={seasonFirst ? 'section cv' : 'section'}>
           <SectionTitle title="Picked for you" href="/shop" />
-          <Rail items={p.featured} label="Picked for you" />
+          <Rail items={p.featured} label="Picked for you" eagerCount={seasonFirst ? 0 : 2} />
         </section>
       )}
       {p.originals.length > 0 && (
-        <section class="section section-originals">
+        <section class="section section-originals cv">
           <SectionTitle title="Abs Vai Originals" href="/originals" />
           <p class="section-lead">Made and packed by ABS VAI LTD.</p>
           <Rail items={p.originals} label="Abs Vai Originals" />
         </section>
       )}
       {p.deals.length > 0 && (
-        <section class="section">
+        <section class="section cv">
           <SectionTitle title="Hot Deals" href="/deals" />
           <Grid items={p.deals} />
         </section>
       )}
-      <section class="section">
+      <section class="section cv">
         <div class="biz-band">
           <div>
             <p class="biz-kicker">For small food businesses</p>
@@ -62,7 +66,7 @@ export function HomePage(p: {
       </section>
       <PromoBanner b={p.promo} />
       {p.newArrivals.length > 0 && (
-        <section class="section">
+        <section class="section cv">
           <SectionTitle title="New Arrivals" href="/new" />
           <Rail items={p.newArrivals} label="New arrivals" />
         </section>
@@ -169,12 +173,12 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
       <div class="pdp" data-pdp>
         <div class="pdp-gallery">
           <div class="gallery-main">
-            <img id="pdp-main" src={images[0]?.url ?? '/img/placeholders/none.svg'} alt={images[0]?.alt ?? String(prod.name)} width="600" height="600" fetchpriority="high" />
+            <img id="pdp-main" src={images[0]?.url ?? '/img/placeholders/none.svg'} srcset={srcsetOf(images[0]?.url)} sizes={SIZES.pdp} alt={images[0]?.alt ?? String(prod.name)} width="600" height="600" fetchpriority="high" />
             <Burst savePaisa={save} />
           </div>
           {images.length > 1 && (
             <div class="gallery-thumbs" role="list">
-              {images.map((m, i) => <button type="button" role="listitem" data-thumb={m.url} data-media-id={String(m.id)} aria-label={`Photo ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}><img src={m.url} alt="" width="80" height="80" loading="lazy" /></button>)}
+              {images.map((m, i) => <button type="button" role="listitem" data-thumb={m.url} data-media-id={String(m.id)} aria-label={`Photo ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}><img src={smallOf(m.url)} alt="" width="80" height="80" loading="lazy" decoding="async" /></button>)}
             </div>
           )}
         </div>
@@ -527,7 +531,7 @@ export function CategoriesPage(p: { categories: CategoryNode[] }) {
       <ul class="cat-grid">
         {p.categories.map(c => (
           <li>
-            <a class="cat-tile" href={`/c/${c.slug}`}><img src={c.icon} alt="" width="160" height="160" loading="lazy" /><span>{c.name}</span></a>
+            <a class="cat-tile" href={`/c/${c.slug}`}><img src={c.icon} srcset={srcsetOf(c.icon)} sizes={SIZES.catTile} alt="" width="160" height="160" loading="lazy" decoding="async" /><span>{c.name}</span></a>
             {c.children.length > 0 && <ul class="cat-children">{c.children.map(k => <li><a href={`/c/${k.slug}`}>{k.name}</a></li>)}</ul>}
           </li>
         ))}

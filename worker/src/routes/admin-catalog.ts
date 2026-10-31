@@ -5,6 +5,7 @@ import { validGtin } from '../lib/barcode';
 import { TAG } from '../lib/cache-tags';
 import { CLAIM_BADGES, healthClaimIn } from '../lib/claims';
 import { bad, HttpError, int, mediaBucket, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
+import { COPY_WIDTHS, copyOf } from '../lib/images';
 import { attributesKey, formatSku, productCodeFromName, SKU_PATTERN, variantCode } from '../lib/sku';
 import { effectiveSpecFields, effectiveVariantAttributes, parseNetQuantity, publishChecklist, validateSpecValue, type ProductTemplate } from '../lib/templates';
 import { clearTemplateCache, getSeasons, rowToVariant } from '../repo/catalog';
@@ -333,15 +334,29 @@ adminCatalog.post('/categories', need('catalog:write'), c => saveCategory(c, nul
 const CATEGORY_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/svg+xml': 'svg' };
 
 /** Stores an uploaded picture in R2 under `prefix/` and returns its public URL. */
+const IMMUTABLE = { cacheControl: 'public, max-age=31536000, immutable' };
+
+/** Saves the 480 and 960 px wide copies the admin made in the browser next to the photo (see lib/images). */
+async function putCopies(media: R2Bucket, key: string, form: FormData, type: string) {
+  if (!/\.(webp|jpg)$/.test(key)) return;
+  for (const w of COPY_WIDTHS) {
+    const f = form.get(`file_${w}`);
+    if (!(f instanceof File) || f.type !== type || f.size > 2 * 1024 * 1024) continue;
+    await media.put(copyOf(key, w), await f.arrayBuffer(), { httpMetadata: { contentType: type, ...IMMUTABLE } });
+  }
+}
+
 async function storeImage(c: Context<AppEnv>, prefix: 'c' | 'b', types: Record<string, string>, maxMb: number): Promise<string> {
-  const file = (await c.req.formData()).get('file');
+  const form = await c.req.formData();
+  const file = form.get('file');
   if (!(file instanceof File)) throw bad('Choose a picture.');
   const ext = types[file.type];
   if (!ext) throw bad(`Upload the picture as ${Object.values(types).map(x => x.toUpperCase()).join(', ')}.`);
   if (file.size > maxMb * 1024 * 1024) throw bad(`The picture must be under ${maxMb} MB.`);
   const media = mediaBucket(c.env);
   const key = `${prefix}/${crypto.randomUUID()}.${ext}`;
-  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
+  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, ...IMMUTABLE } });
+  await putCopies(media, key, form, file.type);
   return `/media/${key}`;
 }
 
@@ -715,7 +730,8 @@ adminCatalog.post('/media', need('catalog:write'), async c => {
   const media = mediaBucket(c.env);
   const key = `p/${productId}/${crypto.randomUUID()}.${ext}`;
   // R2 needs a known length; a FormData file stream has none, so read it (files are capped at 8 MB above).
-  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' } });
+  await media.put(key, await file.arrayBuffer(), { httpMetadata: { contentType: file.type, ...IMMUTABLE } });
+  if (kind === 'image') await putCopies(media, key, form, file.type);
   const r = await cat.insertMedia(c.env.DB, { productId, kind, key, url: `/media/${key}`, alt: str(form.get('alt'), 200) || null, width: int(form.get('width')), height: int(form.get('height')), sortOrder: await cat.nextMediaSort(c.env.DB, productId) });
   await audit(c, 'media.upload', 'product', productId, { kind, key });
   await catalogChanged(c, await productTags(c.env.DB, productId, Number(p.category_id)));
@@ -728,7 +744,7 @@ adminCatalog.delete('/media/:id', need('catalog:write'), async c => {
   if (!m) throw notFound();
   if (await cat.mediaSupportsClaim(c.env.DB, id)) throw bad('This document supports a claim badge. Remove the badge first.');
   await cat.deleteMedia(c.env.DB, id);
-  if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete(m.r2_key);
+  if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete([...new Set([m.r2_key, ...COPY_WIDTHS.map(w => copyOf(m.r2_key!, w))])]);
   await audit(c, 'media.delete', 'product', m.product_id, { id });
   await catalogChanged(c, await productTags(c.env.DB, m.product_id, null));
   return c.json({ ok: true });

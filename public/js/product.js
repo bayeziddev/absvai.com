@@ -1,5 +1,5 @@
 // Product page: the selectors come from the product's template; price, stock, unit price and photo follow the chosen option.
-import { added, buyNow, cart, taka } from './app.js';
+import { added, buyNow, cart, showPhoto, taka } from './app.js';
 
 const data = JSON.parse(document.getElementById('page-data').textContent);
 const form = document.querySelector('[data-pdp-form]');
@@ -36,7 +36,7 @@ function update() {
       r.disabled = !possible && !r.checked;
     });
   }
-  if (v?.image) document.getElementById('pdp-main').src = v.image;
+  if (v?.image) showPhoto(document.getElementById('pdp-main'), v.image);
   const max = v && v.availability.state !== 'made_to_order' ? Math.max(1, Math.min(99, v.stock)) : 20;
   qtyInput.max = String(max);
   if (Number(qtyInput.value) > max) qtyInput.value = String(max);
@@ -69,7 +69,7 @@ document.querySelectorAll('[data-pdp-add]').forEach(b => b.addEventListener('cli
 document.querySelectorAll('[data-pdp-order]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) buyNow(v.id, qty()); }));
 
 document.querySelectorAll('[data-thumb]').forEach(t => t.addEventListener('click', () => {
-  document.getElementById('pdp-main').src = t.dataset.thumb;
+  showPhoto(document.getElementById('pdp-main'), t.dataset.thumb);
   document.querySelectorAll('[data-thumb]').forEach(x => x.setAttribute('aria-current', String(x === t)));
 }));
 

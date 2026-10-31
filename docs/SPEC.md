@@ -79,10 +79,22 @@ reduced motion). `public/js/track.js` waits for `prerenderingchange`, so a prere
 visitor actually opens it.
 
 ### 2.4 Page-weight rules — **Built**
-Self-hosted fonts (`@fontsource` Inter + Poppins, latin subset, `font-display: swap`, preloaded); no Google Fonts. No framework on
-the storefront. Budgets enforced by `tests/unit/architecture.test.ts`: home/listing JS < 50 KB gzipped (actual ≈ 7 KB), product page
-< 100 KB (actual ≈ 9 KB). Images: WebP ≤ 1600 px compressed in the admin browser before upload; width/height on every image. A
-service worker (`public/sw.js`, versioned by content hash) caches CSS/JS/fonts and shows `offline.html`. **Planned P2**: Lighthouse
+Self-hosted fonts (`@fontsource` Inter + Poppins, latin subset); no Google Fonts. Poppins 800 and Inter 400 are preloaded;
+headings (Poppins) use `font-display: swap`, body text (Inter) `optional`, so text is never re-drawn while people read. No framework
+on the storefront. Budgets enforced by `tests/unit/architecture.test.ts` and `tests/unit/first-load.test.ts`: home/listing JS
+< 50 KB gzipped (actual ≈ 6 KB, minified at build), product page < 100 KB (actual ≈ 8 KB), stylesheet < 12 KB gzipped.
+
+**First paint in one download**: the minified stylesheet (≈ 7 KB brotli) and the brand colours are put inside every page
+(`worker/src/lib/page-css.ts`, read once per isolate from the static assets; the page links `/css/app.css` if that fails), which
+saves a round trip before anything can show (measured on a Lighthouse-style slow-4G phone: first paint 0.91 → 0.68 s on the
+homepage, 0.76 → 0.59 s on a product page). Homepage sections below the first screen use `content-visibility: auto`.
+
+**Images**: the admin compresses photos in the browser before upload (WebP, JPG where the browser can't make WebP) to ≤ 1600 px,
+plus **480 and 960 px wide copies** stored next to them (`<name>-480.webp`, `<name>-960.webp`, see `worker/src/lib/images.ts`).
+Cards, the product gallery, category pictures and banners use `srcset` + `sizes`, so a phone downloads a card photo of ~30–50 KB
+instead of the 1600 px original; `/media` serves the original for photos uploaded before copies existed. width/height on every
+image; on-screen images (hero, first category pictures, first product row) load eagerly, the rest lazily, on a soft cream
+placeholder. A service worker (`public/sw.js`, versioned by content hash) caches CSS/JS/fonts and shows `offline.html`. **Planned P2**: Lighthouse
 CI with the LCP < 2.0 s / INP < 200 ms / CLS < 0.1 mobile budgets against a preview deploy.
 
 ## 3. Public Website — Design & Navigation — **Built**

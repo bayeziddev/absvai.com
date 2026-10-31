@@ -1,6 +1,7 @@
 import type { Child } from 'hono/jsx';
 import type { CategoryNode } from '../repo/catalog';
 import { DEFAULT_COLORS, parseBrandColors, SOCIAL_NETWORKS, TRACKING_FORMATS } from '../lib/settings-schema';
+import { smallOf } from '../lib/images';
 import { Icon } from './icons';
 
 export interface LayoutProps {
@@ -20,6 +21,8 @@ export interface LayoutProps {
   children: Child;
   turnstileSiteKey?: string;
   bodyClass?: string;
+  /** The stylesheet, put inside the page (lib/page-css); without it the page links /css/app.css. */
+  css?: string | null;
 }
 
 const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
@@ -54,7 +57,8 @@ export function Layout(p: LayoutProps) {
   const announce = s.announcement || '';
   const logo = /^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/.test(s.brand_logo_url ?? '') ? s.brand_logo_url : null;
   const colors = parseBrandColors(JSON.parse(s.brand_colors || '{}'));
-  const customColors = (Object.keys(DEFAULT_COLORS) as Array<keyof typeof DEFAULT_COLORS>).some(k => colors[k] !== DEFAULT_COLORS[k]);
+  // Brand colours changed in Settings (checked hex values), as CSS variables after the stylesheet.
+  const brandVars = (Object.keys(DEFAULT_COLORS) as Array<keyof typeof DEFAULT_COLORS>).filter(k => colors[k] !== DEFAULT_COLORS[k]).map(k => `--${k}:${colors[k]}`).join(';');
   const tracking = trackingConfig(s, p.path);
   const Wordmark = (props: { light?: boolean }) => (
     <a class={`wordmark${props.light ? ' wordmark-light' : ''}`} href="/" aria-label={`${store} home`}>{logo ? <img src={logo} alt={store} height="32" /> : <>Abs<span>Vai</span></>}</a>
@@ -78,9 +82,11 @@ export function Layout(p: LayoutProps) {
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        {/* Headings and body text: both start downloading with the page, before the browser reaches the text. */}
         <link rel="preload" href="/fonts/poppins-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-        <link rel="stylesheet" href="/css/app.css" />
-        {customColors && <link rel="stylesheet" href="/brand.css" />}
+        <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        {p.css ? <style dangerouslySetInnerHTML={{ __html: p.css }} /> : <link rel="stylesheet" href="/css/app.css" />}
+        {brandVars && <style dangerouslySetInnerHTML={{ __html: `:root{${brandVars}}` }} />}
         <script type="speculationrules" dangerouslySetInnerHTML={{ __html: json(SPECULATION_RULES) }} />
         {(p.jsonLd ?? []).map(d => <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json(d) }} />)}
       </head>
@@ -109,7 +115,7 @@ export function Layout(p: LayoutProps) {
             </nav>
             <button class="icon-btn search-toggle" type="button" data-search-toggle aria-label="Search" aria-expanded="false"><Icon name="search" /></button>
             <a class="icon-btn" href="/wishlist" aria-label="Wishlist"><Icon name="heart" /><span class="badge" data-wish-count hidden>0</span></a>
-            <a class="icon-btn" href="/cart" aria-label="Cart"><Icon name="bag" /><span class="badge" data-cart-count>0</span></a>
+            <a class="icon-btn" href="/cart" aria-label="Cart"><Icon name="bag" /><span class="badge" data-cart-count hidden>0</span></a>
           </div>
         </header>
 
@@ -127,7 +133,7 @@ export function Layout(p: LayoutProps) {
                 <ul class="drawer-sub">
                   {p.categories.map(c => (
                     <li>
-                      <a href={`/c/${c.slug}`}><img src={c.icon} alt="" width="36" height="36" loading="lazy" />{c.name}</a>
+                      <a href={`/c/${c.slug}`}><img src={smallOf(c.icon)} alt="" width="36" height="36" loading="lazy" decoding="async" />{c.name}</a>
                       {c.children.length > 0 && (
                         <ul>{c.children.map(k => (
                           <li><a href={`/c/${k.slug}`}>{k.name}</a>
@@ -184,7 +190,7 @@ export function Layout(p: LayoutProps) {
         <nav class="tabbar" aria-label="Quick links">
           <a href="/" aria-current={p.tab === 'home' ? 'page' : undefined}><Icon name="home" /><span>Home</span></a>
           <a href="/categories" aria-current={p.tab === 'categories' ? 'page' : undefined}><Icon name="grid" /><span>Categories</span></a>
-          <a href="/cart" class="tab-cart" aria-current={p.tab === 'cart' ? 'page' : undefined}><span class="tab-cart-btn"><Icon name="bag" size={26} /><span class="badge" data-cart-count>0</span></span><span>Cart</span></a>
+          <a href="/cart" class="tab-cart" aria-current={p.tab === 'cart' ? 'page' : undefined}><span class="tab-cart-btn"><Icon name="bag" size={26} /><span class="badge" data-cart-count hidden>0</span></span><span>Cart</span></a>
           <a href="/wishlist" aria-current={p.tab === 'wishlist' ? 'page' : undefined}><Icon name="heart" /><span>Wishlist</span></a>
           <a href="/account" aria-current={p.tab === 'account' ? 'page' : undefined}><Icon name="user" /><span>Account</span></a>
         </nav>

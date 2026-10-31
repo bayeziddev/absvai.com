@@ -73,17 +73,37 @@ const keyOf = a => Object.keys(a).filter(k => a[k]).sort().map(k => `${k}=${Stri
 const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 
 /** Photos are resized to 1600 px and saved as WebP in the browser before upload. */
+/**
+ * Shrinks a photo in the browser: at most 1600 px, plus 480 and 960 px wide copies so the store can send phones a
+ * small one (worker/src/lib/images.ts). WebP where the browser can make it (Safari can't), JPG otherwise.
+ */
 export async function compressImage(file) {
-  if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return { file, width: null, height: null };
+  if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return { file, width: null, height: null, copies: [] };
   const bmp = await createImageBitmap(file);
   const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
   const w = Math.round(bmp.width * scale);
   const h = Math.round(bmp.height * scale);
-  const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
-  const blob = await new Promise(r => canvas.toBlob(r, 'image/webp', 0.82));
-  return { file: new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' }), width: w, height: h };
+  const encode = async (cw, ch, type) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = cw; canvas.height = ch;
+    canvas.getContext('2d').drawImage(bmp, 0, 0, cw, ch);
+    return new Promise(r => canvas.toBlob(r, type, type === 'image/webp' ? 0.82 : 0.85));
+  };
+  let blob = await encode(w, h, 'image/webp');
+  if (blob.type !== 'image/webp') blob = await encode(w, h, 'image/jpeg');
+  const type = blob.type;
+  const ext = type === 'image/webp' ? 'webp' : 'jpg';
+  const name = file.name.replace(/\.\w+$/, '');
+  const copies = [];
+  for (const cw of [480, 960]) if (cw < w) copies.push([cw, new File([await encode(cw, Math.round((h * cw) / w), type)], `${name}-${cw}.${ext}`, { type })]);
+  return { file: new File([blob], `${name}.${ext}`, { type }), width: w, height: h, copies };
+}
+
+/** Adds a compressed photo, its smaller copies and its size to an upload form. */
+export function appendImage(fd, c) {
+  fd.append('file', c.file);
+  for (const [cw, f] of c.copies ?? []) fd.append(`file_${cw}`, f);
+  if (c.width) { fd.append('width', String(c.width)); fd.append('height', String(c.height)); }
 }
 
 /** The full save payload for a product as loaded from the API (both editors start from it, so nothing is lost on save). */
@@ -282,8 +302,7 @@ export async function openProduct(id, done, startStep = 1) {
   async function upload(file, kind) {
     const c = kind === 'image' ? await compressImage(file) : { file, width: null, height: null };
     const fd = new FormData();
-    fd.append('file', c.file); fd.append('productId', String(id)); fd.append('kind', kind); fd.append('alt', f.name);
-    if (c.width) { fd.append('width', String(c.width)); fd.append('height', String(c.height)); }
+    appendImage(fd, c); fd.append('productId', String(id)); fd.append('kind', kind); fd.append('alt', f.name);
     return api('/media', 'POST', fd);
   }
 

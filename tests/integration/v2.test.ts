@@ -4,6 +4,7 @@
  * cache headers and purge queue, encrypted settings, and query plans for the hot order list.
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { resetPageCss } from '../../worker/src/lib/page-css';
 import { listOrdersQuery } from '../../worker/src/repo/orders';
 import { createTestEnv, type TestEnv } from './env';
 
@@ -383,6 +384,69 @@ describe('settings without code: banners with pictures and social links', () => 
     expect(ok.status).toBe(200);
     const html = await (await t.fetch('/shop')).text();
     expect(html).toMatch(/class="footer-social"[\s\S]*href="https:\/\/www\.facebook\.com\/absvai"[\s\S]*href="https:\/\/www\.tiktok\.com\/@absvai"/);
+  });
+});
+
+describe('fast first load', () => {
+  const form = (fields: Record<string, string | File>) => { const f = new FormData(); for (const [k, v] of Object.entries(fields)) f.append(k, v); return f; };
+  const webp = (name: string, n: number) => new File([new Uint8Array(n).fill(7)], name, { type: 'image/webp' });
+  const post = (path: string, body: FormData) => t.fetch(path, { method: 'POST', body, headers: { cookie: t.admin.cookie, 'x-csrf-token': t.admin.csrf, origin: 'https://absvai.test' } });
+
+  it('puts the stylesheet and brand colours inside the page, and links the file only if it cannot', async () => {
+    const assets = t.env.ASSETS;
+    try {
+      (t.env as { ASSETS: unknown }).ASSETS = { fetch: async () => new Response('.card{color:red}</style><script>') };
+      resetPageCss();
+      expect((await t.adminJson('/settings', 'PUT', { brand_colors: { chili: '#A0201A' } })).status).toBe(200);
+      const html = await (await t.fetch('/')).text();
+      expect(html).toContain('<style>.card{color:red}<\\/style><script></style>');
+      expect(html).toContain('<style>:root{--chili:#A0201A}</style>');
+      expect(html).not.toMatch(/<link rel="stylesheet"/);
+      // Cart badges start hidden, so "0" never flashes before the cart is read.
+      expect(html.match(/<span class="badge" data-cart-count="true" hidden="">0<\/span>/g)).toHaveLength(2);
+      (t.env as { ASSETS: unknown }).ASSETS = { fetch: async () => new Response('', { status: 404 }) };
+      resetPageCss();
+      expect(await (await t.fetch('/shop')).text()).toContain('<link rel="stylesheet" href="/css/app.css"/>');
+    } finally {
+      (t.env as { ASSETS: unknown }).ASSETS = assets;
+      resetPageCss();
+      await t.adminJson('/settings', 'PUT', { brand_colors: {} });
+    }
+  });
+
+  it('stores 480 and 960 px copies of a photo and phones get them through srcset', async () => {
+    const up = await post('/api/admin/media', form({ file: webp('gur.webp', 9000), file_480: webp('gur-480.webp', 900), file_960: webp('gur-960.webp', 3000), productId: String(ids.gurProduct), kind: 'image', width: '1600', height: '1200' }));
+    expect(up.status).toBe(201);
+    const { id, url } = (await up.json()) as { id: number; url: string };
+    expect((await (await t.fetch(url.replace('.webp', '-480.webp'))).arrayBuffer()).byteLength).toBe(900);
+    expect((await (await t.fetch(url.replace('.webp', '-960.webp'))).arrayBuffer()).byteLength).toBe(3000);
+    const others = await t.sql<{ id: number }>("SELECT id FROM product_media WHERE product_id = ? AND kind = 'image' AND id != ?", ids.gurProduct, id);
+    await t.adminJson(`/products/${ids.gurProduct}/media-order`, 'PUT', { ids: [id, ...others.map(o => o.id)] });
+    const pdp = await (await t.fetch('/p/khejur-patali-gur')).text();
+    expect(pdp).toContain(`srcset="${url.replace('.webp', '-480.webp')} 480w, ${url.replace('.webp', '-960.webp')} 960w, ${url} 1600w"`);
+    expect(await (await t.fetch('/c/khejur-gur')).text()).toContain(`${url.replace('.webp', '-480.webp')} 480w`);
+    // Removing the photo removes its copies.
+    expect((await t.adminJson(`/media/${id}`, 'DELETE')).status).toBe(200);
+    expect((await t.fetch(url.replace('.webp', '-480.webp'))).status).toBe(404);
+    expect(await t.env.MEDIA!.head(url.slice('/media/'.length).replace('.webp', '-960.webp'))).toBeNull();
+  });
+
+  it('serves the original for a photo uploaded before copies existed', async () => {
+    await t.env.MEDIA!.put(`p/${ids.gurProduct}/older-photo.webp`, new Uint8Array(1234));
+    const r = await t.fetch(`/media/p/${ids.gurProduct}/older-photo-480.webp`);
+    expect(r.status).toBe(200);
+    expect((await r.arrayBuffer()).byteLength).toBe(1234);
+    expect((await t.fetch(`/media/p/${ids.gurProduct}/missing-480.webp`)).status).toBe(404);
+  });
+
+  it('category and banner pictures keep their copies too', async () => {
+    const up = await post('/api/admin/banner-image', form({ file: webp('b.webp', 5000), file_480: webp('b-480.webp', 500) }));
+    const { url } = (await up.json()) as { url: string };
+    expect((await (await t.fetch(url.replace('.webp', '-480.webp'))).arrayBuffer()).byteLength).toBe(500);
+    // A copy of another type, or a PNG original (whose name has no copy form), is ignored.
+    const png = await post('/api/admin/category-image', form({ file: new File([new Uint8Array([0x89, 0x50])], 'c.png', { type: 'image/png' }), file_480: webp('c-480.webp', 50) }));
+    const c = (await png.json()) as { url: string };
+    expect((await (await t.fetch(c.url)).arrayBuffer()).byteLength).toBe(2);
   });
 });
 

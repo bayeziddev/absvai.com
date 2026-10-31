@@ -1,9 +1,11 @@
 /* Abs Vai storefront: "spice market meets Facebook ad". Mobile-first, no framework. */
 
-/* Self-hosted, latin subset (OFL). font-display: swap so text never waits for a font. */
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/inter-latin-400-normal.woff2) format('woff2'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500 600; font-display: swap; src: url(/fonts/inter-latin-600-normal.woff2) format('woff2'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/inter-latin-700-normal.woff2) format('woff2'); }
+/* Self-hosted, latin subset (OFL). Text never waits for a font. Body text (Inter) is "optional": if it hasn't arrived
+   by the first paint, that page keeps the phone's own font instead of re-drawing text while people read, and the
+   next page uses Inter from cache. Headings (Poppins, 8 KB, preloaded) swap in. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: optional; src: url(/fonts/inter-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500 600; font-display: optional; src: url(/fonts/inter-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: optional; src: url(/fonts/inter-latin-700-normal.woff2) format('woff2'); }
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/poppins-latin-700-normal.woff2) format('woff2'); }
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 800; font-display: swap; src: url(/fonts/poppins-latin-800-normal.woff2) format('woff2'); }
 
@@ -158,6 +160,9 @@ main { min-height: 60vh; }
 
 /* ── Sections ── */
 .section { max-width: 1240px; margin: 28px auto 0; padding: 0 var(--gutter); }
+/* Sections below the first screen are laid out and painted only as they scroll near, so the first paint is light. */
+.cv, .site-footer { content-visibility: auto; contain-intrinsic-size: auto 560px; }
+.cv { padding-bottom: 12px; margin-bottom: -12px; }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .section-lead { margin: -6px 0 12px; color: var(--muted); }
 .brush-title { margin: 0; font-size: clamp(1.25rem, 4vw, 1.65rem); }
@@ -170,7 +175,7 @@ main { min-height: 60vh; }
 .cat-track { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; list-style: none; margin: 0; padding: 4px 2px 8px; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 85%, transparent); }
 .cat-track::-webkit-scrollbar { display: none; }
 .cat-item { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 84px; text-decoration: none; scroll-snap-align: start; text-align: center; }
-.cat-circle { position: relative; width: 76px; height: 76px; border-radius: 50%; background: var(--white); box-shadow: var(--shadow); display: grid; place-items: center; overflow: hidden; border: 3px solid var(--white); }
+.cat-circle { position: relative; width: 76px; height: 76px; border-radius: 50%; background: var(--cream); box-shadow: var(--shadow); display: grid; place-items: center; overflow: hidden; border: 3px solid var(--white); }
 .cat-circle img { width: 100%; height: 100%; object-fit: cover; }
 .cat-season { position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; border-radius: 50%; background: var(--turmeric); display: grid; place-items: center; color: var(--clove); }
 .cat-name { font-size: .78rem; font-weight: 600; line-height: 1.25; }

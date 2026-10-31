@@ -2,7 +2,7 @@
 // choose with a price and stock each, the parcel weight, and only the details the category requires to publish. Everything
 // else (SEO, seasons, wholesale, barcodes…) keeps its saved or default value and lives in the full editor.
 import { api, busy, can, esc, fromPaisa, slideOver, toast, toPaisa } from '../app.js';
-import { compressImage, openProduct, productForm } from './products.js';
+import { appendImage, compressImage, openProduct, productForm } from './products.js';
 
 const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 const keyOf = a => Object.keys(a).sort().map(k => `${k}=${a[k]}`).join('|');
@@ -222,8 +222,7 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
       for (const p of st.newPhotos.splice(0)) {
         const c = await compressImage(p.file);
         const fd = new FormData();
-        fd.append('file', c.file); fd.append('productId', String(id)); fd.append('kind', 'image'); fd.append('alt', st.name);
-        if (c.width) { fd.append('width', String(c.width)); fd.append('height', String(c.height)); }
+        appendImage(fd, c); fd.append('productId', String(id)); fd.append('kind', 'image'); fd.append('alt', st.name);
         await api('/media', 'POST', fd);
       }
       const base = productForm(d);

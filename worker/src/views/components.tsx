@@ -1,5 +1,6 @@
 import type { Child } from 'hono/jsx';
 import type { CategoryNode, ProductCard } from '../repo/catalog';
+import { SIZES, srcsetOf } from '../lib/images';
 import { formatTaka } from '../lib/money';
 import { Icon } from './icons';
 
@@ -32,13 +33,13 @@ export function OriginalsSeal({ small }: { small?: boolean }) {
   return <span class={`seal${small ? ' seal-sm' : ''}`} title="Made by Abs Vai"><Icon name="leaf" size={small ? 12 : 14} />Made by Abs Vai</span>;
 }
 
-export function Card({ p, eager }: { p: ProductCard; eager?: boolean }) {
+export function Card({ p, eager, sizes = SIZES.card }: { p: ProductCard; eager?: boolean; sizes?: string }) {
   const a = p.availability;
   const href = `/p/${p.slug}`;
   return (
     <article class="card" data-product={p.slug} data-product-id={String(p.id)} data-variant={p.variantCount === 1 && p.defaultVariantId ? String(p.defaultVariantId) : undefined} data-name={p.name}>
       <a class="card-media" href={href} tabindex={-1} aria-hidden="true">
-        <img src={p.image} alt="" width="600" height="600" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+        <img src={p.image} srcset={srcsetOf(p.image)} sizes={sizes} alt="" width="600" height="600" loading={eager ? 'eager' : 'lazy'} decoding="async" />
         <Burst savePaisa={p.savePaisa} />
         <span class="card-tags">
           {a.state === 'pre_order' && <span class="tag tag-turmeric">Pre-order</span>}
@@ -79,10 +80,10 @@ export function Grid({ items, eagerCount = 0 }: { items: ProductCard[]; eagerCou
   return <div class="grid">{items.map((p, i) => <Card p={p} eager={i < eagerCount} />)}</div>;
 }
 
-export function Rail({ items, label }: { items: ProductCard[]; label: string }) {
+export function Rail({ items, label, eagerCount = 0 }: { items: ProductCard[]; label: string; eagerCount?: number }) {
   return (
     <div class="rail" role="region" aria-label={label} tabindex={0}>
-      {items.map(p => <div class="rail-item"><Card p={p} /></div>)}
+      {items.map((p, i) => <div class="rail-item"><Card p={p} eager={i < eagerCount} sizes={SIZES.rail} /></div>)}
     </div>
   );
 }
@@ -100,7 +101,7 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
               {b.subline && <p class="hero-sub">{b.subline}</p>}
               <span class="btn btn-cta">{b.cta_text ?? 'Shop now'}<Icon name="right" size={18} /></span>
             </div>
-            {b.image && <img class="hero-img" src={b.image} alt="" width="600" height="600" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />}
+            {b.image && <img class="hero-img" src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.hero} alt="" width="600" height="600" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />}
           </a>
         ))}
       </div>
@@ -118,11 +119,12 @@ export function CategoryCarousel({ categories, seasonal }: { categories: Categor
     <nav class="cat-carousel" aria-label="Shop by category">
       <button class="scroll-btn scroll-prev" type="button" data-scroll="-1" aria-label="Scroll categories left"><Icon name="left" /></button>
       <ul class="cat-track" data-scroller>
-        {categories.map(c => (
+        {categories.map((c, i) => (
           <li>
             <a class="cat-item" href={`/c/${c.slug}`}>
               <span class="cat-circle">
-                <img src={c.icon} alt="" width="160" height="160" loading="lazy" />
+                {/* The first few are on screen at once, so they load with the page instead of popping in later. */}
+                <img src={c.icon} srcset={srcsetOf(c.icon)} sizes={SIZES.catCircle} alt="" width="160" height="160" loading={i < 6 ? 'eager' : 'lazy'} decoding="async" />
                 {seasonal.has(c.id) && <span class="cat-season" title="In season now"><Icon name="sun" size={12} /></span>}
               </span>
               <span class="cat-name">{c.name}</span>
@@ -144,7 +146,7 @@ export function PromoBanner({ b }: { b: Banner | null }) {
         {b.subline && <p class="promo-sub">{b.subline}</p>}
         <span class="btn btn-cta btn-sm">{b.cta_text ?? 'Shop now'}</span>
       </div>
-      {b.image && <img src={b.image} alt="" width="600" height="600" loading="lazy" />}
+      {b.image && <img src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.promo} alt="" width="600" height="600" loading="lazy" decoding="async" />}
     </a>
   );
 }

@@ -4,7 +4,7 @@
 //   2. "Use my location" (district-level only: the data has district coordinates and outlines, nothing finer),
 //   3. the dropdowns themselves.
 // GPS coordinates never leave the browser. The server re-validates everything on submit.
-import { api, cart, esc, taka } from './app.js';
+import { api, cart, esc, small, taka } from './app.js';
 
 const pd = JSON.parse(document.getElementById('page-data').textContent);
 const form = document.getElementById('checkout-form');
@@ -194,7 +194,7 @@ async function refreshQuote() {
 
 function renderSummary(q) {
   $('[data-co-lines]').innerHTML = q.lines.map(l => `
-    <div class="co-line"><img src="${esc(l.image)}" alt=""><div>${esc(l.name)}<small>${esc(l.variantLabel)}${l.variantLabel ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small>${l.problem ? `<small class="problem">${esc(l.problem)}</small>` : ''}</div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
+    <div class="co-line"><img src="${esc(small(l.image))}" alt=""><div>${esc(l.name)}<small>${esc(l.variantLabel)}${l.variantLabel ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small>${l.problem ? `<small class="problem">${esc(l.problem)}</small>` : ''}</div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
   $('[data-subtotal]').textContent = taka(q.subtotalPaisa);
   const d = q.delivery;
   $('[data-delivery]').textContent = !d ? 'Choose your area' : d.status === 'to_confirm' ? 'Confirmed by phone' : d.chargePaisa === 0 ? 'Free' : taka(d.chargePaisa) + (q.needsArea ? ' (choose your area)' : '');
