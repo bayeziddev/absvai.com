@@ -42,8 +42,10 @@ for (const [family, weights] of FONT_FILES) {
 // esbuild comes with wrangler; without it the files are served as written.
 try {
   const { transformSync } = await import('esbuild');
-  const css = join(dist, 'css/app.css');
-  writeFileSync(css, transformSync(readFileSync(css, 'utf8'), { loader: 'css', minify: true }).code);
+  for (const f of readdirSync(join(dist, 'css')).filter(f => f.endsWith('.css'))) {
+    const css = join(dist, 'css', f);
+    writeFileSync(css, transformSync(readFileSync(css, 'utf8'), { loader: 'css', minify: true }).code);
+  }
   for (const f of readdirSync(join(dist, 'js')).filter(f => f.endsWith('.js'))) {
     const p = join(dist, 'js', f);
     writeFileSync(p, transformSync(readFileSync(p, 'utf8'), { loader: 'js', minify: true }).code);

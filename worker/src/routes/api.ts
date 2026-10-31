@@ -22,6 +22,10 @@ import { issueOtp, placeOrder, verifyOtp } from '../services/orders';
 import { otpActive } from '../services/sms';
 import { inquiryEmail } from '../services/email';
 import { trackOrders } from '../services/tracking';
+import { addLandingView, landingById } from '../repo/landing';
+import { addReview, deliveredPurchase, reviewExists } from '../repo/reviews';
+import { purge } from '../services/cache';
+import { TAG } from '../lib/cache-tags';
 import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf } from './context';
 
 export const api = new Hono<AppEnv>();
@@ -216,6 +220,7 @@ api.post('/checkout/quote', async c => {
   return c.json(await quote(c.env.DB, await settingsOf(c), {
     lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId),
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod', customerIsNewOrRisky,
+    couponCode: str(body.couponCode, 30) || null, phone,
   }));
 });
 
@@ -243,15 +248,17 @@ api.post('/checkout/place', async c => {
     const v = str((body.utm as Record<string, unknown> | undefined)?.[k], 200);
     if (v) utm[k] = v;
   }
-  const landing = posInt(body.landingPageId);
+  const landingId = posInt(body.landingPageId);
+  const landing = landingId ? await landingById(c.env.DB, landingId) : null;
   const placed = await placeOrder(c.env, await settingsOf(c), {
     phone: str(body.phone, 20), name: str(body.name, 120),
     divisionId: int(body.divisionId) ?? 0, districtId: int(body.districtId) ?? 0, upazilaId: int(body.upazilaId) ?? 0, unionId: posInt(body.unionId),
     postcode: asciiDigits(str(body.postcode, 4)) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,
-    lines: sanitizeLines(body.lines), source: landing ? 'landing' : 'web', sourceDetail: landing ? `Landing page ${landing}` : null, utm,
+    lines: sanitizeLines(body.lines), source: landing ? 'landing' : 'web', sourceDetail: landing ? `Landing page: ${landing.title} (/lp/${landing.slug})` : null, utm,
     email: str(body.email, 120) || null, emailOffers: body.emailOffers === true,
+    couponCode: str(body.couponCode, 30) || null, landingPageId: landing?.id ?? null,
   }, { channel: 'web', identity: id, checkoutSessionId: sid, route: '/api/checkout/place' });
   return c.json(placed, 201);
 });
@@ -303,6 +310,48 @@ api.post('/orders/track', async c => {
     orderNo: first.orderNo, status: first.status, statusLabel: first.statusLabel, totalPaisa: first.totalPaisa, courier: first.courier, trackingId: first.trackingCode,
     etaText: first.eta, timeline: first.steps,
   });
+});
+
+// ───────────── Reviews and landing page views ─────────────
+
+/**
+ * A customer's review. One per product per mobile number; "Verified buyer" when that number received the product.
+ * Reviews wait for the shop's approval (verified buyers' reviews can go live at once: Admin → Reviews).
+ */
+api.post('/reviews', async c => {
+  if (!(await rateLimit(c.env.KV, limiterKeys(c, 'review').ip, 6, 3600))) throw new HttpError(429, 'Too many reviews from this connection. Please try again later.');
+  const body = await readJson(c);
+  if (str(body.website, 100)) throw bad('Please check your review and try again.'); // honeypot
+  const settings = await settingsOf(c);
+  if (settings.reviews_enabled === '0') throw bad('Reviews are switched off right now.');
+  const productId = posInt(body.productId);
+  if (!productId || !(await productExists(c.env.DB, productId))) throw notFound('Product not found.');
+  const phone = normalizeBdPhone(str(body.phone, 20));
+  if (!phone) throw bad('Type the mobile number you ordered with (it is not shown).');
+  const name = str(body.name, 60);
+  const rating = int(body.rating) ?? 0;
+  const text = str(body.body, 1000);
+  if (name.length < 2) throw bad('Type your name.');
+  if (!(rating >= 1 && rating <= 5)) throw bad('Choose 1 to 5 stars.');
+  if (text.length < 5) throw bad('Write a few words about the product.');
+  if (await reviewExists(c.env.DB, productId, phone)) throw bad('You have already reviewed this product. Thank you!');
+  const orderId = await deliveredPurchase(c.env.DB, productId, phone);
+  const live = Boolean(orderId) && settings.reviews_auto_publish_verified === '1';
+  const id = (await requestIdentity(c));
+  await addReview(c.env.DB, { productId, name, rating, body: text, phone, verified: Boolean(orderId), status: live ? 'approved' : 'pending', source: 'customer', ipHash: id.ipHash, orderId });
+  if (live) {
+    let ctx: ExecutionContext | undefined;
+    try { ctx = c.executionCtx as unknown as ExecutionContext; } catch { ctx = undefined; }
+    await purge(c.env, ctx, [TAG.product(productId)]);
+  }
+  return c.json({ ok: true, live, message: live ? 'Thank you! Your review is live.' : 'Thank you! Your review shows on the page after the shop checks it.' }, 201);
+});
+
+/** Counts a landing page visit (sent once per visit by the page; pages themselves are cached at the edge). */
+api.post('/lp/:id/view', async c => {
+  const id = posInt(c.req.param('id'));
+  if (id && (await rateLimit(c.env.KV, `lpv:${id}:${limiterKeys(c, 'lpv').ip}`, 3, 3600))) await addLandingView(c.env.DB, id);
+  return c.body(null, 204);
 });
 
 api.post('/notify', async c => {

@@ -18,11 +18,16 @@
 | অসম্পূর্ণ অর্ডার | [Incomplete orders](https://absvai.absvai.workers.dev/admin/#/incomplete) |
 | ফোন / ফেসবুকের অর্ডার নেওয়া | [New manual order](https://absvai.absvai.workers.dev/admin/#/manual) |
 | ফেরত পার্সেল স্ক্যান | [Returns scan](https://absvai.absvai.workers.dev/admin/#/returns) |
+| বিক্রির রিপোর্ট | [Reports](https://absvai.absvai.workers.dev/admin/#/reports) |
 | প্রোডাক্ট তালিকা | [Products](https://absvai.absvai.workers.dev/admin/#/products) |
 | নতুন প্রোডাক্ট যোগ | [+ Add product](https://absvai.absvai.workers.dev/admin/#/products?new=1) |
 | ক্যাটাগরি | [Categories](https://absvai.absvai.workers.dev/admin/#/categories) |
 | স্টক | [Inventory](https://absvai.absvai.workers.dev/admin/#/inventory) |
 | কুরিয়ার (Steadfast, Pathao) | [Couriers](https://absvai.absvai.workers.dev/admin/#/courier) |
+| ল্যান্ডিং পেইজ (বিজ্ঞাপনের পেইজ) | [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) |
+| নতুন ল্যান্ডিং পেইজ | [+ New landing page](https://absvai.absvai.workers.dev/admin/#/landing/new) |
+| কুপন | [Coupons](https://absvai.absvai.workers.dev/admin/#/coupons) |
+| কাস্টমারের রিভিউ | [Reviews](https://absvai.absvai.workers.dev/admin/#/reviews) |
 | দোকানের নাম, লোগো, ব্যানার, পপআপ | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) |
 | ইমেইল | [Emails](https://absvai.absvai.workers.dev/admin/#/emails) |
 | কাস্টমার | [Customers](https://absvai.absvai.workers.dev/admin/#/customers) |
@@ -58,7 +63,7 @@
 ## মেনু চেনা
 
 - বাম পাশে মেনু। মোবাইলে উপরের বাম কোণের **☰** চাপলে মেনু খোলে।
-- শুরুতে **সহজ মেনু** থাকে: প্রতিদিনের কাজের পেইজগুলো (Overview, Orders, Products, Categories, Inventory, Couriers, Website & banners, Emails, Customers, Sellers, Seasons, Settings, Help center)।
+- শুরুতে **সহজ মেনু** থাকে: প্রতিদিনের কাজের পেইজগুলো (Overview, Orders, Reports, Products, Categories, Inventory, Couriers, Landing pages, Coupons, Reviews, Website & banners, Emails, Customers, Sellers, Seasons, Settings, Help center)।
 - মেনুর একদম নিচে **Show all tools** চাপলে বাকি সব টুল (Staff & roles, Security, Audit log, Barcodes & labels ইত্যাদি) দেখাবে। **Simple menu** চাপলে আবার সহজ মেনুতে ফিরবেন।
 - উপরের সার্চ বক্সে অর্ডার নম্বর (AV-…), ফোন নম্বর বা প্রোডাক্টের নাম লিখে Enter চাপলে সরাসরি খুঁজে পাবেন।
 - **View store** চাপলে নিজের দোকান খোলে; **Sign out** দিয়ে বের হবেন।
@@ -207,6 +212,70 @@
 - **On hand** = হাতে আছে; **Available** = কনফার্ম অর্ডারের জন্য রাখা বাদ দিয়ে বিক্রি করা যাবে।
 - নতুন মাল এলে বা নষ্ট/হারানো হলে **Adjust** চেপে পরিমাণ আর কারণ লিখুন। খাবারে ব্যাচ নম্বর দিন।
 - **History** চাপলে স্টকের প্রতিটি পরিবর্তন কারণসহ দেখা যায়।
+
+## ল্যান্ডিং পেইজ (বিজ্ঞাপনের জন্য বিক্রির পেইজ)
+
+একটা পণ্যের জন্য আলাদা একটা পেইজ, ফেসবুক বা গুগল বিজ্ঞাপনের লিংক হিসেবে দেওয়ার জন্য। পেইজে বড় ছবি, দাম, বিস্তারিত, ভিডিও, রিভিউ, প্রশ্ন-উত্তর আর বারবার **অর্ডার করুন** বাটন থাকে; বাটন চাপলে একই পেইজের নিচে অর্ডার ফর্ম খোলে (ঠিকানা খোঁজা, কুপন, ক্যাশ অন ডেলিভারি সব আছে)। যত খুশি পেইজ বানাতে পারবেন।
+
+### নতুন পেইজ বানানো
+
+1. [Landing pages → + New landing page](https://absvai.absvai.workers.dev/admin/#/landing/new) খুলুন।
+2. **Product this page sells**: কোন পণ্য বিক্রি করবেন বেছে নিন। পণ্যের নাম, ছোট বর্ণনা, বিবরণ, ছবি আর সুবিধাগুলো নিজে থেকে বসে যায়; আপনি শুধু বদলাবেন।
+3. **Page address**: লিংকের শেষ অংশ, যেমন `khejur-gur-offer` (ইংরেজি অক্ষর, সংখ্যা, ড্যাশ)। খালি রাখলে নিজে তৈরি হয়।
+4. **Top of the page**: অফারের ব্যাজ (যেমন "আজকের অফার ২০% ছাড়"), বড় শিরোনাম, নিচের লাইন, প্রধান ছবি, আর চাইলে আগের দাম (কেটে দেখাবে, পাশে "৳X ছাড়")।
+5. **More photos**: আরও ছবি (১২টা পর্যন্ত)। কাস্টমার ছবিতে চাপলে বড় করে দেখবেন।
+6. **Description and benefits**: বিবরণ (ফাঁকা লাইন দিলে নতুন অনুচ্ছেদ), সুবিধা (প্রতি লাইনে একটা, সবুজ টিকসহ দেখায়), আর **Details table** (যেমন ওজন → ১ কেজি)।
+7. **Video**: শিরোনাম, YouTube লিংক আর ভিডিওর নিচের লেখা। পেইজে চাপলে ভিডিও চলে।
+8. **Reviews**: কাস্টমাররা যা বলেছেন (নাম, জায়গা, স্টার, কথা, চাইলে ছবি)। চাইলে পণ্যের প্রকাশিত রিভিউও দেখাবে। শুধু আসল রিভিউ দেবেন।
+9. **Questions (FAQ)**: প্রশ্ন আর উত্তর। তিনটি সাধারণ প্রশ্ন আগে থেকেই দেওয়া থাকে।
+10. **Order button and form**: বাটনের লেখা (যেমন "এখনই অর্ডার করুন"), বাটনের নিচের লাইন, সবার জন্য চালু থাকা কুপন, কোন অপশনগুলো দেখাবে (যেমন শুধু ১ কেজি), পেইজের রং, নিচে আটকে থাকা অর্ডার বার, আর **Focus mode** (দোকানের মেনু, সার্চ, কার্ট লুকিয়ে রাখে; বিজ্ঞাপনের জন্য ভালো)।
+11. নিচে **Save draft** (শুধু আপনি **Preview** দিয়ে দেখতে পারবেন) অথবা **Publish** (সবাই দেখতে পাবে)।
+
+### লিংক বিজ্ঞাপনে দেওয়া আর ফল দেখা
+
+- [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) তালিকায় **Copy link** চাপুন, ফেসবুক বিজ্ঞাপন বা পোস্টে পেস্ট করুন। লিংক দেখতে এমন: `https://absvai.absvai.workers.dev/lp/khejur-gur-offer`।
+- তালিকায় প্রতিটি পেইজের **Visits** (কতজন দেখেছেন), **Orders**, **Sales** আর **Conversion** (দেখা থেকে অর্ডারের হার) দেখায়।
+- এই পেইজ থেকে আসা অর্ডার Orders এ "Landing page" হিসেবে দেখায়, একই নিয়মে কনফার্ম ও ডেলিভারি হয়।
+- **Copy page** দিয়ে একটা পেইজ কপি করে নতুন অফার বানান; **Delete** দিলে লিংক বন্ধ হয় (আগের অর্ডার থাকে)।
+- পণ্য দোকান থেকে সরালে (ড্রাফট করলে) তার ল্যান্ডিং পেইজও বন্ধ থাকে।
+
+## কুপন
+
+[Coupons](https://absvai.absvai.workers.dev/admin/#/coupons): কাস্টমার চেকআউটে কোড লিখলে ছাড় পান, অর্ডার দেওয়ার আগেই মোট টাকায় ছাড় দেখায়।
+
+1. **+ New coupon** চাপুন।
+2. **Code**: কাস্টমার যা লিখবেন, যেমন `EID100` (**Make one** চাপলে নিজে তৈরি হয়)।
+3. ধরন বেছে নিন:
+   - **Percent off**: শতকরা ছাড় (যেমন ২০%); **At most** ঘরে সর্বোচ্চ কত টাকা ছাড় দেবেন।
+   - **Taka off**: নির্দিষ্ট টাকা ছাড় (যেমন ৳১০০)।
+   - **Free delivery**: ডেলিভারি চার্জ ফ্রি।
+4. **Minimum order**: কত টাকার পণ্য কিনলে কুপন চলবে (খালি = যেকোনো অর্ডারে)।
+5. **Starts on / Ends on**: কবে থেকে কবে পর্যন্ত (খালি = সবসময়)।
+6. **Total uses**: মোট কতবার ব্যবহার করা যাবে; **Uses per customer**: একজন (একটা মোবাইল নম্বর) কতবার (১ = একবারই)।
+7. **Save coupon**।
+
+তালিকায় প্রতিটি কুপন কতবার ব্যবহার হয়েছে, কত অর্ডার, কত ছাড় আর কত বিক্রি এনেছে দেখায়। **Switch off** দিয়ে বন্ধ করুন। একবারও ব্যবহার না হওয়া কুপন মুছে ফেলা যায়; ব্যবহার হওয়া কুপন **Delete** চাপলে শুধু বন্ধ হয় (রিপোর্টে হিসাব থাকে)। বাতিল অর্ডারে ব্যবহার হওয়া কুপন কাস্টমার আবার ব্যবহার করতে পারেন।
+
+ল্যান্ডিং পেইজে কুপন বেছে দিলে ঐ পেইজের অর্ডার ফর্মে কোডটি নিজে থেকেই বসে থাকে।
+
+## কাস্টমারের রিভিউ
+
+- প্রতিটি প্রোডাক্ট পেইজের নিচে **Customer reviews** অংশ থাকে: গড় স্টার, কতজন রিভিউ দিয়েছেন, আর **Write a review** ফর্ম (নাম, যে নম্বর দিয়ে অর্ডার করেছেন, স্টার, মতামত)। নম্বর কখনো দেখানো হয় না।
+- যে নম্বরে ঐ পণ্য ডেলিভারি হয়েছে, তার রিভিউতে **Verified buyer** ব্যাজ থাকে। একই নম্বরে একটা পণ্যে একবারই রিভিউ দেওয়া যায়।
+- [Reviews](https://absvai.absvai.workers.dev/admin/#/reviews) এ নতুন রিভিউ **Waiting** ট্যাবে আসে: **Publish** (দেখাবে), **Hide** (লুকাবে), **Reply** (আপনার উত্তর সবাই দেখবে), **Delete**।
+- উপরের সুইচ দিয়ে রিভিউ ফর্ম চালু/বন্ধ করুন। **Publish verified buyers' reviews at once** টিক দিলে যাচাই করা ক্রেতার রিভিউ সাথে সাথে দেখায়।
+- **+ Add a review**: কাস্টমার ফেসবুক বা WhatsApp এ যা বলেছেন সেটা যোগ করুন (Verified ব্যাজ ছাড়া)।
+- প্রকাশিত রিভিউর স্টার গুগল সার্চেও দেখাতে পারে। শুধু আসল রিভিউ প্রকাশ করবেন।
+
+## রিপোর্ট
+
+[Reports](https://absvai.absvai.workers.dev/admin/#/reports): যেকোনো তারিখের বিক্রির হিসাব (বাংলাদেশ সময়ে)। টেস্ট অর্ডার বাদ, বাতিল অর্ডার বিক্রিতে ধরা হয় না।
+
+- উপরে **Today, Yesterday, Last 7 days, Last 30 days, This month, Last month** অথবা নিজে তারিখ দিয়ে **Show**।
+- উপরের কার্ডে: মোট বিক্রি, গড় অর্ডার, ডেলিভারি হওয়া টাকা, ডেলিভারির হার, খোলা অর্ডার, বাতিল, ছাড়, ডেলিভারি চার্জ, আর (মালিক ও হিসাবরক্ষকের জন্য) পণ্যের লাভ।
+- নিচে টেবিল: দিন অনুযায়ী, সবচেয়ে বেশি বিক্রি হওয়া পণ্য (কেনা দাম ও লাভসহ), ক্যাটাগরি, জেলা, কোথা থেকে অর্ডার এসেছে (ওয়েবসাইট, ল্যান্ডিং পেইজ, ফেসবুক, ফোন), ল্যান্ডিং পেইজ, কুপন, কুরিয়ার (ডেলিভারি ও ফেরতের হার) আর টিমের নেওয়া অর্ডার।
+- প্রতিটি টেবিলের **Download CSV** চাপলে Excel এ খোলার মতো ফাইল নামে।
+- লাভ ঠিক দেখাতে প্রতিটি পণ্যের অপশনে **Cost** (কেনা দাম) দিয়ে রাখুন (Products → Full editor → Options & prices)।
 
 ## ওয়েবসাইট ও ব্যানার
 

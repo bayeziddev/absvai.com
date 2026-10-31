@@ -53,6 +53,55 @@ everything else: SEO, seasons, wholesale prices, barcodes, video.
 **Categories → + Add category**: type the name, add a picture, choose whether it sits inside another category, and what kind of
 products it holds (a subcategory uses its main category's kind). Press **Save**. The short code is made for you.
 
+## Landing pages
+
+**Landing pages → + New landing page** makes a sales page for one product, for Facebook and Google ads. Make as many as
+you like; each has its own link, `/lp/<address>`.
+
+1. **Product this page sells**: pick it. Its name, short line, description, photos and benefit chips fill the empty sections.
+2. **Top of the page**: offer badge, headline, the line under it, the main photo and (optionally) the regular price to show
+   crossed out with "৳X ছাড়".
+3. **More photos** (up to 12, they open big when tapped), **Description and benefits** (one benefit per line, with a green
+   tick) and the **Details table** (e.g. Weight → 1 kg).
+4. **Video**: title, YouTube link and a line about it. **Reviews**: what customers told you (name, place, stars, words, an
+   optional photo), plus the product's published reviews. **Questions (FAQ)**: three common ones are filled in for you.
+5. **Order button and form**: the button text, the line under it, a coupon applied for everyone on the page, which options
+   to offer, the page colour, the order bar that follows the customer, and **Focus mode** (hides the shop menu, search and
+   cart; best for ads).
+6. **Save draft** (only staff can open it, with **Preview**) or **Publish**.
+
+Order buttons sit at the top, after the benefits, after the video and in the sticky bar; they all scroll to the order form
+at the bottom, which is the same checkout as the shop (address finder, coupon, Cash on Delivery). Orders from the page show
+as "Landing page" in Orders. The list shows each page's **visits, orders, sales and conversion**; **Copy link** for the
+ad, **Copy page** to start a new offer from it, **Delete** to switch the link off (its orders stay).
+
+## Coupons
+
+**Coupons → + New coupon**: the code customers type (e.g. EID100; **Make one** suggests one), and what it gives:
+**Percent off** (with an optional "at most ৳"), **Taka off** or **Free delivery**. Optional: a **minimum order**, **start
+and end dates**, **total uses** and **uses per customer** (by mobile number). Checkout shows the discount before the order
+is placed; a coupon that stops working (used up, expired, already used by that number) is refused with the reason. The list
+shows uses, orders, the discount given and the sales each coupon brought. A coupon that was used is switched off instead of
+deleted, so the report keeps it. Cancelled orders give the use back.
+
+## Reviews
+
+Every product page has **Customer reviews**: the average stars, the reviews, and **Write a review** (name, the mobile number
+they ordered with, stars, words; the number is never shown). A number that received the product gets **Verified buyer**;
+one review per product per number. New reviews wait in **Reviews → Waiting**: **Publish**, **Hide**, **Reply** (shown under
+the review) or **Delete**. The switch at the top turns the form on or off, and **Publish verified buyers' reviews at once**
+skips the wait for real buyers. **+ Add a review** adds one a customer sent you on Facebook or WhatsApp. Published ratings go
+into the page's Google data (review stars). Only publish real reviews.
+
+## Reports
+
+**Reports** shows sales for any dates in Bangladesh time (Today, Yesterday, Last 7 / 30 days, This month, Last month or
+your own dates). Test orders are left out and cancelled orders don't count as sales. The cards: sales, average order,
+delivered money, delivery rate, open and cancelled orders, discounts, delivery charges and (for the owner and the accountant)
+product profit. The tables: by day, best-selling products (with cost and profit), categories, districts, where orders came
+from, landing pages, coupons, couriers (delivery and return rates) and orders the team entered. Every table has **Download
+CSV** for Excel. Profit needs each option's **Cost** (Products → Full editor → Options & prices).
+
 ## Website & banners: shop name, logo, banners and the popup
 
 ![Homepage banners](screenshots/admin-banners.png)

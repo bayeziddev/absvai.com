@@ -4,6 +4,7 @@ import { resolveZone } from '../repo/geo';
 import { settingInt } from '../repo/settings';
 import { formatTaka } from '../lib/money';
 import { priceCart, type CartLineIn, type PricedLine } from './cart';
+import { checkCoupon } from './coupons';
 
 export interface AdvanceRule { required: boolean; amountPaisa: number | null; reasons: string[] }
 
@@ -15,6 +16,9 @@ export interface Quote {
   needsArea: boolean;
   defaultCourier: string | null;
   discountPaisa: number;
+  /** The coupon that applies (and what it takes off), or why the typed code can't be used. */
+  coupon: { id: number; code: string; label: string; discountPaisa: number; kind: string; note: string | null } | null;
+  couponError: string | null;
   advance: AdvanceRule;
   totalPaisa: number | null;
   hasPreOrder: boolean;
@@ -60,7 +64,7 @@ export function advanceFor(lines: PricedLine[], delivery: ChargeResult | null, o
 export async function quote(
   db: D1Database,
   settings: Record<string, string>,
-  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number },
+  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number; couponCode?: string | null; phone?: string | null },
   now = new Date(),
 ): Promise<Quote> {
   const priced = await priceCart(db, input.lines, now);
@@ -84,8 +88,21 @@ export async function quote(
       );
     }
   }
-  // Manual orders only: a staff discount, never more than the subtotal (role limits are checked by the caller).
-  const discountPaisa = Math.min(Math.max(0, input.discountPaisa ?? 0), priced.subtotalPaisa);
+  // Manual orders: a staff discount (role limits are checked by the caller). Web orders: a coupon. Product discounts never
+  // go below zero; a free-delivery coupon takes the delivery charge off.
+  let couponOff = 0;
+  let deliveryOff = 0;
+  let coupon: Quote['coupon'] = null;
+  let couponError: string | null = null;
+  if (input.couponCode?.trim()) {
+    const chargeKnown = delivery && delivery.chargePaisa !== null ? delivery.chargePaisa : null;
+    const r = await checkCoupon(db, input.couponCode, { subtotalPaisa: priced.subtotalPaisa, deliveryChargePaisa: chargeKnown, phone: input.phone ?? null }, now);
+    if (r.ok) {
+      if (r.coupon.kind === 'free_delivery') deliveryOff = r.discountPaisa; else couponOff = r.discountPaisa;
+      coupon = { id: r.coupon.id, code: r.coupon.code, label: r.label, discountPaisa: r.discountPaisa, kind: r.coupon.kind, note: r.coupon.kind === 'free_delivery' && chargeKnown === null ? 'Delivery becomes free once you choose your area.' : null };
+    } else couponError = r.error;
+  }
+  const discountPaisa = Math.min(Math.max(0, input.discountPaisa ?? 0) + couponOff, priced.subtotalPaisa) + deliveryOff;
   const totalPaisa = delivery && delivery.chargePaisa !== null ? priced.subtotalPaisa - discountPaisa + delivery.chargePaisa + delivery.codFeePaisa : null;
   const advance = advanceFor(priced.lines, delivery, {
     totalPaisa: totalPaisa ?? priced.subtotalPaisa,
@@ -100,6 +117,8 @@ export async function quote(
     needsArea,
     defaultCourier,
     discountPaisa,
+    coupon,
+    couponError,
     advance,
     totalPaisa,
     hasPreOrder: priced.lines.some(l => l.fulfilmentMode === 'pre_order'),

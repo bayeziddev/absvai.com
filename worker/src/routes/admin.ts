@@ -11,6 +11,7 @@ import { adminOps } from './admin-ops';
 import { adminOrders } from './admin-orders';
 import { adminSettings } from './admin-settings';
 import { adminSellers } from './admin-sellers';
+import { adminGrowth } from './admin-growth';
 
 export const admin = new Hono<AppEnv>();
 
@@ -134,3 +135,4 @@ admin.route('/', adminOrders);
 admin.route('/', adminSettings);
 admin.route('/', adminOps);
 admin.route('/', adminSellers);
+admin.route('/', adminGrowth);

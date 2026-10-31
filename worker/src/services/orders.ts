@@ -54,6 +54,10 @@ export interface PlaceOrderInput {
   email?: string | null;
   /** Ticked "email me offers". */
   emailOffers?: boolean;
+  /** A coupon typed at checkout (web orders). */
+  couponCode?: string | null;
+  /** The landing page the order form was on. */
+  landingPageId?: number | null;
 }
 
 /** Who is placing the order and from where. Web orders come from the checkout; manual orders from a signed-in staff member. */
@@ -121,8 +125,11 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     }
     discount = ctx.discountPaisa;
   }
-  const q = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount }, now);
+  const couponCode = manual ? null : input.couponCode?.trim() || null;
+  const q = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount, couponCode, phone }, now);
   if (q.problems.length) throw new HttpError(409, q.problems[0], { problems: q.problems });
+  // A coupon that stopped working (used up, expired, already used by this number) is reported, never silently dropped.
+  if (couponCode && q.couponError) throw new HttpError(409, `${q.couponError} Remove the coupon to order without it.`, { coupon: q.couponError });
   if (!q.delivery) throw bad('We could not work out delivery to this area. Please call us.');
   if (!manual) {
     if (q.advance.required && q.advance.amountPaisa && input.paymentMethod !== 'manual_mobile') {
@@ -176,6 +183,7 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     source: input.source, sourceDetail: input.sourceDetail, utm: input.utm, checkoutSessionId: ctx.checkoutSessionId,
     deviceHash: ctx.identity.deviceHash, ipHash: ctx.identity.ipHash,
     createdBy: ctx.staff?.adminId ?? null, assignedTo: ctx.staff?.adminId ?? null, courier: q.defaultCourier,
+    landingPageId: input.landingPageId ?? null, coupon: q.coupon ? { id: q.coupon.id, code: q.coupon.code, discountPaisa: q.coupon.discountPaisa } : null,
     items: q.lines.map(l => ({ productId: l.productId, variantId: l.variantId, sku: l.sku, name: l.name, variantLabel: l.variantLabel, unitPaisa: l.unitPaisa, qty: l.qty, lineTotalPaisa: l.lineTotalPaisa, packedWeightGrams: l.packedWeightGrams, fulfilmentMode: l.fulfilmentMode })),
     conversion: { sessionId: ctx.checkoutSessionId, phone, sinceIso: new Date(now.getTime() - settingInt(settings, 'incomplete_conversion_window_hours', 24) * 3_600_000).toISOString(), incompleteId: ctx.fromIncompleteId ?? null },
     placedNote: manual ? `Entered by staff from ${ORDER_SOURCES[input.source]}${input.sourceDetail ? ` (${input.sourceDetail})` : ''}` : `Placed on the ${input.source === 'landing' ? 'landing page' : 'website'}`,

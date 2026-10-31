@@ -2,6 +2,7 @@
 import type { OrderStatus, Actor } from '../lib/state-machine';
 import { courierLine, sourceFor, stageLine } from '../lib/tracking';
 import { trackNewOrderStmt, trackStmt } from './tracking';
+import { redemptionStmts } from './coupons';
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 export type Row = Record<string, unknown>;
@@ -53,6 +54,8 @@ export interface NewOrder {
   riskLevel: string; riskReasons: Array<{ code: string; detail: string }>; duplicateOf: number | null; holdReason: string | null;
   source: string; sourceDetail: string | null; utm: Record<string, string>; checkoutSessionId: string | null; deviceHash: string | null; ipHash: string | null;
   createdBy: string | null; assignedTo: string | null; courier: string | null;
+  /** Where the order came from and the coupon it used (migration 0009). */
+  landingPageId?: number | null; coupon?: { id: number; code: string; discountPaisa: number } | null;
   items: Array<{ productId: number; variantId: number; sku: string; name: string; variantLabel: string; unitPaisa: number; qty: number; lineTotalPaisa: number; packedWeightGrams: number; fulfilmentMode: string }>;
   /** Links incomplete checkouts from the same session, or the same phone within the window, as converted. */
   conversion: { sessionId: string | null; phone: string; sinceIso: string; incompleteId: number | null };
@@ -70,8 +73,9 @@ export async function insertOrder(db: D1Database, o: NewOrder): Promise<number> 
          subtotal_paisa, delivery_charge_paisa, delivery_charge_status, cod_fee_paisa, discount_paisa, total_paisa, delivery_zone_id, eta_text,
          customer_name, phone, division_id, district_id, upazila_id, union_id, postcode, post_office,
          division_name, district_name, upazila_name, union_name, address_line, landmark, customer_note,
-         risk_level, risk_reasons, duplicate_of_order_id, hold_reason, source, source_detail, utm, checkout_session_id, device_hash, ip_hash, created_by, assigned_to, courier)
-       VALUES (?, ?, (SELECT id FROM customers WHERE phone = ?), 'new', ?, ?, 'unpaid', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         risk_level, risk_reasons, duplicate_of_order_id, hold_reason, source, source_detail, utm, checkout_session_id, device_hash, ip_hash, created_by, assigned_to, courier,
+         landing_page_id, coupon_code)
+       VALUES (?, ?, (SELECT id FROM customers WHERE phone = ?), 'new', ?, ?, 'unpaid', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       o.orderNo, o.accessToken, o.phone, o.fulfilmentType, o.paymentMethod,
       o.advanceRequired ? 1 : 0, o.advanceReason, o.advanceAmountPaisa, o.advanceStatus, o.advanceTrxId, o.advanceWallet,
@@ -79,9 +83,10 @@ export async function insertOrder(db: D1Database, o: NewOrder): Promise<number> 
       o.name, o.phone, o.divisionId, o.districtId, o.upazilaId, o.unionId, o.postcode, o.postOffice,
       o.names.division, o.names.district, o.names.upazila, o.names.union, o.addressLine, o.landmark, o.note,
       o.riskLevel, JSON.stringify(o.riskReasons), o.duplicateOf, o.holdReason, o.source, o.sourceDetail, JSON.stringify(o.utm), o.checkoutSessionId, o.deviceHash, o.ipHash,
-      o.createdBy, o.assignedTo, o.courier,
+      o.createdBy, o.assignedTo, o.courier, o.landingPageId ?? null, o.coupon?.code ?? null,
     ),
   ];
+  if (o.coupon) stmts.push(...redemptionStmts(db, o.orderNo, o.coupon.id, o.phone, o.coupon.discountPaisa));
   for (const l of o.items) {
     stmts.push(db.prepare(
       `INSERT INTO order_items (order_id, product_id, variant_id, sku, name, variant_label, unit_price_paisa, qty, line_total_paisa, packed_weight_grams, fulfilment_mode)

@@ -13,6 +13,12 @@ import { clientIp, HttpError, parseJson, rateLimit } from '../lib/http';
 import { pageCss } from '../lib/page-css';
 import { POLICIES } from '../lib/policies';
 import { approvedSellerBySlug, productSellerPublic } from '../repo/sellers';
+import { productReviews } from '../repo/reviews';
+import { landingBySlug, productSlugById } from '../repo/landing';
+import { cleanLanding } from '../lib/landing';
+import { LandingPage, landingVariants } from '../views/landing';
+import { getCookie } from 'hono/cookie';
+import { SESSION_COOKIE } from '../lib/auth';
 import { checkUnsubscribe } from '../services/email';
 import { trackOrders, type TrackResult } from '../services/tracking';
 import { unsubscribeCustomer } from '../repo/email';
@@ -204,10 +210,11 @@ pages.get('/p/:slug', async c => {
   const d = await getProductDetail(c.env.DB, c.req.param('slug'));
   if (!d) return notFound(c, sh);
   const prod = d.product as Record<string, string | number | null>;
-  const [related, zones, soldBy] = await Promise.all([
+  const [related, zones, soldBy, reviews] = await Promise.all([
     queryProducts(c.env.DB, { categoryIds: [d.category.id], excludeId: Number(prod.id), limit: 8 }),
     zoneSummaries(c.env.DB),
     prod.seller_id ? productSellerPublic(c.env.DB, Number(prod.id)) : Promise.resolve(null),
+    productReviews(c.env.DB, Number(prod.id)),
   ]);
   const crumbs = [{ name: 'Home', href: '/' }, ...(d.category.parent ? [{ name: d.category.parent.name, href: `/c/${d.category.parent.slug}` }] : []), { name: d.category.name, href: `/c/${d.category.slug}` }, { name: String(prod.name) }];
   const image = d.media.find(m => m.kind === 'image')?.url;
@@ -221,12 +228,53 @@ pages.get('/p/:slug', async c => {
     '@context': 'https://schema.org', '@type': 'Product', name: prod.name, description: prod.short_description ?? prod.meta_description ?? undefined,
     image: image ? [image.startsWith('http') ? image : `${c.env.SITE_URL}${image}`] : undefined, sku: d.variants[0]?.sku, brand: prod.brand ? { '@type': 'Brand', name: prod.brand } : undefined,
     category: d.category.name, offers: offers.length === 1 ? offers[0] : { '@type': 'AggregateOffer', priceCurrency: 'BDT', lowPrice: Math.min(...d.variants.map(v => v.pricePaisa)) / 100, highPrice: Math.max(...d.variants.map(v => v.pricePaisa)) / 100, offerCount: offers.length, offers },
+    // Real, published customer reviews only (Google's rules for review stars).
+    ...(reviews.count ? {
+      aggregateRating: { '@type': 'AggregateRating', ratingValue: reviews.average, reviewCount: reviews.count, bestRating: 5, worstRating: 1 },
+      review: reviews.items.slice(0, 5).map(r => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 }, reviewBody: r.body ?? undefined, datePublished: r.created_at.slice(0, 10) })),
+    } : {}),
   };
   return render(c, sh, {
     title: String(prod.meta_title ?? prod.name), description: String(prod.meta_description ?? prod.short_description ?? ''), path: `/p/${prod.slug}`, image,
-    jsonLd: [productLd, crumbLd(c.env.SITE_URL, crumbs)], pageData: productPageData(d), scripts: ['/js/product.js'], bodyClass: 'pdp-page',
-    children: <ProductPage d={d} related={related.items} zones={zones} freeThresholdPaisa={settingInt(sh.settings, 'free_delivery_threshold_paisa')} settings={sh.settings} soldBy={soldBy} />,
+    jsonLd: [productLd, crumbLd(c.env.SITE_URL, crumbs)], pageData: productPageData(d), scripts: ['/js/product.js', '/js/reviews.js'], bodyClass: 'pdp-page',
+    children: <ProductPage d={d} related={related.items} zones={zones} freeThresholdPaisa={settingInt(sh.settings, 'free_delivery_threshold_paisa')} settings={sh.settings} soldBy={soldBy} reviews={reviews} />,
   }, { cache: [TAG.product(Number(prod.id)), TAG.category(d.category.id), 'zones', ...d.seasons.map(x => TAG.season(x.slug)), ...cardTags(related.items)] });
+});
+
+// ───────────── Landing pages ─────────────
+
+/** A landing page. Drafts open only for signed-in staff (the admin's Preview button), never cached or indexed. */
+pages.get('/lp/:slug', async c => {
+  const sh = await shell(c);
+  const l = await landingBySlug(c.env.DB, c.req.param('slug'));
+  if (!l?.product_id) return notFound(c, sh);
+  const draft = l.status !== 'published';
+  if (draft) {
+    const token = getCookie(c, SESSION_COOKIE);
+    if (!token || !(await c.env.KV.get(`sess:${token}`))) return notFound(c, sh);
+  }
+  const productSlug = await productSlugById(c.env.DB, l.product_id);
+  // A published page only sells a product that is live in the shop.
+  const d = productSlug ? await getProductDetail(c.env.DB, productSlug, { preview: draft }) : null;
+  if (!d) return notFound(c, sh);
+  const content = cleanLanding(JSON.parse(l.blocks || '{}')).content;
+  const reviews = await productReviews(c.env.DB, Number(d.product.id));
+  const options = landingVariants({ c: content, d });
+  const wallets = settingJson<Array<{ wallet: string; number: string; type?: string }>>(sh.settings, 'manual_wallets', []);
+  const hero = content.heroImage ?? d.media.find(m => m.kind === 'image')?.url;
+  const wa = sh.settings.whatsapp_number?.replace(/\D/g, '') || null;
+  return render(c, sh, {
+    title: content.headline || l.title, description: content.subheadline || String(d.product.short_description ?? ''), path: `/lp/${l.slug}`, image: hero, noindex: draft,
+    scripts: options.length ? ['/js/checkout.js', '/js/landing.js'] : ['/js/landing.js'], turnstileSiteKey: options.length ? c.env.TURNSTILE_SITE_KEY : undefined,
+    bodyClass: `lp-page${content.focusMode ? ' lp-focus' : ''}`, styles: ['/css/landing.css'],
+    pageData: {
+      outlinesBase: `/geo/${GEO_VERSION}`, mapTileUrl: sh.settings.map_tile_url || null, mapAttribution: sh.settings.map_tile_attribution || '',
+      freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY),
+      lines: options.length ? [{ variantId: options[0].id, qty: 1 }] : [], landingPageId: l.id, placeLabel: content.ctaText, draft,
+    },
+    children: <LandingPage id={l.id} title={l.title} slug={l.slug} draft={draft} c={content} d={d} reviews={reviews} wallets={wallets} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY}
+      phone={sh.settings.support_phone || null} whatsapp={wa} etaText={null} />,
+  }, { cache: draft ? null : [TAG.landing(l.id), TAG.product(Number(d.product.id)), 'zones'] });
 });
 
 pages.get('/categories', async c => {

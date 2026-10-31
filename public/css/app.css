@@ -604,3 +604,39 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .sell-form h2 { margin-top: 0; }
 .sell-grid { display: grid; grid-template-columns: 1fr; gap: 0 14px; }
 @media (min-width: 720px) { .sell-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ── Reviews (product and landing pages) and the coupon box ── */
+.stars { position: relative; display: inline-block; color: var(--husk); letter-spacing: 1px; line-height: 1; }
+.stars-on { position: absolute; inset: 0 auto 0 0; overflow: hidden; white-space: nowrap; color: var(--turmeric); }
+.rating-line { display: inline-flex; gap: 6px; align-items: center; text-decoration: none; font-size: .9rem; margin: 0 0 8px; }
+.rev-summary { display: grid; gap: 12px 24px; grid-template-columns: auto minmax(0, 1fr); align-items: center; max-width: 560px; margin-bottom: 16px; }
+.rev-score { display: grid; justify-items: center; gap: 4px; }
+.rev-score b { font: 800 2.4rem/1 var(--display); }
+.rev-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .82rem; }
+.rev-bars li { display: grid; grid-template-columns: 34px 1fr 28px; gap: 8px; align-items: center; }
+.rev-bar { height: 8px; background: var(--cream); border-radius: 99px; overflow: hidden; }
+.rev-bar span { display: block; height: 100%; background: var(--turmeric); }
+.rev-list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.rev-item { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.rev-item header { display: flex; gap: 10px; align-items: center; }
+.rev-item header img { border-radius: 50%; object-fit: cover; }
+.rev-item p { margin: 8px 0 0; line-height: 1.6; }
+.rev-verified { margin-left: 8px; color: var(--leaf); font-size: .78rem; font-weight: 700; }
+.rev-reply { background: var(--cream); border-radius: 10px; padding: 8px 10px; font-size: .9rem; }
+.rev-write { margin-top: 16px; }
+.rev-write > summary { list-style: none; }
+.rev-write > summary::-webkit-details-marker { display: none; }
+.rev-form { margin-top: 12px; max-width: 560px; }
+.rev-rate { border: 0; padding: 0; margin: 0 0 10px; display: inline-flex; flex-direction: row-reverse; }
+.rev-rate legend { font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+.rev-rate input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rev-rate label { font-size: 2rem; line-height: 1; color: var(--husk); cursor: pointer; padding: 0 2px; }
+.rev-rate input:checked ~ label, .rev-rate label:hover, .rev-rate label:hover ~ label { color: var(--turmeric); }
+.rev-rate input:focus-visible + label { outline: 2px solid var(--chili); border-radius: 4px; }
+.coupon-box { margin: 10px 0 2px; }
+.coupon-box .field { margin-bottom: 4px; }
+.coupon-row { display: flex; gap: 8px; }
+.coupon-row input { flex: 1; min-width: 0; text-transform: uppercase; }
+.coupon-msg { margin: 0 0 6px; font-size: .86rem; }
+.coupon-msg.ok { color: var(--leaf); font-weight: 600; }
+.coupon-msg.error { color: var(--chili); }

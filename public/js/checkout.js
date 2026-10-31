@@ -16,7 +16,18 @@ const errorBox = $('[data-co-error]');
 
 const params = new URLSearchParams(location.search);
 const buyNow = Number(params.get('buy'));
-const lines = buyNow ? [{ variantId: buyNow, qty: Math.max(1, Math.min(99, Number(params.get('qty')) || 1)) }] : cart.lines();
+// A landing page gives its own lines (its option and quantity picker sends 'absvai:lines' when they change).
+const onLanding = Array.isArray(pd.lines);
+let lines = onLanding ? pd.lines : buyNow ? [{ variantId: buyNow, qty: Math.max(1, Math.min(99, Number(params.get('qty')) || 1)) }] : cart.lines();
+document.addEventListener('absvai:lines', e => { lines = e.detail; refreshQuote(); captureSoon(); });
+
+// ── Coupon: applied in the quote, so the summary shows the real total before the order is placed ──
+let couponCode = (form.couponCode?.value || params.get('coupon') || '').trim().toUpperCase();
+if (form.couponCode) form.couponCode.value = couponCode;
+const couponMsg = $('[data-coupon-msg]');
+function applyCoupon() { couponCode = form.couponCode.value.trim().toUpperCase(); form.couponCode.value = couponCode; refreshQuote(); }
+$('[data-coupon-apply]')?.addEventListener('click', applyCoupon);
+form.couponCode?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } });
 
 let geo = null; // { divisions, districts, upazilas, postcodes }
 let lastQuote = null;
@@ -188,7 +199,7 @@ form.querySelectorAll('input[name=paymentMethod]').forEach(r => r.addEventListen
 async function refreshQuote() {
   if (!lines.length) return;
   try {
-    lastQuote = await api('/api/checkout/quote', { lines, districtId: Number(sel.district.value) || null, upazilaId: Number(sel.upazila.value) || null, paymentMethod: payment(), phone: form.phone.value });
+    lastQuote = await api('/api/checkout/quote', { lines, districtId: Number(sel.district.value) || null, upazilaId: Number(sel.upazila.value) || null, paymentMethod: payment(), phone: form.phone.value, couponCode });
   } catch (e) { errorBox.textContent = e.message; return; }
   renderSummary(lastQuote);
 }
@@ -197,6 +208,13 @@ function renderSummary(q) {
   $('[data-co-lines]').innerHTML = q.lines.map(l => `
     <div class="co-line"><img src="${esc(small(l.image))}" alt=""><div>${esc(l.name)}<small>${esc(l.variantLabel)}${l.variantLabel ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small>${l.problem ? `<small class="problem">${esc(l.problem)}</small>` : ''}</div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
   $('[data-subtotal]').textContent = taka(q.subtotalPaisa);
+  const off = q.discountPaisa > 0;
+  $('[data-discount-row]').hidden = !off; $('[data-discount]').hidden = !off;
+  if (off) $('[data-discount]').textContent = `−${taka(q.discountPaisa)}`;
+  if (couponMsg) {
+    couponMsg.className = `coupon-msg ${q.coupon ? 'ok' : q.couponError ? 'error' : ''}`;
+    couponMsg.textContent = q.coupon ? `✓ ${q.coupon.code}: ${q.coupon.label}${q.coupon.discountPaisa ? ` (−${taka(q.coupon.discountPaisa)})` : ''}${q.coupon.note ? `. ${q.coupon.note}` : ''}` : q.couponError ?? '';
+  }
   const d = q.delivery;
   $('[data-delivery]').textContent = !d ? 'Choose your area' : d.status === 'to_confirm' ? 'Confirmed by phone' : d.chargePaisa === 0 ? 'Free' : taka(d.chargePaisa) + (q.needsArea ? ' (choose your area)' : '');
   const cod = d?.codFeePaisa > 0;
@@ -216,7 +234,7 @@ function renderSummary(q) {
   }
   errorBox.textContent = q.problems.join(' ');
   placeBtn.disabled = q.problems.length > 0 || !q.lines.length;
-  placeBtn.textContent = q.hasPreOrder ? 'Place pre-order' : 'Place order';
+  placeBtn.textContent = q.hasPreOrder ? 'Place pre-order' : pd.placeLabel || 'Place order';
 }
 
 // ── Incomplete-order capture (Section 8.1): starts only once the phone number is valid. Blur on the phone field, a
@@ -294,14 +312,15 @@ form.addEventListener('submit', async e => {
       email: form.email.value.trim(), emailOffers: form.emailOffers.checked,
       paymentMethod: payment(), advanceTrxId: form.advanceTrxId?.value || null, advanceWallet: form.advanceWallet?.value || null,
       lines, token, utm: utm(), website: form.website?.value ?? '',
+      couponCode: lastQuote?.coupon ? couponCode : null, landingPageId: pd.landingPageId ?? null,
     });
     placed = true;
-    if (!buyNow) cart.clear();
+    if (!buyNow && !onLanding) cart.clear();
     location.href = `/order/${encodeURIComponent(r.orderNo)}?t=${encodeURIComponent(r.accessToken)}`;
   } catch (err) {
     errorBox.textContent = err.message;
     placeBtn.disabled = false;
-    placeBtn.textContent = 'Place order';
+    placeBtn.textContent = pd.placeLabel || 'Place order';
     if (err.status === 409) refreshQuote();
     if (err.status === 401) { session = null; window.turnstile?.reset?.(); if (!pd.turnstile) startSession(''); }
   }

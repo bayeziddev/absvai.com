@@ -9,6 +9,7 @@ import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
 import { effectiveVariantAttributes, formatNetQuantity, infoPanels } from '../lib/templates';
 import { Banner, Breadcrumbs, Burst, CategoryCarousel, CheckChip, Empty, Grid, HeroCarousel, OriginalsSeal, Pagination, PromoBanner, Rail, SectionTitle, TrustStrip } from './components';
 import { Icon } from './icons';
+import { RatingLine, ReviewsSection, type ReviewSummary } from './reviews';
 
 // ───────────── Home ─────────────
 
@@ -152,7 +153,7 @@ export function ListingPage(p: {
 
 const youtubeId = (url: string) => url.match(/(?:v=|youtu\.be\/)([\w-]{6,})/)?.[1] ?? null;
 
-export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones: Array<{ name: string; eta_text: string; base_charge_paisa: number }>; freeThresholdPaisa: number; settings: Record<string, string>; soldBy?: { shop_name: string; slug: string } | null }) {
+export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones: Array<{ name: string; eta_text: string; base_charge_paisa: number }>; freeThresholdPaisa: number; settings: Record<string, string>; soldBy?: { shop_name: string; slug: string } | null; reviews?: ReviewSummary }) {
   const { d } = p;
   const prod = d.product as Record<string, string | number | null>;
   const attrs = effectiveVariantAttributes(d.template, d.promotedSpecKeys).filter(a => d.variants.some(v => v.attributes[a.attributeTypeId]));
@@ -188,6 +189,7 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
         <div class="pdp-info">
           {prod.is_original ? <OriginalsSeal /> : null}
           <h1 class="pdp-title">{prod.name}</h1>
+          {p.reviews && <RatingLine s={p.reviews} />}
           {p.soldBy && <p class="sold-by"><Icon name="shield" size={14} />Sold by <a href={`/store/${p.soldBy.slug}`}>{p.soldBy.shop_name}</a> · delivered by {p.settings.store_name || 'Abs Vai'}</p>}
           {prod.short_description && <p class="pdp-short">{prod.short_description}</p>}
           {d.claims.length > 0 && <ul class="claims">{d.claims.map(c => <li><Icon name="shield" size={14} />{c.claim}</li>)}</ul>}
@@ -289,6 +291,8 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
         </section>
       )}
 
+      {p.reviews && (p.reviews.count > 0 || p.settings.reviews_enabled !== '0') && <ReviewsSection productId={Number(prod.id)} s={p.reviews} canWrite={p.settings.reviews_enabled !== '0'} />}
+
       {p.related.length > 0 && (
         <section class="section">
           <SectionTitle title="You may also like" href={`/c/${d.category.slug}`} />
@@ -348,7 +352,18 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
     <div class="container">
       <h1>Checkout</h1>
       <noscript><p class="notice">Checkout needs JavaScript. You can also order by phone.</p></noscript>
-      <form class="checkout" id="checkout-form" data-checkout novalidate>
+      <CheckoutForm wallets={p.wallets} turnstileSiteKey={p.turnstileSiteKey} />
+    </div>
+  );
+}
+
+/**
+ * The one-page checkout form (public/js/checkout.js drives it). The checkout page and every landing page use it, so a
+ * landing-page order gets the same address finder, coupon, fraud checks and incomplete-order capture.
+ */
+export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; turnstileSiteKey?: string; couponCode?: string | null; placeLabel?: string; compact?: boolean }) {
+  return (
+      <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout novalidate>
         <div class="co-main">
           <fieldset class="co-step">
             <legend><span class="step-no">1</span>Mobile number</legend>
@@ -416,8 +431,15 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
         <aside class="co-summary" aria-label="Order summary">
           <h2>Order summary</h2>
           <div data-co-lines><p class="muted">Loading…</p></div>
+          <div class="coupon-box">
+            <label class="field"><span>Coupon code</span>
+              <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="e.g. EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>Apply</button></span>
+            </label>
+            <p class="coupon-msg" data-coupon-msg aria-live="polite" />
+          </div>
           <dl class="totals">
             <dt>Subtotal</dt><dd data-subtotal>—</dd>
+            <dt data-discount-row hidden>Discount</dt><dd data-discount hidden>—</dd>
             <dt>Delivery</dt><dd data-delivery>Choose your area</dd>
             <dt data-cod-row hidden>COD fee</dt><dd data-cod-fee hidden>—</dd>
             <dt class="total">Total</dt><dd class="total" data-total>—</dd>
@@ -426,11 +448,10 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
           <p class="eta" data-eta />
           {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" />}
           <p class="form-msg error" data-co-error role="alert" />
-          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>Place order</button>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>{p.placeLabel ?? 'Place order'}</button>
           <p class="small muted">We save your details as you type so our team can help if checkout fails. We never store your GPS location.</p>
         </aside>
       </form>
-    </div>
   );
 }
 

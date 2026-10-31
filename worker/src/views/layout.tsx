@@ -18,6 +18,8 @@ export interface LayoutProps {
   tab?: 'home' | 'categories' | 'cart' | 'wishlist' | 'account';
   pageData?: object;
   scripts?: string[];
+  /** Extra stylesheets for this page only (e.g. landing pages), linked after the inline stylesheet. */
+  styles?: string[];
   children: Child;
   turnstileSiteKey?: string;
   bodyClass?: string;
@@ -102,6 +104,7 @@ export function Layout(p: LayoutProps) {
         <link rel="preload" href="/fonts/poppins-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         {p.css ? <style dangerouslySetInnerHTML={{ __html: p.css }} /> : <link rel="stylesheet" href="/css/app.css" />}
+        {(p.styles ?? []).map(href => <link rel="stylesheet" href={href} />)}
         {brandVars && <style dangerouslySetInnerHTML={{ __html: `:root{${brandVars}}` }} />}
         <script type="speculationrules" dangerouslySetInnerHTML={{ __html: json(SPECULATION_RULES) }} />
         {(p.jsonLd ?? []).map(d => <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json(d) }} />)}

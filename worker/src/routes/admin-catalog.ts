@@ -346,7 +346,7 @@ async function putCopies(media: R2Bucket, key: string, form: FormData, type: str
   }
 }
 
-async function storeImage(c: Context<AppEnv>, prefix: 'c' | 'b', types: Record<string, string>, maxMb: number): Promise<string> {
+async function storeImage(c: Context<AppEnv>, prefix: 'c' | 'b' | 'lp', types: Record<string, string>, maxMb: number): Promise<string> {
   const form = await c.req.formData();
   const file = form.get('file');
   if (!(file instanceof File)) throw bad('Choose a picture.');
@@ -373,6 +373,12 @@ const BANNER_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/
 adminCatalog.post('/banner-image', needAny('settings:write', 'seasons:write'), async c => {
   const url = await storeImage(c, 'b', BANNER_IMAGE_TYPES, 3);
   await audit(c, 'banner.image', 'settings', null, { url });
+  return c.json({ url }, 201);
+});
+/** Landing page photos (top photo, gallery, review photos). The browser resizes them first, like banners. */
+adminCatalog.post('/landing-image', need('catalog:write'), async c => {
+  const url = await storeImage(c, 'lp', BANNER_IMAGE_TYPES, 3);
+  await audit(c, 'landing.image', 'landing_page', null, { url });
   return c.json({ url }, 201);
 });
 adminCatalog.put('/categories/:id', need('catalog:write'), c => saveCategory(c, posInt(c.req.param('id'))));

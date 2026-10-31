@@ -378,7 +378,7 @@ auto-assignment round robin to on-duty agents and the leaderboard (delivered val
 | Segments based on **delivered** orders | **Planned P2** |
 | 15.2 Bulk SMS with segment count and cost before sending, opt-outs, quiet hours | **Planned P2** (`sms_outbox` exists) |
 | 15.3 Coupons and flash sales with caps that cannot oversell | **Planned P2** (`coupons` table exists) |
-| 15.4 Landing pages with embedded order form | **Planned P2** (`landing_pages`; orders already accept `source = 'landing'` and `landingPageId`) |
+| 15.4 Landing pages with embedded order form | **Built** (`/lp/:slug`, admin builder, `landing_pages.blocks`, orders keep `landing_page_id`; coupons, reviews and the sales report too, migration 0009) |
 | Wholesale tiers and dealer inquiries | **Built** (v1) |
 
 ## 16. Built-in Web Analytics & Real-Time Dashboard — **Planned P2**
