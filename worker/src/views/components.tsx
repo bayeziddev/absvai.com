@@ -4,7 +4,11 @@ import { SIZES, srcsetOf } from '../lib/images';
 import { formatTaka } from '../lib/money';
 import { Icon } from './icons';
 
-export interface Banner { headline: string; subline?: string; cta_text?: string; cta_href?: string; theme?: string; image?: string; kicker?: string }
+/** `wide`: the photo fills the whole banner, with the text over its left side. Otherwise a photo takes the right half. */
+export interface Banner { headline: string; subline?: string; cta_text?: string; cta_href?: string; theme?: string; image?: string; kicker?: string; wide?: boolean }
+
+/** How a banner shows its picture: a full-width photo, a photo on the right half, or a drawing (SVG) beside the text. */
+export const bannerLayout = (b: Banner) => (!b.image ? 'none' : b.image.endsWith('.svg') ? 'art' : b.wide ? 'wide' : 'side');
 
 export function Burst({ savePaisa }: { savePaisa: number }) {
   if (savePaisa <= 0) return null;
@@ -93,17 +97,24 @@ export function HeroCarousel({ banners }: { banners: Banner[] }) {
   return (
     <section class="hero" aria-roledescription="carousel" aria-label="Offers">
       <div class="hero-track" data-carousel>
-        {banners.map((b, i) => (
-          <a class={`hero-slide theme-${b.theme ?? 'chili'}`} href={b.cta_href ?? '/shop'} aria-roledescription="slide" aria-label={`${i + 1} of ${banners.length}: ${b.headline}`}>
-            <div class="hero-copy">
-              {b.kicker && <span class="hero-kicker">{b.kicker}</span>}
-              {i === 0 ? <h1 class="hero-title">{b.headline}</h1> : <p class="hero-title">{b.headline}</p>}
-              {b.subline && <p class="hero-sub">{b.subline}</p>}
-              <span class="btn btn-cta">{b.cta_text ?? 'Shop now'}<Icon name="right" size={18} /></span>
-            </div>
-            {b.image && <img class="hero-img" src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.hero} alt="" width="600" height="600" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} />}
-          </a>
-        ))}
+        {banners.map((b, i) => {
+          const layout = bannerLayout(b);
+          // The first banner's photo is the biggest thing on the first screen, so it loads first; the others wait.
+          const load = { loading: i === 0 ? 'eager' : 'lazy', fetchpriority: i === 0 ? 'high' : undefined, decoding: i === 0 ? undefined : 'async' } as const;
+          return (
+            <a class={`hero-slide hero-${layout} theme-${b.theme ?? 'chili'}`} href={b.cta_href ?? '/shop'} aria-roledescription="slide" aria-label={`${i + 1} of ${banners.length}: ${b.headline}`}>
+              {layout === 'wide' && <img class="hero-bg" src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.heroWide} alt="" width="2560" height="1097" {...load} />}
+              {layout === 'side' && <img class="hero-photo" src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.heroSide} alt="" width="1024" height="1024" {...load} />}
+              <div class="hero-copy">
+                {b.kicker && <span class="hero-kicker">{b.kicker}</span>}
+                {i === 0 ? <h1 class="hero-title">{b.headline}</h1> : <p class="hero-title">{b.headline}</p>}
+                {b.subline && <p class="hero-sub">{b.subline}</p>}
+                <span class="btn btn-cta">{b.cta_text ?? 'Shop now'}<Icon name="right" size={18} /></span>
+              </div>
+              {layout === 'art' && <img class="hero-img" src={b.image} alt="" width="600" height="600" {...load} />}
+            </a>
+          );
+        })}
       </div>
       {banners.length > 1 && (
         <div class="hero-dots" data-dots>
@@ -140,13 +151,13 @@ export function CategoryCarousel({ categories, seasonal }: { categories: Categor
 export function PromoBanner({ b }: { b: Banner | null }) {
   if (!b) return null;
   return (
-    <a class={`promo theme-${b.theme ?? 'clove'}`} href={b.cta_href ?? '/shop'}>
-      <div>
+    <a class={`promo promo-${bannerLayout(b)} theme-${b.theme ?? 'clove'}`} href={b.cta_href ?? '/shop'}>
+      <div class="promo-copy">
         <p class="promo-title">{b.headline}</p>
         {b.subline && <p class="promo-sub">{b.subline}</p>}
         <span class="btn btn-cta btn-sm">{b.cta_text ?? 'Shop now'}</span>
       </div>
-      {b.image && <img src={b.image} srcset={srcsetOf(b.image)} sizes={SIZES.promo} alt="" width="600" height="600" loading="lazy" decoding="async" />}
+      {b.image && <img src={b.image} srcset={srcsetOf(b.image)} sizes={bannerLayout(b) === 'art' ? SIZES.promo : SIZES.promoPhoto} alt="" width="600" height="600" loading="lazy" decoding="async" />}
     </a>
   );
 }

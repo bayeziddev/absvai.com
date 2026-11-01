@@ -4,14 +4,19 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 export const taka = paisa => `৳${Math.floor(Math.abs(paisa) / 100).toLocaleString('en-US')}${paisa % 100 ? `.${String(Math.abs(paisa) % 100).padStart(2, '0')}` : ''}`;
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-// Uploaded photos also come 480 and 960 px wide (worker/src/lib/images.ts); built-in pictures don't.
+// Uploaded photos also come 480 and 960 px wide, and the shop's built-in photos in their own widths
+// (worker/src/lib/images.ts); other pictures (SVG placeholders) don't.
 const RESIZABLE = /^\/media\/(p\/\d+|c|b)\/[\w-]+\.(webp|jpg)$/;
 const copy = (u, w) => u.replace(/\.(webp|jpg)$/, `-${w}.$1`);
+const PHOTO = /^\/img\/photos\/(wide|sq)\/[\w-]+\.webp$/;
+const SETS = { wide: [[640, 960, 1280, 1920], 2560], sq: [[240, 480, 720], 1024] };
+const widths = u => { const m = u && u.match(PHOTO); return m ? SETS[m[1]] : u && RESIZABLE.test(u) ? [[480, 960], 1600] : null; };
 /** The small copy of a photo, for thumbnails. */
-export const small = u => (u && RESIZABLE.test(u) ? copy(u, 480) : u);
+export const small = u => { const s = widths(u); return s ? copy(u, s[0][0]) : u; };
 /** Shows a photo in an <img> that has `sizes`, letting the browser pick the right width. */
 export function showPhoto(img, u) {
-  img.srcset = u && RESIZABLE.test(u) ? `${copy(u, 480)} 480w, ${copy(u, 960)} 960w, ${u} 1600w` : '';
+  const s = widths(u);
+  img.srcset = s ? [...s[0].map(w => `${copy(u, w)} ${w}w`), `${u} ${s[1]}w`].join(', ') : '';
   img.src = u;
 }
 

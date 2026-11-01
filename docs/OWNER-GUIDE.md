@@ -114,7 +114,9 @@ CSV** for Excel. Profit needs each option's **Cost** (Products → Full editor �
 
 Each banner shows a live preview while you type.
 
-1. Press **+ Add picture** and choose a photo from your phone or computer (wide photos look best; it is made smaller for you).
+1. Press **+ Add picture** and choose a photo from your phone or computer. Best: a wide photo about 2000 × 860 px with the
+   products on the right and empty space on the left for the text. A wide photo ticks **Photo fills the whole banner** by
+   itself (the text sits on a soft dark shade on the left); untick it to put the photo on the right half instead.
 2. Type a **headline**, and if you like a short line under it and the button text.
 3. Under **Button opens**, pick the page: the shop, deals, new arrivals, any category or season. **Another link…** lets you paste
    your own.
@@ -127,6 +129,25 @@ pages, and customers can close it.
 
 The **second banner** sits further down the homepage. While a season is live, the season's own banners show at the top instead
 (the page tells you so); change those in **Seasons**, which uses the same banner editor.
+
+### Changing the pictures: banners, categories and products
+
+The shop now shows real photos instead of drawings. To put in your own:
+
+| Picture | Where | What photo |
+|---|---|---|
+| Big homepage banners while a season is live (winter now) | **Seasons** → tap **Winter** → *Banners while the season is live* → **Change picture** | Wide, about 2000 × 860 px, products on the right, empty space on the left |
+| Big homepage banners when no season is live | **Website & banners** → *Big banners at the top of the homepage* | The same kind of wide photo |
+| Second banner (lower on the homepage) | **Website & banners** → *Second banner* | Square, 1000 px or more |
+| Round category pictures | **Categories** → **Edit** → **Change picture** | Square, the thing in the middle (it is cut into a circle) |
+| Product photos | **Products** → tap the product → **Photos & video** | Square, 1000–2000 px, in good light |
+
+Photos never look blurred and the site stays fast: every photo is saved in several sizes, phones load a small one and large
+screens a large one. Use the photo straight from the camera; photos passed through WhatsApp or Messenger are shrunk and can look
+soft. If a change does not show, press **Settings → Refresh every page now**.
+
+Seven of the photos now on the site are the ones you sent; the others are decorative photos made with AI for the demo catalog
+and the categories. Your own product photos sell best: replace them when you can.
 
 **Settings → Store → Social media**: paste the full link of your Facebook page, Instagram, YouTube or TikTok (for example
 `https://www.facebook.com/absvai`). Leave a box empty to hide it. They show in the footer of every page.

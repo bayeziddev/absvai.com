@@ -94,6 +94,8 @@ for (const [group, terms] of Object.entries(SYNONYM_GROUPS)) {
   for (const term of terms) cfg.push(insert('search_synonyms', { group_key: group, term }));
 }
 for (const [key, value] of Object.entries(SETTINGS)) cfg.push(insert('settings', { key, value }));
+// These banners and the category pictures are drawings: migration 0010 swaps them for real photos. 0003 is already
+// applied on the live shop, so it keeps them as they were.
 cfg.push(insert('settings', {
   key: 'default_banners',
   value: JSON.stringify([
@@ -131,7 +133,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { weight: '1kg' }, price: 72000, compare: 80000, stock: 60, packed: 1200, net: [1, 'kg'] },
       { attrs: { weight: '2kg' }, price: 140000, compare: 160000, stock: 20, packed: 2300, net: [2, 'kg'] },
     ],
-    image: '/img/placeholders/gur.svg', keywords: 'nolen gur patali',
+    image: '/img/photos/sq/cat-khejur-gur.webp', keywords: 'nolen gur patali',
   },
   {
     slug: 'liquid-khejur-gur', category: 'khejur-gur', template: 'weighed_food', name: 'Liquid Khejur Gur (jhola gur)', code: 'JHLG',
@@ -143,7 +145,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { weight: '500g', packaging: 'Jar' }, price: 35000, stock: 30, packed: 800, net: [500, 'g'] },
       { attrs: { weight: '1kg', packaging: 'Jar' }, price: 65000, stock: 25, packed: 1400, net: [1, 'kg'] },
     ],
-    image: '/img/placeholders/liquid-gur.svg',
+    image: '/img/photos/sq/p-liquid-gur.webp',
   },
   {
     slug: 'himsagar-mango-pre-order', category: 'organic-seasonal-food', template: 'weighed_food', name: 'Himsagar Mango (pre-order)', code: 'HMSG',
@@ -152,7 +154,7 @@ const DEMO: DemoProduct[] = [
     fulfilment: 'pre_order', preorder: { dispatch: '2027-05-25', type: 'fixed', advance: 20000 }, seasons: ['mango'], chips: ['Carbide-free', 'Picked to order'],
     specs: { origin: 'Chapainawabganj', batch_no: 'Pre-order batch · May 2027', best_before: '2027-06-10', ingredients: 'Fresh mango', storage: 'Ripen at room temperature, then refrigerate.' },
     variants: [{ attrs: { weight: '5kg' }, price: 75000, stock: 200, packed: 5800, net: [5, 'kg'] }],
-    image: '/img/placeholders/mango.svg',
+    image: '/img/photos/sq/p-mango.webp',
   },
   {
     slug: 'langra-mango', category: 'organic-seasonal-food', template: 'weighed_food', name: 'Langra Mango', code: 'LNGR',
@@ -161,7 +163,7 @@ const DEMO: DemoProduct[] = [
     seasons: ['mango'],
     specs: { origin: 'Rajshahi', batch_no: 'Season 2027', best_before: '2027-07-31', ingredients: 'Fresh mango', storage: 'Ripen at room temperature.' },
     variants: [{ attrs: { weight: '5kg' }, price: 70000, stock: 0, packed: 5800, net: [5, 'kg'] }],
-    image: '/img/placeholders/mango.svg',
+    image: '/img/photos/sq/p-mango.webp',
   },
   {
     slug: 'sundarbans-honey', category: 'organic-seasonal-food', template: 'weighed_food', name: 'Sundarbans Mangrove Honey', code: 'HONY',
@@ -174,7 +176,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { volume: '500ml' }, price: 80000, compare: 85000, stock: 24, packed: 900, net: [500, 'ml'] },
       { attrs: { volume: '1l' }, price: 150000, stock: 10, packed: 1700, net: [1, 'l'] },
     ],
-    image: '/img/placeholders/liquid-gur.svg',
+    image: '/img/photos/sq/p-honey.webp',
   },
   {
     slug: '42-item-master-masala', category: 'spices-masala', template: 'packaged_food', name: '42 Item Master Masala', code: 'MMSL', brand: 'Abs Vai', original: true, home: true,
@@ -187,7 +189,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { pack_size: '500g' }, price: 34000, stock: 90, packed: 560, net: [500, 'g'] },
       { attrs: { pack_size: '1kg' }, price: 65000, compare: 72000, stock: 80, packed: 1100, net: [1, 'kg'], tiers: [{ minQty: 5, pricePaisa: 60000 }, { minQty: 20, pricePaisa: 56000 }] },
     ],
-    image: '/img/placeholders/masala.svg', keywords: 'chaat masala fuchka masala',
+    image: '/img/photos/sq/p-masala.webp', keywords: 'chaat masala fuchka masala',
   },
   {
     slug: 'electronic-impulse-sealer-pfs', category: 'sealers', template: 'machinery', name: 'Electronic Impulse Sealer (PFS series)', code: 'SEAL',
@@ -200,7 +202,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { model_size: '300mm' }, price: 185000, compare: 210000, stock: 25, packed: 2900 },
       { attrs: { model_size: '400mm' }, price: 235000, stock: 8, packed: 3800 },
     ],
-    image: '/img/placeholders/sealer.svg',
+    image: '/img/photos/sq/p-sealer.webp',
   },
   {
     slug: 'manual-chanachur-press', category: 'chanachur-presses', template: 'machinery', home: true, name: 'Manual Chanachur Press', code: 'CHNC',
@@ -212,7 +214,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { model_size: '4-inch' }, price: 450000, compare: 480000, stock: 6, packed: 9000 },
       { attrs: { model_size: '6-inch' }, price: 650000, stock: 3, packed: 14000 },
     ],
-    image: '/img/placeholders/press.svg',
+    image: '/img/photos/sq/p-press.webp',
   },
   {
     slug: 'mahogany-velpuri-maker', category: 'kitchen-wooden-tools', template: 'handmade_tool', name: 'Mahogany Velpuri & Fuchka Maker', code: 'VLPR',
@@ -224,7 +226,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { tool_size: '8×6 inch', finish: 'Natural' }, price: 120000, stock: 10, packed: 1800 },
       { attrs: { tool_size: '8×6 inch', finish: 'Colored' }, price: 120000, stock: 14, packed: 1800 },
     ],
-    image: '/img/placeholders/velpuri.svg', sold: 67,
+    image: '/img/photos/sq/cat-wooden.webp', sold: 67,
   },
   {
     slug: 'wooden-hand-masher', category: 'kitchen-wooden-tools', template: 'handmade_tool', name: 'Wooden Hand Masher', code: 'MASH',
@@ -233,7 +235,7 @@ const DEMO: DemoProduct[] = [
     chips: ['Easy to use', 'Solid wood'], fulfilment: 'made_to_order',
     specs: { wood_type: 'Mahogany', finish_detail: 'Natural polish', dimensions: '12 × 5 × 5', care: 'Wash and dry immediately.', lead_time_days: '4' },
     variants: [{ attrs: { tool_size: 'One size' }, price: 65000, stock: 20, packed: 900 }],
-    image: '/img/placeholders/masher.svg',
+    image: '/img/photos/sq/cat-wooden.webp',
   },
   {
     slug: 'wooden-clothes-rack', category: 'home-furniture', template: 'bulky_home', name: 'Wooden Clothes Rack with Shoe Shelves', code: 'CRCK',
@@ -242,7 +244,7 @@ const DEMO: DemoProduct[] = [
     chips: ['Keeps your room tidy', 'Free home delivery'], free: true,
     specs: { dimensions: '62 × 20 × 16', material: 'Gamari wood', assembly_required: '1', max_load: '25', item_weight: '9', delivery_note: 'Delivered flat-packed with tools and a printed guide' },
     variants: [{ attrs: {}, price: 260000, compare: 300000, stock: 7, packed: 11000 }],
-    image: '/img/placeholders/rack.svg',
+    image: '/img/photos/sq/p-clothes-rack.webp',
   },
   {
     slug: 'mens-cotton-panjabi', category: 'clothing', template: 'apparel', name: "Men's Cotton Panjabi", code: 'PNJB',
@@ -251,14 +253,14 @@ const DEMO: DemoProduct[] = [
     specs: { fabric: '100% cotton', care: 'Machine wash cold. Do not bleach.', gender_age: 'Men', fit: 'Regular', occasion: 'Eid, Jummah' },
     sizeChart: { columns: ['Chest (inch)', 'Length (inch)', 'Shoulder (inch)'], rows: [{ size: 'M', values: ['40', '42', '17'] }, { size: 'L', values: ['42', '43', '18'] }, { size: 'XL', values: ['44', '44', '19'] }] },
     variants: ['M', 'L', 'XL'].flatMap(size => ['White', 'Navy'].map(color => ({ attrs: { apparel_size: size, color }, price: 137000, compare: 145000, stock: 8, packed: 450 }))),
-    image: '/img/placeholders/panjabi.svg',
+    image: '/img/photos/sq/cat-clothing.webp',
   },
   {
     slug: 'cotton-voile-fabric', category: 'unstitched-fabric', template: 'fabric', name: 'Cotton Voile Fabric', code: 'VOIL',
     short: 'Soft printed cotton voile, cut to the length you choose.', description: 'Lightweight cotton voile for kurtis, three-pieces and summer wear.',
     specs: { fabric: '100% cotton voile', width: '44', care: 'Hand wash cold. Dry in shade.' },
     variants: ['2m', '2.5m', '5m'].flatMap(len => ['Indigo', 'Rust'].map(color => ({ attrs: { length_m: len, color }, price: Math.round(Number(len.replace('m', '')) * 32000), stock: 15, packed: Math.round(Number(len.replace('m', '')) * 140 + 60), net: [Number(len.replace('m', '')), 'm'] as [number, 'm'] }))),
-    image: '/img/placeholders/panjabi.svg',
+    image: '/img/photos/sq/p-fabric.webp',
   },
   {
     slug: 'winter-wool-shawl', category: 'winter-wear', template: 'apparel', name: 'Winter Wool Shawl', code: 'SHWL',
@@ -266,7 +268,7 @@ const DEMO: DemoProduct[] = [
     seasons: ['winter'], specs: { fabric: 'Wool blend', care: 'Hand wash cold.', gender_age: 'Unisex' },
     sizeChart: { columns: ['Width (inch)', 'Length (inch)'], rows: [{ size: 'Free size', values: ['40', '80'] }] },
     variants: [{ attrs: { apparel_size: 'Free size', color: 'Maroon' }, price: 95000, stock: 12, packed: 400 }, { attrs: { apparel_size: 'Free size', color: 'Grey' }, price: 95000, stock: 9, packed: 400 }],
-    image: '/img/placeholders/shawl.svg',
+    image: '/img/photos/sq/p-shawl.webp',
   },
   {
     slug: 'mens-leather-loafer', category: 'shoes', template: 'footwear', name: "Men's Genuine Leather Loafer", code: 'LOAF',
@@ -274,14 +276,14 @@ const DEMO: DemoProduct[] = [
     specs: { upper_material: 'Genuine leather', sole_material: 'Rubber' },
     sizeChart: { columns: ['Foot length (cm)'], rows: [{ size: '40', values: ['25.5'] }, { size: '41', values: ['26'] }, { size: '42', values: ['26.5'] }, { size: '43', values: ['27'] }] },
     variants: ['40', '41', '42', '43'].map(s => ({ attrs: { shoe_size: s, color: 'Black' }, price: 120000, stock: 5, packed: 900 })),
-    image: '/img/placeholders/loafer.svg',
+    image: '/img/photos/sq/cat-shoes.webp',
   },
   {
     slug: 'smart-watch-basic', category: 'gadgets-electronics', template: 'electronics', name: 'Smart Watch (basic)', code: 'SMWT', brand: 'Generic',
     short: 'Step counter, heart-rate and call alerts.', description: 'A basic smart watch with a magnetic charger.',
     specs: { model_no: 'SW-9', warranty_period: '3 months', warranty_by: 'Abs Vai', in_the_box: 'Watch, magnetic charger, manual', power_spec: '250mAh, magnetic USB charging' },
     variants: [{ attrs: { color: 'Black' }, price: 149000, compare: 169000, stock: 10, packed: 300 }, { attrs: { color: 'Pink' }, price: 149000, compare: 169000, stock: 6, packed: 300 }],
-    image: '/img/placeholders/watch.svg',
+    image: '/img/photos/sq/cat-gadgets.webp',
   },
   {
     slug: 'kraft-food-pouch', category: 'packaging-supplies', template: 'pack_supply', name: 'Kraft Stand-up Food Pouch', code: 'KRFT',
@@ -291,7 +293,7 @@ const DEMO: DemoProduct[] = [
       { attrs: { supply_size: '6×9 inch', pack_qty: '100 pcs' }, price: 90000, stock: 40, packed: 1400, net: [100, 'pcs'], tiers: [{ minQty: 5, pricePaisa: 82000 }] },
       { attrs: { supply_size: '6×9 inch', pack_qty: '500 pcs' }, price: 400000, stock: 10, packed: 6500, net: [500, 'pcs'] },
     ],
-    image: '/img/placeholders/pouch.svg',
+    image: '/img/photos/sq/cat-packaging.webp',
   },
 ];
 
@@ -301,8 +303,8 @@ const demo: string[] = [
   '-- GENERATED by scripts/gen-seed.ts. DEMO DATA for local development and tests only. Never run against production.',
   "UPDATE seasons SET starts_on = '2026-10-25', ends_on = '2027-02-28', banners = " +
     j([
-      { headline: 'Fresh khejur gur is here', subline: 'Patali and liquid gur from Jashore and Satkhira. Cash on Delivery.', cta_text: 'Shop winter', cta_href: '/season/winter', theme: 'chili', image: '/img/placeholders/gur.svg' },
-      { headline: 'Warm up for winter', subline: 'Shawls and winter wear at honest prices.', cta_text: 'See winter wear', cta_href: '/c/winter-wear', theme: 'clove', image: '/img/placeholders/shawl.svg' },
+      { headline: 'Fresh khejur gur is here', subline: 'Patali and liquid gur from Jashore and Satkhira. Cash on Delivery.', cta_text: 'Shop winter', cta_href: '/season/winter', theme: 'chili', image: '/img/photos/wide/hero-winter-gur.webp', wide: true },
+      { headline: 'Warm up for winter', subline: 'Shawls and winter wear at honest prices.', cta_text: 'See winter wear', cta_href: '/c/winter-wear', theme: 'clove', image: '/img/photos/sq/banner-winter-wear.webp' },
     ]) + " WHERE slug = 'winter';",
   "UPDATE seasons SET starts_on = '2027-05-20', ends_on = '2027-07-31' WHERE slug = 'mango';",
   "UPDATE settings SET value = '8801700000000' WHERE key = 'whatsapp_number';",

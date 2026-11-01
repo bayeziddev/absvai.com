@@ -29,6 +29,7 @@
 | কুপন | [Coupons](https://absvai.absvai.workers.dev/admin/#/coupons) |
 | কাস্টমারের রিভিউ | [Reviews](https://absvai.absvai.workers.dev/admin/#/reviews) |
 | দোকানের নাম, লোগো, ব্যানার, পপআপ | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) |
+| ব্যানার, ক্যাটাগরি ও প্রোডাক্টের ছবি বদলানো | [নিচের "ছবি বদলানো" অংশ](#ছবি-বদলানো-ব্যানার-ক্যাটাগরি-আর-প্রোডাক্ট) |
 | ইমেইল | [Emails](https://absvai.absvai.workers.dev/admin/#/emails) |
 | কাস্টমার | [Customers](https://absvai.absvai.workers.dev/admin/#/customers) |
 | সেলার (মার্কেটপ্লেস) | [Sellers](https://absvai.absvai.workers.dev/admin/#/sellers) |
@@ -288,6 +289,24 @@
 
 কোনো সিজন চালু থাকলে উপরে সিজনের ব্যানার দেখায়; সেগুলো **Seasons** পেইজে বদলাবেন।
 
+## ছবি বদলানো: ব্যানার, ক্যাটাগরি আর প্রোডাক্ট
+
+দোকানে এখন কার্টুন নয়, আসল ছবি আছে। নিজের ছবি দিতে:
+
+| কোন ছবি | কোথায় বদলাবেন | কেমন ছবি দেবেন |
+|---|---|---|
+| হোমপেইজের বড় ব্যানার, সিজন চলার সময় (এখন শীত) | [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons) → **Winter** সারিতে চাপুন → **Banners while the season is live** → **Change picture** | চওড়া ছবি, প্রায় ২০০০ × ৮৬০ পিক্সেল: জিনিস ডান দিকে, বাম দিকে ফাঁকা জায়গা (সেখানে লেখা বসে) |
+| হোমপেইজের বড় ব্যানার, কোনো সিজন না থাকলে | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Big banners at the top of the homepage** → **Change picture** | একই রকম চওড়া ছবি |
+| হোমপেইজের নিচের দ্বিতীয় ব্যানার | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Second banner** | চারকোনা (বর্গ) ছবি, ১০০০ পিক্সেল বা বড় |
+| ক্যাটাগরির গোল ছবি | [Categories](https://absvai.absvai.workers.dev/admin/#/categories) → ক্যাটাগরির **Edit** → **Change picture** | চারকোনা ছবি, জিনিস ঠিক মাঝখানে (ছবিটা গোল করে কাটা হয়) |
+| প্রোডাক্টের ছবি | [Products](https://absvai.absvai.workers.dev/admin/#/products) → প্রোডাক্টে চাপুন → **Photos & video** | চারকোনা ছবি, ১০০০ থেকে ২০০০ পিক্সেল, ভালো আলোতে তোলা |
+
+- চওড়া ছবি দিলে **Photo fills the whole banner** নিজে থেকে টিক হয়: ছবি পুরো ব্যানার জুড়ে থাকে, বাম দিকে লেখার পেছনে হালকা কালো ছায়া পড়ে যাতে লেখা পরিষ্কার পড়া যায়। টিক তুলে দিলে ছবি ডান দিকের অর্ধেকে বসে, বাকিটা ব্যানারের রঙ (Red, Yellow, Dark, Green)।
+- ছবি ঝাপসা হবে না, ওয়েবসাইটও ধীর হবে না: বড় ছবি দিলে সিস্টেম নিজেই কয়েকটা ছোট-বড় কপি বানায়। মোবাইল ছোট কপি নেয় (দ্রুত খোলে), বড় স্ক্রিন বড় কপি নেয় (পরিষ্কার দেখায়)।
+- মোবাইল ক্যামেরার আসল ছবিই দিন। WhatsApp/Messenger থেকে নেওয়া ছবি ছোট হয়ে যায়, তাই ঝাপসা দেখাতে পারে।
+- শেষে **Save** চাপুন। দোকানে না দেখালে Settings → **Refresh every page now**।
+- এখনকার ব্যানার, ক্যাটাগরি আর ডেমো প্রোডাক্টের ছবির মধ্যে আপনার দেওয়া ৭টা ছবি আছে, বাকিগুলো AI দিয়ে বানানো সাজানো ছবি। নিজের পণ্যের আসল ছবিই সবচেয়ে ভালো বিক্রি করে, তাই সময় পেলে নিজের ছবি তুলে বদলে দিন।
+
 ## সিজন
 
 [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons): শীত (খেজুর গুড়), আম, রমজান, ঈদ…
@@ -390,6 +409,7 @@
 | সমস্যা | কী করবেন |
 |---|---|
 | বদল করলাম, দোকানে দেখাচ্ছে না | কয়েক সেকেন্ড অপেক্ষা করে পেইজ রিফ্রেশ করুন; তবুও না হলে Settings → **Refresh every page now** |
+| ছবি ঝাপসা দেখায় | আসল বড় ছবিটা দিন (WhatsApp থেকে নেওয়া ছোট ছবি নয়): ব্যানারে প্রায় ২০০০ পিক্সেল চওড়া, প্রোডাক্ট ও ক্যাটাগরিতে ১০০০ পিক্সেল বা বড় |
 | Save চাপলে লাল লেখা আসে | লাল লেখায় কোন ঘরে কী ভুল তা বলা থাকে; ঠিক করে আবার Save |
 | "Please sign in again" | অনেকক্ষণ বসে থাকলে লগআউট হয়ে যায়; আবার লগইন করুন |
 | ইমেইল আসছে না | [Emails](https://absvai.absvai.workers.dev/admin/#/emails) এ Status দেখুন, **Send me a test email** চাপুন, স্প্যাম ফোল্ডার দেখুন |

@@ -5,7 +5,8 @@ Turns source photos into the responsive WebP sets the storefront serves (worker/
   wide  full-width banners   <name>.webp 2560 px wide + copies 640, 960, 1280, 1920
   sq    square pictures      <name>.webp 1024 x 1024  + copies 240, 480, 720
 
-Usage: photos.py OUT_DIR < list      (one "name kind zoom source" per line; source is a URL or a file path)
+Usage: python3 scripts/photos.py public/img/photos < list
+  (one "name kind zoom source" per line; source is a URL or a file path; zoom 1 keeps the whole picture)
 """
 import io
 import os

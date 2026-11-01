@@ -34,7 +34,10 @@ function validateSocial(v: string): string | null {
 }
 
 export const BANNER_THEMES = ['chili', 'turmeric', 'clove', 'leaf'] as const;
-/** One banner: text fields, an uploaded or built-in picture, a link inside the store (or https), a known colour theme. */
+/**
+ * One banner: text fields, an uploaded or built-in picture (`wide`: it fills the whole banner), a link inside the store
+ * (or https), a known colour theme.
+ */
 export function bannerProblem(b: unknown, n: string): string | null {
   if (!b || typeof b !== 'object' || Array.isArray(b)) return `${n} is not valid.`;
   const x = b as Record<string, unknown>;
@@ -43,6 +46,7 @@ export function bannerProblem(b: unknown, n: string): string | null {
   if (x.image !== undefined && x.image !== '' && (typeof x.image !== 'string' || !/^(\/media\/b\/[\w-]+\.(png|jpg|webp)|\/img\/[\w/.-]+|https:\/\/\S+)$/.test(x.image))) return `${n}: upload the picture again.`;
   if (x.cta_href !== undefined && x.cta_href !== '' && (typeof x.cta_href !== 'string' || !/^(\/[\w/?=&.-]*|https:\/\/\S+)$/.test(x.cta_href))) return `${n}: the button link should be a page of the store (starting with /) or an https:// link.`;
   if (x.theme !== undefined && !(BANNER_THEMES as readonly unknown[]).includes(x.theme)) return `${n}: choose one of the colours.`;
+  if (x.wide !== undefined && typeof x.wide !== 'boolean') return `${n} is not valid.`;
   return null;
 }
 function validateBanners(v: string): string | null {

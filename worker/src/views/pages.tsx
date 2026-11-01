@@ -13,6 +13,9 @@ import { RatingLine, ReviewsSection, type ReviewSummary } from './reviews';
 
 // ───────────── Home ─────────────
 
+/** The business band's photo: a press making chanachur. */
+const BIZ_PHOTO = '/img/photos/sq/cat-press.webp';
+
 export function HomePage(p: {
   banners: Banner[]; categories: CategoryNode[]; seasonal: Set<number>; activeSeason: { slug: string; name: string } | null;
   inSeason: ProductCard[]; featured: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; settings: Record<string, string>;
@@ -64,7 +67,7 @@ export function HomePage(p: {
               <a class="btn btn-outline-light" href="/contact#wholesale">Bulk & dealer inquiry</a>
             </div>
           </div>
-          <img src="/img/placeholders/press.svg" alt="" width="600" height="600" loading="lazy" />
+          <img src={BIZ_PHOTO} srcset={srcsetOf(BIZ_PHOTO)} sizes={SIZES.bizBand} alt="" width="600" height="600" loading="lazy" decoding="async" />
         </div>
       </section>
       <PromoBanner b={p.promo} />

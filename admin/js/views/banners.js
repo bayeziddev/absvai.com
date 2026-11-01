@@ -1,5 +1,6 @@
 // Banner editor for the owner: picture upload, headline, a short line, the button, where it opens and a colour, with a live
 // preview. Used for the homepage banners, the second banner and each season's banners. No codes or links to type.
+// A wide photo (about twice as wide as it is tall) fills the whole banner; a square one takes the right half.
 import { api, esc, toast } from '../app.js';
 import { appendImage, compressImage } from './products.js';
 
@@ -15,7 +16,9 @@ export async function linkOptions() {
   ];
 }
 
-const blank = () => ({ headline: '', subline: '', cta_text: 'Shop now', cta_href: '/shop', theme: 'chili', image: '' });
+const blank = () => ({ headline: '', subline: '', cta_text: 'Shop now', cta_href: '/shop', theme: 'chili', image: '', wide: false });
+/** Photos at least this much wider than tall fill the whole banner. */
+const WIDE_RATIO = 1.8;
 
 /**
  * Renders an editable list of banners into `el` and returns { value() } with the cleaned list.
@@ -28,9 +31,11 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
 
   const preview = b => {
     const [, , bg, fg] = THEMES.find(t => t[0] === b.theme) ?? THEMES[0];
-    return `<div class="bn-preview" style="background:${bg};color:${fg}">
+    const wide = b.image && b.wide;
+    return `<div class="bn-preview${wide ? ' bn-wide' : ''}" style="background:${wide ? '#24170F' : bg};color:${wide ? '#fff' : fg}">
+      ${wide ? `<img class="bn-bg" src="${esc(b.image)}" alt="">` : ''}
       <div class="bn-text"><b>${esc(b.headline || 'Your headline')}</b>${b.subline ? `<span>${esc(b.subline)}</span>` : ''}<em>${esc(b.cta_text || 'Shop now')}</em></div>
-      ${b.image ? `<img src="${esc(b.image)}" alt="">` : '<div class="bn-noimg">No picture yet</div>'}</div>`;
+      ${wide ? '' : b.image ? `<img src="${esc(b.image)}" alt="">` : '<div class="bn-noimg">No picture yet</div>'}</div>`;
   };
 
   function draw() {
@@ -40,7 +45,8 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
         ${preview(b)}
         ${readOnly ? '' : `<div class="bn-fields">
           <div class="row"><label class="btn btn-sm btn-outline">${b.image ? 'Change picture' : '+ Add picture'}<input type="file" data-b="file" accept="image/png,image/jpeg,image/webp" hidden></label>
-            ${b.image ? '<button type="button" class="btn btn-sm btn-ghost" data-b="noimg">Remove picture</button>' : ''}<span class="small muted">Wide photos look best.</span></div>
+            ${b.image ? '<button type="button" class="btn btn-sm btn-ghost" data-b="noimg">Remove picture</button>' : ''}<span class="small muted">Best: a wide photo about 2000 × 860 px, products on the right, empty space on the left for the text.</span></div>
+          ${b.image ? `<label class="check bn-wide-check"><input type="checkbox" data-b="wide" ${b.wide ? 'checked' : ''}> <span>Photo fills the whole banner <span class="small muted">· off: the photo sits on the right half</span></span></label>` : ''}
           <label class="f">Headline <span class="req">*</span><input data-b="headline" value="${esc(b.headline)}" maxlength="80" placeholder="e.g. Fresh khejur gur is here"></label>
           <label class="f">Short line under it<input data-b="subline" value="${esc(b.subline)}" maxlength="160" placeholder="e.g. Patali, liquid and nolen gur from Jessore"></label>
           <div class="grid-2"><label class="f">Button text<input data-b="cta_text" value="${esc(b.cta_text)}" maxlength="30"></label>
@@ -73,13 +79,16 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
         if (!file) return;
         try {
           const fd = new FormData();
-          appendImage(fd, await compressImage(file));
+          const photo = await compressImage(file);
+          appendImage(fd, photo);
           b.image = (await api('/banner-image', 'POST', fd)).url;
+          b.wide = Boolean(photo.width && photo.width / photo.height >= WIDE_RATIO);
           toast('Picture added. Remember to save.');
           draw();
         } catch (err) { toast(err.message, true); }
       });
-      card.querySelector('[data-b=noimg]')?.addEventListener('click', () => { b.image = ''; draw(); });
+      card.querySelector('[data-b=wide]')?.addEventListener('change', e => { b.wide = e.target.checked; refresh(); });
+      card.querySelector('[data-b=noimg]')?.addEventListener('click', () => { b.image = ''; b.wide = false; draw(); });
       card.querySelector('[data-b=up]')?.addEventListener('click', () => { [list[i - 1], list[i]] = [list[i], list[i - 1]]; draw(); });
       card.querySelector('[data-b=down]')?.addEventListener('click', () => { [list[i + 1], list[i]] = [list[i], list[i + 1]]; draw(); });
       card.querySelector('[data-b=remove]')?.addEventListener('click', () => { list.splice(i, 1); draw(); });
@@ -95,6 +104,7 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
         const out = { headline: b.headline.trim(), cta_text: b.cta_text.trim() || 'Shop now', cta_href: b.cta_href.trim() || '/shop', theme: b.theme };
         if (b.subline.trim()) out.subline = b.subline.trim();
         if (b.image) out.image = b.image;
+        if (b.image && b.wide) out.wide = true;
         return out;
       });
     },

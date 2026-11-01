@@ -217,6 +217,7 @@ async function saveSeason(c: Context<AppEnv>, id: number | null) {
   const banners = Array.isArray(b.banners) ? (b.banners as Array<Record<string, unknown>>).slice(0, 5).map(x => ({
     headline: str(x.headline, 80), subline: str(x.subline, 160), cta_text: str(x.cta_text, 30) || 'Shop now', cta_href: str(x.cta_href, 200) || '/',
     theme: ['chili', 'turmeric', 'clove', 'leaf'].includes(String(x.theme)) ? String(x.theme) : 'chili', image: str(x.image, 300),
+    ...(x.wide === true && x.image ? { wide: true } : {}),
   })).filter(x => x.headline) : [];
   for (const [i, x] of banners.entries()) { const e = bannerProblem(x, `Banner ${i + 1}`); if (e) throw bad(e); }
   const input = {
