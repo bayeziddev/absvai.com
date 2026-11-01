@@ -52,8 +52,8 @@ export const SIZES = {
   hero: '(max-width: 640px) 42vw, 260px',
   /** A photo on the right half of a banner. */
   heroSide: '(max-width: 719px) 50vw, 620px',
-  /** A photo that fills the whole banner: on phones it is cropped to the banner's height, so wider than the screen. */
-  heroWide: '(max-width: 719px) 132vw, (max-width: 1271px) 96vw, 1208px',
+  /** A photo that fills the whole banner: on phones it is cropped to the banner's height, so a little wider than the screen. */
+  heroWide: '(max-width: 719px) 104vw, (max-width: 1271px) 96vw, 1208px',
   promo: '180px',
   promoPhoto: '(max-width: 719px) 46vw, 560px',
   bizBand: '(max-width: 719px) 200px, 260px',

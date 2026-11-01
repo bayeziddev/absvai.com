@@ -45,7 +45,7 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false }) 
         ${preview(b)}
         ${readOnly ? '' : `<div class="bn-fields">
           <div class="row"><label class="btn btn-sm btn-outline">${b.image ? 'Change picture' : '+ Add picture'}<input type="file" data-b="file" accept="image/png,image/jpeg,image/webp" hidden></label>
-            ${b.image ? '<button type="button" class="btn btn-sm btn-ghost" data-b="noimg">Remove picture</button>' : ''}<span class="small muted">Best: a wide photo about 2000 × 860 px, products on the right, empty space on the left for the text.</span></div>
+            ${b.image ? '<button type="button" class="btn btn-sm btn-ghost" data-b="noimg">Remove picture</button>' : ''}<span class="small muted">Best: a wide photo about 2000 × 860 px, products on the right, empty space on the left for the text. <a href="/admin/photo-guide-bn.html" target="_blank" rel="noopener">Photo guide</a></span></div>
           ${b.image ? `<label class="check bn-wide-check"><input type="checkbox" data-b="wide" ${b.wide ? 'checked' : ''}> <span>Photo fills the whole banner <span class="small muted">· off: the photo sits on the right half</span></span></label>` : ''}
           <label class="f">Headline <span class="req">*</span><input data-b="headline" value="${esc(b.headline)}" maxlength="80" placeholder="e.g. Fresh khejur gur is here"></label>
           <label class="f">Short line under it<input data-b="subline" value="${esc(b.subline)}" maxlength="160" placeholder="e.g. Patali, liquid and nolen gur from Jessore"></label>

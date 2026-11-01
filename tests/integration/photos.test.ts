@@ -49,7 +49,7 @@ describe('homepage photos', () => {
     const bg = html.match(/<img class="hero-bg"[^>]*>/)![0];
     expect(bg).toContain('src="/img/photos/wide/hero-winter-gur.webp"');
     expect(bg).toContain('hero-winter-gur-1280.webp 1280w');
-    expect(bg).toContain('sizes="(max-width: 719px) 132vw');
+    expect(bg).toContain('sizes="(max-width: 719px) 104vw');
     expect(bg).toContain('fetchpriority="high"');
     expect(bg).toContain('loading="eager"');
     const side = html.match(/<img class="hero-photo"[^>]*>/)![0];

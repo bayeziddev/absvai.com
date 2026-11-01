@@ -52,3 +52,30 @@ describe('Bangla admin guide', () => {
     expect(page).not.toMatch(/<script/);
   });
 });
+
+describe('Bangla photo and website sections guide', () => {
+  const photoMd = readFileSync(join(ROOT, 'docs/PHOTO-GUIDE-BN.md'), 'utf8');
+  const { html, toc } = mdToHtml(photoMd);
+
+  it('covers every place a picture goes, the homepage sections, the steps, tips, problems and a checklist', () => {
+    expect(toc.map((t: { html: string }) => t.html)).toEqual(expect.arrayContaining(['১. এক নজরে: কোন ছবি কোন মাপে', '২. হোমপেইজে উপর থেকে নিচে কী আছে', '৪. ধাপে ধাপে: কীভাবে ছবি দেবেন', '৭. ছবি দেওয়ার আগে চেকলিস্ট']));
+    for (const place of ['বড় ব্যানার', 'ক্যাটাগরির গোল ছবি', 'প্রোডাক্টের ছবি', 'দ্বিতীয় ব্যানার', 'পপআপ', 'লোগো', 'ল্যান্ডিং পেইজ']) expect(html).toContain(place);
+    // The sizes it recommends are the ones the site is built for (lib/images.ts).
+    expect(photoMd).toContain('২০০০ × ৮৬০');
+    expect(photoMd).toContain('১০০০ × ১০০০');
+  });
+
+  it('links to admin pages that exist, as relative links', () => {
+    const linked = [...new Set([...photoMd.matchAll(/\/admin\/#\/([a-z]+)/g)].map(m => m[1]))];
+    expect(linked.length).toBeGreaterThan(5);
+    for (const r of linked) expect(routeNames, `#/${r}`).toContain(r);
+    expect(html).not.toContain('absvai.absvai.workers.dev/admin');
+  });
+
+  it('labels every table cell, so tables read as cards on phones', () => {
+    expect(html).toContain('<td data-label="কোথায় দেখায়">');
+    expect(html).toContain('<td data-label="কোথা থেকে বদলাবেন">');
+    expect(html).not.toMatch(/<td>/);
+    expect(guidePage(photoMd, { title: 'ছবি গাইড' })).toContain('td[data-label]');
+  });
+});

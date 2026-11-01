@@ -49,7 +49,9 @@ export function mdToHtml(md) {
       i += 2;
       const rows = [];
       while (i < lines.length && /^\|.*\|\s*$/.test(lines[i])) rows.push(cells(lines[i++]));
-      out.push(`<div class="table-wrap"><table><thead><tr>${head.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
+      // Each cell carries its column name, so on phones a row can show as a card with the names above the values.
+      const label = c => c.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*`]/g, '').replace(/[&"<>]/g, ch => ({ '&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;' })[ch]);
+      out.push(`<div class="table-wrap"><table><thead><tr>${head.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, n) => `<td data-label="${label(head[n] ?? '')}">${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
       continue;
     }
     if (/^>\s?/.test(line)) {
@@ -113,6 +115,15 @@ body { background: var(--bg); }
 .toc summary { font-weight: 700; cursor: pointer; }
 .toc ol { columns: 2 240px; margin: 10px 0 0; padding-left: 22px; }
 .top-link { position: fixed; right: 16px; bottom: 16px; z-index: 5; }
+/* Phones: every table row becomes a card, each value under its column name, so nothing scrolls sideways. */
+@media (max-width: 640px) {
+  .guide .table-wrap { overflow: visible; background: none; border: 0; box-shadow: none; border-radius: 0; }
+  .guide table, .guide tbody, .guide tr, .guide td { display: block; width: auto; }
+  .guide thead { display: none; }
+  .guide tr { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; margin: 0 0 10px; }
+  .guide td { border: 0; padding: 3px 0; }
+  .guide td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; font-size: .78rem; font-weight: 700; color: var(--muted); line-height: 1.4; }
+}
 @media print { .guide-top, .top-link { display: none; } .guide { max-width: none; } }
 </style>
 </head>

@@ -142,9 +142,13 @@ The shop now shows real photos instead of drawings. To put in your own:
 | Round category pictures | **Categories** → **Edit** → **Change picture** | Square, the thing in the middle (it is cut into a circle) |
 | Product photos | **Products** → tap the product → **Photos & video** | Square, 1000–2000 px, in good light |
 
-Photos never look blurred and the site stays fast: every photo is saved in several sizes, phones load a small one and large
+On phones the banner is wide and short like on a computer, with only the headline and the button, so keep headlines to
+three to six words. Photos never look blurred and the site stays fast: every photo is saved in several sizes, phones load a small one and large
 screens a large one. Use the photo straight from the camera; photos passed through WhatsApp or Messenger are shrunk and can look
 soft. If a change does not show, press **Settings → Refresh every page now**.
+
+A Bangla guide for the whole team, with every section of the site, the best photo size for each place and photo tips, is
+at **/admin/photo-guide-bn.html** (Help center → Photo guide).
 
 Seven of the photos now on the site are the ones you sent; the others are decorative photos made with AI for the demo catalog
 and the categories. Your own product photos sell best: replace them when you can.

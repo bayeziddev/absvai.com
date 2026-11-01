@@ -15,11 +15,15 @@ mkdirSync(dist, { recursive: true });
 for (const entry of readdirSync(dist)) rmSync(join(dist, entry), { recursive: true, force: true });
 cpSync(join(root, 'public'), dist, { recursive: true });
 cpSync(join(root, 'admin'), join(dist, 'admin'), { recursive: true });
-// The owner guides. The admin assistant (worker/src/services/assistant.ts) reads both, English and Bangla, from
-// /admin/guide.md; the Bangla guide is also a page of its own for the owner (/admin/guide-bn.html, Help center).
+// The owner guides. The admin assistant (worker/src/services/assistant.ts) reads them all, English and Bangla, from
+// /admin/guide.md; the Bangla guides are also pages of their own for the owner (Help center): the full guide
+// (/admin/guide-bn.html) and the photo and website sections guide (/admin/photo-guide-bn.html).
 const guideBn = readFileSync(join(root, 'docs/ADMIN-GUIDE-BN.md'), 'utf8');
-writeFileSync(join(dist, 'admin/guide.md'), `${readFileSync(join(root, 'docs/OWNER-GUIDE.md'), 'utf8').trim()}\n\n${guideBn.replace(/^# .*\n/, '').trim()}\n`);
+const photoGuideBn = readFileSync(join(root, 'docs/PHOTO-GUIDE-BN.md'), 'utf8');
+const body = md => md.replace(/^# .*\n/, '').trim();
+writeFileSync(join(dist, 'admin/guide.md'), `${readFileSync(join(root, 'docs/OWNER-GUIDE.md'), 'utf8').trim()}\n\n${body(guideBn)}\n\n${body(photoGuideBn)}\n`);
 writeFileSync(join(dist, 'admin/guide-bn.html'), guidePage(guideBn, { title: 'বাংলা গাইড · Abs Vai Admin' }));
+writeFileSync(join(dist, 'admin/photo-guide-bn.html'), guidePage(photoGuideBn, { title: 'ছবি ও ওয়েবসাইট গাইড · Abs Vai Admin' }));
 const geo = join(dist, 'geo', version);
 mkdirSync(geo, { recursive: true });
 cpSync(join(root, 'data/geo/generated/outlines'), join(geo, 'outlines'), { recursive: true });

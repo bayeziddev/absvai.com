@@ -163,12 +163,22 @@ main { min-height: 60vh; }
 .hero-photo { width: 52%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 40%); mask-image: linear-gradient(90deg, transparent, #000 40%); }
 .hero-side::after { display: none; }
 /* A photo across the whole banner: dark shade behind the text on the left, the products on the right stay bright. */
-.hero-slide.hero-wide { display: flex; color: var(--white); background: #24170F; min-height: 230px; }
+.hero-slide.hero-wide { display: flex; color: var(--white); background: #24170F; }
 .hero-bg { width: 100%; object-position: 74% 50%; }
 .hero-wide::after { inset: 0; width: auto; height: auto; border-radius: 0; background: linear-gradient(90deg, rgba(24, 14, 8, .88), rgba(24, 14, 8, .62) 50%, rgba(24, 14, 8, .05) 88%); }
 .hero-wide .hero-copy { max-width: 66%; }
 .hero-wide .hero-title { text-shadow: 0 2px 14px rgba(0, 0, 0, .35); }
 .hero-wide.theme-turmeric .hero-kicker { background: var(--turmeric); color: var(--clove); }
+/* Phones: a short, wide banner like on a computer: the headline and the button over the photo. */
+@media (max-width: 719px) {
+  .hero-slide.hero-wide, .hero-slide.hero-side { aspect-ratio: 2.1; min-height: 0; padding: 14px 16px; }
+  .hero-wide .hero-kicker, .hero-side .hero-kicker { font-size: .6rem; padding: 4px 7px; margin-bottom: 6px; }
+  .hero-wide .hero-title, .hero-side .hero-title { font-size: clamp(1rem, 4.6vw, 1.5rem); margin-bottom: 8px; }
+  .hero-wide .hero-sub, .hero-side .hero-sub { display: none; }
+  .hero-wide .btn-cta, .hero-side .btn-cta { min-height: 32px; padding: 6px 12px; font-size: .78rem; gap: 4px; }
+  .hero-wide .hero-copy { max-width: 62%; }
+}
+@media (min-width: 520px) and (max-width: 719px) { .hero-wide .hero-sub, .hero-side .hero-sub { display: block; font-size: .85rem; margin-bottom: 10px; } }
 @media (min-width: 720px) {
   .hero-slide.hero-wide { min-height: clamp(300px, 34vw, 430px); padding: 40px 48px; }
   .hero-wide::after { background: linear-gradient(90deg, rgba(24, 14, 8, .82), rgba(24, 14, 8, .5) 34%, rgba(24, 14, 8, 0) 60%); }
