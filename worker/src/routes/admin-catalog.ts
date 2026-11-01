@@ -5,7 +5,7 @@ import { validGtin } from '../lib/barcode';
 import { TAG } from '../lib/cache-tags';
 import { CLAIM_BADGES, healthClaimIn } from '../lib/claims';
 import { bad, HttpError, int, mediaBucket, notFound, parseJson, posInt, readJson, slugify, str } from '../lib/http';
-import { COPY_WIDTHS, copyOf } from '../lib/images';
+import { copyOf, copyWidthsFor } from '../lib/images';
 import { attributesKey, formatSku, productCodeFromName, SKU_PATTERN, variantCode } from '../lib/sku';
 import { effectiveSpecFields, effectiveVariantAttributes, parseNetQuantity, publishChecklist, validateSpecValue, type ProductTemplate } from '../lib/templates';
 import { clearTemplateCache, getSeasons, rowToVariant } from '../repo/catalog';
@@ -339,7 +339,7 @@ const IMMUTABLE = { cacheControl: 'public, max-age=31536000, immutable' };
 /** Saves the 480 and 960 px wide copies the admin made in the browser next to the photo (see lib/images). */
 async function putCopies(media: R2Bucket, key: string, form: FormData, type: string) {
   if (!/\.(webp|jpg)$/.test(key)) return;
-  for (const w of COPY_WIDTHS) {
+  for (const w of copyWidthsFor(key)) {
     const f = form.get(`file_${w}`);
     if (!(f instanceof File) || f.type !== type || f.size > 2 * 1024 * 1024) continue;
     await media.put(copyOf(key, w), await f.arrayBuffer(), { httpMetadata: { contentType: type, ...IMMUTABLE } });
@@ -371,7 +371,7 @@ const BANNER_IMAGE_TYPES: Record<string, string> = { 'image/png': 'png', 'image/
 
 /** Banner picture (homepage, second banner, season banners). The browser resizes it to WebP first. */
 adminCatalog.post('/banner-image', needAny('settings:write', 'seasons:write'), async c => {
-  const url = await storeImage(c, 'b', BANNER_IMAGE_TYPES, 3);
+  const url = await storeImage(c, 'b', BANNER_IMAGE_TYPES, 4);
   await audit(c, 'banner.image', 'settings', null, { url });
   return c.json({ url }, 201);
 });
@@ -762,7 +762,7 @@ export async function deleteMediaItem(c: Context<AppEnv>, id: number, productId?
   if (!m || (productId !== undefined && m.product_id !== productId)) throw notFound();
   if (await cat.mediaSupportsClaim(c.env.DB, id)) throw bad('This document supports a claim badge. Remove the badge first.');
   await cat.deleteMedia(c.env.DB, id);
-  if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete([...new Set([m.r2_key, ...COPY_WIDTHS.map(w => copyOf(m.r2_key!, w))])]);
+  if (m.r2_key && c.env.MEDIA && !(await cat.r2KeyInUse(c.env.DB, m.r2_key))) await c.env.MEDIA.delete([...new Set([m.r2_key, ...copyWidthsFor(m.r2_key).map(w => copyOf(m.r2_key!, w))])]);
   await audit(c, 'media.delete', 'product', m.product_id, { id });
   await catalogChanged(c, await productTags(c.env.DB, m.product_id, null));
 }

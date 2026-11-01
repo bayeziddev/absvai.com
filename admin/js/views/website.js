@@ -30,7 +30,7 @@ export async function website(v) {
       </div>
 
       <div class="card"><h2>Big banners at the top of the homepage</h2>
-        <p class="small muted">They slide one after another. Add a picture, a headline and the page the button opens.</p>
+        <p class="small muted">The big pictures at the top of the homepage. They slide one after another. Each one shows how customers see it on a phone and on a computer; press <b>✏️ Edit</b> to change it.</p>
         <p class="notice small" id="season-note" hidden></p>
         <div id="bn-home" class="bn-list"></div>
       </div>
@@ -46,7 +46,7 @@ export async function website(v) {
         </div>
       </div>
 
-      <div class="card"><h2>Second banner</h2><p class="small muted">One wide banner further down the homepage.</p><div id="bn-promo" class="bn-list"></div></div>
+      <div class="card"><h2>Second banner</h2><p class="small muted">One banner further down the homepage, with a square photo on its right.</p><div id="bn-promo" class="bn-list"></div></div>
     </form>
     ${write ? '<div class="save-bar"><button class="btn btn-primary" id="save">Save</button></div>' : ''}`;
 
@@ -69,9 +69,9 @@ export async function website(v) {
 
   const links = await linkOptions();
   const home = bannerEditor($('#bn-home'), parse(val.default_banners, []), { max: 6, links, readOnly: !write });
-  const popEd = bannerEditor($('#bn-pop'), pop.headline ? [pop] : [], { max: 1, links, readOnly: !write });
+  const popEd = bannerEditor($('#bn-pop'), pop.headline ? [pop] : [], { max: 1, links, readOnly: !write, kind: 'popup' });
   const promoNow = parse(val.promo_banner, null);
-  const promo = bannerEditor($('#bn-promo'), promoNow ? [promoNow] : [], { max: 1, links, readOnly: !write });
+  const promo = bannerEditor($('#bn-promo'), promoNow ? [promoNow] : [], { max: 1, links, readOnly: !write, kind: 'promo' });
   if (!write) return;
 
   $('#logo')?.addEventListener('change', async e => {

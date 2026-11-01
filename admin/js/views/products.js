@@ -72,15 +72,15 @@ const FULFIL = { in_stock: 'In stock', pre_order: 'Pre-order (seasonal)', made_t
 const keyOf = a => Object.keys(a).filter(k => a[k]).sort().map(k => `${k}=${String(a[k]).toLowerCase()}`).join('|');
 const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 
-/** Photos are resized to 1600 px and saved as WebP in the browser before upload. */
 /**
- * Shrinks a photo in the browser: at most 1600 px, plus 480 and 960 px wide copies so the store can send phones a
- * small one (worker/src/lib/images.ts). WebP where the browser can make it (Safari can't), JPG otherwise.
+ * Shrinks a photo in the browser: at most 1600 px (banners 2400 px), plus smaller copies (480 and 960 px wide, banners
+ * also 1600 px) so the store can send phones a small one (worker/src/lib/images.ts). WebP where the browser can make it
+ * (Safari can't), JPG otherwise.
  */
-export async function compressImage(file) {
+export async function compressImage(file, { max = 1600, copies: widths = [480, 960] } = {}) {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return { file, width: null, height: null, copies: [] };
   const bmp = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const w = Math.round(bmp.width * scale);
   const h = Math.round(bmp.height * scale);
   const encode = async (cw, ch, type) => {
@@ -95,7 +95,7 @@ export async function compressImage(file) {
   const ext = type === 'image/webp' ? 'webp' : 'jpg';
   const name = file.name.replace(/\.\w+$/, '');
   const copies = [];
-  for (const cw of [480, 960]) if (cw < w) copies.push([cw, new File([await encode(cw, Math.round((h * cw) / w), type)], `${name}-${cw}.${ext}`, { type })]);
+  for (const cw of widths) if (cw < w) copies.push([cw, new File([await encode(cw, Math.round((h * cw) / w), type)], `${name}-${cw}.${ext}`, { type })]);
   return { file: new File([blob], `${name}.${ext}`, { type }), width: w, height: h, copies };
 }
 

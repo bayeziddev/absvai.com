@@ -250,7 +250,7 @@ export function Layout(p: LayoutProps) {
         {popup && (
           <dialog class={`popup theme-${popup.theme ?? 'chili'}`} data-popup data-key={popup.key} data-delay={String(popup.delay ?? 4)} data-freq={popup.frequency ?? 'day'} aria-labelledby="popup-title">
             <button class="popup-close" type="button" data-popup-close aria-label="Close"><Icon name="close" /></button>
-            {popup.image && <img class="popup-img" src={popup.image} srcset={srcsetOf(popup.image)} sizes="(max-width: 480px) 90vw, 420px" alt="" width="600" height="400" loading="lazy" decoding="async" />}
+            {popup.image && <img class={`popup-img${popup.image.endsWith('.svg') ? '' : ' popup-photo'}`} src={popup.image} srcset={srcsetOf(popup.image)} sizes="(max-width: 480px) 90vw, 420px" alt="" width="600" height="400" loading="lazy" decoding="async" />}
             <div class="popup-copy">
               <p class="popup-title" id="popup-title">{popup.headline}</p>
               {popup.subline && <p class="popup-sub">{popup.subline}</p>}

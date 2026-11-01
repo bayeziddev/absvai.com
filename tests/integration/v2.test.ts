@@ -462,6 +462,15 @@ describe('fast first load', () => {
     const up = await post('/api/admin/banner-image', form({ file: webp('b.webp', 5000), file_480: webp('b-480.webp', 500) }));
     const { url } = (await up.json()) as { url: string };
     expect((await (await t.fetch(url.replace('.webp', '-480.webp'))).arrayBuffer()).byteLength).toBe(500);
+    // Banners are kept up to 2400 px, so they also keep a 1600 px copy; an older banner without it serves the original.
+    const big = await post('/api/admin/banner-image', form({ file: webp('w.webp', 7000), file_960: webp('w-960.webp', 900), file_1600: webp('w-1600.webp', 1600) }));
+    const wide = ((await big.json()) as { url: string }).url;
+    expect((await (await t.fetch(wide.replace('.webp', '-1600.webp'))).arrayBuffer()).byteLength).toBe(1600);
+    expect((await (await t.fetch(url.replace('.webp', '-1600.webp'))).arrayBuffer()).byteLength).toBe(5000);
+    // Products keep only the 480 and 960 px copies: a 1600 px copy sent with one is not stored (the original answers).
+    const prod = await post('/api/admin/media', form({ file: webp('p.webp', 3000), file_1600: webp('p-1600.webp', 1600), productId: String(ids.gurProduct), kind: 'image' }));
+    const purl = ((await prod.json()) as { url: string }).url;
+    expect((await (await t.fetch(purl.replace('.webp', '-1600.webp'))).arrayBuffer()).byteLength).toBe(3000);
     // A copy of another type, or a PNG original (whose name has no copy form), is ignored.
     const png = await post('/api/admin/category-image', form({ file: new File([new Uint8Array([0x89, 0x50])], 'c.png', { type: 'image/png' }), file_480: webp('c-480.webp', 50) }));
     const c = (await png.json()) as { url: string };

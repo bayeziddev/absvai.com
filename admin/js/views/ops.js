@@ -19,11 +19,11 @@ export async function seasons(v) {
       <div class="grid-3"><label class="f">Starts (Bangladesh date)<input type="date" id="st" value="${esc(s?.starts_on ?? '')}"></label><label class="f">Ends<input type="date" id="en" value="${esc(s?.ends_on ?? '')}"></label><label class="check"><input type="checkbox" id="on" ${s?.is_enabled !== 0 ? 'checked' : ''}> Enabled</label></div>
       <div class="grid-3"><label class="f">Badge text<input id="al" value="${esc(s?.accent_label ?? '')}" placeholder="Winter special"></label><label class="f">Accent colour<input type="color" id="ac" value="${esc(s?.accent_color ?? '#B3261E')}"></label><label class="f">“Back in season from …”<input id="back" value="${esc(s?.back_in_season_text ?? '')}" placeholder="November"></label></div>
       <label class="f">Landing page intro<input id="intro" value="${esc(s?.landing_intro ?? '')}"></label>
-      <h3>Banners while the season is live</h3><p class="small muted">Shown first on the homepage during the season. Add a picture, a headline and where the button goes.</p>
+      <h3>Banners while the season is live</h3><p class="small muted">These are the big pictures at the top of the homepage during the season. Each one shows how customers see it; press <b>✏️ Edit</b> to change it.</p>
       <div id="season-banners" class="bn-list"></div>`;
     so.foot.innerHTML = `${s && can('seasons:write') ? '<button class="btn btn-ghost" id="del">Delete</button>' : '<span></span>'}${can('seasons:write') ? '<button class="btn btn-primary" id="save">Save season</button>' : ''}`;
     const g = id => so.body.querySelector(`#${id}`);
-    const editor = bannerEditor(g('season-banners'), s?.banners ?? [], { max: 5, links: await linkOptions(), readOnly: !can('seasons:write') });
+    const editor = bannerEditor(g('season-banners'), s?.banners ?? [], { max: 5, links: await linkOptions(), readOnly: !can('seasons:write'), kicker: s?.accent_label || s?.name || '', saveLabel: 'Save season' });
     if (!can('seasons:write')) return;
     busy(so.foot.querySelector('#save'), async () => {
       const body = { name: g('name').value, slug: g('slug')?.value, startsOn: g('st').value, endsOn: g('en').value, isEnabled: g('on').checked, accentLabel: g('al').value, accentColor: g('ac').value, backInSeasonText: g('back').value, landingIntro: g('intro').value,

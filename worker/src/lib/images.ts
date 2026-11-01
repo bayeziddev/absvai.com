@@ -1,14 +1,20 @@
 /**
  * Uploaded photos come in three widths so phones never download a 1600 px photo for a 180 px card: the original
  * (at most 1600 px) and 480 / 960 px wide copies the admin makes in the browser at upload, stored next to it as
- * `<name>-480.webp` and `<name>-960.webp`. Photos uploaded before the copies existed still work: /media serves the
- * original when a copy is missing.
+ * `<name>-480.webp` and `<name>-960.webp`. Banners are kept up to 2400 px with a 1600 px copy too. Photos uploaded
+ * before a copy existed still work: /media serves the original when a copy is missing.
  */
 export const COPY_WIDTHS = [480, 960] as const;
-export type CopyWidth = (typeof COPY_WIDTHS)[number];
+/** Banners are uploaded up to 2400 px wide (sharp on big screens), so they also get a 1600 px copy. */
+export const BANNER_COPY_WIDTHS = [480, 960, 1600] as const;
+export type CopyWidth = (typeof BANNER_COPY_WIDTHS)[number];
 
 const RESIZABLE = /^\/media\/(p\/\d+|c|b)\/[\w-]+\.(webp|jpg)$/;
-const COPY_KEY = /-(480|960)\.(webp|jpg)$/;
+const BANNER = /^(\/media\/)?b\//;
+const COPY_KEY = /-(480|960|1600)\.(webp|jpg)$/;
+
+/** The copy widths kept for an R2 key or URL: banners have one more. */
+export const copyWidthsFor = (keyOrUrl: string): readonly CopyWidth[] => (BANNER.test(keyOrUrl) ? BANNER_COPY_WIDTHS : COPY_WIDTHS);
 
 /** The R2 key (or URL) of one copy. */
 export const copyOf = (keyOrUrl: string, w: CopyWidth) => keyOrUrl.replace(/\.(webp|jpg)$/, `-${w}.$1`);
@@ -36,6 +42,8 @@ export function srcsetOf(url: string | null | undefined): string | undefined {
     return [...set.copies.map(w => `${sized(url, w)} ${w}w`), `${url} ${set.main}w`].join(', ');
   }
   if (!RESIZABLE.test(url)) return undefined;
+  // A banner uploaded before the 1600 px copy existed is itself at most 1600 px: /media serves it for the missing copy.
+  if (BANNER.test(url)) return `${copyOf(url, 480)} 480w, ${copyOf(url, 960)} 960w, ${copyOf(url, 1600)} 1600w, ${url} 2400w`;
   return `${copyOf(url, 480)} 480w, ${copyOf(url, 960)} 960w, ${url} 1600w`;
 }
 

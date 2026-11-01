@@ -5,7 +5,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PHOTO_SETS, smallOf, srcsetOf } from '../../worker/src/lib/images';
+import { copyWidthsFor, originalOf, PHOTO_SETS, smallOf, srcsetOf } from '../../worker/src/lib/images';
 import { bannerProblem } from '../../worker/src/lib/settings-schema';
 import { bannerLayout } from '../../worker/src/views/components';
 
@@ -53,6 +53,14 @@ describe('built-in photos', () => {
     expect(smallOf('/img/photos/sq/p-honey.webp')).toBe('/img/photos/sq/p-honey-240.webp');
     expect(srcsetOf('/img/photos/other/x.webp')).toBeUndefined();
     expect(srcsetOf('/img/photos/sq/x.png')).toBeUndefined();
+  });
+
+  it('offers a banner the shop uploaded at 480, 960, 1600 px and its 2400 px original', () => {
+    expect(srcsetOf('/media/b/ab-cd.webp')).toBe('/media/b/ab-cd-480.webp 480w, /media/b/ab-cd-960.webp 960w, /media/b/ab-cd-1600.webp 1600w, /media/b/ab-cd.webp 2400w');
+    expect(srcsetOf('/media/c/ab-cd.webp')).toBe('/media/c/ab-cd-480.webp 480w, /media/c/ab-cd-960.webp 960w, /media/c/ab-cd.webp 1600w');
+    expect(copyWidthsFor('b/x.webp')).toEqual([480, 960, 1600]);
+    expect(copyWidthsFor('p/4/x.webp')).toEqual([480, 960]);
+    expect(originalOf('b/x-1600.webp')).toBe('b/x.webp');
   });
 
   it('the storefront script picks the same widths', () => {

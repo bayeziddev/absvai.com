@@ -112,16 +112,20 @@ CSV** for Excel. Profit needs each option's **Cost** (Products → Full editor �
   shop, and press **+ Upload logo**. **Remove logo** goes back to showing the name. The running message at the very top is here too.
 - **Big banners at the top of the homepage**, the **popup banner** and the **second banner** use the same banner editor below.
 
-Each banner shows a live preview while you type.
+Each banner shows exactly how customers see it, **📱 on a phone** and **🖥 on a computer**, and changes as you type. Press
+**✏️ Edit** on a banner (or **+ Add a banner**) and go through four short steps:
 
-1. Press **+ Add picture** and choose a photo from your phone or computer. Best: a wide photo about 2000 × 860 px with the
-   products on the right and empty space on the left for the text. A wide photo ticks **Photo fills the whole banner** by
-   itself (the text sits on a soft dark shade on the left); untick it to put the photo on the right half instead.
-2. Type a **headline**, and if you like a short line under it and the button text.
-3. Under **Button opens**, pick the page: the shop, deals, new arrivals, any category or season. **Another link…** lets you paste
-   your own.
-4. Pick a colour. Use **Move up / Move down** to change the order, **Remove** to delete one.
-5. Press **Save** at the bottom of the screen.
+1. **Photo**: press **📷 Choose a photo**. Best: a wide photo about 2000 × 860 px with the products on the right and empty
+   space on the left for the words. The photo style is chosen for you: a wide photo fills the banner (the words sit on a soft
+   dark shade), a square one sits on the right half. Tap the other style to change it.
+2. **Words**: a short **Headline** (3 to 6 words) and, if you like, a **Short line under it** (shown on computers).
+3. **Button**: the **Button words** and the page it opens: the shop, deals, new arrivals, any category or season, or
+   **Another link…**.
+4. **Colour**: Red, Yellow, Dark or Green.
+
+Yellow **⚠** notes warn about a photo too small to look sharp, a photo of the wrong shape, or a headline too long for
+phones. Press **✓ Done**, use **↑ ↓** to change the order and **🗑** to remove one, then press **Save** at the bottom of the
+screen.
 
 **Popup banner**: tick **Show the popup**, make the banner, then choose after how many seconds it appears, how often (once a day,
 only once per customer, or every visit) and where (homepage only or every page). It never shows on the cart, checkout or account
@@ -136,7 +140,7 @@ The shop now shows real photos instead of drawings. To put in your own:
 
 | Picture | Where | What photo |
 |---|---|---|
-| Big homepage banners while a season is live (winter now) | **Seasons** → tap **Winter** → *Banners while the season is live* → **Change picture** | Wide, about 2000 × 860 px, products on the right, empty space on the left |
+| Big homepage banners while a season is live (winter now) | **Seasons** → tap **Winter** → *Banners while the season is live* → **✏️ Edit** → **Change photo** | Wide, about 2000 × 860 px, products on the right, empty space on the left |
 | Big homepage banners when no season is live | **Website & banners** → *Big banners at the top of the homepage* | The same kind of wide photo |
 | Second banner (lower on the homepage) | **Website & banners** → *Second banner* | Square, 1000 px or more |
 | Round category pictures | **Categories** → **Edit** → **Change picture** | Square, the thing in the middle (it is cut into a circle) |
