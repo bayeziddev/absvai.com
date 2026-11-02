@@ -1,4 +1,4 @@
-# Abs Vai · absvai.com
+# vandarmart · vandarmart.com
 
 Seasonal multi-category marketplace for **ABS VAI LTD**: households buying gur, masala, clothing, gadgets and home items, and
 small food businesses buying presses, sealers, tools, packaging and bulk Master Masala. English only, mobile-first, Bangladesh.
