@@ -144,6 +144,9 @@ td img.thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--husk); background: #fff; border-radius: 999px; padding: 5px 12px; cursor: pointer; font-weight: 600; font-size: .84rem; }
 .chip[aria-pressed="true"] { background: var(--clove); color: #fff; border-color: var(--clove); }
+.chip:focus-visible { outline: 3px solid var(--turmeric); outline-offset: 2px; }
+.chip-with-swatch { display: inline-flex; align-items: center; gap: 7px; }
+.chip-swatch-dot { display: inline-block; width: 16px; height: 16px; flex: 0 0 16px; border-radius: 50%; background: var(--chip-swatch); border: 1px solid rgba(0, 0, 0, .24); }
 .chip.add { border-style: dashed; color: var(--muted); }
 .vt input { min-height: 32px; padding: 4px 6px; border: 1px solid var(--husk); border-radius: 7px; width: 100%; min-width: 70px; }
 .vt td { padding: 6px; } .vt td.opt { font-weight: 700; white-space: nowrap; }
