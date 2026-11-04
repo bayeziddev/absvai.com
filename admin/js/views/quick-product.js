@@ -3,6 +3,7 @@
 // else (SEO, seasons, wholesale, barcodes…) keeps its saved or default value and lives in the full editor.
 import { api, busy, can, esc, fromPaisa, slideOver, toast, toPaisa } from '../app.js';
 import { appendImage, compressImage, openProduct, productForm } from './products.js';
+import { optionValues } from '../lib/variant-options.js';
 
 const parseNet = s => { const m = String(s ?? '').toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l|pcs|m)\b/); return m ? { value: Number(m[1]), unit: m[2] } : null; };
 const keyOf = a => Object.keys(a).sort().map(k => `${k}=${a[k]}`).join('|');
@@ -20,7 +21,11 @@ function categoryOptions(cats, selected) {
  */
 export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
   cats ??= await api('/categories');
-  let d = id ? await api(`/products/${id}`) : null;
+  const [initialData, attrTypes] = await Promise.all([
+    id ? api(`/products/${id}`) : Promise.resolve(null),
+    api('/attribute-types'),
+  ]);
+  let d = initialData;
   let template = d?.template ?? null;
   const so = slideOver(id ? `Edit · ${d.product.name}` : 'Add a product', { wide: true, onClose: () => done?.() });
   const write = can('catalog:write');
@@ -107,9 +112,9 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
 
       ${t ? `<section class="qp-card"><h3><span class="qp-n">3</span> Sizes, prices and stock</h3>
         ${attrs().map(a => {
-          const pool = [...new Set([...a.presetValues, ...(st.chosen[a.attributeTypeId] ?? [])])];
+          const pool = optionValues(a, attrTypes, st.chosen[a.attributeTypeId] ?? []);
           const block = `<div class="qp-attr" data-attr="${esc(a.attributeTypeId)}"><b>${esc(a.label)}</b> ${a.required ? '<span class="req">*</span>' : '<span class="small muted">(optional)</span>'}
-            <div class="chips">${pool.map(x => `<button type="button" class="chip" aria-pressed="${(st.chosen[a.attributeTypeId] ?? []).includes(x)}" data-val="${esc(x)}">${esc(x)}</button>`).join('')}
+            <div class="chips">${pool.map(({ value, hex }) => { const swatch = a.input === 'swatch' ? hex : null; return `<button type="button" class="chip${swatch ? ' chip-with-swatch' : ''}" aria-label="Select ${esc(value)}" aria-pressed="${(st.chosen[a.attributeTypeId] ?? []).includes(value)}" data-val="${esc(value)}">${swatch ? `<span class="chip-swatch-dot" style="--chip-swatch:${swatch}" aria-hidden="true"></span>` : ''}<span>${esc(value)}</span></button>`; }).join('')}
             ${a.allowCustomValues ? '<button type="button" class="chip add" data-custom>+ Other</button>' : ''}</div></div>`;
           // Required choices are open; when none is required (food: weight or volume), the first one is open too.
           const open = a.required || (st.chosen[a.attributeTypeId] ?? []).length || (!attrs().some(x => x.required) && a === attrs()[0]);
