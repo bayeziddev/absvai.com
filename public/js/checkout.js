@@ -28,6 +28,10 @@ const couponMsg = $('[data-coupon-msg]');
 function applyCoupon() { couponCode = form.couponCode.value.trim().toUpperCase(); form.couponCode.value = couponCode; refreshQuote(); }
 $('[data-coupon-apply]')?.addEventListener('click', applyCoupon);
 form.couponCode?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } });
+const deliveryChoices = [...form.querySelectorAll('input[name="deliveryChoice"]')];
+deliveryChoices.forEach(r => r.addEventListener('change', () => {
+  form.querySelectorAll('.delivery-choice').forEach(x => x.classList.toggle('is-picked', x.querySelector('input')?.checked));
+}));
 
 let geo = null; // { divisions, districts, upazilas, postcodes }
 let lastQuote = null;
@@ -216,6 +220,13 @@ function renderSummary(q) {
     couponMsg.textContent = q.coupon ? `✓ ${q.coupon.code}: ${q.coupon.label}${q.coupon.discountPaisa ? ` (−${taka(q.coupon.discountPaisa)})` : ''}${q.coupon.note ? `. ${q.coupon.note}` : ''}` : q.couponError ?? '';
   }
   const d = q.delivery;
+  const picked = d?.zoneName?.toLowerCase().includes('inside dhaka') ? 'inside' : d ? 'outside' : '';
+  deliveryChoices.forEach(r => {
+    r.checked = Boolean(picked && r.value === picked);
+    r.closest('.delivery-choice')?.classList.toggle('is-picked', r.checked);
+  });
+  const outsidePrice = form.querySelector('[data-delivery-choice-price="outside"]');
+  if (outsidePrice && d?.chargePaisa !== null && d?.chargePaisa !== undefined && picked === 'outside') outsidePrice.textContent = `৳${Math.round(d.chargePaisa / 100).toLocaleString('bn-BD')}`;
   $('[data-delivery]').textContent = !d ? 'Choose your area' : d.status === 'to_confirm' ? 'Confirmed by phone' : d.chargePaisa === 0 ? 'Free' : taka(d.chargePaisa) + (q.needsArea ? ' (choose your area)' : '');
   const cod = d?.codFeePaisa > 0;
   $('[data-cod-row]').hidden = !cod; $('[data-cod-fee]').hidden = !cod;

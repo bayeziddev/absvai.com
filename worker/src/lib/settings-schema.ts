@@ -123,7 +123,7 @@ export const SETTINGS: SettingDef[] = [
   { key: 'otp_daily_cap', group: 'fraud', label: 'SMS codes per day for the whole store', kind: 'int' },
 
   { key: 'notify_email', group: 'email', label: 'Send shop alerts to', kind: 'text', validate: re(/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i, 'Type one email address, like absvai1020@gmail.com.') },
-  { key: 'email_from', group: 'email', label: 'Emails come from', kind: 'text', help: 'Until your domain is verified in Resend, keep Abs Vai <onboarding@resend.dev>.', validate: re(/^([^<>@]{1,60}<[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}>|[^\s@<>]+@[^\s@<>]+\.[a-z]{2,})$/i, 'Write it like Abs Vai <orders@absvai.com>.') },
+  { key: 'email_from', group: 'email', label: 'Emails come from', kind: 'text', help: 'Until your domain is verified in Resend, keep Abs Vai <onboarding@resend.dev>.', validate: re(/^([^<>@]{1,60}<[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}>|[^\s@<>]+@[^\s@<>]+\.[a-z]{2,})$/i, 'Write it like Abs Vai <orders@vandarmart.com>.') },
   { key: 'email_reply_to', group: 'email', label: 'Customer replies go to', kind: 'text', validate: re(/^[^\s@<>]+@[^\s@<>]+\.[a-z]{2,}$/i, 'Type one email address.') },
   { key: 'email_owner_new_order', group: 'email', label: 'Email me every new order', kind: 'bool' },
   { key: 'email_owner_updates', group: 'email', label: 'Email me when an order is cancelled, returned or delivered, and about wholesale inquiries', kind: 'bool' },

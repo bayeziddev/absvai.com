@@ -437,7 +437,7 @@ adminOrders.get('/orders/:id/invoice.pdf', need('orders:read'), async c => {
   const s = await settingsOf(c);
   const pdf = buildInvoicePdf({
     invoiceNo: String(o.invoice_no), issuedAt: String(o.issued_at ?? o.confirmed_at), orderNo: String(o.order_no),
-    company: { name: s.store_name ?? 'Abs Vai', legalName: s.company_name ?? 'ABS VAI LTD', address: s.company_address ?? '', phone: s.support_phone ?? '', site: 'absvai.com' },
+    company: { name: s.store_name ?? 'Abs Vai', legalName: s.company_name ?? 'ABS VAI LTD', address: s.company_address ?? '', phone: s.support_phone ?? '', site: 'vandarmart.com' },
     customer: {
       name: String(o.customer_name), phone: localPhone(String(o.phone)),
       address: [String(o.address_line), [o.landmark ? `Near ${o.landmark}` : '', o.union_name].filter(Boolean).join(', '), `${o.upazila_name}, ${o.district_name}, ${o.division_name} Division${o.postcode ? ` ${o.postcode}` : ''}`].filter(Boolean),

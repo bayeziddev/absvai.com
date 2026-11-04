@@ -1,11 +1,11 @@
 # Abs Vai owner guide
 
-Plain steps for running the store from `absvai.com/admin/`. No coding needed. A full guide in Bangla with a direct link for
+Plain steps for running the store from `vandarmart.com/admin/`. No coding needed. A full guide in Bangla with a direct link for
 every page is in [ADMIN-GUIDE-BN.md](ADMIN-GUIDE-BN.md), and inside the admin at **Help center → বাংলা গাইড** (`/admin/guide-bn.html`).
 
 ## First sign-in
 
-1. Open `absvai.com/admin/`. The first time, it asks for the **setup token** (your developer gives it to you once), your name,
+1. Open `vandarmart.com/admin/`. The first time, it asks for the **setup token** (your developer gives it to you once), your name,
    email and a password (10+ characters with a number). This creates the **Super Admin**.
 2. Go to **Settings** and fill in: support phone, WhatsApp number, social media links, **bKash/Nagad/Rocket numbers** (for advances),
    company address (printed on invoices), the delivery charges and the free-delivery amount. Under **Colours** you can change
@@ -176,9 +176,9 @@ once, while setting up.
 - Press **Send me a test email** to check it works.
 
 Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
-Actions); the deploy copies it to the Worker. Until your own domain (for example absvai.com) is verified in **Resend → Domains**,
+Actions); the deploy copies it to the Worker. Until your own domain (for example vandarmart.com) is verified in **Resend → Domains**,
 Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
-the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@absvai.com>`.
+the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@vandarmart.com>`.
 
 ## Sellers (marketplace)
 
@@ -219,7 +219,7 @@ Admin can change them.
 | Steadfast | Steadfast merchant panel → API | **API Key**, **Secret Key** | **Callback URL** `https://absvai.absvai.workers.dev/api/webhooks/steadfast` and the **Auth Token (Bearer)** shown on the Couriers page |
 | Pathao | Pathao merchant panel → Developers API → Merchant API Credentials | **Client ID**, **Client Secret**, your Pathao **login email** and **password**; then **Test connection** and pick the **pickup store** | The **Callback URL** shown on the Couriers page (it ends with a secret code). If Pathao shows an integration secret, paste it into Couriers |
 
-After `absvai.com` is connected, the addresses change to `https://absvai.com/…`; the Couriers page always shows the right ones.
+After `vandarmart.com` is connected, the addresses change to `https://vandarmart.com/…`; the Couriers page always shows the right ones.
 
 Press **Test connection** after saving: Steadfast shows your balance, Pathao lists your pickup stores.
 

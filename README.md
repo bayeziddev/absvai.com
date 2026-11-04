@@ -16,7 +16,7 @@ Cache**: public pages are answered at the edge and refreshed by tag when an admi
 | **বাংলা গাইড (admin manual in Bangla)** | https://absvai.absvai.workers.dev/admin/guide-bn.html (source: [docs/ADMIN-GUIDE-BN.md](docs/ADMIN-GUIDE-BN.md)) |
 | **Order tracking** | https://absvai.absvai.workers.dev/track (mobile number or order number) |
 | **Seller registration / portal** | https://absvai.absvai.workers.dev/sell · https://absvai.absvai.workers.dev/seller/ |
-| After the domain is connected | https://absvai.com and https://absvai.com/admin/ (the next deploy switches over by itself) |
+| After the domain is connected | https://vandarmart.com and https://vandarmart.com/admin/ (the next deploy switches over by itself) |
 
 Every push to `main` runs the tests and, when they pass, updates the live site on Cloudflare through GitHub Actions
 (`.github/workflows/ci.yml`). The run summary in the **Actions** tab shows the live and admin URLs and the smoke-test results.
@@ -93,13 +93,13 @@ GitHub Actions deploys on every push to `main` (and, until it is merged, to the 
 The job finds or creates D1, KV and R2, applies migrations, deploys the Worker with its secrets in one step and smoke-tests the
 live site. Add the repository secrets listed in [docs/DEPLOY.md](docs/DEPLOY.md): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and
 `SETUP_TOKEN` (optional: Turnstile and SMS). The internal keys `OTP_PEPPER`, `SIGNING_KEY` and `SETTINGS_KEY` are created on the
-first deploy and kept on Cloudflare. `absvai.com` and `www.absvai.com` attach
+first deploy and kept on Cloudflare. `vandarmart.com` and `www.vandarmart.com` attach
 as custom domains once the zone is in the Cloudflare account; until then the deploy goes to `workers.dev`.
 
 ## Folder structure
 
 ```
-absvai.com/
+vandarmart.com/
 ├── worker/
 │   ├── src/
 │   │   ├── worker.ts      gateway + cached Storefront entrypoint + scheduled handler

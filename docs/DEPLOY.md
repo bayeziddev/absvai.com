@@ -12,14 +12,14 @@ applies the migrations, uploads the Worker together with its secrets, and checks
 | Push to `main` | Tests, then deploy |
 | **Actions → Test and deploy → Run workflow** | Tests, then deploy from the branch you pick; tick *Load the demo catalog* to fill an empty store with the 17 demo products |
 
-Live now at **https://absvai.absvai.workers.dev** (admin: **https://absvai.absvai.workers.dev/admin/**). Once `absvai.com` is added
-to the Cloudflare account, the next deploy attaches `absvai.com` and `www.absvai.com` by itself.
+Live now at **https://absvai.absvai.workers.dev** (admin: **https://absvai.absvai.workers.dev/admin/**). Once `vandarmart.com` is added
+to the Cloudflare account, the next deploy attaches `vandarmart.com` and `www.vandarmart.com` by itself.
 
 ## One-time setup (about 10 minutes)
 
 ### 1. Cloudflare API token
 Cloudflare dashboard → **My Profile → API Tokens → Create Token → "Edit Cloudflare Workers"** template, then **add** the permission
-**Account → D1 → Edit**. Scope it to your account and, under Zone Resources, to the `absvai.com` zone. The template includes
+**Account → D1 → Edit**. Scope it to your account and, under Zone Resources, to the `vandarmart.com` zone. The template includes
 Workers Scripts, Workers KV Storage, Workers R2 Storage, Workers Routes and Account Settings.
 
 **Photo storage (R2)**: switch R2 on once (dashboard → R2 Object Storage → Get started; the free tier is enough, Cloudflare asks
@@ -38,7 +38,7 @@ GitHub → the repository → **Settings → Secrets and variables → Actions �
 | `CLOUDFLARE_ACCOUNT_ID` | yes | dashboard → Workers & Pages → Account ID (right side) |
 | `SETUP_TOKEN` | yes | any long random text you choose (like a password); you type it once at `/admin/` to create the Super Admin |
 | `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY` | **no, created for you** | internal random keys nobody types (they hash SMS codes, sign checkout sessions and encrypt passwords saved in Settings). The first deploy creates them and keeps them on Cloudflare; later deploys keep the same ones. Add your own only if you want a copy (`openssl rand -base64 32` each) |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `absvai.absvai.workers.dev` and `absvai.com`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `absvai.absvai.workers.dev` and `vandarmart.com`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
 | `SMS_PROVIDER`, `SMS_API_KEY` | later | once the SMS gateway is chosen; until then messages are logged in Admin → SMS outbox |
 
 The deploy never replaces those three keys once they exist: if it can't read the Worker's secrets it stops instead. If you ever
@@ -46,7 +46,7 @@ delete the Worker or change `SETTINGS_KEY`, credentials saved in Settings must b
 checkouts and resets device/IP block matching.
 
 ### 3. The domain
-The Worker attaches `absvai.com` and `www.absvai.com` as custom domains when the **absvai.com zone is in the same Cloudflare
+The Worker attaches `vandarmart.com` and `www.vandarmart.com` as custom domains when the **vandarmart.com zone is in the same Cloudflare
 account** (add the site in Cloudflare and point the domain's nameservers to it at the registrar). Until then the workflow removes the
 routes for that run and deploys to `https://absvai.<your-subdomain>.workers.dev`, and says so in the run summary. Run it again after
 the zone is active.

@@ -32,7 +32,7 @@ export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response> {
     const url = new URL(request.url);
     const storefront = (ctx as unknown as { exports?: Exports }).exports?.Storefront;
-    if (storefront && (request.method === 'GET' || request.method === 'HEAD') && url.hostname !== 'www.absvai.com' && isEdgeServed(url.pathname)) {
+    if (storefront && (request.method === 'GET' || request.method === 'HEAD') && url.hostname !== 'www.vandarmart.com' && isEdgeServed(url.pathname)) {
       return storefront.fetch(request, { cf: { cacheKey: cacheKey(url) } });
     }
     return app.fetch(request, env, ctx);

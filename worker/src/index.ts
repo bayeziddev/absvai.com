@@ -21,7 +21,7 @@ const app = new Hono<AppEnv>();
 
 app.use('*', (c, next) => {
   const url = new URL(c.req.url);
-  return url.hostname === 'www.absvai.com' ? Promise.resolve(c.redirect(`https://absvai.com${url.pathname}${url.search}`, 301)) : next();
+  return url.hostname === 'www.vandarmart.com' ? Promise.resolve(c.redirect(`https://vandarmart.com${url.pathname}${url.search}`, 301)) : next();
 });
 
 app.use('*', async (c, next) => {

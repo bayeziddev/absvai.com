@@ -6,7 +6,7 @@
 
 ## সরাসরি লিংক (এক নজরে)
 
-এখনকার ঠিকানা `https://absvai.absvai.workers.dev`। absvai.com ডোমেইন যুক্ত হলে একই পেইজ `https://absvai.com/...` ঠিকানাতেও খুলবে।
+এখনকার ঠিকানা `https://absvai.absvai.workers.dev`। vandarmart.com ডোমেইন যুক্ত হলে একই পেইজ `https://vandarmart.com/...` ঠিকানাতেও খুলবে।
 
 | কাজ | লিংক |
 |---|---|
@@ -356,7 +356,7 @@
 - **Send an offer**: যারা "Email me offers" টিক দিয়েছেন তাদের সবাইকে অফার পাঠান।
 - **Send me a test email** চেপে দেখে নিন ইমেইল আসছে কি না। নিচের তালিকায় প্রতিটি ইমেইল আর না গেলে কারণ দেখায়।
 
-কাস্টমারকে ইমেইল পাঠাতে Resend এ নিজের ডোমেইন (যেমন absvai.com) যাচাই করতে হয়; তার আগ পর্যন্ত শুধু আপনার ইমেইলে যায়। ডোমেইন যাচাই হলে **Emails come from** ঘরে যেমন `Abs Vai <orders@absvai.com>` লিখুন।
+কাস্টমারকে ইমেইল পাঠাতে Resend এ নিজের ডোমেইন (যেমন vandarmart.com) যাচাই করতে হয়; তার আগ পর্যন্ত শুধু আপনার ইমেইলে যায়। ডোমেইন যাচাই হলে **Emails come from** ঘরে যেমন `Abs Vai <orders@vandarmart.com>` লিখুন।
 
 ## সেটিংস
 

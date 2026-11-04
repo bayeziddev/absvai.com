@@ -1,6 +1,6 @@
-# Abs Vai (absvai.com): A–Z build specification, v2
+# Abs Vai (vandarmart.com): A–Z build specification, v2
 
-Client: **ABS VAI LTD** · Domain: **absvai.com** · Stack: Cloudflare Workers (Hono + TypeScript, server-rendered JSX), D1,
+Client: **ABS VAI LTD** · Domain: **vandarmart.com** · Stack: Cloudflare Workers (Hono + TypeScript, server-rendered JSX), D1,
 KV, R2, Workers Cache, GitHub Actions. English-only storefront, admin, invoices and SMS. Mobile-first, Bangladesh.
 
 This document follows the numbering of the v2 build prompt (34 sections). Each section states the requirement, **what is built**
@@ -582,7 +582,7 @@ request and before every deploy.
 ## 27. File & Folder Structure
 
 ```
-absvai.com/
+vandarmart.com/
 ├── .github/workflows/ci.yml          test → deploy (GitHub Actions → Cloudflare)
 ├── admin/                            admin SPA (no build step): index.html, admin.css, js/app.js, js/routes.js, js/views/*
 ├── data/geo/                         pinned Bangladesh-geocode source files, SOURCES.md, match reports, generated outlines

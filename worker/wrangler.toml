@@ -6,10 +6,10 @@ compatibility_date = "2026-09-01"
 # ctx.exports (the gateway → Storefront loopback) is on by default from 2025-11-17.
 
 # Production domains (top-level key: it must stay above the first [table] header). The deploy workflow drops this
-# line when the absvai.com zone is not in the Cloudflare account yet, so the first deploy goes to workers.dev.
+# line when the vandarmart.com zone is not in the Cloudflare account yet, so the first deploy goes to workers.dev.
 routes = [
-  { pattern = "absvai.com", custom_domain = true },
-  { pattern = "www.absvai.com", custom_domain = true },
+  { pattern = "vandarmart.com", custom_domain = true },
+  { pattern = "www.vandarmart.com", custom_domain = true },
 ]
 
 # Edge cache (Workers Cache): on for the Storefront entrypoint only. The default entrypoint is the gateway and runs on
@@ -58,5 +58,5 @@ bucket_name = "absvai-media"
 crons = ["5 18 * * *", "*/30 * * * *"]
 
 [vars]
-SITE_URL = "https://absvai.com"
+SITE_URL = "https://vandarmart.com"
 ENVIRONMENT = "production"

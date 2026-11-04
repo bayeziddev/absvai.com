@@ -12,6 +12,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--chili); }
 h1, h2, h3 { font-family: var(--display); margin: 0 0 .5em; line-height: 1.2; }
 h1 { font-size: 1.4rem; } h2 { font-size: 1.1rem; } h3 { font-size: .98rem; }
+.eyebrow { margin: 0 0 4px; color: var(--chili); font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 :focus-visible { outline: 3px solid var(--turmeric); outline-offset: 2px; }
 .boot { padding: 40px; text-align: center; color: var(--muted); }
 .muted { color: var(--muted); } .small { font-size: .82rem; } .nowrap { white-space: nowrap; } .right { text-align: right; }
