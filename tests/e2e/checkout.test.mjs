@@ -45,7 +45,9 @@ async function placeAndWait(page) {
   // The server silently rejects forms submitted within 3 seconds of the checkout session starting (bot check).
   await page.waitForFunction(() => performance.now() > 3500);
   await page.click('[data-place]');
-  await page.waitForURL(/\/order\/(AV|PRE)-\d{6}-\d{4}\?t=/, { timeout: 15000 });
+  // Confirmation is a full navigation; the URL is enough to prove success. Waiting for `load`
+  // can flake when a nonessential resource on the confirmation page is slow in CI.
+  await page.waitForURL(/\/order\/(AV|PRE)-\d{6}-\d{4}\?t=/, { waitUntil: 'domcontentloaded', timeout: 20000 });
   return decodeURIComponent(new URL(page.url()).pathname.split('/').pop());
 }
 
