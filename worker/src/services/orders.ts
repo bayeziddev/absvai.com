@@ -11,7 +11,7 @@ import { assessRisk } from '../lib/risk';
 import { SMS } from '../lib/sms';
 import { COURIERS, courierLabel } from '../lib/tracking';
 import { canTransition, confirmBlockers, RESERVED_STAGES, RETURN_REASONS, STATUS_LABELS, validatePartialReturn, type Actor, type OrderStatus } from '../lib/state-machine';
-import { validateAddress } from '../repo/geo';
+import { fixedDeliveryZone, validateAddress } from '../repo/geo';
 import { nextInvoiceNo, nextOrderNo } from '../repo/numbering';
 import {
   commitTransition, countOtpAttempt, customerByPhone, ensureCustomer, hasConfirmedCall, insertOrder, logRejectedTransition, markOtpVerified,
@@ -35,6 +35,7 @@ export const MANUAL_SOURCES = ['facebook_comment', 'messenger', 'whatsapp', 'pho
 export interface PlaceOrderInput {
   phone: string;
   name: string;
+  deliveryChoice?: 'inside' | 'outside' | null;
   divisionId: number;
   districtId: number;
   upazilaId: number;
@@ -108,11 +109,11 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     throw blockedError(block.type, settings.support_phone ?? '');
   }
 
-  const addr = await validateAddress(db, {
-    divisionId: input.divisionId, districtId: input.districtId, upazilaId: input.upazilaId, unionId: input.unionId, postcode: input.postcode,
-  });
+  const quickZone = input.deliveryChoice ? await fixedDeliveryZone(db, input.deliveryChoice) : null;
+  const addr = quickZone
+    ? { ok: true as const, names: { division: 'বাংলাদেশ', district: input.deliveryChoice === 'inside' ? 'রাজবাড়ী' : 'সারা বাংলাদেশ', upazila: 'সম্পূর্ণ ঠিকানা', union: null }, postOffice: null, postcodeMismatch: false }
+    : await validateAddress(db, { divisionId: input.divisionId, districtId: input.districtId, upazilaId: input.upazilaId, unionId: input.unionId, postcode: input.postcode });
   if (!addr.ok) throw bad(addr.error);
-
   const customer = await customerByPhone(db, phone);
   const isNewOrRisky = !customer || customer.delivered_count === 0 || customer.returned_count > 0;
 
@@ -120,13 +121,13 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
   if (manual && ctx.discountPaisa) {
     if (!ctx.staff?.canDiscount) {
       const maxPct = settingInt(settings, 'manual_discount_max_percent', 10);
-      const pre = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod }, now);
+      const pre = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, deliveryChoice: input.deliveryChoice, paymentMethod: input.paymentMethod }, now);
       if (ctx.discountPaisa > Math.floor((pre.subtotalPaisa * maxPct) / 100)) throw bad(`Sales agents can give at most ${maxPct}% off. Ask a manager for a bigger discount.`);
     }
     discount = ctx.discountPaisa;
   }
   const couponCode = manual ? null : input.couponCode?.trim() || null;
-  const q = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount, couponCode, phone }, now);
+  const q = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, deliveryChoice: input.deliveryChoice, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount, couponCode, phone }, now);
   if (q.problems.length) throw new HttpError(409, q.problems[0], { problems: q.problems });
   // A coupon that stopped working (used up, expired, already used by this number) is reported, never silently dropped.
   if (couponCode && q.couponError) throw new HttpError(409, `${q.couponError} Remove the coupon to order without it.`, { coupon: q.couponError });

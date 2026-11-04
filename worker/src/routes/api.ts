@@ -218,7 +218,7 @@ api.post('/checkout/quote', async c => {
     customerIsNewOrRisky = !cust || cust.delivered_count === 0 || cust.returned_count > 0;
   }
   return c.json(await quote(c.env.DB, await settingsOf(c), {
-    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId),
+    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), deliveryChoice: body.deliveryChoice === 'outside' ? 'outside' : body.deliveryChoice === 'inside' ? 'inside' : null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod', customerIsNewOrRisky,
     couponCode: str(body.couponCode, 30) || null, phone,
   }));
@@ -251,7 +251,7 @@ api.post('/checkout/place', async c => {
   const landingId = posInt(body.landingPageId);
   const landing = landingId ? await landingById(c.env.DB, landingId) : null;
   const placed = await placeOrder(c.env, await settingsOf(c), {
-    phone: str(body.phone, 20), name: str(body.name, 120),
+    phone: str(body.phone, 20), name: str(body.name, 120), deliveryChoice: body.deliveryChoice === 'outside' ? 'outside' : body.deliveryChoice === 'inside' ? 'inside' : null,
     divisionId: int(body.divisionId) ?? 0, districtId: int(body.districtId) ?? 0, upazilaId: int(body.upazilaId) ?? 0, unionId: posInt(body.unionId),
     postcode: asciiDigits(str(body.postcode, 4)) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',

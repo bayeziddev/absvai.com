@@ -369,99 +369,48 @@ export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: strin
  */
 export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; turnstileSiteKey?: string; couponCode?: string | null; placeLabel?: string; compact?: boolean }) {
   return (
-      <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout novalidate>
+      <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout data-quick-order novalidate>
         <div class="co-main">
-          <fieldset class="co-step">
-            <legend><span class="step-no">১</span>আপনার মোবাইল নম্বর</legend>
-            <label class="field">
-              <span>অর্ডার নিশ্চিত করতে আমরা এই নম্বরে কল করব।</span>
-              <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required />
-            </label>
-            <p class="field-note" data-capture-note>আপনার তথ্য নিরাপদে রাখা হয়। <a href="/policies/privacy">গোপনীয়তা নীতি</a></p>
-            {/* Honeypot: hidden from people, filled by bots. Orders with it filled are rejected. */}
+          <fieldset class="co-step co-customer">
+            <legend><span class="step-no">১</span>আপনার তথ্য</legend>
+            <label class="field"><span>আপনার নাম <b class="required">*</b></span><input name="name" autocomplete="name" placeholder="সম্পূর্ণ নাম লিখুন" maxlength={120} required /></label>
+            <label class="field"><span>মোবাইল নম্বর <b class="required">*</b></span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required /></label>
+            <p class="field-note" data-capture-note>অর্ডার নিশ্চিত করতে এই নম্বরে কল করা হবে।</p>
             <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>
           </fieldset>
-          <fieldset class="co-step">
-            <legend><span class="step-no">২</span>আপনার নাম</legend>
-            <label class="field"><span class="sr-only">Full name</span><input name="name" autocomplete="name" placeholder="আপনার পুরো নাম লিখুন" maxlength={120} required /></label>
+          <fieldset class="co-step co-address">
+            <legend><span class="step-no">২</span>ডেলিভারি ঠিকানা</legend>
+            <label class="field"><span>সম্পূর্ণ ঠিকানা <b class="required">*</b></span><textarea name="addressLine" autocomplete="street-address" placeholder="বাড়ি/ফ্ল্যাট, রোড, এলাকা, থানা, জেলা লিখুন" maxlength={300} rows={4} required /></label>
+            <label class="field"><span>কাছের পরিচিত স্থান <small class="muted">ঐচ্ছিক</small></span><input name="landmark" placeholder="যেমন: মসজিদের পাশে" maxlength={200} /></label>
+            <label class="field"><span>অতিরিক্ত নোট <small class="muted">ঐচ্ছিক</small></span><textarea name="note" rows={2} maxlength={500} placeholder="ডেলিভারি সংক্রান্ত কোনো নির্দেশনা থাকলে লিখুন" /></label>
           </fieldset>
-          <fieldset class="co-step">
-            <legend><span class="step-no">৩</span>ডেলিভারি ঠিকানা</legend>
-            <div class="finder" role="group" aria-label="Find your address">
-              <label class="field finder-postcode">
-                <span>পোস্টকোড দিয়ে এলাকা খুঁজুন</span>
-                <input name="postcode" inputmode="numeric" maxlength={4} pattern="\d{4}" placeholder="e.g. 1000" autocomplete="postal-code" />
-              </label>
-              <span class="finder-or">অথবা</span>
-              <button class="btn btn-outline" type="button" data-locate><Icon name="pin" size={18} />আমার অবস্থান ব্যবহার করুন</button>
-            </div>
-            <p class="finder-msg" data-finder-msg aria-live="polite" />
-            <div class="po-picker" data-po-picker hidden />
-            <div class="selects">
-              <label class="field"><span>বিভাগ</span><select name="divisionId" required><option value="">লোড হচ্ছে…</option></select></label>
-              <label class="field"><span>জেলা</span><select name="districtId" required disabled><option value="">জেলা নির্বাচন করুন</option></select></label>
-              <label class="field"><span>এলাকা / উপজেলা / থানা</span><select name="upazilaId" required disabled><option value="">এলাকা নির্বাচন করুন</option></select></label>
-              <label class="field"><span>ইউনিয়ন (ঐচ্ছিক)</span><select name="unionId" disabled><option value="">ইউনিয়ন নির্বাচন করুন</option></select></label>
-            </div>
-            <div class="map-card" data-map-card hidden>
-              <div class="map" data-map role="img" aria-label="Map of your district" />
-              <p data-map-label />
-            </div>
-            <label class="field"><span>বাড়ি, রোড / গ্রামের ঠিকানা</span><input name="addressLine" autocomplete="street-address" placeholder="বাড়ি ১২, রোড ৫, ব্লক সি" maxlength={300} required /></label>
-            <label class="field"><span>কাছের পরিচিত স্থান (ঐচ্ছিক)</span><input name="landmark" placeholder="মসজিদের বিপরীতে, সোনালী ব্যাংকের পাশে" maxlength={200} /></label>
-            <label class="field"><span>ইমেইল (ঐচ্ছিক) <small class="muted">রসিদ ও ইনভয়েসের জন্য</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength={120} placeholder="you@example.com" /></label>
-            <label class="check-line"><input type="checkbox" name="emailOffers" /> <span>নতুন অফার ও পণ্যের খবর পেতে চাই</span></label>
-            <label class="field"><span>অতিরিক্ত নোট (ঐচ্ছিক)</span><textarea name="note" rows={2} maxlength={500} /></label>
-          </fieldset>
-          <fieldset class="co-step">
-            <legend><span class="step-no">৪</span>পেমেন্ট পদ্ধতি</legend>
+          <fieldset class="co-step co-payment">
+            <legend><span class="step-no">৩</span>পেমেন্ট</legend>
             <label class="pay-option"><input type="radio" name="paymentMethod" value="cod" checked /><span><strong>ক্যাশ অন ডেলিভারি</strong><small>পণ্য হাতে পেয়ে মূল্য পরিশোধ করুন।</small></span></label>
             <label class="pay-option" data-pay-mobile hidden={!p.wallets.length}><input type="radio" name="paymentMethod" value="manual_mobile" /><span><strong>bKash / Nagad / Rocket</strong><small>আগে পেমেন্ট করে ট্রানজেকশন আইডি দিন।</small></span></label>
             <div class="advance" data-advance hidden>
               <p class="advance-title" data-advance-title />
               <ul class="advance-reasons" data-advance-reasons />
-              {p.wallets.length > 0 && (
-                <div class="wallets">
-                  <p>Send the advance to:</p>
-                  <ul>{p.wallets.map(w => <li><strong>{w.wallet}</strong> {w.number}{w.type ? ` (${w.type})` : ''}</li>)}</ul>
-                  <div class="row-2">
-                    <label class="field"><span>Wallet used</span><select name="advanceWallet">{p.wallets.map(w => <option>{w.wallet}</option>)}</select></label>
-                    <label class="field"><span>Transaction ID</span><input name="advanceTrxId" autocomplete="off" placeholder="e.g. 9JK4L2M8QX" maxlength={30} /></label>
-                  </div>
-                </div>
-              )}
-              <p class="small">The advance is taken off your total. If we cannot deliver, we refund it in full.</p>
+              {p.wallets.length > 0 && <div class="wallets"><p>Send the advance to:</p><ul>{p.wallets.map(w => <li><strong>{w.wallet}</strong> {w.number}{w.type ? ` (${w.type})` : ''}</li>)}</ul><div class="row-2"><label class="field"><span>Wallet used</span><select name="advanceWallet">{p.wallets.map(w => <option>{w.wallet}</option>)}</select></label><label class="field"><span>Transaction ID</span><input name="advanceTrxId" autocomplete="off" placeholder="Transaction ID" maxlength={30} /></label></div></div>}
             </div>
           </fieldset>
         </div>
         <aside class="co-summary" aria-label="Order summary">
           <div class="summary-heading"><div><p class="eyebrow">আপনার পছন্দ</p><h2>অর্ডারের বিবরণ</h2></div><span class="summary-lock"><Icon name="lock" size={15} /></span></div>
-          <div data-co-lines><p class="muted">Loading…</p></div>
+          <div data-co-lines><p class="muted">লোড হচ্ছে…</p></div>
           <div class="delivery-picker" aria-label="Delivery charge options">
             <p class="delivery-picker-title">ডেলিভারি চার্জ</p>
-            <label class="delivery-choice"><input type="radio" name="deliveryChoice" value="inside" /><span class="choice-copy"><strong>ঢাকার ভিতরে</strong><small>Inside Dhaka City</small></span><b>৳৭০</b><span class="choice-tick">✓</span></label>
-            <label class="delivery-choice"><input type="radio" name="deliveryChoice" value="outside" /><span class="choice-copy"><strong>ঢাকার বাইরে</strong><small>Outside Dhaka</small></span><b data-delivery-choice-price="outside">৳১৩০</b><span class="choice-tick">✓</span></label>
-            <p class="delivery-hint">ঠিকানা অনুযায়ী সঠিক চার্জটি স্বয়ংক্রিয়ভাবে নির্বাচিত হবে।</p>
+            <label class="delivery-choice"><input type="radio" name="deliveryChoice" value="inside" checked /><span class="choice-copy"><strong>রাজবাড়ীর ভিতরে</strong><small>Local delivery</small></span><b>৳৭০</b><span class="choice-tick">✓</span></label>
+            <label class="delivery-choice"><input type="radio" name="deliveryChoice" value="outside" /><span class="choice-copy"><strong>রাজবাড়ীর বাইরে</strong><small>সারা বাংলাদেশ</small></span><b>৳১৩০</b><span class="choice-tick">✓</span></label>
+            <p class="delivery-hint">আপনার ঠিকানা অনুযায়ী একটি অপশন নির্বাচন করুন।</p>
           </div>
-          <div class="coupon-box">
-            <label class="field"><span>Coupon code</span>
-              <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="e.g. EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>Apply</button></span>
-            </label>
-            <p class="coupon-msg" data-coupon-msg aria-live="polite" />
-          </div>
-          <dl class="totals">
-            <dt>পণ্যের মূল্য</dt><dd data-subtotal>—</dd>
-            <dt data-discount-row hidden>ছাড়</dt><dd data-discount hidden>—</dd>
-            <dt>ডেলিভারি চার্জ</dt><dd data-delivery>এলাকা নির্বাচন করুন</dd>
-            <dt data-cod-row hidden>COD চার্জ</dt><dd data-cod-fee hidden>—</dd>
-            <dt class="total">সর্বমোট</dt><dd class="total" data-total>—</dd>
-          </dl>
-          <ul class="explain" data-explain />
-          <p class="eta" data-eta />
+          <div class="coupon-box"><label class="field"><span>কুপন কোড <small class="muted">ঐচ্ছিক</small></span><span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="কুপন কোড" /><button class="btn btn-outline" type="button" data-coupon-apply>প্রয়োগ</button></span></label><p class="coupon-msg" data-coupon-msg aria-live="polite" /></div>
+          <dl class="totals"><dt>পণ্যের মূল্য</dt><dd data-subtotal>—</dd><dt data-discount-row hidden>ছাড়</dt><dd data-discount hidden>—</dd><dt>ডেলিভারি চার্জ</dt><dd data-delivery>—</dd><dt data-cod-row hidden>COD চার্জ</dt><dd data-cod-fee hidden>—</dd><dt class="total">সর্বমোট</dt><dd class="total" data-total>—</dd></dl>
+          <ul class="explain" data-explain /><p class="eta" data-eta />
           {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" />}
           <p class="form-msg error" data-co-error role="alert" />
-          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>{p.placeLabel ?? 'অর্ডার নিশ্চিত করুন'}</button>
-          <p class="small muted">আপনার তথ্য দিয়ে অর্ডার করলে আমাদের প্রতিনিধি ফোন করে নিশ্চিত করবেন।</p>
+          <button class="btn btn-primary btn-lg btn-block quick-order-button" type="submit" data-place>{p.placeLabel ?? 'অর্ডার কনফার্ম করুন'}</button>
+          <p class="small muted">অর্ডার পাঠালে আমাদের প্রতিনিধি ফোন করে নিশ্চিত করবেন।</p>
         </aside>
       </form>
   );

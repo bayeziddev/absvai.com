@@ -690,3 +690,28 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .coupon-msg { margin: 0 0 6px; font-size: .86rem; }
 .coupon-msg.ok { color: var(--leaf); font-weight: 600; }
 .coupon-msg.error { color: var(--chili); }
+
+/* বাংলা quick-order card: reference-inspired, fewer boxes and faster scanning. */
+.quick-order-button { background: #ff7800; border-color: #ff7800; font-size: 1.08rem; box-shadow: 0 8px 18px rgba(255, 120, 0, .22); }
+.quick-order-button:hover { background: #e96800; border-color: #e96800; }
+.checkout-compact .co-step { box-shadow: none; border: 1px solid #E7EEE9; }
+.checkout-compact .co-main { gap: 0; }
+.checkout-compact .co-step legend { font-size: 1rem; }
+.co-customer, .co-address { background: #fff; }
+.required { color: var(--chili); }
+.co-customer .field + .field { margin-top: 10px; }
+.co-address textarea { min-height: 92px; resize: vertical; }
+.delivery-picker { margin: 12px 0 14px; padding-top: 12px; border-top: 1px solid var(--cream); }
+.delivery-picker-title { margin: 0 0 6px; font-weight: 800; color: var(--clove); }
+.delivery-choice { min-height: 58px; }
+.delivery-choice .choice-copy strong { display: block; }
+.delivery-choice .choice-copy small { color: var(--muted); }
+.delivery-hint { margin: 8px 0 0; color: var(--muted); font-size: .78rem; }
+@media (max-width: 599px) {
+  .checkout-page { padding-left: 10px; padding-right: 10px; }
+  .checkout-title { margin: 8px 6px 14px; align-items: flex-start; }
+  .checkout-secure { font-size: .72rem; padding: 6px 8px; }
+  .checkout { gap: 10px; }
+  .co-step, .co-summary { border-radius: 16px; padding: 14px; }
+  .co-summary { padding: 15px; }
+}

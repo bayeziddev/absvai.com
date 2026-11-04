@@ -53,6 +53,13 @@ export async function validateAddress(db: D1Database, a: AddressIds): Promise<Va
  * needsArea is true when the district has upazila overrides with different zones and no upazila was chosen,
  * so the shown charge could still change.
  */
+export async function fixedDeliveryZone(db: D1Database, choice: 'inside' | 'outside'): Promise<{ zone: Zone; defaultCourier: string | null } | null> {
+  const charge = choice === 'inside' ? 7000 : 13000;
+  const row = await db.prepare('SELECT * FROM delivery_zones WHERE base_charge_paisa = ? ORDER BY sort_order LIMIT 1').bind(charge).first<Record<string, unknown>>();
+  if (!row) return null;
+  return { zone: rowToZone(row), defaultCourier: (row.default_courier as string) ?? null };
+}
+
 export async function resolveZone(db: D1Database, districtId: number, upazilaId: number | null): Promise<{ zone: Zone; needsArea: boolean; defaultCourier: string | null } | null> {
   if (upazilaId) {
     const o = await db.prepare('SELECT z.* FROM zone_upazila_overrides o JOIN delivery_zones z ON z.id = o.zone_id WHERE o.upazila_id = ?').bind(upazilaId).first<Record<string, unknown>>();

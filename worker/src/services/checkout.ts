@@ -1,6 +1,6 @@
 /** Checkout quote: repriced cart + live delivery charge + advance rules, shown before the customer places the order. */
 import { deliveryCharge, type ChargeResult } from '../lib/delivery-charge';
-import { resolveZone } from '../repo/geo';
+import { fixedDeliveryZone, resolveZone } from '../repo/geo';
 import { settingInt } from '../repo/settings';
 import { formatTaka } from '../lib/money';
 import { priceCart, type CartLineIn, type PricedLine } from './cart';
@@ -64,29 +64,28 @@ export function advanceFor(lines: PricedLine[], delivery: ChargeResult | null, o
 export async function quote(
   db: D1Database,
   settings: Record<string, string>,
-  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number; couponCode?: string | null; phone?: string | null },
+  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; deliveryChoice?: 'inside' | 'outside' | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number; couponCode?: string | null; phone?: string | null },
   now = new Date(),
 ): Promise<Quote> {
   const priced = await priceCart(db, input.lines, now);
   let delivery: ChargeResult | null = null;
   let needsArea = false;
   let defaultCourier: string | null = null;
-  if (input.districtId) {
-    const z = await resolveZone(db, input.districtId, input.upazilaId);
-    if (z) {
-      needsArea = z.needsArea;
-      defaultCourier = z.defaultCourier;
-      delivery = deliveryCharge(
-        priced.lines.map(l => ({ qty: l.qty, packedWeightGrams: l.packedWeightGrams, freeDelivery: l.freeDelivery, shippingProfile: l.shippingProfile, bulkyDeliveryMode: l.bulkyDeliveryMode, lineTotalPaisa: l.lineTotalPaisa })),
-        z.zone,
-        {
-          freeThresholdPaisa: settingInt(settings, 'free_delivery_threshold_paisa'),
-          freeExcludesBulky: settings.free_delivery_excludes_bulky !== '0',
-          codFeePaisa: settingInt(settings, 'cod_fee_paisa'),
-        },
-        input.paymentMethod,
-      );
-    }
+  const fixed = input.deliveryChoice ? await fixedDeliveryZone(db, input.deliveryChoice) : null;
+  const zoneResult = fixed ? { zone: fixed.zone, needsArea: false, defaultCourier: fixed.defaultCourier } : input.districtId ? await resolveZone(db, input.districtId, input.upazilaId) : null;
+  if (zoneResult) {
+    needsArea = zoneResult.needsArea;
+    defaultCourier = zoneResult.defaultCourier;
+    delivery = deliveryCharge(
+      priced.lines.map(l => ({ qty: l.qty, packedWeightGrams: l.packedWeightGrams, freeDelivery: l.freeDelivery, shippingProfile: l.shippingProfile, bulkyDeliveryMode: l.bulkyDeliveryMode, lineTotalPaisa: l.lineTotalPaisa })),
+      zoneResult.zone,
+      {
+        freeThresholdPaisa: settingInt(settings, 'free_delivery_threshold_paisa'),
+        freeExcludesBulky: settings.free_delivery_excludes_bulky !== '0',
+        codFeePaisa: settingInt(settings, 'cod_fee_paisa'),
+      },
+      input.paymentMethod,
+    );
   }
   // Manual orders: a staff discount (role limits are checked by the caller). Web orders: a coupon. Product discounts never
   // go below zero; a free-delivery coupon takes the delivery charge off.
