@@ -17,6 +17,11 @@ deliveryChoices.forEach(r => r.addEventListener('change', () => {
   form.querySelectorAll('.delivery-choice').forEach(x => x.classList.toggle('is-picked', x.querySelector('input')?.checked));
   refreshQuote(); captureSoon();
 }));
+
+form.querySelectorAll('.delivery-choice').forEach(card => card.addEventListener('click', e => {
+  const radio = card.querySelector('input[name=deliveryChoice]');
+  if (radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+}));
 form.querySelector('.delivery-choice input:checked')?.closest('.delivery-choice')?.classList.add('is-picked');
 
 let couponCode = (form.couponCode?.value || params.get('coupon') || '').trim().toUpperCase();
@@ -69,7 +74,12 @@ function renderSummary(q) {
   $('[data-explain]').innerHTML = (d?.explanation ?? []).map(t => `<li>${esc(t)}</li>`).join('');
   $('[data-eta]').textContent = d ? `ডেলিভারি: সাধারণত ${d.etaText}` : '';
   const adv = $('[data-advance]'); adv.hidden = !q.advance.required;
-  if (q.advance.required) { $('[data-advance-title]').textContent = q.advance.amountPaisa ? `এই অর্ডারে ${taka(q.advance.amountPaisa)} অগ্রিম লাগবে` : 'এই অর্ডারে অগ্রিম লাগবে'; $('[data-advance-reasons]').innerHTML = q.advance.reasons.map(r => `<li>${esc(r)}</li>`).join(''); }
+  if (q.advance.required) {
+    const mobilePayment = form.querySelector('input[name=paymentMethod][value=manual_mobile]');
+    if (mobilePayment) mobilePayment.checked = true;
+    $('[data-advance-title]').textContent = q.advance.amountPaisa ? `এই অর্ডারে ${taka(q.advance.amountPaisa)} অগ্রিম লাগবে` : 'এই অর্ডারে অগ্রিম লাগবে';
+    $('[data-advance-reasons]').innerHTML = q.advance.reasons.map(r => `<li>${esc(r)}</li>`).join('');
+  }
   errorBox.textContent = q.problems.join(' ');
   placeBtn.disabled = q.problems.length > 0 || !q.lines.length;
   placeBtn.textContent = q.hasPreOrder ? 'প্রি-অর্ডার করুন' : pd.placeLabel || 'অর্ডার কনফার্ম করুন';

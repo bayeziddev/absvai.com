@@ -57,7 +57,9 @@ export async function fixedDeliveryZone(db: D1Database, choice: 'inside' | 'outs
   const charge = choice === 'inside' ? 7000 : 13000;
   const row = await db.prepare('SELECT * FROM delivery_zones WHERE base_charge_paisa = ? ORDER BY sort_order LIMIT 1').bind(charge).first<Record<string, unknown>>();
   if (!row) return null;
-  return { zone: rowToZone(row), defaultCourier: (row.default_courier as string) ?? null };
+  const zone = rowToZone(row);
+  // Quick-order choices are fixed-rate: do not add packed-weight surcharges.
+  return { zone: { ...zone, baseWeightGrams: 100_000_000, extraPerKgPaisa: 0, bulkyChargePaisa: charge }, defaultCourier: (row.default_courier as string) ?? null };
 }
 
 export async function resolveZone(db: D1Database, districtId: number, upazilaId: number | null): Promise<{ zone: Zone; needsArea: boolean; defaultCourier: string | null } | null> {
