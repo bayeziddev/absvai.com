@@ -78,6 +78,8 @@ export function deliveryCharge(lines: ChargeLine[], zone: Zone, settings: Charge
   if (regular.length) {
     explanation.push(regularCharge === 0
       ? (thresholdMet ? `Free delivery: your order is over ${formatTaka(settings.freeThresholdPaisa)}.` : 'Free delivery on these items.')
+      // A flat charge (no per-kg extra) says just the charge; otherwise what the weight adds.
+      : zone.extraPerKgPaisa === 0 ? `${zone.name}: ${formatTaka(zone.baseChargePaisa)}, whatever the weight.`
       : `${zone.name}: ${formatTaka(zone.baseChargePaisa)} up to ${zone.baseWeightGrams / 1000}kg` +
         (regularWeight > zone.baseWeightGrams ? `, +${formatTaka(zone.extraPerKgPaisa)} per extra kg (${(regularWeight / 1000).toFixed(1)}kg packed).` : '.'));
   }

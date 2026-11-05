@@ -40,34 +40,35 @@ describe('reading the district out of a typed address', () => {
 });
 
 describe('checkout by delivery area', () => {
-  it('starts with Bangla area names and delivery times', async () => {
-    const zones = await t.sql<{ name: string; eta_text: string }>('SELECT name, eta_text FROM delivery_zones ORDER BY sort_order, id');
+  it('starts with the shop’s two areas: inside Rajbari ৳70 and the rest of Bangladesh ৳130, flat, in Bangla', async () => {
+    const zones = await t.sql<Record<string, unknown>>('SELECT name, note, base_charge_paisa, extra_per_kg_paisa, eta_text FROM delivery_zones ORDER BY sort_order, id');
     expect(zones).toEqual([
-      { name: 'ঢাকা সিটির ভিতরে', eta_text: '১–২ দিন' },
-      { name: 'ঢাকার আশেপাশে', eta_text: '২–৩ দিন' },
-      { name: 'ঢাকার বাইরে', eta_text: '৩–৫ দিন' },
+      { name: 'রাজবাড়ীর ভিতরে', note: 'Local delivery', base_charge_paisa: 7000, extra_per_kg_paisa: 0, eta_text: '১–২ দিন' },
+      { name: 'রাজবাড়ীর বাইরে', note: 'সারা বাংলাদেশ', base_charge_paisa: 13000, extra_per_kg_paisa: 0, eta_text: '৩–৫ দিন' },
     ]);
+    // Rajbari district is "inside"; everywhere else falls to the main area.
+    expect(await t.sql("SELECT z.name FROM zone_districts zd JOIN delivery_zones z ON z.id = zd.zone_id JOIN geo_districts d ON d.id = zd.district_id WHERE d.name = 'Rajbari'")).toEqual([{ name: 'রাজবাড়ীর ভিতরে' }]);
   });
 
   it('prices every area for the cart and adds the chosen one to the total', async () => {
     const lines = [{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }];
-    const outside = await zoneId('ঢাকার বাইরে');
+    const outside = await zoneId('রাজবাড়ীর বাইরে');
     const q = (await t.json('/api/checkout/quote', { method: 'POST', body: { lines, zoneId: outside, withAreas: true, paymentMethod: 'cod' } })).body;
     expect(q.areas.map((a: { name: string; chargePaisa: number }) => [a.name, a.chargePaisa])).toEqual([
-      ['ঢাকা সিটির ভিতরে', 7000], ['ঢাকার আশেপাশে', 10000], ['ঢাকার বাইরে', 13000],
+      ['রাজবাড়ীর ভিতরে', 7000], ['রাজবাড়ীর বাইরে', 13000],
     ]);
-    expect(q.delivery).toMatchObject({ zoneName: 'ঢাকার বাইরে', chargePaisa: 13000 });
+    expect(q.delivery).toMatchObject({ zoneName: 'রাজবাড়ীর বাইরে', chargePaisa: 13000 });
     expect(q.totalPaisa).toBe(q.subtotalPaisa + 13000);
     // No area chosen yet: every charge still shows, the total waits.
     const none = (await t.json('/api/checkout/quote', { method: 'POST', body: { lines, withAreas: true, paymentMethod: 'cod' } })).body;
     expect(none.delivery).toBeNull();
     expect(none.totalPaisa).toBeNull();
-    expect(none.areas).toHaveLength(3);
+    expect(none.areas).toHaveLength(2);
   });
 
   it('places an order with only an area and a typed address, and files it under the district named', async () => {
     const lines = [{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }];
-    const outside = await zoneId('ঢাকার বাইরে');
+    const outside = await zoneId('রাজবাড়ীর বাইরে');
     const r = await place({ lines, zoneId: outside, addressLine: 'বাসা ১২, পাংশা, রাজবাড়ী' });
     expect(r.status).toBe(201);
     const [o] = await t.sql<Record<string, unknown>>('SELECT district_id, upazila_id, district_name, upazila_name, address_line, delivery_charge_paisa FROM orders WHERE id = ?', r.body.orderId);
@@ -85,7 +86,7 @@ describe('checkout by delivery area', () => {
   it('shows where customers are on the dashboard: by district and by delivery area', async () => {
     const ch = (await t.adminJson('/dashboard')).body.charts;
     expect(ch.places.find((p: { district: string }) => p.district === 'Rajbari')).toMatchObject({ orders: 1, id: expect.any(Number) });
-    expect(ch.areas.find((a: { area: string }) => a.area === 'ঢাকার বাইরে')).toMatchObject({ orders: 2, unplaced: 1 });
+    expect(ch.areas.find((a: { area: string }) => a.area === 'রাজবাড়ীর বাইরে')).toMatchObject({ orders: 2, unplaced: 1 });
   });
 });
 
@@ -107,13 +108,13 @@ describe('delivery areas the owner names and prices', () => {
     expect((await t.adminJson(`/zones/${id}`, 'PUT', { name: 'রাজবাড়ী জেলা', baseChargePaisa: 8000, extraPerKgPaisa: 2000, bulkyChargePaisa: 50000, etaText: '২–৩ দিন' })).status).toBe(200);
     expect(await t.sql('SELECT name, base_charge_paisa FROM delivery_zones WHERE id = ?', id)).toEqual([{ name: 'রাজবাড়ী জেলা', base_charge_paisa: 8000 }]);
     // A name already taken gets a clear message.
-    expect((await t.adminJson('/zones', 'POST', { name: 'ঢাকার বাইরে', baseChargePaisa: 1, extraPerKgPaisa: 0, bulkyChargePaisa: 0 })).body.error).toMatch(/already a delivery area/);
+    expect((await t.adminJson('/zones', 'POST', { name: 'রাজবাড়ীর বাইরে', baseChargePaisa: 1, extraPerKgPaisa: 0, bulkyChargePaisa: 0 })).body.error).toMatch(/already a delivery area/);
     expect((await t.adminJson(`/zones/${id}`, 'DELETE')).status).toBe(200);
     expect(await t.sql('SELECT id FROM delivery_zones WHERE id = ?', id)).toEqual([]);
   });
 
   it('keeps an area that orders went to (rename it instead)', async () => {
-    const outside = await zoneId('ঢাকার বাইরে');
+    const outside = await zoneId('রাজবাড়ীর বাইরে');
     expect((await t.adminJson(`/zones/${outside}`, 'DELETE')).status).toBe(400);
   });
 });

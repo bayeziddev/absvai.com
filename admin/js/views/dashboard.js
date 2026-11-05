@@ -1,4 +1,4 @@
-import { api, badge, can, date, esc, taka } from '../app.js';
+import { api, badge, can, date, esc, state, taka } from '../app.js';
 import { barChart, compactTaka, districtMap, fillDays, funnel, hBars, lineChart, tableView } from './charts.js';
 
 export async function dashboard(v) {
@@ -6,7 +6,7 @@ export async function dashboard(v) {
   const k = d.kpis;
   const s = d.seasons;
   v.innerHTML = `
-    <div class="page-head"><div><h1>Overview</h1><p>Today in Bangladesh time.</p></div><div class="row">${can('orders:write') ? '<a class="btn btn-outline" href="#/manual">+ Manual order</a>' : ''}${can('catalog:write') ? '<a class="btn btn-primary" href="#/products?new=1">+ Add product</a>' : ''}</div></div>
+    <div class="page-head"><div><p class="eyebrow">${esc(state.store)} · Admin</p><h1>Overview</h1><p>Today in Bangladesh time.</p></div><div class="row">${can('orders:write') ? '<a class="btn btn-outline" href="#/manual">+ Manual order</a>' : ''}${can('catalog:write') ? '<a class="btn btn-primary" href="#/products?new=1">+ Add product</a>' : ''}</div></div>
     <div class="health">${d.health.map(h => `<span><span class="dot ${h.ok ? 'ok' : 'warn'}"></span>${esc(h.text)}</span>`).join('')}</div>
     <h2 class="section-title">Order pipeline</h2>
     <div class="stages">${d.stages.map(st => `<a class="stage ${st.value === 'new' && st.count ? 'alert' : ''}" href="#/orders?status=${st.value}" title="${esc(st.meaning)}"><span>${esc(st.label)}</span><b>${st.count}</b><small>${esc(st.scope)}</small></a>`).join('')}

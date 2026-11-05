@@ -1,5 +1,6 @@
 import { api, badge, busy, can, confirmBox, date, esc, fromPaisa, qs, slideOver, state, taka, toast, toPaisa } from '../app.js';
 import { quickProduct } from './quick-product.js';
+import { optionValues } from '../lib/variant-options.js';
 
 // ───────────── Product list ─────────────
 
@@ -223,13 +224,12 @@ export async function openProduct(id, done, startStep = 1) {
   function step4() {
     const attrs = attrsNow();
     const chosen = Object.fromEntries(attrs.map(a => [a.attributeTypeId, [...new Set(f.variants.map(v => v.attributes[a.attributeTypeId]).filter(Boolean))]]));
-    const typeValues = id => attrTypes.find(t => t.id === id)?.values.map(x => x.value) ?? [];
     return `
       <p class="explain">Tap the choices customers can pick. Every combination becomes an option with its own price, stock, packed weight and SKU.</p>
       ${attrs.map(a => {
-        const pool = [...new Set([...a.presetValues, ...(a.promoted ? [] : typeValues(a.attributeTypeId)), ...chosen[a.attributeTypeId]])];
+        const pool = optionValues(a, attrTypes, chosen[a.attributeTypeId]);
         return `<div class="card" data-attr="${esc(a.attributeTypeId)}"><h3>${esc(a.label)} ${a.required ? '<span class="badge b-red">required</span>' : '<span class="badge b-grey">optional</span>'}</h3>
-          <div class="chips">${pool.map(x => `<button type="button" class="chip" aria-pressed="${chosen[a.attributeTypeId].includes(x)}" data-val="${esc(x)}">${esc(x)}</button>`).join('')}
+          <div class="chips">${pool.map(({ value, hex }) => { const swatch = a.input === 'swatch' ? hex : null; return `<button type="button" class="chip${swatch ? ' chip-with-swatch' : ''}" aria-label="Select ${esc(value)}" aria-pressed="${chosen[a.attributeTypeId].includes(value)}" data-val="${esc(value)}">${swatch ? `<span class="chip-swatch-dot" style="--chip-swatch:${swatch}" aria-hidden="true"></span>` : ''}<span>${esc(value)}</span></button>`; }).join('')}
           ${a.allowCustomValues ? '<button type="button" class="chip add" data-custom>+ Add your own</button>' : ''}</div></div>`;
       }).join('')}
       <div class="row" style="margin-bottom:10px"><button class="btn btn-outline" type="button" id="gen">Update option rows</button>

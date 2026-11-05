@@ -462,7 +462,7 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
           <p class="eta" data-eta />
           {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" data-error-callback="absvaiTurnstileError" />}
           <p class="form-msg error" data-co-error role="alert" />
-          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>{p.placeLabel ?? 'অর্ডার কনফার্ম করুন'}</button>
+          <button class="btn btn-primary btn-lg btn-block quick-order-button" type="submit" data-place>{p.placeLabel ?? 'অর্ডার কনফার্ম করুন'}</button>
           {p.whatsapp && (
             <a class="btn btn-whatsapp btn-lg btn-block" href={`https://wa.me/${p.whatsapp}`} target="_blank" rel="noopener" data-wa-order>
               <Icon name="whatsapp" size={20} />WhatsApp-এ অর্ডার করুন

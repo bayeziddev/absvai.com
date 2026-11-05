@@ -54,6 +54,15 @@ export async function validateAddress(db: D1Database, a: AddressIds): Promise<Va
  * needsArea is true when the district has upazila overrides with different zones and no upazila was chosen,
  * so the shown charge could still change.
  */
+/**
+ * The delivery area for the old two-choice checkout ("inside" = ৳70, "outside" = ৳130), for a page a customer opened
+ * before the editable areas went live. New pages send the area's id.
+ */
+export async function areaIdForChoice(db: D1Database, choice: 'inside' | 'outside'): Promise<number | null> {
+  const r = await db.prepare('SELECT id FROM delivery_zones WHERE base_charge_paisa = ? ORDER BY sort_order, id LIMIT 1').bind(choice === 'inside' ? 7000 : 13000).first<{ id: number }>();
+  return r?.id ?? null;
+}
+
 export async function resolveZone(db: D1Database, districtId: number, upazilaId: number | null): Promise<{ zone: Zone; needsArea: boolean; defaultCourier: string | null } | null> {
   if (upazilaId) {
     const o = await db.prepare('SELECT z.* FROM zone_upazila_overrides o JOIN delivery_zones z ON z.id = o.zone_id WHERE o.upazila_id = ?').bind(upazilaId).first<Record<string, unknown>>();

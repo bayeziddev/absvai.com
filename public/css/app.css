@@ -490,15 +490,21 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .req { color: var(--chili); } .opt { color: var(--muted); font-weight: 500; font-size: .8rem; }
 .field-hint { color: var(--muted); font-size: .82rem; }
 .co-account { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--cream); font-size: .9rem; } .co-account.ok { background: var(--leaf-soft); color: #1F5A23; font-weight: 600; }
+.co-areas { margin: 14px 0; padding: 12px; border-radius: 14px; background: #F1FBF4; border: 1px solid #D9EFDC; }
+.co-areas h3 { margin: 0 0 8px; color: var(--clove); font-weight: 800; }
+.co-areas .field-note { margin: 8px 2px 0; font-size: .78rem; }
 .area-options { display: grid; gap: 8px; }
-.area-option { position: relative; display: flex; gap: 10px; align-items: center; border: 2px solid var(--husk); border-radius: 12px; padding: 10px 12px; cursor: pointer; background: var(--white); }
-.area-option:has(input:checked) { border-color: var(--chili); background: #FFF8F7; }
+.area-option { position: relative; display: flex; gap: 10px; align-items: center; min-height: 58px; border: 1px solid #D6E8D9; border-radius: 12px; padding: 10px 12px; cursor: pointer; background: var(--white); }
+.area-option:has(input:checked) { border-color: var(--leaf); background: #F6FFF7; box-shadow: 0 0 0 2px rgba(46,125,50,.1); }
 .area-option:has(input:focus-visible) { outline: 3px solid var(--turmeric); outline-offset: 2px; }
 .area-option input { position: absolute; opacity: 0; pointer-events: none; }
 .area-text { flex: 1; min-width: 0; } .area-text strong { display: block; line-height: 1.25; } .area-text small { display: block; color: var(--muted); font-size: .8rem; }
-.area-charge { font: 800 1.05rem var(--display); color: var(--chili); white-space: nowrap; }
-.area-tick { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--husk); display: grid; place-items: center; color: transparent; flex: none; }
-.area-option:has(input:checked) .area-tick { background: var(--chili); border-color: var(--chili); color: var(--white); }
+.area-charge { font: 800 1.05rem var(--display); color: var(--leaf); white-space: nowrap; }
+.area-tick { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #B8D8BC; display: grid; place-items: center; color: transparent; flex: none; }
+.area-option:has(input:checked) .area-tick { background: var(--leaf); border-color: var(--leaf); color: var(--white); }
+.quick-order-button { background: #ff7800; border-color: #ff7800; font-size: 1.08rem; box-shadow: 0 8px 18px rgba(255, 120, 0, .22); }
+.quick-order-button:hover { background: #e96800; border-color: #e96800; }
+@media (max-width: 599px) { .checkout { gap: 10px; } .co-step, .co-summary { border-radius: 16px; padding: 14px; } }
 .done-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 .co-delivery { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--leaf-soft); color: #1F5A23; font-size: .95rem; }
 .co-delivery span { display: block; font-size: .82rem; opacity: .85; margin-top: 2px; }
@@ -513,7 +519,7 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .advance-title { font-weight: 800; }
 .advance-reasons { margin: 0 0 10px; padding-left: 18px; font-size: .9rem; }
 .wallets ul { list-style: none; padding: 0; margin: 4px 0 10px; }
-.co-summary { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+.co-summary { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; border: 1px solid rgba(46,125,50,.12); }
 .co-line { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--cream); }
 .co-line img { width: 64px; height: 64px; border-radius: 12px; background: var(--cream); object-fit: cover; }
 .co-line small { display: block; color: var(--muted); }
@@ -679,3 +685,7 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .coupon-msg { margin: 0 0 6px; font-size: .86rem; }
 .coupon-msg.ok { color: var(--leaf); font-weight: 600; }
 .coupon-msg.error { color: var(--chili); }
+
+/* The landing-page form: flatter cards. */
+.checkout-compact .co-step { box-shadow: none; border: 1px solid #E7EEE9; }
+.checkout-compact .co-step legend { font-size: 1rem; }

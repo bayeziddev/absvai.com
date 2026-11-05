@@ -15,6 +15,8 @@ beforeAll(async () => {
   ids.savar = await one("SELECT id FROM geo_upazilas WHERE name = 'Savar'");
   ids.tangail = await one("SELECT id FROM geo_districts WHERE name = 'Tangail'");
   ids.kalihati = await one("SELECT id FROM geo_upazilas WHERE name = 'Kalihati'");
+  ids.rajbari = await one("SELECT id FROM geo_districts WHERE name = 'Rajbari'");
+  ids.pangsa = await one("SELECT id FROM geo_upazilas WHERE name = 'Pangsa'");
   ids.chattogramDivision = await one("SELECT id FROM geo_divisions WHERE name = 'Chattagram'");
 });
 afterAll(async () => { await t?.dispose(); });
@@ -96,26 +98,27 @@ describe('delivery charge quotes', () => {
   const quote = async (lines: Array<{ variantId: number; qty: number }>, districtId: number, upazilaId: number | null) =>
     (await t.json('/api/checkout/quote', { method: 'POST', body: { lines, districtId, upazilaId, paymentMethod: 'cod' } })).body;
 
-  it('charges inside Dhaka city, the Dhaka suburbs and outside Dhaka by zone (Bangla area names)', async () => {
+  it('charges ৳70 inside Rajbari and ৳130 everywhere else (the shop delivers from Rajbari; Bangla area names)', async () => {
     const lines = [{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }];
-    expect((await quote(lines, ids.dhaka, ids.dhakaSouth)).delivery).toMatchObject({ zoneName: 'ঢাকা সিটির ভিতরে', chargePaisa: 7000 });
-    expect((await quote(lines, ids.dhaka, ids.savar)).delivery).toMatchObject({ zoneName: 'ঢাকার আশেপাশে', chargePaisa: 10000 });
-    expect((await quote(lines, ids.tangail, ids.kalihati)).delivery).toMatchObject({ zoneName: 'ঢাকার বাইরে', chargePaisa: 13000 });
+    expect((await quote(lines, ids.rajbari, ids.pangsa)).delivery).toMatchObject({ zoneName: 'রাজবাড়ীর ভিতরে', chargePaisa: 7000 });
+    expect((await quote(lines, ids.dhaka, ids.dhakaSouth)).delivery).toMatchObject({ zoneName: 'রাজবাড়ীর বাইরে', chargePaisa: 13000 });
+    expect((await quote(lines, ids.tangail, ids.kalihati)).delivery).toMatchObject({ zoneName: 'রাজবাড়ীর বাইরে', chargePaisa: 13000 });
   });
 
-  it('asks for the area in Dhaka before the charge is final', async () => {
+  it('knows the charge from the district alone (no city areas to choose)', async () => {
     const q = await quote([{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }], ids.dhaka, null);
-    expect(q.needsArea).toBe(true);
+    expect(q.needsArea).toBe(false);
+    expect(q.delivery.chargePaisa).toBe(13000);
   });
 
-  it('uses packed weight × quantity, the free threshold and the bulky rule', async () => {
+  it('charges a flat rate whatever the weight, with the free threshold and the bulky rule', async () => {
     const heavyFood = await quote([{ variantId: await variant('ORG-PTGR-2KG-0003'), qty: 1 }], ids.tangail, ids.kalihati); // 2.3kg packed, ৳1,400
-    expect(heavyFood.delivery.chargePaisa).toBe(13000 + 2 * 2500);
+    expect(heavyFood.delivery.chargePaisa).toBe(13000);
     const free = await quote([{ variantId: await variant('ORG-PTGR-2KG-0003'), qty: 2 }], ids.tangail, ids.kalihati); // ৳2,800 ≥ ৳1,500
     expect(free.delivery.chargePaisa).toBe(0);
     const press = await quote([{ variantId: await variant('MCH-CHNC-4IN-0004'), qty: 1 }], ids.tangail, ids.kalihati);
-    expect(press.delivery.chargePaisa).toBe(80000); // bulky charge; the threshold does not cover large items
-    expect(press.advance).toMatchObject({ required: true, amountPaisa: 80000 });
+    expect(press.delivery.chargePaisa).toBe(13000); // a large item costs the area's charge too; the threshold does not cover it
+    expect(press.advance).toMatchObject({ required: true, amountPaisa: 13000 });
   });
 
   it('gives a free-delivery bulky item (clothes rack) free delivery, but still asks for an advance only when there is a charge', async () => {

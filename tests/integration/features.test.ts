@@ -118,7 +118,7 @@ describe('shop assistant (chat popup)', () => {
   it('answers from the shop data without AI: delivery charges and matching products', async () => {
     const d = await ask('What is the delivery charge to Tangail?');
     expect(d.body.ai).toBe(false);
-    expect(d.body.reply).toMatch(/ঢাকার বাইরে ৳\d+/);
+    expect(d.body.reply).toMatch(/রাজবাড়ীর বাইরে ৳\d+/);
     const p = await ask('do you have masala?');
     expect(p.body.products[0]).toMatchObject({ slug: expect.any(String), pricePaisa: expect.any(Number) });
     expect((await ask('')).status).toBe(400);

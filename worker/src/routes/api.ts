@@ -10,7 +10,7 @@ import { activeSeasonIds, getProductDetail, getSeasons, liveProducts, productExi
 import { settingInt } from '../repo/settings';
 import { smallOf } from '../lib/images';
 import { askModel, builtInShopReply, cleanTurns, shopFacts, shopSystemPrompt } from '../services/assistant';
-import { geoHierarchy, postcodeMap, unionsOf } from '../repo/geo';
+import { areaIdForChoice, geoHierarchy, postcodeMap, unionsOf } from '../repo/geo';
 import { sessionStatus } from '../repo/incomplete';
 import { addNotifyRequest, addWholesaleInquiry } from '../repo/misc';
 import { customerByPhone, orderByNo, submitAdvance } from '../repo/orders';
@@ -203,6 +203,13 @@ api.post('/checkout/capture', async c => {
   return c.json({ ok: true, saved: r.saved });
 });
 
+/** The chosen delivery area: its id, or (pages opened before this version) "inside" / "outside". */
+async function chosenArea(c: Context<AppEnv>, body: Record<string, unknown>): Promise<number | null> {
+  const id = posInt(body.zoneId);
+  if (id) return id;
+  return body.deliveryChoice === 'inside' || body.deliveryChoice === 'outside' ? areaIdForChoice(c.env.DB, body.deliveryChoice) : null;
+}
+
 api.post('/checkout/quote', async c => {
   const body = await readJson(c);
   const phone = normalizeBdPhone(str(body.phone));
@@ -212,7 +219,7 @@ api.post('/checkout/quote', async c => {
     customerIsNewOrRisky = !cust || cust.delivered_count === 0 || cust.returned_count > 0;
   }
   return c.json(await quote(c.env.DB, await settingsOf(c), {
-    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), zoneId: posInt(body.zoneId), withAreas: body.withAreas === true,
+    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), zoneId: await chosenArea(c, body), withAreas: body.withAreas === true,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod', customerIsNewOrRisky,
     couponCode: str(body.couponCode, 30) || null, phone,
   }));
@@ -249,7 +256,7 @@ api.post('/checkout/place', async c => {
   const acct = accountId ? await accountById(c.env.DB, accountId) : null;
   const placed = await placeOrder(c.env, await settingsOf(c), {
     phone: str(body.phone, 20), name: str(body.name, 120),
-    divisionId: posInt(body.divisionId), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), unionId: posInt(body.unionId), zoneId: posInt(body.zoneId),
+    divisionId: posInt(body.divisionId), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), unionId: posInt(body.unionId), zoneId: await chosenArea(c, body),
     postcode: asciiDigits(str(body.postcode, 4)) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,
@@ -257,7 +264,7 @@ api.post('/checkout/place', async c => {
     email: acct?.email ?? (str(body.email, 120) || null), emailOffers: acct ? Boolean(acct.offers) : body.emailOffers === true,
     couponCode: str(body.couponCode, 30) || null, landingPageId: landing?.id ?? null,
   }, { channel: 'web', identity: id, checkoutSessionId: sid, route: '/api/checkout/place' });
-  if (acct) await rememberDelivery(c.env.DB, acct.id, { phone: normalizeBdPhone(str(body.phone, 20)) ?? '', addressLine: str(body.addressLine, 300), zoneId: posInt(body.zoneId) });
+  if (acct) await rememberDelivery(c.env.DB, acct.id, { phone: normalizeBdPhone(str(body.phone, 20)) ?? '', addressLine: str(body.addressLine, 300), zoneId: await chosenArea(c, body) });
   return c.json(placed, 201);
 });
 

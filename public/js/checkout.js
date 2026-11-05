@@ -14,6 +14,7 @@ const BN = [
   [/^Free delivery on these items\.$/, 'এই পণ্যগুলোর ডেলিভারি ফ্রি।'],
   [new RegExp(`^(.+): ${T} up to ([\\d.]+)kg, \\+${T} per extra kg \\(([\\d.]+)kg packed\\)\\.$`), '$1: $3 কেজি পর্যন্ত $2, এর পরে প্রতি কেজিতে +$4 (প্যাকেটসহ ওজন $5 কেজি)।'],
   [new RegExp(`^(.+): ${T} up to ([\\d.]+)kg\\.$`), '$1: $3 কেজি পর্যন্ত $2।'],
+  [new RegExp(`^(.+): ${T}, whatever the weight\\.$`), '$1: $2, ওজন যতই হোক।'],
   [/^Large item: we will call you to confirm the delivery charge before dispatch\.$/, 'বড় পণ্য: পাঠানোর আগে আমরা ফোন করে ডেলিভারি চার্জ জানিয়ে দেব।'],
   [new RegExp(`^Large item delivery: ${T} each\\.$`), 'বড় পণ্যের ডেলিভারি চার্জ: প্রতিটি $1।'],
   [/^Free delivery on the large item\.$/, 'বড় পণ্যের ডেলিভারি ফ্রি।'],

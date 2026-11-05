@@ -106,7 +106,7 @@ describe('the signed-in customer', () => {
     // An order while signed in: the receipt goes to the account email, the address is kept for next time.
     const s = await t.checkoutSession();
     const variantId = (await t.sql<{ id: number }>("SELECT id FROM product_variants WHERE sku = 'SPC-MMSL-250G-0001'"))[0].id;
-    const zoneId = (await t.sql<{ id: number }>("SELECT id FROM delivery_zones WHERE name = 'ঢাকার বাইরে'"))[0].id;
+    const zoneId = (await t.sql<{ id: number }>("SELECT id FROM delivery_zones WHERE name = 'রাজবাড়ীর বাইরে'"))[0].id;
     const placed = await t.json('/api/checkout/place', {
       method: 'POST', headers: { cookie: `${s.cookie}; ${cookie}`, 'cf-connecting-ip': '10.7.9.1' },
       body: { phone: '01866123456', name: 'রহিম উদ্দিন', zoneId, addressLine: 'বাসা ১২, পাংশা, রাজবাড়ী', paymentMethod: 'cod', token: s.token, lines: [{ variantId, qty: 2 }] },

@@ -418,8 +418,9 @@ none, book it with Steadfast or call the customer.
 under its name (e.g. “সারা বাংলাদেশ”); a charge of 0 shows as free. Rename any area, change its charge
 up to 1 kg, each extra kg and the delivery time at any time. **+ Add a delivery area** adds one (e.g. "Rajbari", ৳70); an area
 named after a district also covers that district for orders the team types in. **Remove** takes one away (an area that already
-has orders can only be renamed or re-priced). Name areas in Bangla: customers see the name exactly as you type it (the starting
-three are ঢাকা সিটির ভিতরে, ঢাকার আশেপাশে and ঢাকার বাইরে). *ঢাকার বাইরে* (outside Dhaka) is the main area for everywhere not listed. Free delivery from (৳)
+has orders can only be renamed or re-priced). Name areas in Bangla: customers see the name exactly as you type it. The shop
+has two: রাজবাড়ীর ভিতরে (inside Rajbari, ৳70, covers Rajbari district) and রাজবাড়ীর বাইরে (the rest of Bangladesh, ৳130), both a
+flat charge (৳0 per extra kg). *রাজবাড়ীর বাইরে* is the main area for everywhere not listed. Free delivery from (৳)
 and the Cash on Delivery fee are just below.
 
 ## Good to know

@@ -62,13 +62,13 @@ describe('storefront checkout', () => {
     assert.equal(await page.$('[name=landmark], [name=postcode], select[name=districtId], [name=email]'), null);
     assert.match(await page.textContent('.co-head'), /অর্ডার সম্পন্ন করুন.*নিরাপদ অর্ডার/s);
     assert.equal(await page.textContent('[data-delivery]'), 'এলাকা বেছে নিন');
-    // Each area shows what delivery costs for this cart: 1.2kg packed is ৳70 + ৳15 for the extra kg inside Dhaka city.
-    await page.waitForFunction(() => /৳৮৫/.test(document.querySelector('.area-option').textContent));
-    await chooseArea(page, 'ঢাকা সিটির ভিতরে');
-    assert.equal(await page.textContent('[data-delivery]'), '৳85');
-    assert.equal(await page.textContent('[data-total]'), '৳805');
-    assert.match(await page.textContent('[data-co-delivery]'), /ডেলিভারি চার্জ \(ঢাকা সিটির ভিতরে\): ৳85 · সর্বমোট ৳805/);
-    await page.fill('textarea[name=addressLine]', 'বাসা ৭, রোড ৩, ধানমন্ডি, ঢাকা');
+    // Each area shows what delivery costs for this cart: a flat ৳70 inside Rajbari, whatever the weight (1.2kg packed here).
+    await page.waitForFunction(() => /রাজবাড়ীর ভিতরে.*৳৭০/s.test(document.querySelector('.area-option').textContent));
+    await chooseArea(page, 'রাজবাড়ীর ভিতরে');
+    assert.equal(await page.textContent('[data-delivery]'), '৳70');
+    assert.equal(await page.textContent('[data-total]'), '৳790');
+    assert.match(await page.textContent('[data-co-delivery]'), /ডেলিভারি চার্জ \(রাজবাড়ীর ভিতরে\): ৳70 · সর্বমোট ৳790/);
+    await page.fill('textarea[name=addressLine]', 'বাসা ৭, রোড ৩, পাংশা, রাজবাড়ী');
     await page.locator('textarea[name=addressLine]').blur();
     // Incomplete-order capture: one row for this checkout as soon as the phone is valid.
     // The row starts on the phone blur and fills in as the customer keeps typing (debounced).
@@ -79,7 +79,7 @@ describe('storefront checkout', () => {
     assert.equal(server.sql("SELECT COUNT(*) AS n FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].n, 1);
     assert.equal(server.sql("SELECT status FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].status, 'converted');
     const [o] = server.sql(`SELECT total_paisa, delivery_charge_paisa, district_name, address_line FROM orders WHERE order_no = '${orderNo}'`);
-    assert.deepEqual(o, { total_paisa: 80500, delivery_charge_paisa: 8500, district_name: 'Dhaka', address_line: 'বাসা ৭, রোড ৩, ধানমন্ডি, ঢাকা' });
+    assert.deepEqual(o, { total_paisa: 79000, delivery_charge_paisa: 7000, district_name: 'Rajbari', address_line: 'বাসা ৭, রোড ৩, পাংশা, রাজবাড়ী' });
     assert.deepEqual(errors, []);
     await ctx.close();
   });
@@ -96,7 +96,7 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('.cart-line'), /XL · Navy/);
     await page.click('.cart-summary a:has-text("Checkout")');
     await fillContact(page, '01710000002');
-    await chooseArea(page, 'ঢাকার বাইরে');
+    await chooseArea(page, 'রাজবাড়ীর বাইরে');
     await page.fill('textarea[name=addressLine]', 'Village Bashail, Kalihati, Tangail');
     const orderNo = await placeAndWait(page);
     const [item] = server.sql(`SELECT i.sku, i.variant_label FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.order_no = '${orderNo}'`);
@@ -122,7 +122,7 @@ describe('storefront checkout', () => {
     await fillContact(page, '01710000003');
     await page.click('[data-place]');
     assert.equal(await page.textContent('[data-co-error]'), 'ডেলিভারি এলাকা বেছে নিন।');
-    await chooseArea(page, 'ঢাকার বাইরে');
+    await chooseArea(page, 'রাজবাড়ীর বাইরে');
     assert.equal(await page.textContent('[data-delivery]'), 'ফ্রি'); // ৳1,850 is over the free-delivery threshold
     await page.click('[data-place]');
     assert.match(await page.textContent('[data-co-error]'), /পুরো ঠিকানা লিখুন/);
@@ -141,7 +141,7 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('[data-avail]'), /Pre-order · ships from 2027-05-25/);
     await page.click('[data-pdp-form] [data-pdp-order]');
     await fillContact(page, '01710000004');
-    await chooseArea(page, 'ঢাকার বাইরে');
+    await chooseArea(page, 'রাজবাড়ীর বাইরে');
     await page.waitForSelector('[data-advance]:not([hidden])');
     assert.match(await page.textContent('[data-advance-title]'), /এই অর্ডারে ৳200 অ্যাডভান্স লাগবে/);
     assert.match(await page.textContent('[data-advance-reasons]'), /প্রি-অর্ডারের অ্যাডভান্স/);
@@ -175,7 +175,7 @@ describe('storefront checkout', () => {
     await page.waitForURL(/\/checkout\?buy=/);
     await page.waitForFunction(() => document.querySelector('[name=phone]').value === '01710000006');
     assert.match(await page.textContent('[data-co-account]'), /buyer@example\.com/);
-    await chooseArea(page, 'ঢাকার বাইরে');
+    await chooseArea(page, 'রাজবাড়ীর বাইরে');
     await page.fill('textarea[name=addressLine]', 'বাসা ৩, সদর, টাঙ্গাইল');
     const orderNo = await placeAndWait(page);
     assert.equal(server.sql(`SELECT customer_email FROM orders WHERE order_no = '${orderNo}'`)[0].customer_email, 'buyer@example.com');
