@@ -15,8 +15,10 @@ beforeAll(async () => {
   t = await createTestEnv();
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     if (String(input instanceof Request ? input.url : input).startsWith('https://api.resend.com/')) {
-      if (resendFails) return new Response(JSON.stringify({ message: 'The vandarmart.com domain is not verified.' }), { status: 403 });
-      sent.push(JSON.parse(String(init?.body)));
+      const body = JSON.parse(String(init?.body));
+      // Until its DNS records are verified, Resend refuses the shop's domain (the test sender still works).
+      if (resendFails && String(body.from).includes('@vandarmart.com')) return new Response(JSON.stringify({ statusCode: 403, name: 'validation_error', message: 'The vandarmart.com domain is not verified. Please, add and verify your domain on https://resend.com/domains' }), { status: 403 });
+      sent.push(body);
       return new Response(JSON.stringify({ id: `re_${sent.length}` }), { status: 200, headers: { 'content-type': 'application/json' } });
     }
     return realFetch(input, init);
@@ -87,6 +89,7 @@ describe('opening an account with an email code', () => {
     resendFails = true;
     const r = await post('/api/account/code', { mode: 'signin', email: 'down@example.com' });
     resendFails = false;
+    await t.env.KV.delete('email-domain:vandarmart.com');
     expect(r.status).toBe(503);
     expect(r.body.error).toMatch(/ইমেইলে কোড পাঠানো যাচ্ছে না/);
     expect(await t.sql("SELECT email FROM account_codes WHERE email = 'down@example.com'")).toEqual([]);
@@ -156,5 +159,28 @@ describe('the customer invoice', () => {
     expect((await t.fetch(`/order/${o.order_no}/invoice`)).status).toBe(404);
     // The order page links to it.
     expect(await (await t.fetch(`/order/${o.order_no}?t=${o.access_token}`)).text()).toContain('ইনভয়েস ডাউনলোড করুন');
+  });
+});
+
+describe('before the shop domain is verified in Resend', () => {
+  it('keeps emailing the owner from the test sender, says sign-in is coming soon, and tries the domain again later', async () => {
+    resendFails = true;
+    expect((await post('/api/account/code', { mode: 'signin', email: 'early@example.com' })).status).toBe(503);
+    expect(await t.env.KV.get('email-domain:vandarmart.com')).toBe('unverified');
+    // The account page and the checkout do not offer what cannot work yet.
+    const page = await (await t.fetch('/account')).text();
+    expect(page).toContain('খুব শীঘ্রই চালু হবে');
+    expect(page).not.toContain('data-acct-form');
+    expect(await (await t.fetch('/checkout')).text()).toContain('"accounts":false');
+    // Owner emails still go out, from Resend's test sender.
+    const test = await t.adminJson('/emails/test', 'POST', {});
+    expect(test.body.status).toBe('sent');
+    expect(sent.at(-1)!.from).toBe('Vandar Mart <onboarding@resend.dev>');
+    // Once Resend verifies the domain (here: the note expires), the shop domain is used again by itself.
+    resendFails = false;
+    await t.env.KV.delete('email-domain:vandarmart.com');
+    expect(await (await t.fetch('/account')).text()).toContain('data-acct-form');
+    await t.adminJson('/emails/test', 'POST', {});
+    expect(sent.at(-1)!.from).toBe('Vandar Mart <hello@vandarmart.com>');
   });
 });

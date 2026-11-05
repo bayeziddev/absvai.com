@@ -8,9 +8,11 @@
  * - the customer, if they gave an email at checkout: the receipt, the invoice at confirmation, "on the way", "delivered";
  * - customers who ticked "email me offers": the offers the owner sends.
  * Until the shop's own domain is verified in Resend, Resend only delivers to the account's own address, so emails to
- * customers are skipped (and say why) while the sender is still the Resend test address. Once the deploy finds the
- * domain verified it sets EMAIL_DOMAIN, and emails come from "<shop> <hello@domain>" with replies going to the owner's
- * own inbox (Settings → Emails → reply-to, or the alerts address): Resend cannot send as a gmail.com address itself.
+ * customers are skipped (and say why) while the sender is still the Resend test address. EMAIL_DOMAIN (wrangler.toml) is
+ * the shop's domain: emails try "<shop> <hello@domain>", with replies going to the owner's own inbox (Settings → Emails
+ * → reply-to, or the alerts address), because Resend cannot send as a gmail.com address. While Resend says the domain is
+ * not verified yet, emails go from the test sender (so the owner still gets them) and the domain is tried again after
+ * 30 minutes: once its DNS records are in place, customer emails start by themselves, with no deploy.
  */
 import type { Env } from '../env';
 import { hmac, signingKey, timingSafeEqual } from '../lib/crypto';
@@ -29,18 +31,37 @@ const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
 export const emailConnected = (env: Env) => Boolean(env.RESEND_API_KEY);
 export const validEmail = (s: string) => s.length <= 120 && EMAIL_RE.test(s);
 const TEST_SENDER = /@resend\.dev>?\s*$/i;
+const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]{2,}$/i;
+const domainKey = (d: string) => `email-domain:${d}`;
+
+/** The shop's email domain, unless Resend said in the last 30 minutes that it is not verified yet. */
+export async function liveDomain(env: Pick<Env, 'EMAIL_DOMAIN' | 'KV'>): Promise<string | null> {
+  const d = env.EMAIL_DOMAIN?.trim().toLowerCase();
+  if (!d || !DOMAIN_RE.test(d)) return null;
+  try { if ((await env.KV.get(domainKey(d))) === 'unverified') return null; } catch { /* KV down: try the domain */ }
+  return d;
+}
+async function markUnverified(env: Pick<Env, 'KV'>, d: string): Promise<void> {
+  try { await env.KV.put(domainKey(d), 'unverified', { expirationTtl: 1800 }); } catch { /* tried again next time */ }
+}
+/** Resend's answer for a domain whose DNS records are not verified yet. */
+const domainNotVerified = (status: number, message = '') => status === 403 && /not verified|verify (your|the) domain/i.test(message);
+
 /**
- * Who emails come from: the address set in Settings, else the shop's verified domain (EMAIL_DOMAIN), else Resend's
- * test sender (onboarding@resend.dev), which can only deliver to the Resend account's own email address.
+ * Who emails come from: the address set in Settings, else the shop's domain (when Resend accepts it), else Resend's test
+ * sender (onboarding@resend.dev), which can only deliver to the Resend account's own email address.
  */
-export function senderOf(s: Record<string, string>, env?: Pick<Env, 'EMAIL_DOMAIN'>): string {
+export function senderOf(s: Record<string, string>, domain: string | null): string {
   const set = (s.email_from || '').trim();
   if (set && !TEST_SENDER.test(set)) return set;
-  const domain = env?.EMAIL_DOMAIN?.trim();
-  if (domain && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) return `${storeName(s)} <hello@${domain}>`;
+  if (domain) return `${storeName(s)} <hello@${domain}>`;
   return set || `${storeName(s)} <${DEFAULT_FROM_ADDRESS}>`;
 }
-export const canEmailCustomers = (settings: Record<string, string>, env?: Pick<Env, 'EMAIL_DOMAIN'>) => !TEST_SENDER.test(senderOf(settings, env));
+export const canEmailCustomers = (settings: Record<string, string>, domain: string | null) => !TEST_SENDER.test(senderOf(settings, domain));
+/** Customers can get emails (sign-in codes, receipts) right now. */
+export async function customerEmailReady(env: Env, s: Record<string, string>): Promise<boolean> {
+  return Boolean(env.RESEND_API_KEY) && canEmailCustomers(s, await liveDomain(env));
+}
 /** Replies go to the owner's own inbox: the reply-to set in Settings, else the alerts address (e.g. their Gmail). */
 const replyToOf = (s: Record<string, string>) => [s.email_reply_to, s.notify_email].map(x => (x || '').trim()).find(validEmail) ?? null;
 const on = (settings: Record<string, string>, key: string) => settings[key] !== '0';
@@ -76,7 +97,7 @@ async function toOwner(env: Env, s: Record<string, string>, kind: string, mail: 
 }
 
 async function toCustomer(env: Env, s: Record<string, string>, kind: string, to: string, mail: T.Mail, o: { orderId?: number; dedupeKey?: string } = {}) {
-  const ok = canEmailCustomers(s, env);
+  const ok = canEmailCustomers(s, await liveDomain(env));
   await queueEmail(env.DB, { kind, to, ...mail, orderId: o.orderId, dedupeKey: o.dedupeKey, status: ok ? 'queued' : 'skipped', error: ok ? null : 'Verify your own domain in Resend (Admin → Emails) to email customers.' });
 }
 
@@ -177,22 +198,31 @@ export async function flushEmails(env: Env, limit = 20): Promise<{ sent: number;
     return out;
   }
   const s = await loadSettings(env.DB);
-  const from = senderOf(s, env);
+  let domain = await liveDomain(env);
   const replyTo = replyToOf(s) ?? '';
+  const post = (e: (typeof queue)[number], from: string, retry: boolean) => fetch(RESEND_URL, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json', 'idempotency-key': `absvai-email-${e.id}${retry ? '-test' : ''}` },
+    body: JSON.stringify({ from, to: [e.to_email], subject: e.subject, html: e.html, text: e.text, ...(validEmail(replyTo) ? { reply_to: replyTo } : {}), tags: [{ name: 'kind', value: e.kind }] }),
+  });
   for (const [i, e] of queue.entries()) {
     if (i) await new Promise(r => setTimeout(r, 550));
     let res: Response;
+    let body: { id?: string; message?: string; name?: string };
     try {
-      res = await fetch(RESEND_URL, {
-        method: 'POST',
-        headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json', 'idempotency-key': `absvai-email-${e.id}` },
-        body: JSON.stringify({ from, to: [e.to_email], subject: e.subject, html: e.html, text: e.text, ...(validEmail(replyTo) ? { reply_to: replyTo } : {}), tags: [{ name: 'kind', value: e.kind }] }),
-      });
+      res = await post(e, senderOf(s, domain), false);
+      body = (await res.json().catch(() => ({}))) as typeof body;
+      // The shop's domain is not verified yet: send from the test sender instead (reaches the owner) and remember it.
+      if (domain && domainNotVerified(res.status, body.message)) {
+        await markUnverified(env, domain);
+        domain = null;
+        res = await post(e, senderOf(s, null), true);
+        body = (await res.json().catch(() => ({}))) as typeof body;
+      }
     } catch (err) {
       await markEmail(env.DB, e.id, { status: e.attempts >= 4 ? 'failed' : 'queued', error: `Could not reach Resend: ${err instanceof Error ? err.message : err}` });
       break;
     }
-    const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string };
     if (res.ok) { await markEmail(env.DB, e.id, { status: 'sent', providerId: body.id ?? null }); out.sent++; continue; }
     const error = `Resend ${res.status}: ${body.message ?? body.name ?? 'error'}`.slice(0, 500);
     if (res.status === 429 || res.status >= 500) { await markEmail(env.DB, e.id, { status: e.attempts >= 4 ? 'failed' : 'queued', error }); break; }
@@ -208,24 +238,29 @@ export async function flushEmails(env: Env, limit = 20): Promise<{ sent: number;
  */
 export async function sendNow(env: Env, s: Record<string, string>, kind: string, to: string, mail: T.Mail): Promise<{ ok: true } | { ok: false; reason: 'not_connected' | 'no_domain' | 'failed' }> {
   if (!env.RESEND_API_KEY) return { ok: false, reason: 'not_connected' };
-  if (!canEmailCustomers(s, env)) return { ok: false, reason: 'no_domain' };
+  const domain = await liveDomain(env);
+  if (!canEmailCustomers(s, domain)) return { ok: false, reason: 'no_domain' };
   const replyTo = replyToOf(s);
+  let unverified = false;
   let status: 'sent' | 'failed' = 'failed';
   let error: string | null = null;
   try {
     const res = await fetch(RESEND_URL, {
       method: 'POST',
       headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: senderOf(s, env), to: [to], subject: mail.subject, html: mail.html, text: mail.text, ...(replyTo ? { reply_to: replyTo } : {}), tags: [{ name: 'kind', value: kind }] }),
+      body: JSON.stringify({ from: senderOf(s, domain), to: [to], subject: mail.subject, html: mail.html, text: mail.text, ...(replyTo ? { reply_to: replyTo } : {}), tags: [{ name: 'kind', value: kind }] }),
     });
     const body = (await res.json().catch(() => ({}))) as { message?: string; name?: string };
     if (res.ok) status = 'sent';
-    else error = `Resend ${res.status}: ${body.message ?? body.name ?? 'error'}`.slice(0, 500);
+    else {
+      error = `Resend ${res.status}: ${body.message ?? body.name ?? 'error'}`.slice(0, 500);
+      if (domain && domainNotVerified(res.status, body.message)) { unverified = true; await markUnverified(env, domain); }
+    }
   } catch (err) {
     error = `Could not reach Resend: ${err instanceof Error ? err.message : err}`;
   }
   await queueEmail(env.DB, { kind, to, subject: mail.subject.replace(/\d{6}/g, '••••••'), html: '', text: '', status, error }).catch(() => false);
-  return status === 'sent' ? { ok: true } : { ok: false, reason: 'failed' };
+  return status === 'sent' ? { ok: true } : { ok: false, reason: unverified ? 'no_domain' : 'failed' };
 }
 
 /** Old email bodies are dropped after 60 days (the log line stays). */

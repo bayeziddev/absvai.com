@@ -64,11 +64,13 @@ then open Cloudflare dashboard → **Turnstile** → your widget → **Hostname 
 
 ### 4. Email to customers (Resend)
 Customer emails (sign-in codes, receipts, offers) need the shop's domain verified in Resend; Resend cannot send as a
-gmail.com address. The domain `vandarmart.com` is already added in Resend (region Tokyo). With the `RESEND_API_KEY` secret,
-each deploy checks it: if it is not verified yet it adds its DNS records to the Cloudflare zone (needs **Zone → DNS → Edit**
-on the API token) and asks Resend to check them; once verified, the deploy sets `EMAIL_DOMAIN`, so emails come from
-`Vandar Mart <hello@vandarmart.com>` with replies to the owner's Gmail. If the token cannot edit DNS, the run summary lists
-the records to add by hand in **Cloudflare → vandarmart.com → DNS** (then deploy again):
+gmail.com address. The domain `vandarmart.com` is already added in Resend (region Tokyo), and `EMAIL_DOMAIN` in
+`wrangler.toml` names it. The Worker tries to send as `Vandar Mart <hello@vandarmart.com>` (replies go to the owner's Gmail);
+while Resend says the domain is not verified, it sends from Resend's test sender instead (only the owner gets those), the
+account page says sign-in is coming soon, and it tries the domain again every 30 minutes. So once the records below are in
+**Cloudflare → vandarmart.com → DNS** and Resend shows the domain **Verified** (Resend → Domains → vandarmart.com →
+**Verify DNS records**), customer emails and sign-in start by themselves, with no deploy. With a full-access Resend key and
+a Cloudflare token that may edit DNS, each deploy also adds the records and asks Resend to verify by itself.
 
 | Type | Name | Value |
 |---|---|---|
@@ -77,8 +79,8 @@ the records to add by hand in **Cloudflare → vandarmart.com → DNS** (then de
 | TXT | `send` | `v=spf1 include:amazonses.com ~all` |
 | CNAME | `rsend` | `send.forge.rmta.net` (DNS only, not proxied) |
 
-If the Resend key may only send (not read domains), verify the domain in Resend and set the repository **variable**
-`EMAIL_DOMAIN` = `vandarmart.com` (GitHub → Settings → Secrets and variables → Actions → Variables).
+All four are **DNS only** (grey cloud). The current `RESEND_API_KEY` may only send, so the deploy cannot read or verify the
+domain itself; that is fine, the steps above are enough.
 
 ## First run
 1. Push (or press **Run workflow**). The run summary lists the D1/KV/R2 ids, whether each was created, the live URL and the smoke

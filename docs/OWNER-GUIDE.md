@@ -195,8 +195,8 @@ once, while setting up.
 Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
 Actions); the deploy copies it to the Worker. Until your own domain is verified in **Resend → Domains**, Resend delivers only
 to the email address of the Resend account, so customer emails (and sign-in codes) are skipped and say so. vandarmart.com is
-added in Resend; once its DNS records are in Cloudflare and Resend shows it verified, the next deploy switches customer email
-on by itself: emails come from `Vandar Mart <hello@vandarmart.com>` and replies go to your Gmail (the alerts address).
+added in Resend; once its DNS records are in Cloudflare and Resend shows it verified, customer email switches on by itself
+within 30 minutes (no deploy needed); until then the account page says sign-in is coming soon: emails come from `Vandar Mart <hello@vandarmart.com>` and replies go to your Gmail (the alerts address).
 Resend cannot send *as* a gmail.com address, so the sender is the shop's domain and replies go to Gmail. See docs/DEPLOY.md.
 
 ## Sellers (marketplace)

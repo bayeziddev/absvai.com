@@ -714,7 +714,19 @@ const AccountLinks = () => (
  * /account: signed out, a sign-in / open-an-account form (email, then the 6-digit code from the email; public/js/account.js);
  * signed in, the customer's orders with tracking and invoices, the offers for members and their details.
  */
-export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: string; next?: string | null }) {
+export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: string; next?: string | null; emailReady?: boolean }) {
+  // Sign-in codes go by email: until the shop's email domain is verified, say so instead of a form that cannot work.
+  if (!p.view && p.emailReady === false) {
+    return (
+      <div class="container narrow acct" lang="bn" data-account-page>
+        <div class="acct-hero">
+          <h1>আমার অ্যাকাউন্ট</h1>
+          <p class="notice">অ্যাকাউন্ট খোলা ও সাইন ইন খুব শীঘ্রই চালু হবে। ততক্ষণ অ্যাকাউন্ট ছাড়াই অর্ডার করুন, আর মোবাইল নম্বর দিয়ে যেকোনো সময় অর্ডার ট্র্যাক করুন ও ইনভয়েস ডাউনলোড করুন।</p>
+        </div>
+        <AccountLinks />
+      </div>
+    );
+  }
   if (!p.view) {
     return (
       <div class="container narrow acct" lang="bn" data-account-page data-next={p.next ?? ''}>

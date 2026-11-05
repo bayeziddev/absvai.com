@@ -56,4 +56,7 @@ crons = ["5 18 * * *", "*/30 * * * *"]
 
 [vars]
 SITE_URL = "https://vandarmart.com"
+# The shop's email domain in Resend. Emails come from hello@ it once Resend has verified it (until then, from Resend's
+# test sender, which reaches only the owner); the Worker notices the verification by itself.
+EMAIL_DOMAIN = "vandarmart.com"
 ENVIRONMENT = "production"

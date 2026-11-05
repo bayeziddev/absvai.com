@@ -40,7 +40,7 @@ export async function createTestEnv(): Promise<TestEnv> {
   // `wrangler --persist-to X` stores state under X/v3; getPlatformProxy expects that v3 folder itself.
   const proxy = await getPlatformProxy<Env>({ configPath: join(ROOT, 'worker/wrangler.toml'), persist: { path: join(persist, 'v3') } });
   const env = {
-    ...proxy.env, SITE_URL: 'https://absvai.test', ENVIRONMENT: 'test', SETUP_TOKEN: 'setup-token-for-tests', OTP_PEPPER: 'test-pepper',
+    ...proxy.env, SITE_URL: 'https://absvai.test', ENVIRONMENT: 'test', EMAIL_DOMAIN: undefined, SETUP_TOKEN: 'setup-token-for-tests', OTP_PEPPER: 'test-pepper',
     SIGNING_KEY: 'test-signing-key-0123456789abcdef', SETTINGS_KEY: Buffer.alloc(32, 9).toString('base64'),
   } as Env;
   const pending: Promise<unknown>[] = [];

@@ -22,7 +22,7 @@ import { cleanLanding } from '../lib/landing';
 import { LandingPage, landingVariants } from '../views/landing';
 import { getCookie } from 'hono/cookie';
 import { SESSION_COOKIE } from '../lib/auth';
-import { checkUnsubscribe } from '../services/email';
+import { checkUnsubscribe, customerEmailReady } from '../services/email';
 import { trackOrders, type TrackResult } from '../services/tracking';
 import { unsubscribeCustomer } from '../repo/email';
 import { expandQuery } from '../lib/search';
@@ -301,7 +301,11 @@ pages.get('/checkout', async c => {
   const wallets = settingJson<Array<{ wallet: string; number: string; type?: string }>>(sh.settings, 'manual_wallets', []);
   return render(c, sh, {
     title: 'চেকআউট', path: '/checkout', noindex: true, scripts: ['/js/checkout.js'], turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
-    pageData: { freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings) },
+    pageData: {
+      freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings),
+      // The "have an account? sign in" line shows only while sign-in codes can be emailed.
+      accounts: (c.env.ENVIRONMENT === 'development' && !c.env.RESEND_API_KEY) || (await customerEmailReady(c.env, sh.settings)),
+    },
     children: <CheckoutPage wallets={wallets} areas={areas} whatsapp={sh.settings.whatsapp_number?.replace(/\D/g, '') || null} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} />,
   });
 });
@@ -404,9 +408,10 @@ pages.get('/account', async c => {
       offers: offers.map(offerView),
     };
   }
+  const emailReady = Boolean(a) || (c.env.ENVIRONMENT === 'development' && !c.env.RESEND_API_KEY) || (await customerEmailReady(c.env, sh.settings));
   return render(c, sh, {
-    title: 'আমার অ্যাকাউন্ট', path: '/account', tab: 'account', noindex: true, scripts: ['/js/account.js'], styles: ['/css/account.css'], turnstileSiteKey: a ? undefined : c.env.TURNSTILE_SITE_KEY,
-    children: <AccountPage view={view} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} next={/^\/(?!\/)[\w\-/?=&.%]*$/.test(next) ? next : null} />,
+    title: 'আমার অ্যাকাউন্ট', path: '/account', tab: 'account', noindex: true, scripts: ['/js/account.js'], styles: ['/css/account.css'], turnstileSiteKey: a || !emailReady ? undefined : c.env.TURNSTILE_SITE_KEY,
+    children: <AccountPage view={view} emailReady={emailReady} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} next={/^\/(?!\/)[\w\-/?=&.%]*$/.test(next) ? next : null} />,
   });
 });
 

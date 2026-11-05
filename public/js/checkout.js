@@ -293,7 +293,7 @@ form.addEventListener('submit', async e => {
 async function fillFromAccount() {
   const note = $('[data-co-account]');
   if (!/(^|;\s*)vm_in=1/.test(document.cookie)) {
-    if (note && !onLanding) { note.hidden = false; note.innerHTML = 'অ্যাকাউন্ট আছে? <a href="/account?next=/checkout' + encodeURIComponent(location.search) + '">সাইন ইন করুন</a>, আপনার তথ্য নিজে থেকেই বসে যাবে। অ্যাকাউন্ট ছাড়াও অর্ডার করা যায়।'; }
+    if (note && !onLanding && pd.accounts) { note.hidden = false; note.innerHTML = 'অ্যাকাউন্ট আছে? <a href="/account?next=/checkout' + encodeURIComponent(location.search) + '">সাইন ইন করুন</a>, আপনার তথ্য নিজে থেকেই বসে যাবে। অ্যাকাউন্ট ছাড়াও অর্ডার করা যায়।'; }
     return;
   }
   let a = null;
