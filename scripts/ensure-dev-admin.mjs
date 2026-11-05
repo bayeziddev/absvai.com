@@ -20,7 +20,7 @@
  *   node scripts/ensure-dev-admin.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import crypto from 'node:crypto';
@@ -43,6 +43,12 @@ export function passwordProblem(pw) {
 
 const sql = s => `'${String(s).replace(/'/g, "''")}'`;
 
+/** A note for the deploy summary and the log. This step never fails the deploy, so a problem is a warning, not an error. */
+function note(message) {
+  console.log(`Developer support account: ${message}`);
+  if (process.env.GITHUB_STEP_SUMMARY) { try { appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Developer support account: ${message}\n`); } catch { /* summary is best-effort */ } }
+}
+
 function d1(args, opts = {}) {
   return execFileSync('npx', ['wrangler', 'd1', 'execute', 'DB', '--remote', '-c', 'worker/wrangler.toml', ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], ...opts });
 }
@@ -56,15 +62,22 @@ async function main() {
   const email = (process.env.DEV_ADMIN_EMAIL || '').trim().toLowerCase();
   const password = process.env.DEV_ADMIN_PASSWORD || '';
   const name = (process.env.DEV_ADMIN_NAME || 'Developer support (Bayezid)').trim();
-  if (!email && !password) { console.log('Developer support account: not configured (set DEV_ADMIN_EMAIL and DEV_ADMIN_PASSWORD to enable). Nothing to do.'); return; }
-  if (!email || !password) { console.error('Developer support account: set BOTH DEV_ADMIN_EMAIL and DEV_ADMIN_PASSWORD, or neither.'); process.exit(1); }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { console.error('Developer support account: DEV_ADMIN_EMAIL is not a valid email.'); process.exit(1); }
+  // Nothing set: the account is simply not in use.
+  if (!email && !password) { note('not configured (set DEV_ADMIN_EMAIL and DEV_ADMIN_PASSWORD to enable). Nothing to do.'); return; }
+  // Anything misconfigured only skips THIS account; it must never block the shop's deploy, so these are warnings.
+  if (!email || !password) return note('⚠️ set BOTH DEV_ADMIN_EMAIL and DEV_ADMIN_PASSWORD, or neither — skipped for now.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return note('⚠️ DEV_ADMIN_EMAIL is not a valid email — skipped for now.');
   const problem = passwordProblem(password);
-  if (problem) { console.error(`Developer support account: ${problem} (DEV_ADMIN_PASSWORD). The password itself is never printed.`); process.exit(1); }
+  if (problem) return note(`⚠️ ${problem} (DEV_ADMIN_PASSWORD). Choose a stronger password and re-deploy; the account was not changed. The password itself is never printed.`);
 
-  const count = adminCount();
+  let count;
+  try {
+    count = adminCount();
+  } catch (e) {
+    return note(`⚠️ could not read the database (${e.message}); skipped, the deploy continues.`);
+  }
   if (count === 0) {
-    console.log('Developer support account: the store has no admin yet, so the shop owner can still use the one-time setup token to create the first account. This account will be added on the next deploy after that.');
+    note('the store has no admin yet, so the shop owner can still use the one-time setup token to create the first account. This account will be added on the next deploy after that.');
     return;
   }
 
@@ -79,12 +92,16 @@ async function main() {
   try {
     writeFileSync(file, statement); // the file holds only the hash, never the password
     d1(['--file', file], { stdio: 'inherit' });
-    console.log(`Developer support account ready: ${email} (Super Admin). It appears in the admin under Staff & roles.`);
+    note(`ready: ${email} (Super Admin). It appears in the admin under Staff & roles.`);
+  } catch (e) {
+    note(`⚠️ could not write to the database (${e.message}); skipped, the deploy continues.`);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(e => { console.error('Developer support account: failed.', e.message); process.exit(1); });
+// Run when invoked directly (node scripts/ensure-dev-admin.mjs); importing it for tests does not run it.
+if (process.argv[1] && process.argv[1].endsWith('ensure-dev-admin.mjs')) {
+  // Never fail the deploy over the optional support account.
+  main().catch(e => note(`⚠️ skipped (${e.message}); the deploy continues.`));
 }
