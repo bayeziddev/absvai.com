@@ -84,6 +84,31 @@ describe('storefront checkout', () => {
     await ctx.close();
   });
 
+  it('“Order on WhatsApp” writes the whole checkout as a Bangla message and tells the shop', async () => {
+    const { ctx, page, errors } = await phone();
+    await page.goto(`${server.base}/p/khejur-patali-gur`);
+    await page.click('[data-pdp-form] label:has-text("1kg")');
+    await page.click('[data-pdp-form] [data-pdp-order]');
+    await page.waitForURL(/\/checkout\?buy=/);
+    await fillContact(page, '01710000009', 'WhatsApp Buyer');
+    await chooseArea(page, 'রাজবাড়ীর ভিতরে');
+    await page.fill('textarea[name=addressLine]', 'বাসা ৯, পাংশা, রাজবাড়ী');
+    await page.waitForFunction(() => performance.now() > 3500); // the checkout session is ready
+    // Stay on the page (no WhatsApp here): the message is read from the link the tap leaves behind.
+    await page.evaluate(() => document.querySelector('[data-wa-order]').addEventListener('click', e => e.preventDefault()));
+    await page.click('[data-wa-order]');
+    const href = await page.getAttribute('[data-wa-order]', 'href');
+    assert.match(href, /^https:\/\/wa\.me\/8801700000000\?text=/);
+    const text = decodeURIComponent(href.split('text=')[1]);
+    for (const part of ['অর্ডার করতে চাই', 'Khejur Patali Gur', '× ১ = ৳৭২০', 'ডেলিভারি চার্জ* (রাজবাড়ীর ভিতরে): ৳৭০', 'সর্বমোট: ৳৭৯০', 'ক্যাশ অন ডেলিভারি', 'WhatsApp Buyer', '01710000009', 'বাসা ৯, পাংশা, রাজবাড়ী']) {
+      assert.ok(text.includes(part), `message has ${part}:\n${text}`);
+    }
+    const [row] = await waitFor(() => { const r = server.sql("SELECT json_extract(source, '$.via') AS via FROM abandoned_checkouts WHERE phone = '8801710000009'"); return r.length && r[0].via ? r : null; });
+    assert.equal(row.via, 'whatsapp');
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+
   it('clothing: size + colour on the product page, cart, then an English address outside Dhaka', async () => {
     const { ctx, page, errors } = await phone();
     await page.goto(`${server.base}/p/mens-cotton-panjabi`);
@@ -341,6 +366,50 @@ describe('admin smart upload form', () => {
     const [shipped] = server.sql(`SELECT status, courier, tracking_id, invoice_no IS NOT NULL AS invoiced FROM orders WHERE id = ${id}`);
     assert.deepEqual(shipped, { status: 'in_courier', courier: 'steadfast', tracking_id: 'SF-E2E-12345', invoiced: 1 });
     assert.deepEqual(server.sql(`SELECT kind FROM stock_movements WHERE order_id = ${id} ORDER BY id`).map(r => r.kind), ['reserve', 'sale']);
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+
+  it('drafts the Bangla WhatsApp message for a new order, then edits the order: quantity and free delivery', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${server.base}/admin/`);
+    await page.fill('input[name=email]', 'owner@absvai.test');
+    await page.fill('input[name=password]', 'correct-horse-42');
+    await page.click('#auth button');
+    await page.waitForSelector('.stages');
+    const [o] = server.sql("SELECT id, order_no, total_paisa FROM orders WHERE status = 'new' AND delivery_charge_paisa > 0 ORDER BY id LIMIT 1");
+    await page.goto(`${server.base}/admin/#/orders/${o.id}`);
+    await page.waitForSelector('.over .wa-card #wa-text');
+    assert.match(await page.inputValue('#wa-text'), new RegExp(`আসসালামু আলাইকুম[\\s\\S]*আপনার অর্ডারটি আমরা পেয়েছি[\\s\\S]*${o.order_no}[\\s\\S]*"হ্যাঁ"`));
+    assert.equal(await page.getAttribute('.wa-card [data-wa="verify"]', 'aria-pressed'), 'true');
+    if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/admin-whatsapp.png`, fullPage: false });
+    await page.click('.wa-card [data-wa="confirmed"]');
+    assert.match(await page.inputValue('#wa-text'), /কনফার্ম হয়েছে/);
+    await page.fill('#wa-text', `${await page.inputValue('#wa-text')}\nআজই পাঠাচ্ছি।`);
+    await page.evaluate(() => document.querySelector('#wa-send').addEventListener('click', e => e.preventDefault()));
+    await page.click('#wa-send');
+    const href = await page.getAttribute('#wa-send', 'href');
+    assert.match(href, /^https:\/\/wa\.me\/8801\d{9}\?text=/);
+    assert.ok(decodeURIComponent(href.split('text=')[1]).endsWith('আজই পাঠাচ্ছি।'));
+    await waitFor(() => server.sql(`SELECT 1 FROM order_events WHERE order_id = ${o.id} AND kind = 'whatsapp'`).length);
+
+    await page.click('.over #edit-order');
+    await page.waitForSelector('.over #ef [data-q="0"]');
+    await page.fill('.over [data-q="0"]', '2');
+    await page.dispatchEvent('.over [data-q="0"]', 'change');
+    await page.check('.over #efree');
+    await page.waitForFunction(() => /New total/.test(document.querySelector('#esum').textContent));
+    if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/admin-edit.png` });
+    await page.click('.over-foot #esave');
+    await page.waitForFunction(() => /Saved: /.test(document.getElementById('toast').textContent));
+    const [after] = server.sql(`SELECT delivery_charge_paisa, (SELECT qty FROM order_items WHERE order_id = ${o.id} ORDER BY id LIMIT 1) AS qty FROM orders WHERE id = ${o.id}`);
+    assert.deepEqual(after, { delivery_charge_paisa: 0, qty: 2 });
+    // The order panel shows the edit in its history and the message follows the new total.
+    await page.waitForFunction(() => /Edited/.test(document.querySelector('.over .timeline').textContent));
+    assert.match(await page.inputValue('#wa-text'), /ফ্রি/);
     assert.deepEqual(errors, []);
     await ctx.close();
   });

@@ -23,7 +23,9 @@ export async function upsertCapture(db: D1Database, c: Capture): Promise<boolean
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(checkout_session_id) DO UPDATE SET phone = excluded.phone, name = COALESCE(excluded.name, abandoned_checkouts.name), address = excluded.address,
        cart = excluded.cart, subtotal_paisa = excluded.subtotal_paisa, device_hash = excluded.device_hash, ip_hash = excluded.ip_hash,
-       risk_level = excluded.risk_level, risk_reasons = excluded.risk_reasons, updated_at = ${NOW}
+       risk_level = excluded.risk_level, risk_reasons = excluded.risk_reasons, updated_at = ${NOW},
+       -- The first source stays (where the customer came from); a later WhatsApp tap is added to it.
+       source = CASE WHEN json_extract(excluded.source, '$.via') = 'whatsapp' THEN json_set(abandoned_checkouts.source, '$.via', 'whatsapp') ELSE abandoned_checkouts.source END
      WHERE abandoned_checkouts.status != 'converted'`,
   ).bind(c.sessionId, c.phone, c.name, JSON.stringify(c.address), JSON.stringify(c.cart), c.subtotalPaisa, JSON.stringify(c.source), c.deviceHash, c.ipHash, c.riskLevel, JSON.stringify(c.riskReasons)).run();
   return (r.meta.changes ?? 0) > 0;

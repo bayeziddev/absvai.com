@@ -224,17 +224,18 @@ function snapshot(token) {
 }
 let lastSent = '';
 let placed = false;
-async function capture() {
+// via "whatsapp": the customer sent the order on WhatsApp instead, so the shop's Incomplete orders list says so.
+async function capture(via) {
   if (placed || !validPhone() || !lines.length) return;
   const token = await checkoutToken();
   if (!token) return;
-  const body = JSON.stringify(snapshot(token));
+  const body = JSON.stringify({ ...snapshot(token), ...(via === 'whatsapp' ? { via } : {}) });
   if (body === lastSent) return;
   lastSent = body;
   fetch('/api/checkout/capture', { method: 'POST', headers: { 'content-type': 'text/plain' }, body, credentials: 'same-origin', keepalive: true }).catch(() => {});
 }
 function captureSoon() { clearTimeout(captureTimer); captureTimer = setTimeout(capture, 1000); }
-form.phone.addEventListener('blur', capture);
+form.phone.addEventListener('blur', () => capture());
 ['phone', 'name', 'addressLine'].forEach(n => form[n].addEventListener('input', captureSoon));
 function beacon() {
   if (placed || !validPhone() || !session || !navigator.sendBeacon) return;
@@ -328,21 +329,39 @@ async function boot() {
   if (!pd.turnstile) startSession('');
 }
 
-// ── Order on WhatsApp: the same order as a ready-to-send message to the shop ──
-$('[data-wa-order]')?.addEventListener('click', e => {
+// ── Order on WhatsApp: everything typed on the checkout, written out as a ready-to-send message to the shop ──
+// Whatever the customer has not typed yet shows as "(লিখে দিন)", so they can fill it in before sending.
+function whatsappText() {
   const q = lastQuote;
   const d = q?.delivery;
-  const text = [
-    `আসসালামু আলাইকুম! আমি ${pd.store || 'আপনাদের শপ'} থেকে অর্ডার করতে চাই:`,
-    ...(q?.lines ?? []).map(l => `• ${l.name}${l.variantLabel ? ` (${l.variantLabel})` : ''} × ${l.qty} = ${taka(l.lineTotalPaisa)}`),
-    d ? `ডেলিভারি (${d.zoneName}): ${d.status === 'to_confirm' ? 'ফোনে জানাবেন' : d.chargePaisa === 0 ? 'ফ্রি' : taka(d.chargePaisa)}` : '',
-    q?.discountPaisa ? `ছাড়: −${taka(q.discountPaisa)}` : '',
-    q?.totalPaisa != null ? `সর্বমোট: ${taka(q.totalPaisa)}` : '',
-    form.name.value.trim() && `নাম: ${form.name.value.trim()}`,
-    form.phone.value.trim() && `মোবাইল: ${form.phone.value.trim()}`,
-    form.addressLine.value.trim() && `ঠিকানা: ${form.addressLine.value.trim()}`,
-  ].filter(Boolean).join('\n');
-  e.currentTarget.href = `${e.currentTarget.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+  const bt = p => bnNum(taka(p));
+  const fill = v => v.trim() || '(লিখে দিন)';
+  const items = q?.lines?.length
+    ? q.lines.map(l => ({ name: l.name, label: l.variantLabel, qty: l.qty, total: l.lineTotalPaisa }))
+    : (snaps.lines(lines) ?? []).map(l => ({ name: l.name, label: l.label, qty: l.qty, total: l.lineTotalPaisa }));
+  const wallet = payment() === 'manual_mobile';
+  return [
+    `আসসালামু আলাইকুম! আমি *${pd.store || 'আপনাদের শপ'}* থেকে অর্ডার করতে চাই 🛒`,
+    '',
+    '🛍️ *পণ্য:*',
+    ...items.map(l => `• ${l.name}${l.label ? ` (${l.label})` : ''} × ${bnNum(l.qty)} = ${bt(l.total)}`),
+    '',
+    d ? `🚚 *ডেলিভারি চার্জ* (${d.zoneName}): ${d.status === 'to_confirm' || d.chargePaisa === null ? 'ফোনে জানাবেন' : d.chargePaisa === 0 ? 'ফ্রি' : bt(d.chargePaisa)}` : '🚚 *ডেলিভারি এলাকা:* (লিখে দিন)',
+    q?.coupon ? `🎁 *কুপন* (${q.coupon.code}): −${bt(q.coupon.discountPaisa)}` : q?.discountPaisa ? `🎁 *ছাড়:* −${bt(q.discountPaisa)}` : null,
+    q?.totalPaisa != null ? `💰 *সর্বমোট: ${bt(q.totalPaisa)}*` : null,
+    `💵 *পেমেন্ট:* ${wallet ? `বিকাশ / নগদ / রকেট${form.advanceTrxId?.value.trim() ? ` · TrxID ${form.advanceTrxId.value.trim()}` : ''}` : 'ক্যাশ অন ডেলিভারি'}`,
+    '',
+    `👤 *নাম:* ${fill(form.name.value)}`,
+    `📞 *মোবাইল:* ${fill(form.phone.value)}`,
+    `📍 *ঠিকানা:* ${fill(form.addressLine.value)}`,
+    form.note?.value.trim() ? `📝 *নোট:* ${form.note.value.trim()}` : null,
+    '',
+    'অনুগ্রহ করে অর্ডারটি কনফার্ম করুন। ধন্যবাদ!',
+  ].filter(x => x !== null).join('\n');
+}
+$('[data-wa-order]')?.addEventListener('click', e => {
+  e.currentTarget.href = `${e.currentTarget.href.split('?')[0]}?text=${encodeURIComponent(whatsappText())}`;
+  capture('whatsapp');
 });
 
 boot();

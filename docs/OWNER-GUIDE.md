@@ -349,6 +349,20 @@ use its parent's template ("inherits"). The menu on every page updates within se
 4. **On hold** means the same phone or device ordered again within 10 minutes, or more than 3 times in a day. Call, then **Release
    hold** with a short note, or cancel it as a duplicate. Nothing is rejected without a person looking.
 
+**Message the customer on WhatsApp (ready-made, in Bangla)**: every order has a green **WhatsApp message** box. The message is
+already written from the order: **অর্ডার যাচাই** (we got your order, here is everything, reply "হ্যাঁ" if it is right) before
+you confirm, **ফোনে পাইনি** when they did not answer, **অগ্রিম পেমেন্ট** with your bKash/Nagad/Rocket numbers, **অর্ডার কনফার্ম**
+with the order page and receipt link, **পাঠানো হয়েছে** with the courier and tracking ID and the cash to keep ready, **ডেলিভারি
+সম্পন্ন** and **অর্ডার বাতিল**. The one that fits the order's stage is picked for you. Read it, change anything, then **Open
+WhatsApp**: the customer's chat opens with the message written, and it goes only when you press send there. The order's history
+notes which message was sent. When the customer replies "yes", press **✓ The customer said "yes" on WhatsApp**, then confirm.
+
+**Edit an order**: press **✎ Edit order** to change the customer's name, mobile, address or note, the items (quantity, remove,
+add a product; prices only for managers), the delivery area and charge (**Free delivery** sets it to ৳0) and the discount. The new
+total shows before you save. New, Confirmed and Packed orders can be edited; once with the courier they cannot. On a confirmed
+order the stock it holds follows the items (and nothing changes if there is not enough), the invoice total follows the order, and
+every change is written to the history as **Edited** (before → after).
+
 **Pack and send many at once**: tick the orders → **Invoices (A4)** or **Invoices (4×6)** for the courier labels, **Picking list**
 for the warehouse (totals per product, sorted by shelf), then **Move to → Packed**, and **Move to → In Courier** with the courier
 and a tracking ID for each.
@@ -358,6 +372,8 @@ and a tracking ID for each.
 ![Incomplete orders](screenshots/admin-incomplete.png)
 
 When someone types a valid phone number at checkout but doesn't finish, it appears here (one line per checkout, with the cart).
+If they tapped **WhatsApp-এ অর্ডার করুন** instead, the line says **Sent on WhatsApp**: their message with the whole order is in
+your WhatsApp, and **Convert to order** turns it into an order.
 Call or WhatsApp them, set the result (Contacted, Not interested, Unreachable, Spam), or press **Convert to order** to open a manual
 order with everything filled in. If they finish on their own, it turns **Converted** by itself. The report shows how many you
 recovered and the money they brought in. Unfinished ones are deleted after 60 days.

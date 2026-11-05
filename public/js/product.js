@@ -72,10 +72,18 @@ document.querySelectorAll('[data-pdp-order]').forEach(b => b.addEventListener('c
 document.querySelector('[data-wa-product]')?.addEventListener('click', e => {
   const v = match();
   const option = v ? Object.values(v.attributes).join(' · ') : '';
+  const bn = t => String(t).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
   const text = [
-    `আসসালামু আলাইকুম! আমি অর্ডার করতে চাই: ${data.product.name}${option ? ` (${option})` : ''} × ${qty()}${v ? ` = ${taka(v.pricePaisa * qty())}` : ''}`,
-    location.href.split('#')[0].split('?')[0],
-    'আমার নাম ও পুরো ঠিকানা:',
+    'আসসালামু আলাইকুম! আমি এই পণ্যটি অর্ডার করতে চাই 🛒',
+    '',
+    `🛍️ *${data.product.name}*${option ? ` (${option})` : ''}`,
+    `🔢 *পরিমাণ:* ${bn(qty())}`,
+    ...(v ? [`💰 *দাম:* ${bn(taka(v.pricePaisa * qty()))} (ডেলিভারি চার্জ আলাদা)`] : []),
+    `🔗 ${location.href.split('#')[0].split('?')[0]}`,
+    '',
+    '👤 *নাম:* (লিখে দিন)',
+    '📞 *মোবাইল:* (লিখে দিন)',
+    '📍 *ঠিকানা:* (লিখে দিন)',
   ].join('\n');
   e.currentTarget.href = `${e.currentTarget.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
 });

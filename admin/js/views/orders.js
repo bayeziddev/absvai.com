@@ -1,4 +1,5 @@
 import { api, badge, busy, can, confirmBox, date, esc, qs, slideOver, state, taka, toast, toPaisa } from '../app.js';
+import { bindWaCard, editOrderForm, waCardHtml } from './order-edit.js';
 
 const CALLS = [['confirmed', 'Confirmed'], ['no_answer', 'No answer'], ['call_back', 'Call back later'], ['wrong_number', 'Wrong number'], ['cancel_requested', 'Wants to cancel']];
 let META = null;
@@ -136,13 +137,13 @@ export async function openOrder(id, { onChange } = {}) {
       ${returnBack && !o.return_received_at ? '<div class="notice">The parcel is on its way back. Stock returns when the warehouse scans it in <a href="#/returns">Returns scan</a>.</div>' : ''}
       <div class="split">
         <div>
-          <div class="card"><h2>Items</h2><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Item</th><th class="right">Qty</th><th class="right">Price</th><th class="right">Total</th></tr></thead><tbody>
+          <div class="card"><div class="card-head"><h2>Items</h2>${d.edit?.editable ? '<button class="btn btn-sm btn-primary" type="button" id="edit-order">✎ Edit order</button>' : ''}</div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Item</th><th class="right">Qty</th><th class="right">Price</th><th class="right">Total</th></tr></thead><tbody>
             ${d.items.map(i => `<tr><td class="small">${esc(i.sku)}</td><td>${esc(i.name)}${i.variant_label ? `<br><span class="small muted">${esc(i.variant_label)}</span>` : ''}${i.fulfilment_mode !== 'in_stock' ? ` ${badge(i.fulfilment_mode)}` : ''}${i.returned_qty ? `<br><span class="badge b-red">${i.returned_qty} coming back</span>` : ''}</td><td class="right">${i.qty}</td><td class="right">${taka(i.unit_price_paisa)}</td><td class="right">${taka(i.line_total_paisa)}</td></tr>`).join('')}
           </tbody></table></div>
           <dl class="kv" style="margin-top:12px"><dt>Subtotal</dt><dd>${taka(o.subtotal_paisa)}</dd>${o.discount_paisa ? `<dt>Discount</dt><dd>−${taka(o.discount_paisa)}</dd>` : ''}<dt>Delivery</dt><dd>${o.delivery_charge_status === 'to_confirm' ? '<span class="badge b-red">to confirm by phone</span>' : taka(o.delivery_charge_paisa)}</dd>${o.cod_fee_paisa ? `<dt>COD fee</dt><dd>${taka(o.cod_fee_paisa)}</dd>` : ''}<dt>Total</dt><dd>${taka(o.total_paisa)}</dd><dt>Zone / ETA</dt><dd>${esc(o.eta_text ?? '')}</dd></dl>
           ${write && o.delivery_charge_status === 'to_confirm' ? `<div class="row" style="margin-top:10px"><input class="i" id="dc" placeholder="Delivery charge ৳" style="max-width:180px"><button class="btn btn-primary btn-sm" id="dc-go">Set charge</button></div>` : ''}
           </div>
-          <div class="card"><h2>History</h2><ul class="timeline">${d.events.map(e => `<li class="${esc(e.kind)}"><b>${e.kind === 'status' ? `${esc((e.from_status ?? 'placed').replace(/_/g, ' '))} → ${esc(e.to_status.replace(/_/g, ' '))}` : e.kind === 'rejected_transition' ? `Refused: ${esc(e.from_status)} → ${esc(e.to_status)}` : e.kind === 'call' ? `Call: ${esc(e.outcome.replace(/_/g, ' '))}` : esc(e.kind.replace(/_/g, ' '))}</b> <span class="small muted">${date(e.created_at)} · ${esc(e.admin_name ?? e.actor_type)}</span>${e.note ? `<br><span class="small">${esc(e.note)}</span>` : ''}</li>`).join('')}</ul>
+          <div class="card"><h2>History</h2><ul class="timeline">${d.events.map(e => `<li class="${esc(e.kind)}"><b>${e.kind === 'status' ? `${esc((e.from_status ?? 'placed').replace(/_/g, ' '))} → ${esc(e.to_status.replace(/_/g, ' '))}` : e.kind === 'edit' ? 'Edited' : e.kind === 'whatsapp' ? 'WhatsApp' : e.kind === 'rejected_transition' ? `Refused: ${esc(e.from_status)} → ${esc(e.to_status)}` : e.kind === 'call' ? `Call: ${esc(e.outcome.replace(/_/g, ' '))}` : esc(e.kind.replace(/_/g, ' '))}</b> <span class="small muted">${date(e.created_at)} · ${esc(e.admin_name ?? e.actor_type)}</span>${e.note ? `<br><span class="small">${esc(e.note)}</span>` : ''}</li>`).join('')}</ul>
             ${write ? `<div class="row" style="margin-top:8px"><input class="i" id="note" placeholder="Add an internal note" style="flex:1"><button class="btn btn-outline btn-sm" id="note-go">Add note</button></div>` : ''}</div>
           <div class="card"><h2>Message for the customer</h2><p class="small muted">Shows on the customer’s tracking page (<a href="/track?q=${encodeURIComponent(o.order_no)}" target="_blank" rel="noopener">see it</a>). For example: “Delayed by rain, it arrives tomorrow.”</p>
             ${write ? `<div class="row"><input class="i" id="cnote" maxlength="300" placeholder="Write a short update" style="flex:1"><button class="btn btn-outline btn-sm" id="cnote-go">Post</button></div>` : ''}</div>
@@ -158,7 +159,9 @@ export async function openOrder(id, { onChange } = {}) {
             <dt>Assigned</dt><dd>${d.assignee ? esc(d.assignee.name) : '<span class="muted">Nobody</span>'}${write && o.assigned_to !== state.user.id ? ' <button class="btn btn-sm btn-outline" id="claim2">Assign to me</button>' : ''}</dd>
             ${o.customer_note ? `<dt>Note</dt><dd>${esc(o.customer_note)}</dd>` : ''}
             ${Object.keys(o.utm).length ? `<dt>Ad source</dt><dd class="small">${Object.entries(o.utm).map(([k, x]) => `${esc(k)}=${esc(x)}`).join('<br>')}</dd>` : ''}</dl>
+            ${d.edit?.editable ? '<button class="btn btn-sm btn-outline" type="button" id="edit-order-2" style="margin-top:10px">✎ Edit name, mobile or address</button>' : ''}
             ${can('security:write') ? `<details style="margin-top:10px"><summary class="small">Block this customer…</summary><div class="row" style="margin-top:8px"><select class="i" id="blk-type"><option value="phone">Phone number</option><option value="device">Device</option><option value="ip">Connection (expires)</option></select><input class="i" id="blk-reason" placeholder="Reason" style="flex:1"><button class="btn btn-sm btn-outline" id="blk-go">Block</button></div><p class="small muted">Undo any time in Security → Block list.</p></details>` : ''}</div>
+          ${waCardHtml(d)}
           ${o.advance_required ? `<div class="card"><h2>Advance ${badge(o.advance_status)}</h2><p class="small">${esc(o.advance_reason ?? '')}</p><dl class="kv"><dt>Amount</dt><dd>${taka(o.advance_amount_paisa)}</dd><dt>TrxID</dt><dd>${esc(o.advance_trx_id ?? '—')} ${o.advance_wallet ? `(${esc(o.advance_wallet)})` : ''}</dd></dl>
             ${write && o.advance_status !== 'paid' ? `<div class="row" style="margin-top:10px"><input class="i" id="adv-amt" value="${o.advance_amount_paisa ? o.advance_amount_paisa / 100 : ''}" placeholder="Amount received ৳" style="max-width:150px"><button class="btn btn-leaf btn-sm" id="adv-ok">Mark received</button>${o.advance_status === 'submitted' ? '<button class="btn btn-outline btn-sm" id="adv-no">Not found</button>' : ''}</div>` : ''}</div>` : ''}
           ${write && o.status === 'new' ? `<div class="card"><h2>Confirmation call</h2>${d.verificationRequired ? '' : '<p class="small muted">Optional: note how the call went. You can move the order to Confirmed without it.</p>'}<div class="row"><select class="i" id="call-out" style="flex:1">${CALLS.map(([x, l]) => `<option value="${x}">${l}</option>`).join('')}</select></div><input class="i" id="call-note" placeholder="What did they say? (optional)" style="margin:8px 0"><button class="btn btn-outline btn-sm" id="call-go">Log call</button>${o.call_attempts ? `<p class="small muted">${o.call_attempts} call attempt(s) so far.</p>` : ''}</div>` : ''}
@@ -206,6 +209,8 @@ export async function openOrder(id, { onChange } = {}) {
       });
     }
     $('#print')?.addEventListener('click', () => printInvoice(d));
+    bindWaCard(so.body, d, id, after);
+    for (const b of ['#edit-order', '#edit-order-2']) $(b)?.addEventListener('click', () => editOrderForm(d, { onSaved: async () => { await load(); onChange?.(); } }));
     $('#test')?.addEventListener('change', async e => { await api(`/orders/${id}/test`, 'POST', { isTest: e.target.checked }); toast('Saved.'); });
   };
   await load();

@@ -38,6 +38,8 @@ export function newSessionId(): string {
 export interface CaptureInput {
   phone: unknown; name: unknown; divisionId: unknown; districtId: unknown; upazilaId: unknown; postcode: unknown; addressLine: unknown; landmark: unknown;
   lines: unknown; utm: unknown; landingPageId: unknown;
+  /** "whatsapp": the customer tapped "Order on WhatsApp" and sent the order as a message instead. */
+  via?: unknown;
 }
 
 const s = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -69,7 +71,7 @@ export async function captureIncomplete(env: Env, sid: string, id: Identity, bod
     sessionId: sid, phone, name: s(body.name, 120) || null,
     address: { divisionId: n(body.divisionId), districtId: n(body.districtId), upazilaId: n(body.upazilaId), postcode: asciiDigits(s(body.postcode, 4)) || null, line: s(body.addressLine, 300) || null, landmark: s(body.landmark, 200) || null },
     cart: priced.lines.map(l => ({ variantId: l.variantId, qty: l.qty, pricePaisa: l.unitPaisa, name: l.name + (l.variantLabel ? ` (${l.variantLabel})` : ''), sku: l.sku })),
-    subtotalPaisa: priced.subtotalPaisa, source: { landingPageId: n(body.landingPageId), utm }, deviceHash: id.deviceHash, ipHash: id.ipHash, riskLevel: risk, riskReasons: reasons,
+    subtotalPaisa: priced.subtotalPaisa, source: { landingPageId: n(body.landingPageId), utm, ...(body.via === 'whatsapp' ? { via: 'whatsapp' } : {}) }, deviceHash: id.deviceHash, ipHash: id.ipHash, riskLevel: risk, riskReasons: reasons,
   });
   return { saved };
 }

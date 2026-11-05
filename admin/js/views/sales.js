@@ -30,7 +30,7 @@ export async function incomplete(v) {
       <td><b>${esc(a.name ?? 'No name yet')}</b><br><span class="small">${esc(a.phone)}</span>${a.same_phone_count ? ` <span class="badge b-yellow">${a.same_phone_count} more from this phone</span>` : ''}<br><span class="small muted">${ago(a.updated_at)}${a.address?.line ? ` · ${esc(a.address.line)}` : ''}</span></td>
       <td class="small">${a.cart.map(l => `${l.qty} × ${esc(l.name)}`).join('<br>') || '<span class="muted">Empty</span>'}</td>
       <td class="right">${taka(a.subtotal_paisa)}</td>
-      <td class="small">${esc(a.source?.utm?.utm_source ?? (a.source?.landingPageId ? 'Landing page' : 'Direct'))}</td>
+      <td class="small">${a.source?.via === 'whatsapp' ? '<span class="badge b-green" title="The customer tapped “Order on WhatsApp”: look for their message">Sent on WhatsApp</span><br>' : ''}${esc(a.source?.utm?.utm_source ?? (a.source?.landingPageId ? 'Landing page' : 'Direct'))}</td>
       <td>${badge(a.risk_level)}${(a.risk_reasons ?? []).map(r => `<br><span class="small muted">${esc(r)}</span>`).join('')}</td>
       <td>${can('orders:write') ? `<select class="i" data-assign="${a.id}" aria-label="Assigned to" style="min-width:110px"><option value="">Nobody</option>${staff.map(s => `<option value="${esc(s.id)}" ${a.assigned_to === s.id ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>` : esc(a.assignee_name ?? '—')}</td>
       <td>${a.status === 'converted' ? `${badge('converted')} ${a.converted_order_id ? `<a href="#/orders/${a.converted_order_id}">${esc(a.converted_order_no ?? 'Order')}</a>` : ''}` : `<div class="row" style="gap:6px;min-width:220px">

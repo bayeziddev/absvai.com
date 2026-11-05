@@ -12,7 +12,7 @@ import { formatTaka } from '../lib/money';
 import { asciiDigits, extractPhones, localPhone, maskPhone, normalizeBdPhone, phonePrefixRange } from '../lib/phone';
 import { labelsHtml, pickingListHtml, PRINT_CSP } from '../lib/print';
 import { buildSlipsPdf, type SlipData } from '../lib/slips';
-import { confirmBlockers, isOrderStatus, nextStatuses, RETURN_REASONS, STAGE_MEANING, STATUS_LABELS, SUB_STATUSES, type OrderStatus } from '../lib/state-machine';
+import { confirmBlockers, isOrderStatus, nextStatuses, RESERVED_STAGES, RETURN_REASONS, STAGE_MEANING, STATUS_LABELS, SUB_STATUSES, type OrderStatus } from '../lib/state-machine';
 import { adminExists } from '../repo/admins';
 import { incompleteCountForPhone } from '../repo/customers';
 import { assignIncomplete, incompleteById, listIncomplete, recoveryReport, setIncompleteStatus } from '../repo/incomplete';
@@ -28,12 +28,16 @@ import { changeStatus, COURIERS, courierLabel, MANUAL_SOURCES, ORDER_SOURCES, pl
 import { allowed, audit, need, needAny } from './admin-helpers';
 import { API_COURIERS, bookOrder, isApiCourier, pathaoLookup, PATHAO_DEFAULT_URL, STEADFAST_DEFAULT_URL, testCourier, webhookToken } from '../services/couriers';
 import { getSecret, loadSettings } from '../repo/settings';
-import { saveCourierArea } from '../repo/geo';
 import { addTrackNote } from '../repo/tracking';
 import { shopNoteLine } from '../lib/tracking';
 import { settingsOf } from './context';
 import { otpActive } from '../services/sms';
 import { companyName, storeName } from '../lib/brand';
+import { orderAddress } from '../lib/print';
+import { WA_LABELS, waNumber, whatsappDrafts, type WaKind, type WaOrder } from '../lib/whatsapp';
+import { deliveryAreaById, deliveryAreas, saveCourierArea } from '../repo/geo';
+import { settingJson } from '../repo/settings';
+import { editOrder, EDITABLE_STAGES, MAX_EDIT_QTY } from '../services/order-edit';
 
 export const adminOrders = new Hono<AppEnv>();
 
@@ -115,10 +119,34 @@ adminOrders.get('/orders/:id', need('orders:read'), async c => {
   if (!d) throw notFound();
   const o = d.order;
   const hasCall = d.events.some(e => e.kind === 'call' && e.outcome === 'confirmed');
-  const verificationRequired = otpActive(c.env, await settingsOf(c));
+  const settings = await settingsOf(c);
+  const verificationRequired = otpActive(c.env, settings);
+  const phone = phoneFor(c, o);
+  const area = o.delivery_zone_id ? await deliveryAreaById(c.env.DB, Number(o.delivery_zone_id)) : null;
+  const wa: WaOrder = {
+    orderNo: String(o.order_no), status: String(o.status), name: String(o.customer_name), phone, address: orderAddress(o), areaName: area?.name ?? null, etaText: (o.eta_text as string) ?? null,
+    items: d.items.map(i => ({ name: String(i.name), variantLabel: (i.variant_label as string) || null, qty: Number(i.qty), lineTotalPaisa: Number(i.line_total_paisa) })),
+    subtotalPaisa: Number(o.subtotal_paisa), deliveryChargePaisa: o.delivery_charge_paisa === null ? null : Number(o.delivery_charge_paisa), deliveryStatus: String(o.delivery_charge_status),
+    discountPaisa: Number(o.discount_paisa), codFeePaisa: Number(o.cod_fee_paisa ?? 0), totalPaisa: Number(o.total_paisa), paymentMethod: String(o.payment_method),
+    advance: { required: Boolean(o.advance_required), amountPaisa: o.advance_amount_paisa === null ? null : Number(o.advance_amount_paisa), status: String(o.advance_status) },
+    courier: (o.courier as string) ?? null, trackingId: (o.tracking_id as string) ?? null, note: (o.customer_note as string) || null,
+  };
+  const site = c.env.SITE_URL.replace(/\/$/, '');
+  const shop = {
+    store: storeName(settings), site, supportPhone: settings.support_phone || null, wallets: settingJson<Array<{ wallet: string; number: string; type?: string }>>(settings, 'manual_wallets', []),
+    orderUrl: `${site}/order/${encodeURIComponent(String(o.order_no))}?t=${encodeURIComponent(String(o.access_token))}`,
+  };
   return c.json({
     verificationRequired,
-    order: { ...o, phone: phoneFor(c, o), utm: parseJson(o.utm, {}), risk_reasons: parseJson(o.risk_reasons, []) },
+    // Drafts for the shop to send from its own WhatsApp. Hidden while the number is masked (a sales agent's unassigned order).
+    whatsapp: phone.includes('X') ? null : { number: waNumber(phone), drafts: whatsappDrafts(wa, shop) },
+    edit: {
+      editable: EDITABLE_STAGES.includes(o.status as OrderStatus) && allowed(c, 'orders:write'),
+      holdsStock: RESERVED_STAGES.includes(o.status as OrderStatus), canPrice: allowed(c, 'orders:discount'), maxQty: MAX_EDIT_QTY,
+      maxDiscountPercent: Number(settings.manual_discount_max_percent || 10),
+      areas: (await deliveryAreas(c.env.DB)).map(z => ({ id: z.id, name: z.name })),
+    },
+    order: { ...o, phone, utm: parseJson(o.utm, {}), risk_reasons: parseJson(o.risk_reasons, []) },
     items: d.items, events: d.events, payments: d.payments, riskFlags: d.riskFlags, sms: d.sms, customer: d.customer ? { ...d.customer, phone: phoneFor(c, o) } : null,
     assignee: d.assignee, creator: d.creator,
     nextStatuses: nextStatuses(o.status as OrderStatus).map(s => ({ value: s, label: STATUS_LABELS[s] })),
@@ -129,6 +157,42 @@ adminOrders.get('/orders/:id', need('orders:read'), async c => {
       advanceRequired: Boolean(o.advance_required), advanceStatus: String(o.advance_status), deliveryChargeStatus: o.delivery_charge_status as 'final', holdReason: (o.hold_reason as string) ?? null,
     }),
   });
+});
+
+/**
+ * Edit an order before it leaves the shop: customer, address, delivery area and charge (৳0 = free), discount and items.
+ * Every change is written to the order's history.
+ */
+adminOrders.put('/orders/:id', need('orders:write'), async c => {
+  const id = posInt(c.req.param('id')) ?? 0;
+  const b = await readJson(c);
+  const opt = (v: unknown) => (v === undefined || v === null || v === '' ? undefined : int(v) ?? NaN);
+  const items = Array.isArray(b.items)
+    ? (b.items as Array<Record<string, unknown>>).slice(0, 60).map(x => ({ itemId: posInt(x?.itemId), variantId: posInt(x?.variantId), qty: int(x?.qty) ?? 0, unitPaisa: opt(x?.unitPaisa) ?? null }))
+    : undefined;
+  const r = await editOrder(c.env, await settingsOf(c), id, {
+    name: b.name === undefined ? undefined : str(b.name, 120),
+    // A masked number (01712XXX678) means "not changed".
+    phone: typeof b.phone === 'string' && !/x/i.test(b.phone) ? str(b.phone, 20) : undefined,
+    addressLine: b.addressLine === undefined ? undefined : str(b.addressLine, 300),
+    note: b.note === undefined ? undefined : str(b.note, 500),
+    zoneId: posInt(b.zoneId),
+    deliveryChargePaisa: opt(b.deliveryChargePaisa),
+    discountPaisa: opt(b.discountPaisa),
+    items,
+  }, { adminId: c.var.session.adminId, role: c.var.session.role, canDiscount: allowed(c, 'orders:discount') });
+  if (r.changed.length) await audit(c, 'order.edit', 'order', id, { changes: r.changed });
+  return c.json({ ok: true, ...r });
+});
+
+/** The shop opened WhatsApp with one of the drafts: noted in the order's history so the team knows the customer was messaged. */
+adminOrders.post('/orders/:id/whatsapp', need('orders:write'), async c => {
+  const id = posInt(c.req.param('id')) ?? 0;
+  const kind = str((await readJson(c)).kind, 20) as WaKind;
+  if (!(kind in WA_LABELS)) throw bad('Unknown message.');
+  if (!(await orderById(c.env.DB, id))) throw notFound();
+  await addOrderEvent(c.env.DB, { orderId: id, kind: 'whatsapp', note: `WhatsApp message: ${WA_LABELS[kind]}`, adminId: c.var.session.adminId });
+  return c.json({ ok: true });
 });
 
 /** Packing and handing over are warehouse work; everything else needs order rights. */
@@ -532,7 +596,8 @@ adminOrders.post('/orders/quote', need('orders:write'), async c => {
   const phone = normalizeBdPhone(str(b.phone));
   const cust = phone ? await customerByPhone(c.env.DB, phone) : null;
   return c.json(await quote(c.env.DB, await settingsOf(c), {
-    lines: sanitizeLines(b.lines), districtId: posInt(b.districtId), upazilaId: posInt(b.upazilaId), paymentMethod: b.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
+    lines: sanitizeLines(b.lines), districtId: posInt(b.districtId), upazilaId: posInt(b.upazilaId), zoneId: posInt(b.zoneId), withAreas: b.withAreas === true,
+    paymentMethod: b.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     customerIsNewOrRisky: !cust || cust.delivered_count === 0 || cust.returned_count > 0, discountPaisa: Math.max(0, int(b.discountPaisa) ?? 0),
   }));
 });

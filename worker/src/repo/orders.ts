@@ -387,6 +387,77 @@ export async function setDeliveryCharge(db: D1Database, orderId: number, chargeP
   ]);
 }
 
+// ───────────── Editing an order (staff) ─────────────
+
+/** The order columns staff may change when they edit an order; everything else stays as placed. */
+const EDITABLE_COLUMNS = new Set(['customer_name', 'phone', 'address_line', 'customer_note', 'delivery_zone_id', 'eta_text', 'delivery_charge_paisa', 'delivery_charge_status',
+  'discount_paisa', 'subtotal_paisa', 'total_paisa', 'division_id', 'district_id', 'upazila_id', 'union_id', 'division_name', 'district_name', 'upazila_name', 'union_name']);
+
+export interface NewOrderItem {
+  productId: number; variantId: number; sku: string; name: string; variantLabel: string | null; unitPaisa: number; qty: number; packedWeightGrams: number; fulfilmentMode: string;
+}
+
+export interface OrderEditWrite {
+  orderId: number;
+  /** The stage the order was in when it was read: the edit only applies if it is still there. */
+  status: string;
+  adminId: string;
+  fields: Record<string, string | number | null>;
+  updateItems: Array<{ id: number; qty: number; unitPaisa: number }>;
+  insertItems: NewOrderItem[];
+  deleteItemIds: number[];
+  /** Confirmed and packed orders hold stock: + holds more, − lets go. */
+  reserve: Array<{ variantId: number; qty: number }>;
+  soldCount: Array<{ productId: number; change: number }>;
+  invoiceTotalPaisa: number | null;
+  /** A new phone number moves the order to that customer (made beforehand with ensureCustomer). */
+  customer: { fromId: number | null; toPhone: string } | null;
+  note: string;
+}
+
+/**
+ * Applies a staff edit in one batch: the order, its items, the stock it holds, sold counts, the invoice total and a
+ * history line. Like a stage change, it is guarded so that two people editing (or moving) the same order cannot both
+ * win, and the stock CHECK (reserved ≤ stock) rolls the whole edit back when there isn't enough.
+ */
+export async function applyOrderEdit(db: D1Database, e: OrderEditWrite): Promise<boolean> {
+  const token = crypto.randomUUID();
+  const sets = ['last_transition_id = ?', `updated_at = ${NOW}`];
+  const vals: unknown[] = [token];
+  for (const [k, v] of Object.entries(e.fields)) {
+    if (!EDITABLE_COLUMNS.has(k)) throw new Error(`Column ${k} cannot be edited`);
+    sets.push(`${k} = ?`);
+    vals.push(v);
+  }
+  if (e.customer) { sets.push('customer_id = (SELECT id FROM customers WHERE phone = ?)'); vals.push(e.customer.toPhone); }
+  const stmts: D1PreparedStatement[] = [db.prepare(`UPDATE orders SET ${sets.join(', ')} WHERE id = ? AND status = ?`).bind(...vals, e.orderId, e.status)];
+  const guard = `(SELECT last_transition_id FROM orders WHERE id = ${Number(e.orderId)}) = '${token}'`;
+  for (const i of e.updateItems) {
+    stmts.push(db.prepare(`UPDATE order_items SET qty = ?, unit_price_paisa = ?, line_total_paisa = ? WHERE id = ? AND order_id = ? AND ${guard}`).bind(i.qty, i.unitPaisa, i.unitPaisa * i.qty, i.id, e.orderId));
+  }
+  for (const id of e.deleteItemIds) stmts.push(db.prepare(`DELETE FROM order_items WHERE id = ? AND order_id = ? AND ${guard}`).bind(id, e.orderId));
+  for (const l of e.insertItems) {
+    stmts.push(db.prepare(
+      `INSERT INTO order_items (order_id, product_id, variant_id, sku, name, variant_label, unit_price_paisa, qty, line_total_paisa, packed_weight_grams, fulfilment_mode)
+       SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE ${guard}`,
+    ).bind(e.orderId, l.productId, l.variantId, l.sku, l.name, l.variantLabel, l.unitPaisa, l.qty, l.unitPaisa * l.qty, l.packedWeightGrams, l.fulfilmentMode));
+  }
+  for (const r of e.reserve) {
+    stmts.push(db.prepare(`UPDATE product_variants SET reserved = reserved + ?, updated_at = ${NOW} WHERE id = ? AND ${guard}`).bind(r.qty, r.variantId));
+    stmts.push(db.prepare(`INSERT INTO stock_movements (variant_id, change, reserved_change, kind, reason, order_id, admin_id) SELECT ?, 0, ?, ?, 'order edited', ?, ? WHERE ${guard}`)
+      .bind(r.variantId, r.qty, r.qty > 0 ? 'reserve' : 'release', e.orderId, e.adminId));
+  }
+  for (const s of e.soldCount) stmts.push(db.prepare(`UPDATE products SET sold_count = MAX(0, sold_count + ?) WHERE id = ? AND ${guard}`).bind(s.change, s.productId));
+  if (e.invoiceTotalPaisa !== null) stmts.push(db.prepare(`UPDATE invoices SET total_paisa = ? WHERE order_id = ? AND ${guard}`).bind(e.invoiceTotalPaisa, e.orderId));
+  if (e.customer) {
+    if (e.customer.fromId) stmts.push(db.prepare(`UPDATE customers SET order_count = MAX(0, order_count - 1), updated_at = ${NOW} WHERE id = ? AND ${guard}`).bind(e.customer.fromId));
+    stmts.push(db.prepare(`UPDATE customers SET order_count = order_count + 1, last_order_at = ${NOW}, updated_at = ${NOW} WHERE phone = ? AND ${guard}`).bind(e.customer.toPhone));
+  }
+  stmts.push(db.prepare(`INSERT INTO order_events (order_id, kind, note, actor_type, admin_id) SELECT ?, 'edit', ?, 'staff', ? WHERE ${guard}`).bind(e.orderId, e.note.slice(0, 1000), e.adminId));
+  const results = await db.batch(stmts);
+  return (results[0].meta.changes ?? 0) > 0;
+}
+
 // ───────────── Advance payments ─────────────
 
 export async function submitAdvance(db: D1Database, orderId: number, trxId: string, wallet: string, amountPaisa: number): Promise<void> {
