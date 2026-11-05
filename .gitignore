@@ -9,3 +9,7 @@ coverage/
 test-results/
 tests/e2e/screenshots/
 .DS_Store
+
+# Tutorial video build output (screens, voice, renders)
+video/work/
+__pycache__/
