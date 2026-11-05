@@ -4,7 +4,7 @@ import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { AppEnv } from '../env';
 import { hashPassword, passwordProblem, randomToken, ROLE_LABELS, ROLES, SESSION_COOKIE, SESSION_TTL_SECONDS, verifyPassword, type Role, type Session } from '../lib/auth';
 import { bad, clientIp, forbidden, HttpError, rateLimit, readJson, str } from '../lib/http';
-import { activeAdminByEmail, adminCount, createAdmin, listAdmins, staffOptions, touchLogin, updateAdmin } from '../repo/admins';
+import { activeAdminById, activeAdminByEmail, adminCount, createAdmin, listAdmins, staffOptions, touchLogin, updateAdmin } from '../repo/admins';
 import { audit, need } from './admin-helpers';
 import { storeName } from '../lib/brand';
 import { loadSettings } from '../repo/settings';
@@ -69,6 +69,12 @@ admin.use('*', async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
   const session = token ? await c.env.KV.get<Session>(`sess:${token}`, 'json') : null;
   if (!session) throw new HttpError(401, 'Please sign in.');
+  // Bind the session to live staff: a removed or disabled admin is signed out on their next request, not 12 hours later.
+  if (!(await activeAdminById(c.env.DB, session.adminId))) {
+    if (token) await c.env.KV.delete(`sess:${token}`);
+    deleteCookie(c, SESSION_COOKIE, { path: '/', secure: true });
+    throw new HttpError(401, 'Please sign in.');
+  }
   if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
     const origin = c.req.header('origin');
     if (origin && new URL(origin).host !== new URL(c.req.url).host) throw forbidden('Cross-site request blocked.');

@@ -98,6 +98,13 @@ jobs:
       - name: Apply D1 migrations
         run: npx wrangler d1 migrations apply DB --remote -c worker/wrangler.toml
 
+      - name: Ensure the developer support account (only if its secrets are set)
+        env:
+          DEV_ADMIN_EMAIL: ${{ secrets.DEV_ADMIN_EMAIL }}
+          DEV_ADMIN_PASSWORD: ${{ secrets.DEV_ADMIN_PASSWORD }}
+          DEV_ADMIN_NAME: ${{ secrets.DEV_ADMIN_NAME }}
+        run: node scripts/ensure-dev-admin.mjs
+
       - name: Load the demo catalog (skipped if its products are already there)
         if: github.event_name == 'workflow_dispatch' && inputs.load_demo_catalog
         run: |

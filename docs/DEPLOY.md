@@ -42,6 +42,7 @@ GitHub → the repository → **Settings → Secrets and variables → Actions �
 | `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY` | **no, created for you** | internal random keys nobody types (they hash SMS codes, sign checkout sessions and encrypt passwords saved in Settings). The first deploy creates them and keeps them on Cloudflare; later deploys keep the same ones. Add your own only if you want a copy (`openssl rand -base64 32` each) |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `vandarmart.com`, `www.vandarmart.com` and `absvai.absvai.workers.dev`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
 | `SMS_PROVIDER`, `SMS_API_KEY` | later | once the SMS gateway is chosen; until then messages are logged in Admin → SMS outbox |
+| `DEV_ADMIN_EMAIL`, `DEV_ADMIN_PASSWORD` | optional | a standing developer support (break-glass) Super Admin, kept in step on every deploy so support access survives a password reset. Set both or neither. The password lives only here and, hashed, in the database. The account shows normally in **Staff & roles** — tell the owner it exists. See [docs/HANDOVER.md](HANDOVER.md) |
 
 The deploy never replaces those three keys once they exist: if it can't read the Worker's secrets it stops instead. If you ever
 delete the Worker or change `SETTINGS_KEY`, credentials saved in Settings must be entered again; a new `SIGNING_KEY` logs out open

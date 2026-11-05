@@ -13,6 +13,11 @@ export async function activeAdminByEmail(db: D1Database, email: string): Promise
   return db.prepare('SELECT * FROM admins WHERE email = ? AND is_active = 1').bind(email).first<AdminRow>();
 }
 
+/** A session is only honoured while its admin still exists and is active, so a removed or disabled staff member is signed out at once. */
+export async function activeAdminById(db: D1Database, id: string): Promise<{ id: string } | null> {
+  return db.prepare('SELECT id FROM admins WHERE id = ? AND is_active = 1').bind(id).first<{ id: string }>();
+}
+
 export async function createAdmin(db: D1Database, a: { id: string; email: string; name: string; role: Role; passwordHash: string }): Promise<void> {
   await db.prepare('INSERT INTO admins (id, email, name, role, password_hash) VALUES (?, ?, ?, ?, ?)').bind(a.id, a.email, a.name, a.role, a.passwordHash).run();
 }
