@@ -34,6 +34,9 @@ async function post(path: string, body: unknown, cookie = '', method = 'POST') {
   return { status: r.status, body: (await r.json()) as Record<string, any>, cookies: r.headers.getSetCookie().map(c => c.split(';')[0]) };
 }
 const codeIn = (mail: Record<string, any>) => String(mail.text).match(/\b(\d{6})\b/)![1];
+// The code email is the one whose subject ends in "কোড" (order emails never do), so it is picked by that, not by
+// "last sent" — order-confirmation emails flush after the response and their order number holds a 6-digit run too.
+const codeMailFor = (email: string) => [...sent].reverse().find(m => /কোড/.test(String(m.subject)) && JSON.stringify(m.to ?? '').includes(email))!;
 const accountCookie = (cookies: string[]) => cookies.filter(c => c.startsWith('__Host-vm_acct=') || c.startsWith('vm_in=')).join('; ');
 
 async function signUp(email: string, phone: string, password = 'gur-2026') {
@@ -155,7 +158,7 @@ describe('the signed-in customer', () => {
     expect(html).toContain('৳50 ছাড়');
     expect(html).not.toContain('SECRET30');
     await post('/api/account/reset-code', { email: 'karim@example.com' });
-    await post('/api/account/reset', { email: 'karim@example.com', code: codeIn(sent.at(-1)!), password: 'gur-2026' });
+    expect((await post('/api/account/reset', { email: 'karim@example.com', code: codeIn(codeMailFor('karim@example.com')), password: 'gur-2026' })).status).toBe(200);
     html = await (await t.fetch('/account', { headers: { cookie } })).text();
     expect(html).toContain(guest.order_no);
 
