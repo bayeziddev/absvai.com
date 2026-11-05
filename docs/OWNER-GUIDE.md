@@ -427,6 +427,7 @@ and the Cash on Delivery fee are just below.
 
 ## Good to know
 
+- The footer's **Designed & developed by Bayezid** credit (linking to sayadbayezid.com) is part of the site's design, not a setting: it cannot be changed or hidden from the admin.
 - **SMS outbox** shows every message the store sends. Until an SMS company is connected, messages are saved there but not sent.
 - **Inventory → Adjust** when new stock arrives or something is damaged, expired or missing (a reason is required); for food, type
   the batch number so a complaint can be traced to its batch. **Held** shows stock set aside for confirmed orders.

@@ -58,6 +58,14 @@ try {
   // which is what kept the admin on "Loading…" on a phone. The unbundled files stay next to it (nothing loads them).
   const { buildSync } = await import('esbuild');
   buildSync({ entryPoints: [join(root, 'admin/js/app.js')], outfile: join(dist, 'admin/js/app.js'), allowOverwrite: true, bundle: true, format: 'esm', minify: true, target: 'es2022', legalComments: 'none', logLevel: 'warning' });
+  writeFileSync(join(dist, 'admin/admin.css'), transformSync(readFileSync(join(dist, 'admin/admin.css'), 'utf8'), { loader: 'css', minify: true }).code);
+  // The admin page names its bundle and stylesheet with a fingerprint of their content, so a phone keeps them for a year
+  // (a reopened admin downloads no code at all) and a deploy still gets the new ones at once.
+  const tag = f => createHash('sha256').update(readFileSync(join(dist, f))).digest('hex').slice(0, 10);
+  const adminHtml = join(dist, 'admin/index.html');
+  writeFileSync(adminHtml, readFileSync(adminHtml, 'utf8')
+    .replace('src="/admin/js/app.js"', `src="/admin/js/app.js?v=${tag('admin/js/app.js')}"`)
+    .replace('href="/admin/admin.css"', `href="/admin/admin.css?v=${tag('admin/admin.css')}"`));
 } catch (e) {
   if (e?.code !== 'ERR_MODULE_NOT_FOUND') throw e;
   console.warn('esbuild not found: storefront CSS and JS are not minified.');
@@ -78,7 +86,14 @@ writeFileSync(join(dist, '_headers'), [
   '/img/*', '  Cache-Control: public, max-age=604800',
   '/css/*', '  Cache-Control: public, max-age=600, stale-while-revalidate=86400',
   '/js/*', '  Cache-Control: public, max-age=600, stale-while-revalidate=86400',
-  '/admin/*', '  Cache-Control: no-cache', '  X-Robots-Tag: noindex',
+  // The admin page itself is always checked; its fingerprinted bundle and stylesheet are kept (see the build above).
+  '/admin/', '  Cache-Control: no-cache',
+  '/admin/index.html', '  Cache-Control: no-cache',
+  '/admin/*.html', '  Cache-Control: no-cache',
+  '/admin/guide.md', '  Cache-Control: no-cache',
+  '/admin/js/*', '  Cache-Control: public, max-age=31536000, immutable',
+  '/admin/admin.css', '  Cache-Control: public, max-age=31536000, immutable',
+  '/admin/*', '  X-Robots-Tag: noindex',
   '/seller/*', '  Cache-Control: no-cache', '  X-Robots-Tag: noindex',
   // Static files (including the admin app) get the same security headers the Worker sets on its own responses.
   '/*', '  X-Content-Type-Options: nosniff', '  Referrer-Policy: strict-origin-when-cross-origin', '  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload',

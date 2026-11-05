@@ -364,8 +364,43 @@ async function setupLive() {
   }
 }
 
+// ── Pages ready before the tap ──
+// A finger landing on a link (or the mouse resting on it) asks the service worker for that page at once; the tap a moment
+// later opens it from there, with no wait. This is what makes iPhone Safari (no Speculation Rules) feel instant. "Order
+// Now" does the same for the checkout page.
+const SHARED = /^\/($|p\/|c\/|season\/|lp\/|policies\/|shop$|deals$|originals$|free-delivery$|new$|categories$|contact$|checkout$)/;
+const ahead = new Set();
+export function fetchAhead(href) {
+  if (!navigator.serviceWorker?.controller || navigator.connection?.saveData) return;
+  let url;
+  try { url = new URL(href, location.href); } catch { return; }
+  if (url.origin !== location.origin || !SHARED.test(url.pathname) || url.pathname === location.pathname) return;
+  const key = url.pathname + url.search;
+  if (ahead.has(key)) return;
+  ahead.add(key);
+  setTimeout(() => ahead.delete(key), 100_000);
+  fetch(url.href, { headers: { 'x-vm-ahead': '1' }, credentials: 'same-origin', priority: 'high' }).catch(() => ahead.delete(key));
+}
+function setupAhead() {
+  const spec = HTMLScriptElement.supports?.('speculationrules');
+  const onLink = e => {
+    const order = e.target.closest?.('[data-action="order"], [data-pdp-order], [data-s-order]');
+    if (order) return fetchAhead('/checkout');
+    // Chrome already prefetches and prerenders links itself (Speculation Rules).
+    if (spec) return;
+    const a = e.target.closest?.('a[href]');
+    if (a && !a.target && !a.hasAttribute('download')) fetchAhead(a.getAttribute('href'));
+  };
+  addEventListener('touchstart', onLink, { passive: true, capture: true });
+  addEventListener('mousedown', onLink, { passive: true, capture: true });
+  let hover;
+  addEventListener('mouseover', e => { clearTimeout(hover); hover = setTimeout(() => onLink(e), 65); }, { passive: true });
+  addEventListener('mouseout', () => clearTimeout(hover), { passive: true });
+}
+
 // ── Prefetch fallback for browsers without the Speculation Rules API (Section 2.3) ──
 function setupPrefetch() {
+  setupAhead();
   if (HTMLScriptElement.supports?.('speculationrules') || !('IntersectionObserver' in window)) return;
   if (navigator.connection?.saveData) return;
   const done = new Set();

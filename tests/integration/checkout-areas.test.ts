@@ -149,4 +149,12 @@ describe('the shop is Vandar Mart', () => {
     expect(co).not.toContain('name="landmark"');
     expect(await t.sql("SELECT value FROM settings WHERE key = 'notify_email'")).toEqual([{ value: 'absvai1020@gmail.com' }]);
   });
+
+  it('shows the developer credit in the footer of every page, and no setting changes it', async () => {
+    for (const path of ['/', '/shop', '/checkout', '/account', '/policies/privacy']) {
+      const html = await (await t.fetch(path)).text();
+      expect(html).toMatch(/<a class="dev-credit" href="https:\/\/sayadbayezid\.com"[^>]*>.*Designed &amp; developed by.*Bayezid/s);
+    }
+    expect(await t.sql("SELECT key FROM settings WHERE value LIKE '%sayadbayezid%' OR key LIKE '%credit%' OR key LIKE '%developer%'")).toEqual([]);
+  });
 });

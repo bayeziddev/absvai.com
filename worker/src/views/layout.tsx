@@ -39,7 +39,8 @@ const PRIVATE_PATHS = /^\/(cart|checkout|account|order|track|wishlist)(\/|$)/;
  */
 const SPECULATION_RULES = {
   prefetch: [{ where: { and: [{ href_matches: '/*' }, { not: { href_matches: '/cart*' } }, { not: { href_matches: '/checkout*' } }, { not: { href_matches: '/account*' } }, { not: { href_matches: '/order/*' } }, { not: { href_matches: '/api/*' } }, { not: { href_matches: '/admin*' } }, { not: { selector_matches: '[rel~=nofollow]' } }] }, eagerness: 'moderate' }],
-  prerender: [{ where: { href_matches: '/p/*' }, eagerness: 'conservative' }],
+  // Product and category pages start rendering the moment a finger lands on their link, so the tap opens them at once.
+  prerender: [{ where: { or: [{ href_matches: '/p/*' }, { href_matches: '/c/*' }] }, eagerness: 'conservative' }],
 };
 
 /** The popup banner for this page: on, with a headline, never on cart/checkout/account pages, homepage only unless set to every page. */
@@ -183,31 +184,46 @@ export function Layout(p: LayoutProps) {
 
         <footer class="site-footer">
           <div class="footer-inner">
-            <div>
+            <div class="footer-brand">
               <Wordmark light />
               <p>{s.tagline || 'Seasonal goods, honest prices.'}</p>
               <p class="small">{companyName(s)}{s.company_address ? ` · ${s.company_address}` : ''}</p>
+              {social.length > 0 && (
+                <ul class="footer-social" aria-label="Follow us">
+                  {social.map(([k, v]) => <li><a href={v} target="_blank" rel="noopener">{SOCIAL_NETWORKS[k as keyof typeof SOCIAL_NETWORKS].replace(' page', '')}</a></li>)}
+                </ul>
+              )}
             </div>
-            <ul>
-              <li><a href="/shop">All products</a></li>
-              <li><a href="/categories">Categories</a></li>
-              <li><a href="/track">Track your order</a></li>
-              <li><a href="/contact">Contact &amp; wholesale</a></li>
-              {sellersOpen && <li><a href="/sell">Sell on {store}</a></li>}
-            </ul>
-            <ul>
-              <li><a href="/policies/delivery">Delivery &amp; payment</a></li>
-              <li><a href="/policies/returns">Returns &amp; refunds</a></li>
-              <li><a href="/policies/privacy">Privacy</a></li>
-              <li><a href="/policies/credits">Credits</a></li>
-            </ul>
+            <nav aria-label="Shop">
+              <p class="footer-h">Shop</p>
+              <ul>
+                <li><a href="/shop">All products</a></li>
+                <li><a href="/categories">Categories</a></li>
+                <li><a href="/track">Track your order</a></li>
+                <li><a href="/account">My account</a></li>
+                {sellersOpen && <li><a href="/sell">Sell on {store}</a></li>}
+              </ul>
+            </nav>
+            <nav aria-label="Help">
+              <p class="footer-h">Help</p>
+              <ul>
+                <li><a href="/contact">Contact &amp; wholesale</a></li>
+                <li><a href="/policies/delivery">Delivery &amp; payment</a></li>
+                <li><a href="/policies/returns">Returns &amp; refunds</a></li>
+                <li><a href="/policies/privacy">Privacy</a></li>
+                <li><a href="/policies/credits">Credits</a></li>
+              </ul>
+            </nav>
           </div>
-          {social.length > 0 && (
-            <ul class="footer-social" aria-label="Follow us">
-              {social.map(([k, v]) => <li><a href={v} target="_blank" rel="noopener">{SOCIAL_NETWORKS[k as keyof typeof SOCIAL_NETWORKS].replace(' page', '')}</a></li>)}
-            </ul>
-          )}
-          <p class="footer-copy">© {new Date().getFullYear()} {companyName(s)}. Prices in Bangladeshi taka.</p>
+          <div class="footer-bottom">
+            <p class="footer-copy">© {new Date().getFullYear()} {companyName(s)}. Prices in Bangladeshi taka.</p>
+            {/* The developer's credit is part of the site's design: it is not a setting, so it cannot be changed or hidden from the admin. */}
+            <a class="dev-credit" href="https://sayadbayezid.com" target="_blank" rel="noopener author" aria-label="Designed and developed by Bayezid (sayadbayezid.com)">
+              <span class="dev-credit-label">Designed &amp; developed by</span>
+              <span class="dev-credit-name">Bayezid</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9" /></svg>
+            </a>
+          </div>
         </footer>
 
         <nav class="tabbar" aria-label="Quick links">
