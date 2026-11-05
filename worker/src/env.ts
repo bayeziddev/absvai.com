@@ -20,6 +20,8 @@ export interface Env {
   AI?: Ai;
   /** Resend API key for email (the GitHub secret RESEND_API_KEY, passed to the Worker at deploy). */
   RESEND_API_KEY?: string;
+  /** The shop's own email domain once it is verified in Resend (found by the deploy): emails then reach customers. */
+  EMAIL_DOMAIN?: string;
   SMS_PROVIDER?: string;
   SMS_API_KEY?: string;
 }

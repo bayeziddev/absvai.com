@@ -25,8 +25,8 @@ async function waitFor(fn, ms = 8000) {
   throw new Error('timed out');
 }
 
-// The checkout is in Bangla: mobile number, name, delivery area (a choice with its charge), the address in the
-// customer's own words (Bangla or English), payment.
+// The checkout is in Bangla: 1 name and mobile, 2 the address in the customer's own words (Bangla or English) and a
+// note, 3 payment; the delivery-charge choices (each with its charge for this cart) sit in the order summary.
 async function fillContact(page, number, name = 'Test Customer') {
   await page.waitForSelector('[data-co-lines] .co-line');
   await page.fill('input[name=phone]', number);
@@ -58,11 +58,12 @@ describe('storefront checkout', () => {
     await fillContact(page, '01710000001');
     // Everything the customer reads is Bangla; no landmark box, no district or postcode lookups.
     const legends = await page.$$eval('.co-step legend', l => l.map(x => x.textContent.replace(/^[০-৯]/, '')));
-    assert.deepEqual(legends, ['মোবাইল নম্বর', 'আপনার নাম', 'ডেলিভারি এলাকা', 'পুরো ঠিকানা', 'পেমেন্ট']);
-    assert.equal(await page.$('[name=landmark], [name=postcode], select[name=districtId]'), null);
+    assert.deepEqual(legends, ['আপনার তথ্য', 'ডেলিভারি ঠিকানা', 'পেমেন্ট']);
+    assert.equal(await page.$('[name=landmark], [name=postcode], select[name=districtId], [name=email]'), null);
+    assert.match(await page.textContent('.co-head'), /অর্ডার সম্পন্ন করুন.*নিরাপদ অর্ডার/s);
     assert.equal(await page.textContent('[data-delivery]'), 'এলাকা বেছে নিন');
     // Each area shows what delivery costs for this cart: 1.2kg packed is ৳70 + ৳15 for the extra kg inside Dhaka city.
-    await page.waitForFunction(() => /৳85/.test(document.querySelector('.area-option').textContent));
+    await page.waitForFunction(() => /৳৮৫/.test(document.querySelector('.area-option').textContent));
     await chooseArea(page, 'ঢাকা সিটির ভিতরে');
     assert.equal(await page.textContent('[data-delivery]'), '৳85');
     assert.equal(await page.textContent('[data-total]'), '৳805');
@@ -152,6 +153,37 @@ describe('storefront checkout', () => {
     assert.match(orderNo, /^PRE-/);
     const [o] = server.sql(`SELECT advance_status, advance_amount_paisa, advance_trx_id FROM orders WHERE order_no = '${orderNo}'`);
     assert.deepEqual(o, { advance_status: 'submitted', advance_amount_paisa: 20000, advance_trx_id: 'BK7Q2M9X1Z' });
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+
+  it('account: sign up with the email code, order with the details filled in, download the invoice', async () => {
+    const { ctx, page, errors } = await phone();
+    await page.goto(`${server.base}/account?signup=1`);
+    await page.fill('[data-acct-form] input[name=name]', 'Account Buyer');
+    await page.fill('[data-acct-form] input[name=phone]', '01710000006');
+    await page.fill('[data-acct-form] input[name=email]', 'buyer@example.com');
+    // Development has no Resend: the code comes back in the answer (live, it arrives by email).
+    const [resp] = await Promise.all([page.waitForResponse(r => r.url().endsWith('/api/account/code')), page.click('[data-acct-send]')]);
+    const { devCode } = await resp.json();
+    assert.match(devCode, /^\d{6}$/);
+    await page.fill('[data-code-form] input[name=code]', devCode); // six digits submit by themselves
+    await page.waitForSelector('.acct-head');
+    assert.match(await page.textContent('.acct-head h1'), /Account Buyer/);
+    await page.goto(`${server.base}/p/khejur-patali-gur`);
+    await page.click('[data-pdp-form] [data-pdp-order]');
+    await page.waitForURL(/\/checkout\?buy=/);
+    await page.waitForFunction(() => document.querySelector('[name=phone]').value === '01710000006');
+    assert.match(await page.textContent('[data-co-account]'), /buyer@example\.com/);
+    await chooseArea(page, 'ঢাকার বাইরে');
+    await page.fill('textarea[name=addressLine]', 'বাসা ৩, সদর, টাঙ্গাইল');
+    const orderNo = await placeAndWait(page);
+    assert.equal(server.sql(`SELECT customer_email FROM orders WHERE order_no = '${orderNo}'`)[0].customer_email, 'buyer@example.com');
+    const invoice = await page.getAttribute('[data-invoice]', 'href');
+    await page.goto(`${server.base}/account`);
+    assert.match(await page.textContent('.acct-orders'), new RegExp(orderNo));
+    await page.goto(`${server.base}${invoice}`);
+    assert.match(await page.textContent('.sheet'), /অর্ডার রসিদ[\s\S]*Account Buyer[\s\S]*সর্বমোট/);
     assert.deepEqual(errors, []);
     await ctx.close();
   });

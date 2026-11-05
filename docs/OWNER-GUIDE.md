@@ -91,7 +91,16 @@ ad, **Copy page** to start a new offer from it, **Delete** to switch the link of
 and end dates**, **total uses** and **uses per customer** (by mobile number). Checkout shows the discount before the order
 is placed; a coupon that stops working (used up, expired, already used by that number) is refused with the reason. The list
 shows uses, orders, the discount given and the sales each coupon brought. A coupon that was used is switched off instead of
-deleted, so the report keeps it. Cancelled orders give the use back.
+deleted, so the report keeps it. Cancelled orders give the use back. Tick **Show it to signed-in customers** to list a coupon on
+customers' account pages (“আমার অফার”, with a copy button); without it the code stays private.
+
+## Customer accounts
+
+Customers can open an account at **/account** with their name, mobile number and email. There is no password: each time,
+a 6-digit code goes to their email (valid 10 minutes, 5 tries). The account page shows every order placed with that email
+(status, **Track** and **Invoice**), the coupons you show to members, and their details (name, mobile, address, offers
+on/off). At checkout their name, mobile, last address and delivery area fill in by themselves, and the receipt and updates go
+to their email. Customers can still order without an account.
 
 ## Reviews
 
@@ -177,16 +186,18 @@ once, while setting up.
 
 - **To you** (the address in “Send shop alerts to”, absvai1020@gmail.com): every new order, cancelled / returned / delivered
   orders, wholesale inquiries, and a summary every morning at about 12:05 am (yesterday’s orders and what needs your attention).
-- **To customers** who type their email at checkout (it is optional): the receipt when they order, the **invoice** when you
-  confirm, “on the way” with the courier and tracking ID, and “delivered”.
-- **Offers**: customers can tick “Email me offers” at checkout. **Send an offer** emails them all; each email has an
+- **To customers** with an account: the sign-in code, the receipt when they order, the **invoice** when you confirm, “on the
+  way” with the courier and tracking ID, and “delivered”.
+- **Offers**: customers choose “email me offers” in their account. **Send an offer** emails them all; each email has an
   unsubscribe link and you get a copy.
 - Press **Send me a test email** to check it works.
 
 Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
-Actions); the deploy copies it to the Worker. Until your own domain (for example absvai.com) is verified in **Resend → Domains**,
-Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
-the domain, change **Emails come from** to an address on it, such as `Vandar Mart <orders@vandarmart.com>`.
+Actions); the deploy copies it to the Worker. Until your own domain is verified in **Resend → Domains**, Resend delivers only
+to the email address of the Resend account, so customer emails (and sign-in codes) are skipped and say so. vandarmart.com is
+added in Resend; once its DNS records are in Cloudflare and Resend shows it verified, the next deploy switches customer email
+on by itself: emails come from `Vandar Mart <hello@vandarmart.com>` and replies go to your Gmail (the alerts address).
+Resend cannot send *as* a gmail.com address, so the sender is the shop's domain and replies go to Gmail. See docs/DEPLOY.md.
 
 ## Sellers (marketplace)
 
@@ -390,8 +401,11 @@ it** opens their tracking page.
 
 ## Checkout
 
-Customers read the checkout in **Bangla** (on the checkout page and on every landing page); the admin stays in English. Checkout
-has no dropdowns or postcodes. The customer types their mobile number and name, taps their **delivery area** (each
+Customers read the checkout in **Bangla** (on the checkout page and on every landing page); the admin stays in English. The
+form has three steps (your details, the delivery address with an optional note, payment); the order summary beside it shows the
+products with photos and prices, the **delivery charge** choices (each area's name, its short note and its charge for this
+cart), the coupon and the total. After ordering, the thank-you page has **Download invoice** (a print-ready page in Bangla and
+English; “Save as PDF” in the print dialog keeps a copy). Checkout has no dropdowns or postcodes. The customer types their mobile number and name, taps their **delivery area** (each
 button shows what delivery costs for this cart; the total updates by itself), types the full address in their own words
 (Bangla or English), and places the order. The district and thana are read from the address for the dashboard map ("Where your
 customers are") and the courier. **Order on WhatsApp**, under *Place order* and under *Order Now* on product pages, sends the
@@ -400,7 +414,8 @@ none, book it with Steadfast or call the customer.
 
 ## Delivery charges
 
-**Settings → Delivery charges → Delivery areas**: the areas customers choose from at checkout. Rename any area, change its charge
+**Settings → Delivery charges → Delivery areas**: the areas customers choose from at checkout, each with a **Short note** shown
+under its name (e.g. “সারা বাংলাদেশ”); a charge of 0 shows as free. Rename any area, change its charge
 up to 1 kg, each extra kg and the delivery time at any time. **+ Add a delivery area** adds one (e.g. "Rajbari", ৳70); an area
 named after a district also covers that district for orders the team types in. **Remove** takes one away (an area that already
 has orders can only be renamed or re-priced). Name areas in Bangla: customers see the name exactly as you type it (the starting

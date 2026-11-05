@@ -3,7 +3,8 @@
 // added to the Worker in the Cloudflare dashboard. The deploy never adds or removes domains (wrangler.toml has no
 // routes, so Wrangler leaves dashboard domains alone); it only reads which one is attached, so the links in SMS, emails,
 // the sitemap and canonical tags use it. Without one, the shop answers at its workers.dev address.
-// Needs CLOUDFLARE_API_TOKEN (Edit Cloudflare Workers template + D1 Edit) and CLOUDFLARE_ACCOUNT_ID.
+// Needs CLOUDFLARE_API_TOKEN (Edit Cloudflare Workers template + D1 Edit) and CLOUDFLARE_ACCOUNT_ID. Optional: Turnstile Edit
+// (adds the shop's domain to the widget), Zone DNS Edit (adds the email DNS records) and RESEND_API_KEY.
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -112,6 +113,62 @@ if (sitekey && domains.length) {
   }
 }
 
+// Email (Resend): emails reach customers only from a domain verified in Resend (Resend cannot send as a gmail.com
+// address). With the Resend key, the deploy finds (or adds) the shop's domain in Resend, puts its DNS records into the
+// Cloudflare zone when the token may edit DNS, asks Resend to check them, and once the domain is verified turns on
+// sending from it (EMAIL_DOMAIN). Never fails the deploy: it says what is missing instead.
+let emailDomain = '';
+let emailNote = null;
+const resendKey = process.env.RESEND_API_KEY;
+const apex = domain ? domain.replace(/^www\./, '') : null;
+async function resend(path, init = {}) {
+  try {
+    const r = await fetch(`https://api.resend.com${path}`, { ...init, headers: { authorization: `Bearer ${resendKey}`, 'content-type': 'application/json', ...init.headers } });
+    return { status: r.status, ok: r.ok, body: await r.json().catch(() => ({})) };
+  } catch (err) { return { status: 0, ok: false, body: { message: String(err) } }; }
+}
+const recordText = recs => recs.map(r => `${r.type} ${r.name} → ${r.value}${r.priority ? ` (priority ${r.priority})` : ''}`).join('; ');
+if (resendKey && apex) {
+  const list = await resend('/domains');
+  if (!list.ok) {
+    emailNote = `Email: the Resend key cannot read domains (HTTP ${list.status}${list.body.message ? `: ${list.body.message}` : ''}). Customer emails (sign-in codes, receipts) start once ${apex} is verified in Resend; then set the repository variable EMAIL_DOMAIN=${apex} and deploy again.`;
+  } else {
+    let d = (list.body.data ?? []).find(x => x.name === apex);
+    if (!d) {
+      const made = await resend('/domains', { method: 'POST', body: JSON.stringify({ name: apex, region: 'ap-northeast-1' }) });
+      if (made.ok) { d = made.body; created.push(`Resend domain ${apex}`); }
+    }
+    const info = d ? ((await resend(`/domains/${d.id}`)).body ?? d) : null;
+    if (!info) emailNote = `Email: could not add ${apex} to Resend. Add it at resend.com → Domains, then deploy again.`;
+    else if (info.status === 'verified') emailDomain = apex;
+    else {
+      const pending = (info.records ?? []).filter(r => r.status !== 'verified');
+      const zone = await cf(`/zones?name=${encodeURIComponent(apex)}`);
+      const zoneId = zone.ok ? zone.body.result?.[0]?.id : null;
+      let added = 0;
+      let refused = !zoneId;
+      for (const r of refused ? [] : pending) {
+        const fqdn = !r.name || r.name === '@' ? apex : r.name.endsWith(apex) ? r.name : `${r.name}.${apex}`;
+        const have = await cf(`/zones/${zoneId}/dns_records?type=${r.type}&name=${encodeURIComponent(fqdn)}`);
+        if (!have.ok) { refused = true; break; }
+        if ((have.body.result ?? []).some(x => String(x.content).replace(/^"|"$/g, '') === r.value)) continue;
+        const rec = { type: r.type, name: fqdn, content: r.value, ttl: 1, ...(r.type === 'MX' ? { priority: r.priority ?? 10 } : {}), ...(r.type === 'CNAME' ? { proxied: false } : {}) };
+        const add = await cf(`/zones/${zoneId}/dns_records`, { method: 'POST', body: JSON.stringify(rec) });
+        if (add.ok) added++; else { refused = true; break; }
+      }
+      await resend(`/domains/${d.id}/verify`, { method: 'POST' });
+      const now = await resend(`/domains/${d.id}`);
+      if (now.ok && now.body.status === 'verified') emailDomain = apex;
+      else if (refused) emailNote = `Email: ${apex} is not verified in Resend yet and this Cloudflare token may not edit DNS. Add these records in Cloudflare → ${apex} → DNS (or give the token Zone → DNS → Edit), then deploy again: ${recordText(pending)}`;
+      else emailNote = `Email: ${added ? `added ${added} DNS record(s) for ${apex}; ` : ''}Resend is checking ${apex} (usually a few minutes). The next deploy turns on emails to customers.`;
+    }
+  }
+}
+if (!emailDomain && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(process.env.EMAIL_DOMAIN ?? '')) emailDomain = process.env.EMAIL_DOMAIN;
+if (emailDomain) emailNote = `Email: sending as hello@${emailDomain} (verified in Resend), replies go to the owner's inbox; customers get sign-in codes, receipts and offers.`;
+else if (!emailNote) emailNote = resendKey ? 'Email: no shop domain yet, so only the owner gets emails (Resend test sender).' : 'Email: RESEND_API_KEY is not set, so no emails are sent.';
+if (emailNote && !emailDomain) console.log(`::warning::${emailNote}`);
+
 // The workers.dev address (always on, for the admin and as the fallback) needs the account's workers.dev subdomain.
 let subdomain = null;
 {
@@ -142,9 +199,10 @@ const lines = [
   'Workers AI: on (shop chat and admin assistant, within the free daily allowance)',
   created.length ? `Created this run: ${created.join(', ')}` : 'All resources already existed.',
   ...(turnstileNote ? [turnstileNote] : []),
+  emailNote,
   domain ? `Shop address: https://${domain}${domains.length > 1 ? ` (also ${domains.filter(h => h !== domain).join(', ')})` : ''}` : `No domain is attached to the ${WORKER} Worker yet, so links use https://${WORKER}.${subdomain}.workers.dev. Add the domain in Workers & Pages → ${WORKER} → Settings → Domains & Routes, then deploy again.`,
 ];
 console.log(lines.join('\n'));
 const workersDev = subdomain ? `https://${WORKER}.${subdomain}.workers.dev` : '';
-if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `has_domain=${Boolean(domain)}\nhas_r2=${hasR2}\nworkers_dev_url=${workersDev}\nsite_url=${domain ? `https://${domain}` : workersDev}\nd1_id=${db.uuid}\n`);
+if (GITHUB_OUTPUT) appendFileSync(GITHUB_OUTPUT, `has_domain=${Boolean(domain)}\nhas_r2=${hasR2}\nworkers_dev_url=${workersDev}\nsite_url=${domain ? `https://${domain}` : workersDev}\nd1_id=${db.uuid}\nemail_domain=${emailDomain}\n`);
 if (GITHUB_STEP_SUMMARY) appendFileSync(GITHUB_STEP_SUMMARY, `### Cloudflare resources\n\n${lines.map(l => `- ${l}`).join('\n')}\n`);

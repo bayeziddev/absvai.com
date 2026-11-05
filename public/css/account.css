@@ -1,0 +1,31 @@
+/* Account page (/account): sign in / open an account with an email code, then orders, offers and details. */
+.acct-hero h1 { margin-bottom: 6px; } .acct-hero p { color: var(--muted); margin: 0 0 12px; }
+.acct-perks { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acct-perks li { display: flex; gap: 8px; align-items: center; background: var(--white); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow); font-weight: 600; font-size: .9rem; }
+.acct-perks svg { color: var(--chili); flex: none; }
+.acct-box { padding: 18px; margin-bottom: 18px; }
+.acct-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--cream); border-radius: 999px; padding: 4px; margin-bottom: 16px; }
+.acct-tabs[hidden] { display: none; }
+.acct-tabs button { border: 0; background: transparent; border-radius: 999px; padding: 10px; font: 700 .95rem var(--body, inherit); cursor: pointer; color: var(--muted); }
+.acct-tabs button[aria-selected=true] { background: var(--white); color: var(--ink, inherit); box-shadow: var(--shadow); }
+.code-input { font: 800 1.6rem/1 var(--display) !important; letter-spacing: .5em; text-align: center; }
+.acct-sent { background: var(--leaf-soft); color: #1F5A23; border-radius: 12px; padding: 10px 12px; }
+.link-btn { border: 0; background: none; color: var(--chili); font-weight: 700; cursor: pointer; padding: 0; text-decoration: underline; }
+.acct-head { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+.acct-head h1 { margin: 2px 0; } .acct-head p { margin: 0; }
+.acct-grid { display: grid; gap: 16px; margin-bottom: 18px; }
+@media (min-width: 900px) { .acct-grid { grid-template-columns: 1.5fr 1fr; align-items: start; } }
+.acct-grid .card-box { padding: 16px; } .acct-grid h2 { margin: 0 0 10px; font-size: 1.15rem; }
+.acct-side { display: grid; gap: 16px; }
+.acct-order { display: grid; grid-template-columns: 56px 1fr; gap: 10px 12px; padding: 12px 0; border-bottom: 1px solid var(--cream); }
+.acct-order img, .acct-noimg { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--cream); display: grid; place-items: center; color: var(--muted); }
+.acct-order-main small { display: block; color: var(--muted); }
+.acct-status { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; background: var(--cream); font-size: .78rem; font-weight: 700; }
+.acct-status.st-delivered { background: var(--leaf-soft); color: #1F5A23; } .acct-status.st-cancelled, .acct-status.st-returned { background: #FFE4E1; color: var(--chili-dark, #8A1C15); }
+.acct-status.st-in_courier, .acct-status.st-packed, .acct-status.st-confirmed { background: var(--turmeric-soft); color: #5A4300; }
+.acct-order-end { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.acct-order-end b { margin-right: auto; font: 800 1.05rem var(--display); }
+@media (min-width: 600px) { .acct-order { grid-template-columns: 56px 1fr auto; } .acct-order-end { grid-column: auto; flex-direction: column; align-items: flex-end; } .acct-order-end b { margin: 0; } }
+.acct-empty { text-align: center; padding: 18px 0; } .acct-empty p { color: var(--muted); }
+.acct-offer { display: flex; gap: 10px; justify-content: space-between; align-items: center; border: 2px dashed var(--turmeric); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; background: #FFFBEF; }
+.acct-offer b { display: block; font-size: 1.05rem; letter-spacing: .04em; } .acct-offer span { display: block; font-weight: 700; color: var(--chili); } .acct-offer small { display: block; color: var(--muted); }

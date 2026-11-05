@@ -13,6 +13,7 @@ import { webhooks } from './routes/webhooks';
 import { seller } from './routes/seller';
 import { admin } from './routes/admin';
 import { api } from './routes/api';
+import { account } from './routes/account';
 import { notFound, pages } from './routes/pages';
 
 const app = new Hono<AppEnv>();
@@ -59,6 +60,7 @@ app.use('/api/*', async (c, next) => {
 app.route('/api/webhooks', webhooks);
 app.route('/api/seller', seller);
 app.route('/api/admin', admin);
+app.route('/api/account', account);
 app.route('/api', api);
 
 // Product photos and documents uploaded to R2.

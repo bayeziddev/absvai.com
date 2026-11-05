@@ -4,11 +4,13 @@ const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 export interface CouponRow {
   id: number; code: string; kind: 'percent' | 'fixed' | 'free_delivery'; value: number; min_subtotal_paisa: number; max_discount_paisa: number | null;
   starts_at: string | null; ends_at: string | null; usage_limit: number | null; per_phone_limit: number | null; used_count: number; is_active: number;
-  note: string | null; created_at: string | null;
+  note: string | null; created_at: string | null; for_members: number;
 }
 export interface CouponInput {
   code: string; kind: CouponRow['kind']; value: number; minSubtotalPaisa: number; maxDiscountPaisa: number | null; startsAt: string | null; endsAt: string | null;
   usageLimit: number | null; perPhoneLimit: number | null; isActive: boolean; note: string | null;
+  /** Shown to signed-in customers on their account page. */
+  forMembers: boolean;
 }
 
 export async function couponByCode(db: D1Database, code: string): Promise<CouponRow | null> {
@@ -29,14 +31,14 @@ export async function listCoupons(db: D1Database): Promise<Array<CouponRow & { o
 }
 
 export async function saveCoupon(db: D1Database, id: number | null, c: CouponInput): Promise<number> {
-  const vals = [c.code, c.kind, c.value, c.minSubtotalPaisa, c.maxDiscountPaisa, c.startsAt, c.endsAt, c.usageLimit, c.perPhoneLimit, c.isActive ? 1 : 0, c.note];
+  const vals = [c.code, c.kind, c.value, c.minSubtotalPaisa, c.maxDiscountPaisa, c.startsAt, c.endsAt, c.usageLimit, c.perPhoneLimit, c.isActive ? 1 : 0, c.note, c.forMembers ? 1 : 0];
   if (id) {
-    await db.prepare(`UPDATE coupons SET code = ?, kind = ?, value = ?, min_subtotal_paisa = ?, max_discount_paisa = ?, starts_at = ?, ends_at = ?, usage_limit = ?, per_phone_limit = ?, is_active = ?, note = ?, updated_at = ${NOW} WHERE id = ?`)
+    await db.prepare(`UPDATE coupons SET code = ?, kind = ?, value = ?, min_subtotal_paisa = ?, max_discount_paisa = ?, starts_at = ?, ends_at = ?, usage_limit = ?, per_phone_limit = ?, is_active = ?, note = ?, for_members = ?, updated_at = ${NOW} WHERE id = ?`)
       .bind(...vals, id).run();
     return id;
   }
-  const r = await db.prepare(`INSERT INTO coupons (code, kind, value, min_subtotal_paisa, max_discount_paisa, starts_at, ends_at, usage_limit, per_phone_limit, is_active, note, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${NOW}, ${NOW}) RETURNING id`).bind(...vals).first<{ id: number }>();
+  const r = await db.prepare(`INSERT INTO coupons (code, kind, value, min_subtotal_paisa, max_discount_paisa, starts_at, ends_at, usage_limit, per_phone_limit, is_active, note, for_members, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ${NOW}, ${NOW}) RETURNING id`).bind(...vals).first<{ id: number }>();
   return r!.id;
 }
 

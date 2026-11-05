@@ -38,3 +38,64 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#FFF8
 
 /** Print pages have no scripts and only inline styles. */
 export const PRINT_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'";
+
+/** The delivery address as the customer typed it, then the thana and district it was read as (for the courier), e.g.
+ * "বাসা ১২, পাংশা, রাজবাড়ী (Pangsa, Rajbari)". Places already in the typed text are not repeated. */
+export function orderAddress(o: Record<string, unknown>): string {
+  const typed = String(o.address_line ?? '').trim();
+  const places = [o.upazila_name, o.district_name].map(x => String(x ?? '').trim()).filter(x => x && !typed.toLowerCase().includes(x.toLowerCase()));
+  return places.length ? `${typed}${typed ? ' ' : ''}(${[...new Set(places)].join(', ')})` : typed;
+}
+
+export interface CustomerInvoice {
+  store: string; legalName: string; companyAddress: string; phone: string; site: string;
+  invoiceNo: string | null; orderNo: string; date: string; status: string;
+  customer: { name: string; phone: string; address: string };
+  payment: string; paid: boolean; advancePaidPaisa: number;
+  items: Array<{ name: string; variant: string | null; qty: number; unitPaisa: number; totalPaisa: number }>;
+  subtotalPaisa: number; discountPaisa: number; deliveryPaisa: number | null; codFeePaisa: number; totalPaisa: number;
+  backUrl: string;
+}
+
+/** Content-Security-Policy for the customer's invoice: its own styles and the one print button script. */
+export const INVOICE_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; script-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
+/**
+ * The customer's invoice (or receipt, before the order is confirmed) as a print-ready A4 page in Bangla and English.
+ * "Download" opens the browser's print dialog, where "Save as PDF" keeps a copy: every script prints, Bangla included,
+ * which the built-in PDF fonts cannot do.
+ */
+export function customerInvoiceHtml(d: CustomerInvoice): string {
+  const t = formatTaka;
+  const title = d.invoiceNo ? 'ইনভয়েস · Invoice' : 'অর্ডার রসিদ · Order receipt';
+  const rows = d.items.map(i => `<tr><td>${e(i.name)}${i.variant ? `<br><small>${e(i.variant)}</small>` : ''}</td><td class="n">${i.qty}</td><td class="n">${t(i.unitPaisa)}</td><td class="n">${t(i.totalPaisa)}</td></tr>`).join('');
+  const line = (label: string, value: string, cls = '') => `<tr class="${cls}"><td>${label}</td><td class="n">${value}</td></tr>`;
+  const due = Math.max(0, d.totalPaisa - d.advancePaidPaisa);
+  const css = `@page{size:A4;margin:14mm}body{font:13px/1.45 "Noto Sans Bengali","Hind Siliguri","Nirmala UI",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#F6F1E8}
+.bar{position:sticky;top:0;z-index:1;flex-wrap:wrap}.bar button,.bar a{font:inherit;font-weight:700;border-radius:999px;padding:9px 16px;border:1px solid #B3261E;cursor:pointer;text-decoration:none}
+.bar button{background:#B3261E;color:#fff}.bar a{color:#B3261E;background:#fff}.bar small{color:#6B5A4E}
+.sheet{max-width:760px;margin:16px auto;background:#fff;padding:28px;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid #B3261E;padding-bottom:14px}
+.brand{font:800 26px/1.1 system-ui,sans-serif;color:#2A1F1A}.brand+div{color:#6B5A4E;font-size:12px;margin-top:4px}
+h1{margin:0;font-size:18px;text-align:right}.meta{text-align:right;font-size:12px;color:#6B5A4E}.meta b{color:#2A1F1A}
+.two{display:flex;gap:16px;margin:16px 0}.two>div{flex:1;background:#FFF8EC;border-radius:10px;padding:10px 12px}.two h3{margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#6B5A4E}
+table{width:100%;border-collapse:collapse}.items th{background:#2A1F1A;color:#fff;text-align:left;padding:7px 8px;font-size:12px}.items td{padding:8px;border-bottom:1px solid #EDE3D3;vertical-align:top}
+.items small{color:#6B5A4E}.n{text-align:right;white-space:nowrap}.sum{width:300px;margin:12px 0 0 auto}.sum td{padding:5px 8px}.sum .total td{font-weight:800;font-size:16px;border-top:2px solid #2A1F1A}
+.paid{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:999px;background:#E6F4EA;color:#1E6B34;font-weight:700;font-size:12px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:22px;color:#6B5A4E;font-size:12px}.foot svg{display:block;width:210px;height:auto}
+@media (max-width:600px){.sheet{margin:0;border-radius:0;padding:16px}.top,.two{flex-direction:column}h1,.meta{text-align:left}.sum{width:100%}}
+@media print{body{background:#fff}.sheet{box-shadow:none;margin:0;max-width:none;padding:0}}`;
+  const body = `<div class="bar"><button type="button" data-print>⬇ ডাউনলোড / প্রিন্ট (PDF)</button><a href="${e(d.backUrl)}">← অর্ডারে ফিরে যান</a>
+<small>ফোনে: ডাউনলোড চাপুন, তারপর “Save as PDF” বেছে নিন।</small></div>
+<div class="sheet"><div class="top"><div><div class="brand">${e(d.store)}</div><div>${d.legalName && d.legalName !== d.store ? `${e(d.legalName)}<br>` : ''}${d.companyAddress ? `${e(d.companyAddress)}<br>` : ''}${[d.phone, d.site].filter(Boolean).map(e).join(' · ')}</div></div>
+<div><h1>${title}</h1><div class="meta">${d.invoiceNo ? `ইনভয়েস নং <b>${e(d.invoiceNo)}</b><br>` : ''}অর্ডার নং <b>${e(d.orderNo)}</b><br>তারিখ <b>${e(d.date)}</b><br>অবস্থা <b>${e(d.status)}</b></div></div></div>
+<div class="two"><div><h3>ক্রেতা · Bill to</h3><b>${e(d.customer.name)}</b><br>${e(d.customer.phone)}<br>${e(d.customer.address)}</div>
+<div><h3>পেমেন্ট · Payment</h3>${e(d.payment)}${d.paid ? '<br><span class="paid">পরিশোধিত · Paid</span>' : ''}${d.advancePaidPaisa ? `<br>অগ্রিম দেওয়া: ${t(d.advancePaidPaisa)}` : ''}</div></div>
+<table class="items"><thead><tr><th>পণ্য · Item</th><th class="n">পরিমাণ</th><th class="n">দাম</th><th class="n">মোট</th></tr></thead><tbody>${rows}</tbody></table>
+<table class="sum"><tbody>${line('পণ্যের মূল্য', t(d.subtotalPaisa))}${d.discountPaisa ? line('ছাড়', `−${t(d.discountPaisa)}`) : ''}
+${line('ডেলিভারি চার্জ', d.deliveryPaisa === null ? 'ফোনে জানানো হবে' : d.deliveryPaisa === 0 ? 'ফ্রি' : t(d.deliveryPaisa))}${d.codFeePaisa ? line('COD চার্জ', t(d.codFeePaisa)) : ''}
+${line('সর্বমোট · Total', t(d.totalPaisa), 'total')}${d.advancePaidPaisa ? line('অগ্রিম বাদে বাকি · Due', t(due)) : ''}</tbody></table>
+<div class="foot"><div>ধন্যবাদ! কোনো প্রশ্ন থাকলে ${e(d.phone || d.site)}-এ যোগাযোগ করুন।<br>Computer-generated ${d.invoiceNo ? 'invoice' : 'receipt'}; no signature needed.</div><div>${code128Svg(d.orderNo, { height: 36, label: true })}</div></div></div>
+<script src="/js/invoice.js"></script>`;
+  return shell(`${d.invoiceNo ?? d.orderNo} · ${d.store}`, css, body).replace('<html lang="en">', '<html lang="bn">');
+}

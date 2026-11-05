@@ -73,9 +73,10 @@ export async function resolveZone(db: D1Database, districtId: number, upazilaId:
 
 // ───────────── Delivery areas chosen at checkout ─────────────
 
-export interface DeliveryArea extends Zone { defaultCourier: string | null; isDefault: boolean }
+/** A delivery area, with the short line customers see under its name at checkout (e.g. "সারা বাংলাদেশ"). */
+export interface DeliveryArea extends Zone { defaultCourier: string | null; isDefault: boolean; note: string }
 
-const toArea = (r: Record<string, unknown>): DeliveryArea => ({ ...rowToZone(r), defaultCourier: (r.default_courier as string) ?? null, isDefault: Boolean(r.is_default) });
+const toArea = (r: Record<string, unknown>): DeliveryArea => ({ ...rowToZone(r), defaultCourier: (r.default_courier as string) ?? null, isDefault: Boolean(r.is_default), note: String(r.note ?? '') });
 
 /** Every delivery area in the owner's order: the choices at checkout. */
 export async function deliveryAreas(db: D1Database): Promise<DeliveryArea[]> {
@@ -151,14 +152,14 @@ export async function zonesOverview(db: D1Database) {
   return { zones: zones.results, districts: districts.results, overrides: overrides.results };
 }
 
-export interface ZoneInput { name: string; baseChargePaisa: number; baseWeightGrams: number; extraPerKgPaisa: number; bulkyChargePaisa: number; etaText: string; isDefault: boolean; sortOrder: number; defaultCourier: string | null }
+export interface ZoneInput { name: string; note: string; baseChargePaisa: number; baseWeightGrams: number; extraPerKgPaisa: number; bulkyChargePaisa: number; etaText: string; isDefault: boolean; sortOrder: number; defaultCourier: string | null }
 
 /** Saves a zone and returns its id (the new one for a new zone). */
 export async function saveZone(db: D1Database, id: number | null, z: ZoneInput): Promise<number> {
-  const vals = [z.name, z.baseChargePaisa, z.baseWeightGrams, z.extraPerKgPaisa, z.bulkyChargePaisa, z.etaText, z.isDefault ? 1 : 0, z.sortOrder, z.defaultCourier];
+  const vals = [z.name, z.note, z.baseChargePaisa, z.baseWeightGrams, z.extraPerKgPaisa, z.bulkyChargePaisa, z.etaText, z.isDefault ? 1 : 0, z.sortOrder, z.defaultCourier];
   const stmts = z.isDefault ? [db.prepare('UPDATE delivery_zones SET is_default = 0')] : [];
-  if (id) stmts.push(db.prepare('UPDATE delivery_zones SET name = ?, base_charge_paisa = ?, base_weight_grams = ?, extra_per_kg_paisa = ?, bulky_charge_paisa = ?, eta_text = ?, is_default = ?, sort_order = ?, default_courier = ? WHERE id = ?').bind(...vals, id));
-  else stmts.push(db.prepare('INSERT INTO delivery_zones (name, base_charge_paisa, base_weight_grams, extra_per_kg_paisa, bulky_charge_paisa, eta_text, is_default, sort_order, default_courier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(...vals));
+  if (id) stmts.push(db.prepare('UPDATE delivery_zones SET name = ?, note = ?, base_charge_paisa = ?, base_weight_grams = ?, extra_per_kg_paisa = ?, bulky_charge_paisa = ?, eta_text = ?, is_default = ?, sort_order = ?, default_courier = ? WHERE id = ?').bind(...vals, id));
+  else stmts.push(db.prepare('INSERT INTO delivery_zones (name, note, base_charge_paisa, base_weight_grams, extra_per_kg_paisa, bulky_charge_paisa, eta_text, is_default, sort_order, default_courier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(...vals));
   const res = await db.batch(stmts);
   return id ?? Number(res[res.length - 1].meta.last_row_id);
 }

@@ -2,7 +2,7 @@
 import { Hono, type Context } from 'hono';
 import type { AppEnv } from '../env';
 import { GEO_VERSION } from '../generated/geo-version';
-import { bad, clientIp, int, notFound, posInt, rateLimit, readJson, str, HttpError } from '../lib/http';
+import { bad, int, notFound, posInt, rateLimit, readJson, str, HttpError } from '../lib/http';
 import { asciiDigits, maskPhone, normalizeBdPhone } from '../lib/phone';
 import { expandQuery } from '../lib/search';
 import { effectiveVariantAttributes } from '../lib/templates';
@@ -14,6 +14,7 @@ import { geoHierarchy, postcodeMap, unionsOf } from '../repo/geo';
 import { sessionStatus } from '../repo/incomplete';
 import { addNotifyRequest, addWholesaleInquiry } from '../repo/misc';
 import { customerByPhone, orderByNo, submitAdvance } from '../repo/orders';
+import { accountById, rememberDelivery } from '../repo/accounts';
 import { priceCart, sanitizeLines } from '../services/cart';
 import { quote } from '../services/checkout';
 import { recordAttempt } from '../services/fraud';
@@ -26,7 +27,7 @@ import { addLandingView, landingById } from '../repo/landing';
 import { addReview, deliveredPurchase, reviewExists } from '../repo/reviews';
 import { purge } from '../services/cache';
 import { TAG, tagHeader } from '../lib/cache-tags';
-import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf } from './context';
+import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf, signedInAccountId, verifyTurnstile } from './context';
 
 export const api = new Hono<AppEnv>();
 
@@ -165,17 +166,6 @@ api.get('/geo/:version/unions/:upazilaId', async c => {
 
 // ───────────── Checkout ─────────────
 
-async function verifyTurnstile(c: Context<AppEnv>, token: string): Promise<boolean> {
-  if (!c.env.TURNSTILE_SECRET) return true;
-  if (!token) return false;
-  const form = new FormData();
-  form.append('secret', c.env.TURNSTILE_SECRET);
-  form.append('response', token);
-  form.append('remoteip', clientIp(c));
-  const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form });
-  return Boolean(((await r.json()) as { success?: boolean }).success);
-}
-
 /**
  * Called once when checkout (or a landing-page order form) opens, after an invisible Turnstile check. Sets the
  * HttpOnly checkout-session and device cookies and returns a short-lived signed token for capture and placement.
@@ -254,6 +244,9 @@ api.post('/checkout/place', async c => {
   }
   const landingId = posInt(body.landingPageId);
   const landing = landingId ? await landingById(c.env.DB, landingId) : null;
+  // Signed in: the receipt and updates go to the account's email, and the address is kept for next time.
+  const accountId = await signedInAccountId(c);
+  const acct = accountId ? await accountById(c.env.DB, accountId) : null;
   const placed = await placeOrder(c.env, await settingsOf(c), {
     phone: str(body.phone, 20), name: str(body.name, 120),
     divisionId: posInt(body.divisionId), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), unionId: posInt(body.unionId), zoneId: posInt(body.zoneId),
@@ -261,9 +254,10 @@ api.post('/checkout/place', async c => {
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,
     lines: sanitizeLines(body.lines), source: landing ? 'landing' : 'web', sourceDetail: landing ? `Landing page: ${landing.title} (/lp/${landing.slug})` : null, utm,
-    email: str(body.email, 120) || null, emailOffers: body.emailOffers === true,
+    email: acct?.email ?? (str(body.email, 120) || null), emailOffers: acct ? Boolean(acct.offers) : body.emailOffers === true,
     couponCode: str(body.couponCode, 30) || null, landingPageId: landing?.id ?? null,
   }, { channel: 'web', identity: id, checkoutSessionId: sid, route: '/api/checkout/place' });
+  if (acct) await rememberDelivery(c.env.DB, acct.id, { phone: normalizeBdPhone(str(body.phone, 20)) ?? '', addressLine: str(body.addressLine, 300), zoneId: posInt(body.zoneId) });
   return c.json(placed, 201);
 });
 

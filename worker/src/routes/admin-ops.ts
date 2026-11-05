@@ -275,7 +275,7 @@ async function saveZone(c: Context<AppEnv>, id: number | null) {
   let saved: number;
   try {
     saved = await saveZoneRow(c.env.DB, id, {
-      name, baseChargePaisa: money('baseChargePaisa'), baseWeightGrams: posInt(b.baseWeightGrams) ?? 1000, extraPerKgPaisa: money('extraPerKgPaisa'),
+      name, note: str(b.note, 60), baseChargePaisa: money('baseChargePaisa'), baseWeightGrams: posInt(b.baseWeightGrams) ?? 1000, extraPerKgPaisa: money('extraPerKgPaisa'),
       bulkyChargePaisa: money('bulkyChargePaisa'), etaText: str(b.etaText, 40) || '3–5 days', isDefault: Boolean(b.isDefault), sortOrder: int(b.sortOrder) ?? 0, defaultCourier: courier,
     });
   } catch { throw bad(`There is already a delivery area called “${name}”. Choose another name.`); }

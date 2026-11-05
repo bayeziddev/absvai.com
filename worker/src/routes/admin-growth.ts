@@ -97,7 +97,7 @@ function readCoupon(b: Record<string, unknown>): CouponInput {
   return {
     code, kind, value: kind === 'free_delivery' ? 0 : value, minSubtotalPaisa: money('minSubtotalPaisa') ?? 0, maxDiscountPaisa: kind === 'percent' ? money('maxDiscountPaisa') : null,
     startsAt: starts ? dayStart(starts) : null, endsAt: ends ? dayEnd(ends) : null, usageLimit: count('usageLimit'), perPhoneLimit: count('perPhoneLimit'),
-    isActive: b.isActive !== false, note: str(b.note, 200) || null,
+    isActive: b.isActive !== false, note: str(b.note, 200) || null, forMembers: b.forMembers === true,
   };
 }
 

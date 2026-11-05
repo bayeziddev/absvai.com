@@ -99,7 +99,7 @@ describe('delivery charge quotes', () => {
   it('charges inside Dhaka city, the Dhaka suburbs and outside Dhaka by zone (Bangla area names)', async () => {
     const lines = [{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }];
     expect((await quote(lines, ids.dhaka, ids.dhakaSouth)).delivery).toMatchObject({ zoneName: 'ঢাকা সিটির ভিতরে', chargePaisa: 7000 });
-    expect((await quote(lines, ids.dhaka, ids.savar)).delivery).toMatchObject({ zoneName: 'ঢাকার আশেপাশে (সাভার, গাজীপুর, নারায়ণগঞ্জ)', chargePaisa: 10000 });
+    expect((await quote(lines, ids.dhaka, ids.savar)).delivery).toMatchObject({ zoneName: 'ঢাকার আশেপাশে', chargePaisa: 10000 });
     expect((await quote(lines, ids.tangail, ids.kalihati)).delivery).toMatchObject({ zoneName: 'ঢাকার বাইরে', chargePaisa: 13000 });
   });
 

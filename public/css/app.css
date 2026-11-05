@@ -482,12 +482,24 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .co-step legend { display: flex; align-items: center; gap: 10px; font: 800 1.05rem var(--display); float: left; width: 100%; margin-bottom: 12px; }
 .co-step legend + * { clear: both; }
 .step-no { width: 28px; height: 28px; border-radius: 50%; background: var(--chili); color: var(--white); display: grid; place-items: center; font-size: .9rem; }
-.area-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.area-option { display: flex; gap: 10px; align-items: flex-start; border: 2px solid var(--husk); border-radius: 12px; padding: 10px 12px; cursor: pointer; background: var(--white); }
+.co-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; }
+.co-head h1 { margin: 0; } .co-head p { margin: 4px 0 0; color: var(--muted); }
+.co-safe { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; background: var(--leaf-soft); color: #1F5A23; font-weight: 700; font-size: .85rem; }
+.co-kicker { margin: 0; color: var(--chili); font-weight: 700; font-size: .8rem; letter-spacing: .04em; }
+.co-summary h2 { margin: 0 0 6px; } .co-areas h3 { margin: 14px 0 8px; font-size: 1rem; }
+.req { color: var(--chili); } .opt { color: var(--muted); font-weight: 500; font-size: .8rem; }
+.field-hint { color: var(--muted); font-size: .82rem; }
+.co-account { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--cream); font-size: .9rem; } .co-account.ok { background: var(--leaf-soft); color: #1F5A23; font-weight: 600; }
+.area-options { display: grid; gap: 8px; }
+.area-option { position: relative; display: flex; gap: 10px; align-items: center; border: 2px solid var(--husk); border-radius: 12px; padding: 10px 12px; cursor: pointer; background: var(--white); }
 .area-option:has(input:checked) { border-color: var(--chili); background: #FFF8F7; }
-.area-option input { width: 20px; height: 20px; accent-color: var(--chili); margin: 1px 0 0; flex: none; }
-.area-option strong { display: block; line-height: 1.25; }
-.area-option small { display: block; font-weight: 800; color: var(--chili); font-size: .95rem; }
+.area-option:has(input:focus-visible) { outline: 3px solid var(--turmeric); outline-offset: 2px; }
+.area-option input { position: absolute; opacity: 0; pointer-events: none; }
+.area-text { flex: 1; min-width: 0; } .area-text strong { display: block; line-height: 1.25; } .area-text small { display: block; color: var(--muted); font-size: .8rem; }
+.area-charge { font: 800 1.05rem var(--display); color: var(--chili); white-space: nowrap; }
+.area-tick { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--husk); display: grid; place-items: center; color: transparent; flex: none; }
+.area-option:has(input:checked) .area-tick { background: var(--chili); border-color: var(--chili); color: var(--white); }
+.done-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 .co-delivery { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--leaf-soft); color: #1F5A23; font-size: .95rem; }
 .co-delivery span { display: block; font-size: .82rem; opacity: .85; margin-top: 2px; }
 .co-delivery.free { background: #FFF6DB; color: #6B4A00; }
@@ -502,8 +514,8 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .advance-reasons { margin: 0 0 10px; padding-left: 18px; font-size: .9rem; }
 .wallets ul { list-style: none; padding: 0; margin: 4px 0 10px; }
 .co-summary { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
-.co-line { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--cream); }
-.co-line img { width: 52px; height: 52px; border-radius: 10px; background: var(--cream); object-fit: cover; }
+.co-line { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--cream); }
+.co-line img { width: 64px; height: 64px; border-radius: 12px; background: var(--cream); object-fit: cover; }
 .co-line small { display: block; color: var(--muted); }
 .co-line .problem { color: var(--chili); font-weight: 600; }
 .totals { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 12px 0; }

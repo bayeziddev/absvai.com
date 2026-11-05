@@ -11,6 +11,7 @@ import { effectiveVariantAttributes, formatNetQuantity, infoPanels } from '../li
 import { Banner, Breadcrumbs, Burst, CategoryCarousel, CheckChip, Empty, Grid, HeroCarousel, OriginalsSeal, Pagination, PromoBanner, Rail, SectionTitle, TrustStrip } from './components';
 import { Icon } from './icons';
 import { RatingLine, ReviewsSection, type ReviewSummary } from './reviews';
+import { orderAddress } from '../lib/print';
 
 // ───────────── Home ─────────────
 
@@ -360,64 +361,54 @@ export function CartPage() {
 export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; areas: CheckoutArea[]; whatsapp?: string | null; turnstileSiteKey?: string }) {
   return (
     <div class="container" lang="bn">
-      <h1>অর্ডার করুন</h1>
+      <div class="co-head">
+        <div><h1>অর্ডার সম্পন্ন করুন</h1><p>আপনার তথ্য দিন, আমরা দ্রুত আপনার অর্ডারটি পৌঁছে দেব।</p></div>
+        <span class="co-safe"><Icon name="shield" size={18} />নিরাপদ অর্ডার</span>
+      </div>
       <noscript><p class="notice">অর্ডার করতে ব্রাউজারে JavaScript চালু রাখুন, অথবা ফোন করে অর্ডার দিন।</p></noscript>
       <CheckoutForm wallets={p.wallets} areas={p.areas} whatsapp={p.whatsapp} turnstileSiteKey={p.turnstileSiteKey} />
     </div>
   );
 }
 
+/** A delivery area the customer can choose at checkout: its name, the short line under it and the charge for up to 1 kg (the exact charge follows). */
+export interface CheckoutArea { id: number; name: string; note?: string; baseChargePaisa: number }
+
+/** ৳70 → ৳৭০, the way the delivery charges read at checkout. */
+const bnTaka = (paisa: number) => formatTaka(paisa).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[Number(d)]);
+
 /**
  * The one-page checkout form (public/js/checkout.js drives it). The checkout page and every landing page use it, so a
- * landing-page order gets the same delivery areas, coupon, fraud checks and incomplete-order capture. The customer picks
- * a delivery area (the charge is worked out for them) and types the address in their own words, in Bangla or English.
- * Customers read the form in Bangla; the shop's admin stays in English.
+ * landing-page order gets the same delivery areas, coupon, fraud checks and incomplete-order capture. In Bangla:
+ * 1 your details (name, mobile), 2 the address in the customer's own words (Bangla or English) and a note, 3 payment;
+ * the summary beside it shows the products with their photos and prices, the delivery-charge choices (the charge is
+ * worked out for this cart and added to the total by itself), the coupon and the total. The admin stays in English.
  */
-/** A delivery area the customer can choose at checkout, with the charge for up to 1 kg (the exact charge follows). */
-export interface CheckoutArea { id: number; name: string; baseChargePaisa: number }
-
 export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; areas: CheckoutArea[]; whatsapp?: string | null; turnstileSiteKey?: string; couponCode?: string | null; placeLabel?: string; compact?: boolean }) {
   return (
       <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout lang="bn" novalidate>
         <div class="co-main">
+          <p class="co-account" data-co-account hidden />
           <fieldset class="co-step">
-            <legend><span class="step-no">১</span>মোবাইল নম্বর</legend>
+            <legend><span class="step-no">১</span>আপনার তথ্য</legend>
+            <label class="field"><span>আপনার নাম <b class="req">*</b></span><input name="name" autocomplete="name" placeholder="আপনার পুরো নাম" maxlength={120} required /></label>
             <label class="field">
-              <span>অর্ডার কনফার্ম করতে আমরা এই নম্বরে কল বা SMS করব।</span>
+              <span>মোবাইল নম্বর <b class="req">*</b></span>
               <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required />
+              <small class="field-hint">অর্ডার নিশ্চিত করতে এই নম্বরে কল করা হবে।</small>
             </label>
-            <p class="field-note" data-capture-note>অর্ডার কোনো কারণে আটকে গেলে যেন আমরা সাহায্য করতে পারি, তাই লেখার সাথে সাথে আপনার তথ্য সেভ হয়। <a href="/policies/privacy">প্রাইভেসি</a></p>
             {/* Honeypot: hidden from people, filled by bots. Orders with it filled are rejected. */}
             <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>
           </fieldset>
           <fieldset class="co-step">
-            <legend><span class="step-no">২</span>আপনার নাম</legend>
-            <label class="field"><span class="sr-only">পুরো নাম</span><input name="name" autocomplete="name" placeholder="আপনার পুরো নাম (বাংলা বা English)" maxlength={120} required /></label>
+            <legend><span class="step-no">২</span>ডেলিভারি ঠিকানা</legend>
+            <label class="field"><span>সম্পূর্ণ ঠিকানা <b class="req">*</b></span><textarea name="addressLine" rows={3} autocomplete="street-address" placeholder="বাসা/বাড়ি, রোড, এলাকা, থানা ও জেলা (বাংলা বা ইংরেজিতে), যেমন: বাসা ১২, রোড ৫, মিরপুর ১০, ঢাকা" maxlength={300} required /></label>
+            <label class="field"><span>অতিরিক্ত নোট <small class="opt">ঐচ্ছিক</small></span><textarea name="note" rows={2} maxlength={500} placeholder="যেমন: বিকেলে ডেলিভারি দিলে ভালো হয়" /></label>
           </fieldset>
           <fieldset class="co-step">
-            <legend><span class="step-no">৩</span>ডেলিভারি এলাকা</legend>
-            <p class="field-note">পার্সেল কোথায় যাবে বেছে নিন। ডেলিভারি চার্জ নিজে থেকেই মোট দামে যোগ হবে।</p>
-            <div class="area-options" role="radiogroup" aria-label="ডেলিভারি এলাকা" data-areas>
-              {p.areas.map(a => (
-                <label class="area-option">
-                  <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
-                  <span><strong>{a.name}</strong><small data-area-charge={String(a.id)}>{a.baseChargePaisa ? formatTaka(a.baseChargePaisa) : 'ফ্রি'}</small></span>
-                </label>
-              ))}
-            </div>
-            <p class="co-delivery" data-co-delivery aria-live="polite" hidden />
-          </fieldset>
-          <fieldset class="co-step">
-            <legend><span class="step-no">৪</span>পুরো ঠিকানা</legend>
-            <label class="field"><span>বাসা/বাড়ি, রোড, এলাকা, থানা ও জেলা লিখুন (বাংলা বা ইংরেজি, যেকোনো ভাষায়)</span><textarea name="addressLine" rows={2} autocomplete="street-address" placeholder="যেমন: বাসা ১২, রোড ৫, মিরপুর ১০, ঢাকা" maxlength={300} required /></label>
-            <label class="field"><span>ইমেইল <small class="muted">(না দিলেও চলবে · রসিদ ও ইনভয়েস পেতে)</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength={120} placeholder="you@example.com" /></label>
-            <label class="check-line"><input type="checkbox" name="emailOffers" /> <span>নতুন অফার ও নতুন পণ্যের খবর ইমেইলে পেতে চাই (যেকোনো সময় বন্ধ করা যাবে)</span></label>
-            <label class="field"><span>আমাদের জন্য কোনো কথা <small class="muted">(না দিলেও চলবে)</small></span><textarea name="note" rows={2} maxlength={500} placeholder="যেমন: বিকেলে ডেলিভারি দিলে ভালো হয়" /></label>
-          </fieldset>
-          <fieldset class="co-step">
-            <legend><span class="step-no">৫</span>পেমেন্ট</legend>
-            <label class="pay-option"><input type="radio" name="paymentMethod" value="cod" checked /><span><strong>ক্যাশ অন ডেলিভারি</strong><small>পণ্য হাতে পেয়ে ডেলিভারি ম্যানকে টাকা দিন।</small></span></label>
-            <label class="pay-option" data-pay-mobile hidden={!p.wallets.length}><input type="radio" name="paymentMethod" value="manual_mobile" /><span><strong>বিকাশ / নগদ / রকেট</strong><small>আগে টাকা পাঠান, তারপর ট্রানজেকশন আইডি দিন।</small></span></label>
+            <legend><span class="step-no">৩</span>পেমেন্ট</legend>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="cod" checked /><span><strong>ক্যাশ অন ডেলিভারি</strong><small>পণ্য হাতে পেয়ে মূল্য পরিশোধ করুন।</small></span></label>
+            <label class="pay-option" data-pay-mobile hidden={!p.wallets.length}><input type="radio" name="paymentMethod" value="manual_mobile" /><span><strong>bKash / Nagad / Rocket</strong><small>আগে পেমেন্ট করে ট্রানজেকশন আইডি দিন।</small></span></label>
             <div class="advance" data-advance hidden>
               <p class="advance-title" data-advance-title />
               <ul class="advance-reasons" data-advance-reasons />
@@ -435,17 +426,33 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
             </div>
           </fieldset>
         </div>
-        <aside class="co-summary" aria-label="আপনার অর্ডার">
-          <h2>আপনার অর্ডার</h2>
-          <div data-co-lines><p class="muted">লোড হচ্ছে…</p></div>
+        <aside class="co-summary" aria-label="অর্ডারের বিবরণ">
+          <p class="co-kicker">আপনার পছন্দ</p>
+          <h2>অর্ডারের বিবরণ</h2>
+          <div class="co-lines" data-co-lines><p class="muted">লোড হচ্ছে…</p></div>
+          <div class="co-areas">
+            <h3>ডেলিভারি চার্জ</h3>
+            <div class="area-options" role="radiogroup" aria-label="ডেলিভারি চার্জ" data-areas>
+              {p.areas.map(a => (
+                <label class="area-option">
+                  <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
+                  <span class="area-text"><strong>{a.name}</strong>{a.note && <small>{a.note}</small>}</span>
+                  <b class="area-charge" data-area-charge={String(a.id)}>{a.baseChargePaisa ? bnTaka(a.baseChargePaisa) : 'ফ্রি'}</b>
+                  <span class="area-tick" aria-hidden="true"><Icon name="check" size={16} /></span>
+                </label>
+              ))}
+            </div>
+            <p class="field-note">আপনার ঠিকানা অনুযায়ী একটি অপশন নির্বাচন করুন।</p>
+            <p class="co-delivery" data-co-delivery aria-live="polite" hidden />
+          </div>
           <div class="coupon-box">
-            <label class="field"><span>কুপন কোড</span>
+            <label class="field"><span>কুপন কোড <small class="opt">ঐচ্ছিক</small></span>
               <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="যেমন: EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>প্রয়োগ</button></span>
             </label>
             <p class="coupon-msg" data-coupon-msg aria-live="polite" />
           </div>
           <dl class="totals">
-            <dt>পণ্যের দাম</dt><dd data-subtotal>—</dd>
+            <dt>পণ্যের মূল্য</dt><dd data-subtotal>—</dd>
             <dt data-discount-row hidden>ছাড়</dt><dd data-discount hidden>—</dd>
             <dt>ডেলিভারি চার্জ</dt><dd data-delivery>এলাকা বেছে নিন</dd>
             <dt data-cod-row hidden>COD চার্জ</dt><dd data-cod-fee hidden>—</dd>
@@ -461,7 +468,7 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
               <Icon name="whatsapp" size={20} />WhatsApp-এ অর্ডার করুন
             </a>
           )}
-          <p class="small muted">অর্ডারে সমস্যা হলে আমাদের টিম যেন সাহায্য করতে পারে, তাই আপনার তথ্য সেভ রাখা হয়।</p>
+          <p class="small muted" data-capture-note>অর্ডারে সমস্যা হলে যেন আমরা সাহায্য করতে পারি, তাই লেখার সাথে সাথে আপনার তথ্য সেভ হয়। <a href="/policies/privacy">প্রাইভেসি</a></p>
         </aside>
       </form>
   );
@@ -481,6 +488,10 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
         <h1>Thank you, {String(o.customer_name).split(' ')[0]}!</h1>
         <p>Your order number is <strong class="order-no">{String(o.order_no)}</strong>.</p>
         <p class="status-pill">{STATUS_LABELS[status]}</p>
+        <div class="done-actions" lang="bn">
+          <a class="btn btn-primary" href={`/order/${encodeURIComponent(String(o.order_no))}/invoice?t=${encodeURIComponent(String(o.access_token))}`} target="_blank" rel="noopener" data-invoice><Icon name="download" size={18} />ইনভয়েস ডাউনলোড করুন</a>
+          <a class="btn btn-outline" href="/account"><Icon name="user" size={18} />আমার অ্যাকাউন্ট</a>
+        </div>
       </div>
       {needsOtp && (
         <form class="otp card-box" data-otp>
@@ -526,7 +537,7 @@ export function OrderPage(p: { o: Record<string, unknown>; items: Array<Record<s
           {Number(o.cod_fee_paisa) > 0 && <><dt>COD fee</dt><dd>{formatTaka(Number(o.cod_fee_paisa))}</dd></>}
           <dt class="total">Total</dt><dd class="total">{formatTaka(Number(o.total_paisa))}</dd>
         </dl>
-        <p class="small"><Icon name="pin" size={16} />{String(o.address_line)}, {String(o.upazila_name)}, {String(o.district_name)}{o.eta_text ? ` · usually ${String(o.eta_text)}` : ''}</p>
+        <p class="small"><Icon name="pin" size={16} />{orderAddress(o)}{o.eta_text ? ` · usually ${String(o.eta_text)}` : ''}</p>
       </div>
       <ol class="next-steps">
         <li><strong>We confirm</strong> with a quick call.</li>
@@ -677,17 +688,125 @@ export function CategoriesPage(p: { categories: CategoryNode[] }) {
   );
 }
 
-export function AccountPage() {
-  return (
-    <div class="container narrow">
-      <h1>Your account</h1>
-      <div class="account-links">
-        <a class="card-box link-box" href="/track"><Icon name="pin" /><span><strong>Track an order</strong><small>With your phone and order number</small></span></a>
-        <a class="card-box link-box" href="/wishlist"><Icon name="heart" /><span><strong>Wishlist</strong><small>Products you saved on this phone</small></span></a>
-        <a class="card-box link-box" href="/contact"><Icon name="phone" /><span><strong>Help & contact</strong><small>WhatsApp, Messenger or call</small></span></a>
-        <a class="card-box link-box" href="/policies/returns"><Icon name="return" /><span><strong>Returns & refunds</strong><small>How returns work</small></span></a>
+/** Order statuses as customers read them on their account page. */
+export const STATUS_BN: Record<string, string> = {
+  new: 'নতুন (কনফার্মের অপেক্ষায়)', confirmed: 'কনফার্মড', packed: 'প্যাক হয়েছে', in_courier: 'কুরিয়ারে আছে', delivered: 'ডেলিভারি হয়েছে',
+  partial_delivered: 'আংশিক ডেলিভারি', cancelled: 'বাতিল', returned: 'ফেরত এসেছে',
+};
+const bnDate = (iso: string) => new Date(Date.parse(iso) + 6 * 3_600_000).toISOString().slice(0, 10).split('-').reverse().join('/').replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[Number(d)]);
+
+export interface AccountView {
+  account: { name: string; email: string; phone: string; addressLine: string; offers: boolean };
+  orders: Array<{ orderNo: string; token: string; createdAt: string; status: string; totalPaisa: number; items: number; firstItem: string | null; image: string | null }>;
+  offers: Array<{ code: string; label: string; detail: string }>;
+}
+
+const AccountLinks = () => (
+  <div class="account-links">
+    <a class="card-box link-box" href="/track"><Icon name="pin" /><span><strong>অর্ডার ট্র্যাক করুন</strong><small>মোবাইল নম্বর বা অর্ডার নম্বর দিয়ে</small></span></a>
+    <a class="card-box link-box" href="/wishlist"><Icon name="heart" /><span><strong>পছন্দের তালিকা</strong><small>যে পণ্যগুলো সেভ করেছেন</small></span></a>
+    <a class="card-box link-box" href="/contact"><Icon name="phone" /><span><strong>সাহায্য ও যোগাযোগ</strong><small>WhatsApp, Messenger বা ফোন</small></span></a>
+    <a class="card-box link-box" href="/policies/returns"><Icon name="return" /><span><strong>রিটার্ন ও রিফান্ড</strong><small>কীভাবে ফেরত দেবেন</small></span></a>
+  </div>
+);
+
+/**
+ * /account: signed out, a sign-in / open-an-account form (email, then the 6-digit code from the email; public/js/account.js);
+ * signed in, the customer's orders with tracking and invoices, the offers for members and their details.
+ */
+export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: string; next?: string | null }) {
+  if (!p.view) {
+    return (
+      <div class="container narrow acct" lang="bn" data-account-page data-next={p.next ?? ''}>
+        <div class="acct-hero">
+          <h1>আমার অ্যাকাউন্ট</h1>
+          <p>অ্যাকাউন্ট খুললে সব অর্ডার এক জায়গায় দেখবেন, অর্ডার ট্র্যাক করবেন, ইনভয়েস ডাউনলোড করবেন আর সদস্যদের জন্য বিশেষ অফার পাবেন। পাসওয়ার্ড লাগবে না: প্রতিবার ইমেইলে একটি কোড আসবে।</p>
+          <ul class="acct-perks">
+            <li><Icon name="box" size={18} />সব অর্ডার ও ট্র্যাকিং</li>
+            <li><Icon name="file" size={18} />ইনভয়েস ডাউনলোড</li>
+            <li><Icon name="tag" size={18} />সদস্যদের অফার</li>
+            <li><Icon name="check" size={18} />পরের অর্ডারে তথ্য নিজে থেকে বসে যাবে</li>
+          </ul>
+        </div>
+        <div class="card-box acct-box">
+          <div class="acct-tabs" role="tablist">
+            <button type="button" role="tab" aria-selected="true" data-acct-tab="signin">সাইন ইন</button>
+            <button type="button" role="tab" aria-selected="false" data-acct-tab="signup">নতুন অ্যাকাউন্ট খুলুন</button>
+          </div>
+          <form data-acct-form novalidate>
+            <div data-signup-only hidden>
+              <label class="field"><span>আপনার নাম <b class="req">*</b></span><input name="name" autocomplete="name" maxlength={120} placeholder="আপনার পুরো নাম" /></label>
+              <label class="field"><span>মোবাইল নম্বর <b class="req">*</b></span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} /></label>
+            </div>
+            <label class="field"><span>ইমেইল <b class="req">*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com" maxlength={120} required /></label>
+            <label class="check-line" data-signup-only hidden><input type="checkbox" name="offers" checked /> <span>নতুন অফার ও ছাড়ের খবর ইমেইলে পেতে চাই</span></label>
+            {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="vmAccountTurnstile" />}
+            <p class="form-msg error" data-acct-error role="alert" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit" data-acct-send>ইমেইলে কোড পাঠান</button>
+            <p class="small muted">কোড আসতে এক মিনিট লাগতে পারে। ইনবক্সে না পেলে Spam / Promotions দেখুন।</p>
+          </form>
+          <form data-code-form hidden novalidate>
+            <p class="acct-sent" data-code-sent />
+            <label class="field"><span>ইমেইলে আসা ৬ সংখ্যার কোড</span><input class="code-input" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength={6} placeholder="••••••" /></label>
+            <p class="form-msg error" data-code-error role="alert" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit" data-code-go>যাচাই করে প্রবেশ করুন</button>
+            <p class="small acct-again"><button type="button" class="link-btn" data-code-again>নতুন কোড পাঠান</button> · <button type="button" class="link-btn" data-code-back>ইমেইল বদলান</button></p>
+          </form>
+        </div>
+        <AccountLinks />
       </div>
-      <p class="muted small">Saved addresses and one-tap reorder are coming next.</p>
+    );
+  }
+  const { account: a, orders, offers } = p.view;
+  return (
+    <div class="container acct" lang="bn" data-account-page>
+      <div class="acct-head">
+        <div><p class="co-kicker">আমার অ্যাকাউন্ট</p><h1>আসসালামু আলাইকুম, {a.name}</h1><p class="muted">{a.email}</p></div>
+        <button type="button" class="btn btn-outline" data-logout>সাইন আউট</button>
+      </div>
+      <div class="acct-grid">
+        <section class="card-box acct-orders">
+          <h2>আমার অর্ডার</h2>
+          {orders.length ? orders.map(o => (
+            <div class="acct-order">
+              {o.image ? <img src={o.image} alt="" loading="lazy" width={56} height={56} /> : <span class="acct-noimg"><Icon name="box" /></span>}
+              <div class="acct-order-main">
+                <b>{o.orderNo}</b>
+                <small>{bnDate(o.createdAt)} · {String(o.items).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[Number(d)])}টি পণ্য{o.firstItem ? ` · ${o.firstItem}` : ''}</small>
+                <span class={`acct-status st-${o.status}`}>{STATUS_BN[o.status] ?? o.status}</span>
+              </div>
+              <div class="acct-order-end">
+                <b>{formatTaka(o.totalPaisa)}</b>
+                <a class="btn btn-sm btn-outline" href={`/order/${encodeURIComponent(o.orderNo)}?t=${encodeURIComponent(o.token)}`}>ট্র্যাক করুন</a>
+                <a class="btn btn-sm btn-ghost" href={`/order/${encodeURIComponent(o.orderNo)}/invoice?t=${encodeURIComponent(o.token)}`} target="_blank" rel="noopener"><Icon name="download" size={16} />ইনভয়েস</a>
+              </div>
+            </div>
+          )) : (
+            <div class="acct-empty"><p>এখনো কোনো অর্ডার নেই। এই ইমেইল দিয়ে অর্ডার করলে এখানে দেখাবে।</p><a class="btn btn-primary" href="/shop">কেনাকাটা শুরু করুন</a></div>
+          )}
+        </section>
+        <div class="acct-side">
+          <section class="card-box acct-offers">
+            <h2>আমার অফার</h2>
+            {offers.length ? offers.map(o => (
+              <div class="acct-offer"><div><b class="mono">{o.code}</b><span>{o.label}</span>{o.detail && <small>{o.detail}</small>}</div><button type="button" class="btn btn-sm btn-outline" data-copy={o.code}>কপি</button></div>
+            )) : <p class="muted">এই মুহূর্তে কোনো অফার নেই। নতুন অফার এলে ইমেইলে জানিয়ে দেব।</p>}
+            <p class="small muted">চেকআউটে “কুপন কোড” ঘরে কোডটি লিখে “প্রয়োগ” চাপুন।</p>
+          </section>
+          <section class="card-box">
+            <h2>আমার তথ্য</h2>
+            <form data-profile novalidate>
+              <label class="field"><span>নাম</span><input name="name" value={a.name} maxlength={120} autocomplete="name" /></label>
+              <label class="field"><span>মোবাইল নম্বর</span><input name="phone" value={a.phone} type="tel" inputmode="numeric" maxlength={14} placeholder="01XXXXXXXXX" autocomplete="tel" /></label>
+              <label class="field"><span>ঠিকানা <small class="opt">চেকআউটে নিজে থেকে বসে যাবে</small></span><textarea name="addressLine" rows={2} maxlength={300}>{a.addressLine}</textarea></label>
+              <label class="check-line"><input type="checkbox" name="offers" checked={a.offers} /> <span>নতুন অফার ও ছাড়ের খবর ইমেইলে পেতে চাই</span></label>
+              <p class="form-msg" data-profile-msg role="status" />
+              <button class="btn btn-primary" type="submit">সেভ করুন</button>
+            </form>
+          </section>
+        </div>
+      </div>
+      <AccountLinks />
     </div>
   );
 }

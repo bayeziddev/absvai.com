@@ -45,7 +45,8 @@ function zoneRow(z, write) {
   const dis = write ? '' : 'disabled';
   const id = z.id ?? `new-${Math.random().toString(36).slice(2, 8)}`;
   return `<div class="zone-row" data-zone="${esc(String(id))}">
-      <label class="f zone-name">Area name <span class="help">Customers see it at checkout</span><input data-zf="name" maxlength="60" value="${esc(z.name ?? '')}" placeholder="e.g. Rajbari" ${dis}></label>
+      <label class="f zone-name">Area name <span class="help">Customers see it at checkout</span><input data-zf="name" maxlength="60" value="${esc(z.name ?? '')}" placeholder="e.g. রাজবাড়ীর ভিতরে" ${dis}></label>
+      <label class="f zone-note">Short note <span class="help">Under the name, e.g. “সারা বাংলাদেশ”</span><input data-zf="note" maxlength="60" value="${esc(z.note ?? '')}" placeholder="e.g. Local delivery" ${dis}></label>
       <label class="f">Charge up to ${(z.base_weight_grams ?? 1000) / 1000} kg (৳)<input data-zf="base" inputmode="decimal" value="${esc(z.base_charge_paisa === undefined ? '' : fromPaisa(z.base_charge_paisa))}" placeholder="70" ${dis}></label>
       <label class="f">Each extra kg (৳)<input data-zf="extra" inputmode="decimal" value="${esc(fromPaisa(z.extra_per_kg_paisa ?? 0))}" ${dis}></label>
       <label class="f">Delivery time<input data-zf="eta" maxlength="40" value="${esc(z.eta_text ?? '3–5 days')}" ${dis}></label>
@@ -111,13 +112,13 @@ export async function settings(v) {
     for (const [i, row] of rows.entries()) {
       const val = k => row.querySelector(`[data-zf="${k}"]`).value.trim();
       const z = zd.zones.find(x => String(x.id) === row.dataset.zone);
-      const next = { name: val('name'), base: toPaisa(val('base') || '0'), extra: toPaisa(val('extra') || '0'), eta: val('eta') || '3–5 days' };
+      const next = { name: val('name'), note: val('note'), base: toPaisa(val('base') || '0'), extra: toPaisa(val('extra') || '0'), eta: val('eta') || '3–5 days' };
       if (!next.name) throw new Error('Give every delivery area a name, e.g. “Rajbari”.');
       if (next.base === null || next.extra === null) throw new Error(`Check the charges for ${next.name}: numbers only.`);
-      if (z && next.name === z.name && next.base === z.base_charge_paisa && next.extra === z.extra_per_kg_paisa && next.eta === z.eta_text && i === z.sort_order) continue;
-      const payload = { name: next.name, baseChargePaisa: next.base, baseWeightGrams: z?.base_weight_grams ?? 1000, extraPerKgPaisa: next.extra, bulkyChargePaisa: z?.bulky_charge_paisa ?? main?.bulky_charge_paisa ?? 0, etaText: next.eta, isDefault: Boolean(z?.is_default), sortOrder: i, defaultCourier: z?.default_courier ?? main?.default_courier ?? null };
+      if (z && next.name === z.name && next.note === (z.note ?? '') && next.base === z.base_charge_paisa && next.extra === z.extra_per_kg_paisa && next.eta === z.eta_text && i === z.sort_order) continue;
+      const payload = { name: next.name, note: next.note, baseChargePaisa: next.base, baseWeightGrams: z?.base_weight_grams ?? 1000, extraPerKgPaisa: next.extra, bulkyChargePaisa: z?.bulky_charge_paisa ?? main?.bulky_charge_paisa ?? 0, etaText: next.eta, isDefault: Boolean(z?.is_default), sortOrder: i, defaultCourier: z?.default_courier ?? main?.default_courier ?? null };
       const { id } = await api(z ? `/zones/${z.id}` : '/zones', z ? 'PUT' : 'POST', payload);
-      if (z) Object.assign(z, { name: next.name, base_charge_paisa: next.base, extra_per_kg_paisa: next.extra, eta_text: next.eta, sort_order: i });
+      if (z) Object.assign(z, { name: next.name, note: next.note, base_charge_paisa: next.base, extra_per_kg_paisa: next.extra, eta_text: next.eta, sort_order: i });
       const d = district(next.name);
       if (d && d.zone_id !== id && !z?.is_default) await api('/zones/assign-district', 'PUT', { districtId: d.id, zoneId: id });
     }

@@ -97,7 +97,7 @@ adminSettings.get('/emails', need('settings:read'), async c => {
   const s = await loadSettings(c.env.DB);
   const [recent, counts, audience] = await Promise.all([recentEmails(c.env.DB, 60), emailCounts(c.env.DB, new Date(Date.now() - 7 * 86_400_000).toISOString()), offersAudience(c.env.DB)]);
   return c.json({
-    connected: emailConnected(c.env), canEmailCustomers: canEmailCustomers(s), values: Object.fromEntries(EMAIL_KEYS.map(k => [k, s[k] ?? ''])),
+    connected: emailConnected(c.env), canEmailCustomers: canEmailCustomers(s, c.env), values: Object.fromEntries(EMAIL_KEYS.map(k => [k, s[k] ?? ''])),
     recent, counts, offersCount: audience.length,
   });
 });
@@ -119,7 +119,7 @@ adminSettings.post('/emails/offers', need('settings:write'), async c => {
   const ctaHref = str(b.ctaHref, 300);
   if (subject.length < 3 || message.length < 10) throw bad('Write a subject and a message.');
   if (ctaText && !/^(\/[\w/?=&.-]*|https:\/\/\S+)$/.test(ctaHref)) throw bad('The button link should be a page of the shop (starting with /) or an https:// link.');
-  if (!canEmailCustomers(await loadSettings(c.env.DB))) throw new HttpError(409, 'Customers can get emails once your own domain is verified in Resend. Until then only you receive emails.');
+  if (!canEmailCustomers(await loadSettings(c.env.DB), c.env)) throw new HttpError(409, 'Customers can get emails once your own domain is verified in Resend. Until then only you receive emails.');
   const audience = await offersAudience(c.env.DB);
   if (!audience.length) throw bad('No customer has asked for offers by email yet.');
   const n = await queueOffers(c.env, audience, { subject, message, ctaText, ctaHref: ctaHref.startsWith('/') ? `${c.env.SITE_URL}${ctaHref}` : ctaHref });

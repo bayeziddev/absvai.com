@@ -10,6 +10,9 @@ import { loadSettings, settingInt, settingJson } from '../repo/settings';
 import { TAG, tagHeader } from '../lib/cache-tags';
 import { bdDate, monthName } from '../lib/dates';
 import { clientIp, HttpError, parseJson, rateLimit } from '../lib/http';
+import { formatTaka } from '../lib/money';
+import { localPhone } from '../lib/phone';
+import { customerInvoiceHtml, INVOICE_CSP, orderAddress } from '../lib/print';
 import { pageCss } from '../lib/page-css';
 import { POLICIES } from '../lib/policies';
 import { approvedSellerBySlug, productSellerPublic } from '../repo/sellers';
@@ -29,11 +32,14 @@ import { EDGE_HTML } from '../services/cache';
 import { parseListingQuery } from './api';
 import { companyName, storeName } from '../lib/brand';
 import { deliveryAreas } from '../repo/geo';
+import { accountById, accountOrders, memberOffers, type MemberOffer } from '../repo/accounts';
+import { publicAccount } from './account';
+import { signedInAccountId } from './context';
 import type { Banner } from '../views/components';
 import { Layout, type LayoutProps } from '../views/layout';
 import {
   AccountPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
-  type CheckoutArea,
+  STATUS_BN, type AccountView, type CheckoutArea,
 } from '../views/pages';
 
 export const pages = new Hono<AppEnv>();
@@ -302,7 +308,7 @@ pages.get('/checkout', async c => {
 
 /** The delivery areas a customer chooses from at checkout (Settings → Delivery charges). */
 async function checkoutAreas(db: D1Database): Promise<CheckoutArea[]> {
-  return (await deliveryAreas(db)).map(a => ({ id: a.id, name: a.name, baseChargePaisa: a.baseChargePaisa }));
+  return (await deliveryAreas(db)).map(a => ({ id: a.id, name: a.name, note: a.note, baseChargePaisa: a.baseChargePaisa }));
 }
 
 pages.get('/order/:orderNo', async c => {
@@ -316,6 +322,33 @@ pages.get('/order/:orderNo', async c => {
     title: `Order ${o.order_no}`, path: `/order/${o.order_no}`, noindex: true, scripts: ['/js/order.js'],
     children: <OrderPage o={o} items={items} codeSent={codeSent} wallets={settingJson(sh.settings, 'manual_wallets', [])} />,
   });
+});
+
+const PAYMENT_BN: Record<string, string> = { cod: 'ক্যাশ অন ডেলিভারি', manual_mobile: 'bKash / Nagad / Rocket' };
+
+/** The customer's invoice (a receipt until the order is confirmed): print-ready, saved as PDF from the print dialog. */
+pages.get('/order/:orderNo/invoice', async c => {
+  const sh = await shell(c);
+  const token = c.req.query('t') ?? '';
+  const o = await orderByNo(c.env.DB, c.req.param('orderNo'));
+  if (!o || !token || o.access_token !== token) return notFound(c, sh);
+  const items = await orderItems(c.env.DB, Number(o.id));
+  const s = sh.settings;
+  const num = (k: string) => Number(o[k] ?? 0);
+  const issued = String(o.issued_at ?? o.confirmed_at ?? o.created_at);
+  const html = customerInvoiceHtml({
+    store: storeName(s), legalName: companyName(s), companyAddress: s.company_address ?? '', phone: s.support_phone ?? '', site: new URL(c.env.SITE_URL).host,
+    invoiceNo: (o.invoice_no as string) ?? null, orderNo: String(o.order_no), date: bdDate(new Date(issued)).split('-').reverse().join('/'),
+    status: STATUS_BN[String(o.status)] ?? String(o.status),
+    customer: { name: String(o.customer_name), phone: localPhone(String(o.phone)), address: orderAddress(o) },
+    payment: PAYMENT_BN[String(o.payment_method)] ?? String(o.payment_method), paid: o.payment_status === 'paid',
+    advancePaidPaisa: o.advance_status === 'paid' ? num('advance_amount_paisa') : 0,
+    items: items.map(i => ({ name: String(i.name), variant: (i.variant_label as string) || null, qty: Number(i.qty), unitPaisa: Number(i.unit_price_paisa), totalPaisa: Number(i.line_total_paisa) })),
+    subtotalPaisa: num('subtotal_paisa'), discountPaisa: num('discount_paisa'), deliveryPaisa: o.delivery_charge_paisa === null ? null : num('delivery_charge_paisa'),
+    codFeePaisa: num('cod_fee_paisa'), totalPaisa: num('total_paisa'),
+    backUrl: `/order/${encodeURIComponent(String(o.order_no))}?t=${encodeURIComponent(token)}`,
+  });
+  return c.html(html, 200, { 'Content-Security-Policy': INVOICE_CSP, 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' });
 });
 
 pages.get('/track', async c => {
@@ -350,9 +383,31 @@ pages.get('/wishlist', async c => {
   return render(c, sh, { title: 'Wishlist', path: '/wishlist', tab: 'wishlist', noindex: true, children: <WishlistPage items={items} /> });
 });
 
+/** A coupon as a member reads it: "10% ছাড়", "৳1,000-এর বেশি অর্ডারে · ৩১/১২/২০২৬ পর্যন্ত". */
+function offerView(o: MemberOffer): AccountView['offers'][number] {
+  const label = o.kind === 'percent' ? `${o.value}% ছাড়${o.max_discount_paisa ? ` (সর্বোচ্চ ${formatTaka(o.max_discount_paisa)})` : ''}` : o.kind === 'fixed' ? `${formatTaka(o.value)} ছাড়` : 'ফ্রি ডেলিভারি';
+  const day = o.ends_at ? bdDate(new Date(o.ends_at)).split('-').reverse().join('/') : '';
+  return { code: o.code, label, detail: [o.min_subtotal_paisa ? `${formatTaka(o.min_subtotal_paisa)}-এর বেশি অর্ডারে` : '', day ? `${day} পর্যন্ত` : ''].filter(Boolean).join(' · ') };
+}
+
 pages.get('/account', async c => {
   const sh = await shell(c);
-  return render(c, sh, { title: 'Your account', path: '/account', tab: 'account', children: <AccountPage /> });
+  const id = await signedInAccountId(c);
+  const a = id ? await accountById(c.env.DB, id) : null;
+  const next = c.req.query('next') ?? '';
+  let view: AccountView | null = null;
+  if (a) {
+    const [orders, offers] = await Promise.all([accountOrders(c.env.DB, a.email), memberOffers(c.env.DB, new Date().toISOString())]);
+    view = {
+      account: publicAccount(a),
+      orders: orders.map(o => ({ orderNo: o.order_no, token: o.access_token, createdAt: o.created_at, status: o.status, totalPaisa: Number(o.total_paisa), items: Number(o.items), firstItem: o.first_item, image: o.image })),
+      offers: offers.map(offerView),
+    };
+  }
+  return render(c, sh, {
+    title: 'আমার অ্যাকাউন্ট', path: '/account', tab: 'account', noindex: true, scripts: ['/js/account.js'], styles: ['/css/account.css'], turnstileSiteKey: a ? undefined : c.env.TURNSTILE_SITE_KEY,
+    children: <AccountPage view={view} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} next={/^\/(?!\/)[\w\-/?=&.%]*$/.test(next) ? next : null} />,
+  });
 });
 
 pages.get('/contact', async c => {

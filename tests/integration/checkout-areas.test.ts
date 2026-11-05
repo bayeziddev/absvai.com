@@ -44,7 +44,7 @@ describe('checkout by delivery area', () => {
     const zones = await t.sql<{ name: string; eta_text: string }>('SELECT name, eta_text FROM delivery_zones ORDER BY sort_order, id');
     expect(zones).toEqual([
       { name: 'ঢাকা সিটির ভিতরে', eta_text: '১–২ দিন' },
-      { name: 'ঢাকার আশেপাশে (সাভার, গাজীপুর, নারায়ণগঞ্জ)', eta_text: '২–৩ দিন' },
+      { name: 'ঢাকার আশেপাশে', eta_text: '২–৩ দিন' },
       { name: 'ঢাকার বাইরে', eta_text: '৩–৫ দিন' },
     ]);
   });
@@ -54,7 +54,7 @@ describe('checkout by delivery area', () => {
     const outside = await zoneId('ঢাকার বাইরে');
     const q = (await t.json('/api/checkout/quote', { method: 'POST', body: { lines, zoneId: outside, withAreas: true, paymentMethod: 'cod' } })).body;
     expect(q.areas.map((a: { name: string; chargePaisa: number }) => [a.name, a.chargePaisa])).toEqual([
-      ['ঢাকা সিটির ভিতরে', 7000], ['ঢাকার আশেপাশে (সাভার, গাজীপুর, নারায়ণগঞ্জ)', 10000], ['ঢাকার বাইরে', 13000],
+      ['ঢাকা সিটির ভিতরে', 7000], ['ঢাকার আশেপাশে', 10000], ['ঢাকার বাইরে', 13000],
     ]);
     expect(q.delivery).toMatchObject({ zoneName: 'ঢাকার বাইরে', chargePaisa: 13000 });
     expect(q.totalPaisa).toBe(q.subtotalPaisa + 13000);
@@ -143,7 +143,7 @@ describe('the shop is Vandar Mart', () => {
     expect(home).not.toMatch(/Abs Vai|ABS VAI/); // (the test site's own address is absvai.test)
     expect(home).toContain('placeholder="Search products"');
     const co = await (await t.fetch('/checkout')).text();
-    for (const text of ['মোবাইল নম্বর', 'আপনার নাম', 'ডেলিভারি এলাকা', 'পুরো ঠিকানা', 'পেমেন্ট', 'ক্যাশ অন ডেলিভারি', 'সর্বমোট', 'অর্ডার কনফার্ম করুন']) expect(co).toContain(text);
+    for (const text of ['অর্ডার সম্পন্ন করুন', 'নিরাপদ অর্ডার', 'আপনার তথ্য', 'আপনার নাম', 'মোবাইল নম্বর', 'ডেলিভারি ঠিকানা', 'সম্পূর্ণ ঠিকানা', 'অতিরিক্ত নোট', 'পেমেন্ট', 'ক্যাশ অন ডেলিভারি', 'অর্ডারের বিবরণ', 'ডেলিভারি চার্জ', 'সারা বাংলাদেশ', '৳১৩০', 'কুপন কোড', 'পণ্যের মূল্য', 'সর্বমোট', 'অর্ডার কনফার্ম করুন']) expect(co).toContain(text);
     expect(co).not.toContain('কাছের পরিচিত স্থান');
     expect(co).not.toContain('name="landmark"');
     expect(await t.sql("SELECT value FROM settings WHERE key = 'notify_email'")).toEqual([{ value: 'absvai1020@gmail.com' }]);

@@ -117,6 +117,19 @@ export function testMail(shop: ShopInfo): Mail {
 
 // ───────────── To the customer ─────────────
 
+/** The 6-digit code to open an account or sign in (Bangla first, a line of English for anyone who prefers it). */
+export function accountCode(shop: ShopInfo, code: string, name: string | null, signUp: boolean): Mail {
+  const title = signUp ? 'আপনার অ্যাকাউন্ট খোলার কোড' : 'সাইন ইন করার কোড';
+  const box = `<p style="margin:6px 0 16px;font:800 34px/1.1 Arial,Helvetica,sans-serif;letter-spacing:8px;color:${C.chili};background:${C.cream};border:1px dashed ${C.line};border-radius:12px;padding:14px 0;text-align:center">${h(code)}</p>`;
+  return {
+    subject: `${code} · ${shop.store} ${signUp ? 'অ্যাকাউন্ট খোলার' : 'সাইন ইন'} কোড`,
+    html: layout(shop, title, `${heading(title)}${p(`${name ? `${h(name)}, ` : ''}নিচের ৬ সংখ্যার কোডটি ওয়েবসাইটে লিখুন:`)}${box}`
+      + p('কোডটি ১০ মিনিট কাজ করবে। আপনি না চাইলে এই ইমেইলটি এড়িয়ে যান: কোড ছাড়া কেউ আপনার অ্যাকাউন্টে ঢুকতে পারবে না।')
+      + `<p style="margin:0;font-size:13px;line-height:1.5;color:${C.muted}">Your ${h(shop.store)} code is ${h(code)}. It works for 10 minutes. If you did not ask for it, ignore this email.</p>`),
+    text: `${title}\n\n${name ? `${name}, ` : ''}নিচের কোডটি ওয়েবসাইটে লিখুন: ${code}\n\nকোডটি ১০ মিনিট কাজ করবে। আপনি না চাইলে এই ইমেইলটি এড়িয়ে যান।\n\nYour ${shop.store} code is ${code}. It works for 10 minutes.`,
+  };
+}
+
 export function customerReceipt(shop: ShopInfo, o: OrderView): Mail {
   return {
     subject: `We got your order ${o.orderNo} · ${shop.store}`,

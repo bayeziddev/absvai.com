@@ -23,7 +23,7 @@ export async function coupons(v) {
   const write = can('catalog:write');
   v.innerHTML = `<div class="page-head"><div><h1>Coupons</h1><p>Customers type the code at checkout and see the discount before ordering. A landing page can apply a coupon for everyone who orders there.</p></div>${write ? '<button class="btn btn-primary" id="new">+ New coupon</button>' : ''}</div>
     ${list.length ? `<div class="table-wrap"><table><thead><tr><th>Code</th><th>Gives</th><th>Dates</th><th class="right">Used</th><th class="right">Orders</th><th class="right">Discount given</th><th class="right">Sales</th><th>Status</th><th></th></tr></thead><tbody>
-      ${list.map(c => { const [b, label] = state(c); return `<tr><td><b class="mono">${esc(c.code)}</b>${c.note ? `<br><span class="small muted">${esc(c.note)}</span>` : ''}</td><td>${esc(what(c))}</td>
+      ${list.map(c => { const [b, label] = state(c); return `<tr><td><b class="mono">${esc(c.code)}</b>${c.note ? `<br><span class="small muted">${esc(c.note)}</span>` : ''}${c.for_members ? '<br><span class="badge b-green">Members see it</span>' : ''}</td><td>${esc(what(c))}</td>
         <td class="small">${c.starts_at || c.ends_at ? `${c.starts_at ? date(bdDay(c.starts_at)) : 'Now'} → ${c.ends_at ? date(bdDay(c.ends_at)) : 'no end'}` : 'Always'}</td>
         <td class="right">${c.used_count}${c.usage_limit ? ` / ${c.usage_limit}` : ''}</td><td class="right">${c.orders}</td><td class="right">${taka(c.discount_paisa)}</td><td class="right">${taka(c.revenue_paisa)}</td>
         <td>${badge(b)} ${esc(label)}</td>
@@ -53,7 +53,8 @@ function editCoupon(c, done) {
     <div class="grid-2"><label class="f">Starts on <span class="help">Empty: from now.</span><input id="starts" type="date" value="${bdDay(c?.starts_at)}"></label><label class="f">Ends on <span class="help">Empty: no end.</span><input id="ends" type="date" value="${bdDay(c?.ends_at)}"></label></div>
     <div class="grid-2"><label class="f">Total uses <span class="help">Empty: no limit.</span><input id="limit" type="number" min="1" value="${c?.usage_limit ?? ''}"></label><label class="f">Uses per customer <span class="help">By mobile number. 1 = once each.</span><input id="per" type="number" min="1" value="${c?.per_phone_limit ?? ''}"></label></div>
     <label class="f">Note for the team (optional)<input id="note" maxlength="200" value="${esc(c?.note ?? '')}" placeholder="e.g. Facebook ad, November"></label>
-    <label class="check"><input type="checkbox" id="active" ${c ? (c.is_active ? 'checked' : '') : 'checked'}> Working (customers can use it)</label>`;
+    <label class="check"><input type="checkbox" id="active" ${c ? (c.is_active ? 'checked' : '') : 'checked'}> Working (customers can use it)</label>
+    <label class="check"><input type="checkbox" id="members" ${c?.for_members ? 'checked' : ''}> Show it to signed-in customers <span class="help">On their account page under “আমার অফার”, with a copy button.</span></label>`;
   so.foot.innerHTML = '<span></span><button class="btn btn-primary" id="s">Save coupon</button>';
   const g = id => so.body.querySelector(`#${id}`);
   const sync = () => {
@@ -70,7 +71,7 @@ function editCoupon(c, done) {
       code: g('code').value, kind: k, value: k === 'fixed' ? toPaisa(g('value').value || '0') : Number(g('value').value || 0),
       maxDiscountPaisa: num(g('max').value) === null ? null : toPaisa(g('max').value), minSubtotalPaisa: num(g('min').value) === null ? 0 : toPaisa(g('min').value),
       startsOn: g('starts').value, endsOn: g('ends').value, usageLimit: num(g('limit').value) === null ? null : Number(g('limit').value), perPhoneLimit: num(g('per').value) === null ? null : Number(g('per').value),
-      note: g('note').value, isActive: g('active').checked,
+      note: g('note').value, isActive: g('active').checked, forMembers: g('members').checked,
     };
     await api(c ? `/coupons/${c.id}` : '/coupons', c ? 'PUT' : 'POST', body);
     toast('Coupon saved.'); so.close(); done();

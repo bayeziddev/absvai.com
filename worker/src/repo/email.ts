@@ -2,9 +2,10 @@
 export interface QueuedEmail { id: number; kind: string; to_email: string; subject: string; html: string; text: string; attempts: number }
 
 /** Queues an email; with a dedupe key the same order event never queues twice. */
-export async function queueEmail(db: D1Database, e: { kind: string; to: string; subject: string; html: string; text: string; orderId?: number | null; dedupeKey?: string | null; status?: 'queued' | 'skipped'; error?: string | null }): Promise<boolean> {
-  const r = await db.prepare('INSERT INTO email_log (kind, dedupe_key, to_email, subject, html, text, order_id, status, error) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(dedupe_key) DO NOTHING')
-    .bind(e.kind, e.dedupeKey ?? null, e.to, e.subject, e.html, e.text, e.orderId ?? null, e.status ?? 'queued', e.error ?? null).run();
+export async function queueEmail(db: D1Database, e: { kind: string; to: string; subject: string; html: string; text: string; orderId?: number | null; dedupeKey?: string | null; status?: 'queued' | 'skipped' | 'sent' | 'failed'; error?: string | null }): Promise<boolean> {
+  // An email sent straight away (status 'sent') is logged with its send time.
+  const r = await db.prepare("INSERT INTO email_log (kind, dedupe_key, to_email, subject, html, text, order_id, status, error, attempts, sent_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'sent' THEN strftime('%Y-%m-%dT%H:%M:%fZ','now') END) ON CONFLICT(dedupe_key) DO NOTHING")
+    .bind(e.kind, e.dedupeKey ?? null, e.to, e.subject, e.html, e.text, e.orderId ?? null, e.status ?? 'queued', e.error ?? null, e.status === 'sent' || e.status === 'failed' ? 1 : 0, e.status ?? 'queued').run();
   return (r.meta.changes ?? 0) > 0;
 }
 

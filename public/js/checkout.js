@@ -72,6 +72,7 @@ function bn(text) {
   if (line && stockBn(line[2]) !== line[2]) return `${line[1]}: ${stockBn(line[2])}।`;
   return stockBn(t);
 }
+const bnNum = t => String(t).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
 /** "1–2 days" → "১–২ দিন" (the shop may also write the time in Bangla already). */
 const bnDays = t => String(t ?? '').replace(/\bdays?\b/gi, 'দিন').replace(/\bhours?\b/gi, 'ঘণ্টা').replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
 
@@ -174,7 +175,7 @@ function renderSummary(q) {
     couponMsg.textContent = q.coupon ? `✓ ${q.coupon.code}: ${bn(q.coupon.label)}${q.coupon.discountPaisa ? ` (−${taka(q.coupon.discountPaisa)})` : ''}${q.coupon.note ? `। ${bn(q.coupon.note)}` : ''}` : bn(q.couponError ?? '');
   }
   const d = q.delivery;
-  const charge = a => (a.status === 'to_confirm' ? 'ফোনে জানানো হবে' : a.chargePaisa === 0 ? 'ফ্রি' : taka(a.chargePaisa));
+  const charge = a => (a.status === 'to_confirm' ? 'ফোনে জানাব' : a.chargePaisa === 0 ? 'ফ্রি' : bnNum(taka(a.chargePaisa)));
   for (const a of q.areas ?? []) { const el = form.querySelector(`[data-area-charge="${a.id}"]`); if (el) el.textContent = charge(a); }
   $('[data-delivery]').textContent = !d ? 'এলাকা বেছে নিন' : d.status === 'to_confirm' ? 'ফোনে জানানো হবে' : d.chargePaisa === 0 ? 'ফ্রি' : taka(d.chargePaisa);
   const box = $('[data-co-delivery]');
@@ -271,7 +272,6 @@ form.addEventListener('submit', async e => {
     if (!token) throw new Error(pd.turnstile ? CHECK_FAILED : 'চেকআউট চালু হয়নি। পেজটি রিলোড করে আবার চেষ্টা করুন।');
     const r = await api('/api/checkout/place', {
       phone: form.phone.value, name: form.name.value, zoneId: area(), addressLine: form.addressLine.value, note: form.note.value,
-      email: form.email.value.trim(), emailOffers: form.emailOffers.checked,
       paymentMethod: payment(), advanceTrxId: form.advanceTrxId?.value || null, advanceWallet: form.advanceWallet?.value || null,
       lines, token, utm: utm(), website: form.website?.value ?? '',
       couponCode: lastQuote?.coupon ? couponCode : null, landingPageId: pd.landingPageId ?? null,
@@ -288,6 +288,25 @@ form.addEventListener('submit', async e => {
   }
 });
 
+// ── Signed in: name, mobile, the last address and area fill in by themselves; the receipt goes to the account email ──
+async function fillFromAccount() {
+  const note = $('[data-co-account]');
+  if (!/(^|;\s*)vm_in=1/.test(document.cookie)) {
+    if (note && !onLanding) { note.hidden = false; note.innerHTML = 'অ্যাকাউন্ট আছে? <a href="/account?next=/checkout' + encodeURIComponent(location.search) + '">সাইন ইন করুন</a>, আপনার তথ্য নিজে থেকেই বসে যাবে। অ্যাকাউন্ট ছাড়াও অর্ডার করা যায়।'; }
+    return;
+  }
+  let a = null;
+  try { a = (await (await fetch('/api/account/me', { credentials: 'same-origin' })).json()).account; } catch { /* order as a guest */ }
+  if (!a) return;
+  if (!form.name.value) form.name.value = a.name;
+  if (!form.phone.value && a.phone) form.phone.value = a.phone;
+  if (!form.addressLine.value && a.addressLine) form.addressLine.value = a.addressLine;
+  const r = a.zoneId && form.querySelector(`input[name=zoneId][value="${a.zoneId}"]`);
+  if (r && !area()) { r.checked = true; areaChanged(); }
+  if (note) { note.hidden = false; note.className = 'co-account ok'; note.textContent = `✓ ${a.name} হিসেবে অর্ডার করছেন। রসিদ ও আপডেট যাবে ${a.email}-এ।`; }
+  if (validPhone()) captureSoon();
+}
+
 // ── Boot: the prices and the delivery charges come from one quote; nothing else to load ──
 async function boot() {
   if (!lines.length) {
@@ -295,6 +314,7 @@ async function boot() {
     return;
   }
   refreshQuote();
+  fillFromAccount();
   // Without a Turnstile site key (local development) the session starts straight away.
   if (!pd.turnstile) startSession('');
 }

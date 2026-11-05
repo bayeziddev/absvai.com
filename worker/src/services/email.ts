@@ -8,7 +8,9 @@
  * - the customer, if they gave an email at checkout: the receipt, the invoice at confirmation, "on the way", "delivered";
  * - customers who ticked "email me offers": the offers the owner sends.
  * Until the shop's own domain is verified in Resend, Resend only delivers to the account's own address, so emails to
- * customers are skipped (and say why) while the sender is still the Resend test address.
+ * customers are skipped (and say why) while the sender is still the Resend test address. Once the deploy finds the
+ * domain verified it sets EMAIL_DOMAIN, and emails come from "<shop> <hello@domain>" with replies going to the owner's
+ * own inbox (Settings → Emails → reply-to, or the alerts address): Resend cannot send as a gmail.com address itself.
  */
 import type { Env } from '../env';
 import { hmac, signingKey, timingSafeEqual } from '../lib/crypto';
@@ -26,9 +28,21 @@ const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
 
 export const emailConnected = (env: Env) => Boolean(env.RESEND_API_KEY);
 export const validEmail = (s: string) => s.length <= 120 && EMAIL_RE.test(s);
-/** Resend's test sender (onboarding@resend.dev) can only deliver to the Resend account's own email address. */
-const senderOf = (s: Record<string, string>) => (s.email_from || `${storeName(s)} <${DEFAULT_FROM_ADDRESS}>`).trim();
-export const canEmailCustomers = (settings: Record<string, string>) => !/@resend\.dev>?\s*$/i.test(senderOf(settings));
+const TEST_SENDER = /@resend\.dev>?\s*$/i;
+/**
+ * Who emails come from: the address set in Settings, else the shop's verified domain (EMAIL_DOMAIN), else Resend's
+ * test sender (onboarding@resend.dev), which can only deliver to the Resend account's own email address.
+ */
+export function senderOf(s: Record<string, string>, env?: Pick<Env, 'EMAIL_DOMAIN'>): string {
+  const set = (s.email_from || '').trim();
+  if (set && !TEST_SENDER.test(set)) return set;
+  const domain = env?.EMAIL_DOMAIN?.trim();
+  if (domain && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) return `${storeName(s)} <hello@${domain}>`;
+  return set || `${storeName(s)} <${DEFAULT_FROM_ADDRESS}>`;
+}
+export const canEmailCustomers = (settings: Record<string, string>, env?: Pick<Env, 'EMAIL_DOMAIN'>) => !TEST_SENDER.test(senderOf(settings, env));
+/** Replies go to the owner's own inbox: the reply-to set in Settings, else the alerts address (e.g. their Gmail). */
+const replyToOf = (s: Record<string, string>) => [s.email_reply_to, s.notify_email].map(x => (x || '').trim()).find(validEmail) ?? null;
 const on = (settings: Record<string, string>, key: string) => settings[key] !== '0';
 
 export function shopInfo(env: Env, s: Record<string, string>): T.ShopInfo {
@@ -62,7 +76,7 @@ async function toOwner(env: Env, s: Record<string, string>, kind: string, mail: 
 }
 
 async function toCustomer(env: Env, s: Record<string, string>, kind: string, to: string, mail: T.Mail, o: { orderId?: number; dedupeKey?: string } = {}) {
-  const ok = canEmailCustomers(s);
+  const ok = canEmailCustomers(s, env);
   await queueEmail(env.DB, { kind, to, ...mail, orderId: o.orderId, dedupeKey: o.dedupeKey, status: ok ? 'queued' : 'skipped', error: ok ? null : 'Verify your own domain in Resend (Admin → Emails) to email customers.' });
 }
 
@@ -163,8 +177,8 @@ export async function flushEmails(env: Env, limit = 20): Promise<{ sent: number;
     return out;
   }
   const s = await loadSettings(env.DB);
-  const from = senderOf(s);
-  const replyTo = (s.email_reply_to || '').trim();
+  const from = senderOf(s, env);
+  const replyTo = replyToOf(s) ?? '';
   for (const [i, e] of queue.entries()) {
     if (i) await new Promise(r => setTimeout(r, 550));
     let res: Response;
@@ -186,6 +200,32 @@ export async function flushEmails(env: Env, limit = 20): Promise<{ sent: number;
     out.failed++;
   }
   return out;
+}
+
+/**
+ * Sends one email straight away (a sign-in code cannot wait for the queue). The log keeps the line but never the body,
+ * so nobody in the admin can read a customer's code.
+ */
+export async function sendNow(env: Env, s: Record<string, string>, kind: string, to: string, mail: T.Mail): Promise<{ ok: true } | { ok: false; reason: 'not_connected' | 'no_domain' | 'failed' }> {
+  if (!env.RESEND_API_KEY) return { ok: false, reason: 'not_connected' };
+  if (!canEmailCustomers(s, env)) return { ok: false, reason: 'no_domain' };
+  const replyTo = replyToOf(s);
+  let status: 'sent' | 'failed' = 'failed';
+  let error: string | null = null;
+  try {
+    const res = await fetch(RESEND_URL, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ from: senderOf(s, env), to: [to], subject: mail.subject, html: mail.html, text: mail.text, ...(replyTo ? { reply_to: replyTo } : {}), tags: [{ name: 'kind', value: kind }] }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { message?: string; name?: string };
+    if (res.ok) status = 'sent';
+    else error = `Resend ${res.status}: ${body.message ?? body.name ?? 'error'}`.slice(0, 500);
+  } catch (err) {
+    error = `Could not reach Resend: ${err instanceof Error ? err.message : err}`;
+  }
+  await queueEmail(env.DB, { kind, to, subject: mail.subject.replace(/\d{6}/g, '••••••'), html: '', text: '', status, error }).catch(() => false);
+  return status === 'sent' ? { ok: true } : { ok: false, reason: 'failed' };
 }
 
 /** Old email bodies are dropped after 60 days (the log line stays). */

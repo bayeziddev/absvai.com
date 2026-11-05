@@ -87,6 +87,9 @@ jobs:
         env:
           # The checkout's human check (Turnstile) must allow the shop's domain; the script adds it to the widget.
           TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+          # Email to customers needs the shop's domain verified in Resend; the script checks it (and adds its DNS records).
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || secrets.RESEND_API || secrets.RESEND_KEY || secrets.RESEND }}
+          EMAIL_DOMAIN: ${{ vars.EMAIL_DOMAIN }}
         run: node scripts/ensure-cloudflare-resources.mjs
 
       - name: Build static assets
@@ -121,6 +124,7 @@ jobs:
           # Email (Resend). Also accepts the secret under a similar name.
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || secrets.RESEND_API || secrets.RESEND_KEY || secrets.RESEND }}
           SITE_URL: ${{ steps.resources.outputs.site_url }}
+          EMAIL_DOMAIN: ${{ steps.resources.outputs.email_domain }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
         run: |
           secrets_file="$RUNNER_TEMP/worker-secrets.json"
@@ -131,6 +135,8 @@ jobs:
           # Links in SMS, emails, the sitemap and canonical tags use the shop's domain (or workers.dev until it is attached).
           extra=()
           [ -n "$SITE_URL" ] && extra=(--var "SITE_URL:$SITE_URL")
+          # Emails to customers come from the shop's domain once it is verified in Resend.
+          [ -n "$EMAIL_DOMAIN" ] && extra+=(--var "EMAIL_DOMAIN:$EMAIL_DOMAIN")
           npx wrangler deploy -c worker/wrangler.toml --secrets-file "$secrets_file" "${extra[@]}"
 
       - name: Smoke test the live site

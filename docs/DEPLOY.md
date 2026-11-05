@@ -62,6 +62,24 @@ then open Cloudflare dashboard → **Turnstile** → your widget → **Hostname 
 `www.vandarmart.com`. Until a domain is listed there, the checkout on it says the security check could not start and offers
 "Order on WhatsApp" instead.
 
+### 4. Email to customers (Resend)
+Customer emails (sign-in codes, receipts, offers) need the shop's domain verified in Resend; Resend cannot send as a
+gmail.com address. The domain `vandarmart.com` is already added in Resend (region Tokyo). With the `RESEND_API_KEY` secret,
+each deploy checks it: if it is not verified yet it adds its DNS records to the Cloudflare zone (needs **Zone → DNS → Edit**
+on the API token) and asks Resend to check them; once verified, the deploy sets `EMAIL_DOMAIN`, so emails come from
+`Vandar Mart <hello@vandarmart.com>` with replies to the owner's Gmail. If the token cannot edit DNS, the run summary lists
+the records to add by hand in **Cloudflare → vandarmart.com → DNS** (then deploy again):
+
+| Type | Name | Value |
+|---|---|---|
+| TXT | `resend._domainkey` | the DKIM key shown in Resend → Domains → vandarmart.com |
+| MX | `send` | `feedback-smtp.ap-northeast-1.amazonses.com` (priority 10) |
+| TXT | `send` | `v=spf1 include:amazonses.com ~all` |
+| CNAME | `rsend` | `send.forge.rmta.net` (DNS only, not proxied) |
+
+If the Resend key may only send (not read domains), verify the domain in Resend and set the repository **variable**
+`EMAIL_DOMAIN` = `vandarmart.com` (GitHub → Settings → Secrets and variables → Actions → Variables).
+
 ## First run
 1. Push (or press **Run workflow**). The run summary lists the D1/KV/R2 ids, whether each was created, the live URL and the smoke
    test results.
