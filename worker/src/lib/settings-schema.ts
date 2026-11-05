@@ -78,6 +78,19 @@ function validatePromo(v: string): string | null {
   return b === null ? null : bannerProblem(b, 'The second banner');
 }
 
+/** The "For small food businesses" band: an image, a few lines of text, three feature ticks and two buttons. */
+function validateBizBand(v: string): string | null {
+  const b = JSON.parse(v || 'null') as unknown;
+  if (b === null) return null;
+  if (typeof b !== 'object' || Array.isArray(b)) return 'The food-business banner is not valid.';
+  const o = b as Record<string, unknown>;
+  const str = (x: unknown, max: number) => x === undefined || x === null || (typeof x === 'string' && x.length <= max);
+  if (o.enabled !== undefined && typeof o.enabled !== 'boolean') return 'The food-business banner on/off value is not valid.';
+  if (!str(o.kicker, 60) || !str(o.title, 120) || !str(o.cta1Text, 30) || !str(o.cta2Text, 30) || !str(o.cta1Href, 300) || !str(o.cta2Href, 300) || !str(o.image, 500)) return 'The food-business banner has text that is too long.';
+  if (o.chips !== undefined && (!Array.isArray(o.chips) || o.chips.length > 3 || o.chips.some(c => typeof c !== 'string' || c.length > 80))) return 'The food-business banner feature list is not valid.';
+  return null;
+}
+
 export const TRACKING_FORMATS = {
   gtm_id: /^GTM-[A-Z0-9]{4,10}$/,
   pixel_id: /^\d{10,20}$/,
@@ -97,6 +110,7 @@ export const SETTINGS: SettingDef[] = [
   { key: 'company_address', group: 'store', label: 'Company address (invoices)', kind: 'longtext' },
   { key: 'default_banners', group: 'store', label: 'Homepage banners', kind: 'json', validate: validateBanners },
   { key: 'promo_banner', group: 'store', label: 'Second banner', kind: 'json', validate: validatePromo },
+  { key: 'biz_band', group: 'store', label: 'Food-business banner', kind: 'json', validate: validateBizBand },
   { key: 'popup_banner', group: 'store', label: 'Popup banner', kind: 'json', validate: validatePopup },
 
   { key: 'brand_logo_url', group: 'branding', label: 'Logo', kind: 'url', validate: re(/^\/media\/brand\/[\w-]+\.(png|webp|svg|jpg)$/, 'Upload the logo here instead of pasting a link.') },
@@ -166,7 +180,7 @@ export const SECRET_KEYS = new Set(SETTINGS.filter(s => s.kind === 'secret').map
 
 /** Changing one of these changes what every cached page shows. */
 export const SITEWIDE_KEYS = new Set(['store_name', 'tagline', 'announcement', 'support_phone', 'whatsapp_number', 'messenger_page', 'social_links',
-  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner', 'popup_banner', 'sellers_open']);
+  'brand_logo_url', 'brand_colors', 'gtm_id', 'pixel_id', 'ga4_id', 'clarity_id', 'free_delivery_threshold_paisa', 'default_banners', 'promo_banner', 'biz_band', 'popup_banner', 'sellers_open']);
 
 export function validateSetting(def: SettingDef, value: string): string | null {
   switch (def.kind) {

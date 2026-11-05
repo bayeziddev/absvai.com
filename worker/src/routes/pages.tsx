@@ -38,7 +38,7 @@ import { signedInAccountId } from './context';
 import type { Banner } from '../views/components';
 import { Layout, type LayoutProps } from '../views/layout';
 import {
-  AccountPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
+  AccountPage, type BizBand, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
   STATUS_BN, type AccountView, type CheckoutArea,
 } from '../views/pages';
 
@@ -113,7 +113,7 @@ pages.get('/', async c => {
       { '@context': 'https://schema.org', '@type': 'WebSite', name: storeName(s), url: c.env.SITE_URL, potentialAction: { '@type': 'SearchAction', target: `${c.env.SITE_URL}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },
     ],
     children: <HomePage banners={banners} categories={carousel} seasonal={seasonal} activeSeason={sh.activeSeason} inSeason={inSeason.items} featured={featured.items} originals={originals.items}
-      deals={deals.items} newArrivals={newest.items} promo={settingJson<Banner | null>(s, 'promo_banner', null)} settings={s} />,
+      deals={deals.items} newArrivals={newest.items} promo={settingJson<Banner | null>(s, 'promo_banner', null)} bizBand={settingJson<BizBand | null>(s, 'biz_band', null)} settings={s} />,
   }, { cache: tags });
 });
 

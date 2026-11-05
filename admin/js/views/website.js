@@ -2,6 +2,13 @@
 // shop name and logo, the running message, the homepage banners, the popup banner and the second banner.
 import { api, busy, can, esc, toast } from '../app.js';
 import { bannerEditor, linkOptions } from './banners.js';
+import { appendImage, compressImage } from './products.js';
+
+// Defaults for the "For small food businesses" band, matching the storefront (worker/src/views/pages.tsx).
+const BIZ = { kicker: 'For small food businesses', title: 'Make fuchka, chotpoti and chanachur to sell',
+  chips: ['Presses and sealers', '42 Item Master Masala in 1kg packs', 'Wholesale prices on 5+ packs'],
+  cta1Text: 'See machines', cta1Href: '/c/food-business-machines', cta2Text: 'Bulk & dealer inquiry', cta2Href: '/contact#wholesale',
+  image: '/img/photos/sq/cat-press.webp' };
 
 const parse = (raw, fallback) => { try { return JSON.parse(raw || '') ?? fallback; } catch { return fallback; } };
 
@@ -10,6 +17,8 @@ export async function website(v) {
   const write = can('settings:write');
   const val = d.values;
   const pop = parse(val.popup_banner, null) ?? {};
+  const biz = parse(val.biz_band, null) ?? {};
+  const bizChips = Array.isArray(biz.chips) ? biz.chips : BIZ.chips;
   const dis = write ? '' : 'disabled';
   const opt = (value, label, now) => `<option value="${value}" ${String(now) === String(value) ? 'selected' : ''}>${label}</option>`;
   v.innerHTML = `<div class="page-head"><div><h1>Website & banners</h1><p>${write ? 'Your shop name, logo, the homepage pictures and the popup. Change what you need, then press <b>Save</b> at the bottom.' : 'Read only. Ask a Manager or the Super Admin to change the website.'}</p></div>
@@ -46,7 +55,29 @@ export async function website(v) {
         </div>
       </div>
 
-      <div class="card"><h2>Second banner</h2><p class="small muted">One banner further down the homepage, with a square photo on its right.</p><div id="bn-promo" class="bn-list"></div></div>
+      <div class="card"><h2>&ldquo;For small food businesses&rdquo; banner</h2>
+        <p class="small muted">The dark banner further down the homepage with the machine photo. Change the picture, the words and the two buttons here. It shows <b>right after you press Save</b>, no dates needed.</p>
+        <label class="check ws-switch"><input type="checkbox" id="biz-on" ${biz.enabled === false ? '' : 'checked'} ${dis}> Show this banner</label>
+        <div class="row ws-logo" style="align-items:center">
+          <img id="biz-img" src="${esc(biz.image || BIZ.image)}" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">
+          ${write ? `<label class="btn btn-outline btn-sm">Change photo<input type="file" id="biz-file" accept="image/png,image/webp,image/jpeg" hidden></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="biz-img-reset">Use the default photo</button>` : ''}
+          <span class="small muted">A clear square photo of the product looks best (1000 px or bigger).</span>
+        </div>
+        <div class="grid-2">
+          <label class="f">Small line above<input id="biz-kicker" value="${esc(biz.kicker ?? BIZ.kicker)}" maxlength="60" ${dis}></label>
+          <label class="f">Heading<input id="biz-title" value="${esc(biz.title ?? BIZ.title)}" maxlength="120" ${dis}></label>
+        </div>
+        <div class="grid-3">${[0, 1, 2].map(i => `<label class="f">Feature tick ${i + 1}<input id="biz-chip-${i}" value="${esc(bizChips[i] ?? '')}" maxlength="80" placeholder="Leave empty to hide" ${dis}></label>`).join('')}</div>
+        <div class="grid-2">
+          <label class="f">Button 1 text<input id="biz-cta1" value="${esc(biz.cta1Text ?? BIZ.cta1Text)}" maxlength="30" ${dis}></label>
+          <label class="f">Button 1 link<input id="biz-cta1h" value="${esc(biz.cta1Href ?? BIZ.cta1Href)}" maxlength="300" placeholder="/c/food-business-machines" ${dis}></label>
+        </div>
+        <div class="grid-2">
+          <label class="f">Button 2 text <span class="help">Leave empty to show one button.</span><input id="biz-cta2" value="${esc(biz.cta2Text ?? BIZ.cta2Text)}" maxlength="30" ${dis}></label>
+          <label class="f">Button 2 link<input id="biz-cta2h" value="${esc(biz.cta2Href ?? BIZ.cta2Href)}" maxlength="300" placeholder="/contact#wholesale" ${dis}></label>
+        </div>
+      </div>
     </form>
     ${write ? '<div class="save-bar"><button class="btn btn-primary" id="save">Save</button></div>' : ''}`;
 
@@ -83,6 +114,21 @@ export async function website(v) {
   });
   if ($('#logo-off')) busy($('#logo-off'), async () => { await api('/settings', 'PUT', { brand_logo_url: '' }); toast('Logo removed: the shop name is shown instead.'); website(v); });
 
+  let bizImage = biz.image || BIZ.image;
+  $('#biz-file')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const photo = await compressImage(file, { max: 2400, copies: [480, 960, 1600] });
+      const fd = new FormData();
+      appendImage(fd, photo);
+      bizImage = (await api('/banner-image', 'POST', fd)).url;
+      $('#biz-img').src = bizImage;
+      toast('Photo ready. Press Save to show it on the shop.');
+    } catch (err) { toast(err.message, true); }
+  });
+  $('#biz-img-reset')?.addEventListener('click', () => { bizImage = BIZ.image; $('#biz-img').src = BIZ.image; });
+
   busy($('#save'), async () => {
     const name = $('[name=store_name]').value.trim();
     if (!name) throw new Error('Type your shop name.');
@@ -93,6 +139,11 @@ export async function website(v) {
       default_banners: JSON.stringify(home.value()),
       promo_banner: JSON.stringify(promo.value()[0] ?? null),
       popup_banner: JSON.stringify(popup ? { ...popup, enabled: $('#pop-on').checked, delay: Number($('#pop-delay').value), frequency: $('#pop-freq').value, where: $('#pop-where').value } : null),
+      biz_band: JSON.stringify({
+        enabled: $('#biz-on').checked, kicker: $('#biz-kicker').value.trim(), title: $('#biz-title').value.trim(),
+        chips: [0, 1, 2].map(i => $(`#biz-chip-${i}`).value.trim()).filter(Boolean),
+        cta1Text: $('#biz-cta1').value.trim(), cta1Href: $('#biz-cta1h').value.trim(), cta2Text: $('#biz-cta2').value.trim(), cta2Href: $('#biz-cta2h').value.trim(), image: bizImage,
+      }),
     };
     const r = await api('/settings', 'PUT', body);
     toast(r.changed.length ? `Saved. The shop shows the change in a few seconds.` : 'Saved.');

@@ -16,11 +16,43 @@ import { orderAddress } from '../lib/print';
 // ───────────── Home ─────────────
 
 /** The business band's photo: a press making chanachur. */
-const BIZ_PHOTO = '/img/photos/sq/cat-press.webp';
+/** The "For small food businesses" band, editable from Website & banners (settings key biz_band). Unset fields fall back to these. */
+export interface BizBand { enabled?: boolean; kicker?: string; title?: string; chips?: string[]; cta1Text?: string; cta1Href?: string; cta2Text?: string; cta2Href?: string; image?: string }
+const BIZ_DEFAULTS = {
+  kicker: 'For small food businesses',
+  title: 'Make fuchka, chotpoti and chanachur to sell',
+  chips: ['Presses and sealers', '42 Item Master Masala in 1kg packs', 'Wholesale prices on 5+ packs'],
+  cta1Text: 'See machines', cta1Href: '/c/food-business-machines',
+  cta2Text: 'Bulk & dealer inquiry', cta2Href: '/contact#wholesale',
+  image: '/img/photos/sq/cat-press.webp',
+};
+const bizHref = (h: string | undefined) => (typeof h === 'string' && (h.startsWith('/') || h.startsWith('https://')) ? h : '/shop');
+
+function BizBandSection({ b }: { b: BizBand | null }) {
+  if (b?.enabled === false) return null;
+  const v = { ...BIZ_DEFAULTS, ...(b ?? {}) };
+  const chips = (Array.isArray(v.chips) ? v.chips : BIZ_DEFAULTS.chips).map(c => String(c ?? '').trim()).filter(Boolean).slice(0, 3);
+  return (
+    <section class="section cv">
+      <div class="biz-band">
+        <div>
+          {v.kicker && <p class="biz-kicker">{v.kicker}</p>}
+          <h2 class="biz-title">{v.title || BIZ_DEFAULTS.title}</h2>
+          {chips.length > 0 && <ul class="chips">{chips.map(c => <CheckChip>{c}</CheckChip>)}</ul>}
+          <div class="biz-actions">
+            {v.cta1Text && <a class="btn btn-cta" href={bizHref(v.cta1Href)}>{v.cta1Text}</a>}
+            {v.cta2Text && <a class="btn btn-outline-light" href={bizHref(v.cta2Href)}>{v.cta2Text}</a>}
+          </div>
+        </div>
+        <img src={v.image || BIZ_DEFAULTS.image} srcset={srcsetOf(v.image || BIZ_DEFAULTS.image)} sizes={SIZES.bizBand} alt="" width="600" height="600" loading="lazy" decoding="async" />
+      </div>
+    </section>
+  );
+}
 
 export function HomePage(p: {
   banners: Banner[]; categories: CategoryNode[]; seasonal: Set<number>; activeSeason: { slug: string; name: string } | null;
-  inSeason: ProductCard[]; featured: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; settings: Record<string, string>;
+  inSeason: ProductCard[]; featured: ProductCard[]; originals: ProductCard[]; deals: ProductCard[]; newArrivals: ProductCard[]; promo: Banner | null; bizBand: BizBand | null; settings: Record<string, string>;
 }) {
   // The first row of products is on screen on a phone, so its photos load with the page. Sections further down are
   // drawn only as they scroll near (class "cv"), which keeps the first paint light.
@@ -54,24 +86,7 @@ export function HomePage(p: {
           <Grid items={p.deals} />
         </section>
       )}
-      <section class="section cv">
-        <div class="biz-band">
-          <div>
-            <p class="biz-kicker">For small food businesses</p>
-            <h2 class="biz-title">Make fuchka, chotpoti and chanachur to sell</h2>
-            <ul class="chips">
-              <CheckChip>Presses and sealers</CheckChip>
-              <CheckChip>42 Item Master Masala in 1kg packs</CheckChip>
-              <CheckChip>Wholesale prices on 5+ packs</CheckChip>
-            </ul>
-            <div class="biz-actions">
-              <a class="btn btn-cta" href="/c/food-business-machines">See machines</a>
-              <a class="btn btn-outline-light" href="/contact#wholesale">Bulk & dealer inquiry</a>
-            </div>
-          </div>
-          <img src={BIZ_PHOTO} srcset={srcsetOf(BIZ_PHOTO)} sizes={SIZES.bizBand} alt="" width="600" height="600" loading="lazy" decoding="async" />
-        </div>
-      </section>
+      <BizBandSection b={p.bizBand} />
       <PromoBanner b={p.promo} />
       {p.newArrivals.length > 0 && (
         <section class="section cv">
