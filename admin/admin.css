@@ -514,3 +514,9 @@ body:has(.over) .ai-fab, body:has(.over) .ai-panel, body:has(dialog[open]) .ai-f
 .qu-held { display: block; margin-top: 2px; }
 tr.qu-changed td { background: #FFF6DB; }
 tr.qu-changed { outline: 2px solid var(--turmeric); outline-offset: -2px; }
+/* Skeleton while a screen's data is on its way. */
+.skel { display: grid; gap: 12px; padding: 4px 0; }
+.skel i { display: block; border-radius: 10px; background: linear-gradient(90deg, #EFE7DA 25%, #F8F3EA 50%, #EFE7DA 75%); background-size: 200% 100%; animation: skel 1.1s linear infinite; }
+.skel-h { height: 28px; width: 40%; } .skel-row { height: 16px; } .skel-row.short { width: 60%; } .skel-box { height: 140px; }
+@keyframes skel { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel i { animation: none; } }

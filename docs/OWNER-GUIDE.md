@@ -96,10 +96,12 @@ customers' account pages (“আমার অফার”, with a copy button); 
 
 ## Customer accounts
 
-Customers can open an account at **/account** with their name, mobile number and email. There is no password: each time,
-a 6-digit code goes to their email (valid 10 minutes, 5 tries). The account page shows every order placed with that email
-(status, **Track** and **Invoice**), the coupons you show to members, and their details (name, mobile, address, offers
-on/off). At checkout their name, mobile, last address and delivery area fill in by themselves, and the receipt and updates go
+Customers open an account at **/account** with their name, mobile number, email and a password (at least 6 characters),
+straight away, with no code. They sign in with the email or the mobile number and the password. **Forgot password?** sends
+a 6-digit code to the email (valid 10 minutes, 5 tries) to choose a new one; that is the only time a code is needed. One
+account per email and per mobile number. The account page shows the orders placed while signed in (and, once the email
+was proven with a code, earlier orders with that email) with status, **Track** and **Invoice**, the coupons you show to
+members, and their details (name, mobile, address, offers on/off). At checkout their name, mobile, last address and delivery area fill in by themselves, and the receipt and updates go
 to their email. Customers can still order without an account.
 
 ## Reviews
@@ -186,7 +188,7 @@ once, while setting up.
 
 - **To you** (the address in “Send shop alerts to”, absvai1020@gmail.com): every new order, cancelled / returned / delivered
   orders, wholesale inquiries, and a summary every morning at about 12:05 am (yesterday’s orders and what needs your attention).
-- **To customers** with an account: the sign-in code, the receipt when they order, the **invoice** when you confirm, “on the
+- **To customers** with an account: the "forgot password" code, the receipt when they order, the **invoice** when you confirm, “on the
   way” with the courier and tracking ID, and “delivered”.
 - **Offers**: customers choose “email me offers” in their account. **Send an offer** emails them all; each email has an
   unsubscribe link and you get a copy.
@@ -194,9 +196,9 @@ once, while setting up.
 
 Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
 Actions); the deploy copies it to the Worker. Until your own domain is verified in **Resend → Domains**, Resend delivers only
-to the email address of the Resend account, so customer emails (and sign-in codes) are skipped and say so. vandarmart.com is
+to the email address of the Resend account, so customer emails (and "forgot password" codes) are skipped and say so. vandarmart.com is
 added in Resend; once its DNS records are in Cloudflare and Resend shows it verified, customer email switches on by itself
-within 30 minutes (no deploy needed); until then the account page says sign-in is coming soon: emails come from `Vandar Mart <hello@vandarmart.com>` and replies go to your Gmail (the alerts address).
+within 30 minutes (no deploy needed); opening an account and signing in work before that, only the "forgot password" code waits for it: emails come from `Vandar Mart <hello@vandarmart.com>` and replies go to your Gmail (the alerts address).
 Resend cannot send *as* a gmail.com address, so the sender is the shop's domain and replies go to Gmail. See docs/DEPLOY.md.
 
 ## Sellers (marketplace)

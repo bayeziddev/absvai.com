@@ -1,5 +1,6 @@
-// Account page: open an account or sign in with a 6-digit code sent to the email (no password), then the orders,
-// offers and details. All messages are in Bangla; the server's own messages already are.
+// Account page: sign in (email or mobile number and password), open an account (no code), or "forgot password" (a
+// 6-digit code by email, then a new password); then the orders, offers and details. Messages are in Bangla; the
+// server's own messages already are.
 import { toast } from './app.js';
 
 const page = document.querySelector('[data-account-page]');
@@ -16,79 +17,95 @@ async function send(path, method, body) {
   return data;
 }
 const bnDigits = s => String(s).replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)));
+const goNext = () => { location.href = page.dataset.next || '/account'; };
 
-// ── Signed out: email → code → in ──
-const form = page?.querySelector('[data-acct-form]');
-const codeForm = page?.querySelector('[data-code-form]');
-if (form && codeForm) {
-  let mode = 'signin';
-  let email = '';
-  let turnstileToken = '';
-  window.vmAccountTurnstile = t => { turnstileToken = t; };
-  const err = form.querySelector('[data-acct-error]');
-  const codeErr = codeForm.querySelector('[data-code-error]');
-  const sendBtn = form.querySelector('[data-acct-send]');
+// Turnstile (the invisible "I am human" check) for opening an account and for sending a reset code.
+const tokens = { signup: '', reset: '' };
+window.vmAccountTurnstile = t => { tokens.signup = t; };
+window.vmResetTurnstile = t => { tokens.reset = t; };
 
-  function setMode(m) {
-    mode = m;
-    page.querySelectorAll('[data-acct-tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.acctTab === m)));
-    form.querySelectorAll('[data-signup-only]').forEach(el => { el.hidden = m !== 'signup'; });
-    err.textContent = '';
+const forms = page ? Object.fromEntries([...page.querySelectorAll('[data-acct-form]')].map(f => [f.dataset.acctForm, f])) : {};
+if (forms.signin) {
+  const tabs = page.querySelector('.acct-tabs');
+  let resetEmail = '';
+  function show(name) {
+    Object.entries(forms).forEach(([k, f]) => { f.hidden = k !== name; });
+    tabs.hidden = name === 'forgot' || name === 'reset';
+    page.querySelectorAll('[data-acct-tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.acctTab === name)));
+    forms[name].querySelectorAll('[data-acct-error]').forEach(e => { e.textContent = ''; });
+    forms[name].querySelector('input:not([type=checkbox])')?.focus();
   }
-  page.querySelectorAll('[data-acct-tab]').forEach(t => t.addEventListener('click', () => setMode(t.dataset.acctTab)));
-  if (new URLSearchParams(location.search).get('signup') === '1') setMode('signup');
+  page.querySelectorAll('[data-acct-tab]').forEach(t => t.addEventListener('click', () => show(t.dataset.acctTab)));
+  if (new URLSearchParams(location.search).get('signup') === '1') show('signup');
+  page.querySelectorAll('[data-show-password]').forEach(c => c.addEventListener('change', () => {
+    c.closest('form').querySelectorAll('input[name=password]').forEach(i => { i.type = c.checked ? 'text' : 'password'; });
+  }));
+  page.querySelector('[data-forgot]').addEventListener('click', () => {
+    const login = forms.signin.login.value.trim();
+    if (login.includes('@')) forms.forgot.email.value = login;
+    show('forgot');
+  });
+  page.querySelectorAll('[data-back-signin]').forEach(b => b.addEventListener('click', () => show('signin')));
 
-  async function requestCode() {
-    const body = { email: form.email.value.trim(), mode, turnstileToken, offers: form.offers?.checked !== false };
-    if (mode === 'signup') Object.assign(body, { name: form.name.value.trim(), phone: bnDigits(form.phone.value.trim()) });
-    const r = await send('/api/account/code', 'POST', body);
-    email = r.email;
-    turnstileToken = '';
-    window.turnstile?.reset?.();
-    form.hidden = true;
-    codeForm.hidden = false;
-    page.querySelector('[data-acct-tabs], .acct-tabs')?.setAttribute('hidden', '');
-    codeForm.querySelector('[data-code-sent]').innerHTML = `<b>${email.replace(/[<>&"]/g, '')}</b>-এ একটি ৬ সংখ্যার কোড পাঠানো হয়েছে। ইমেইল খুলে কোডটি নিচে লিখুন।`
-      + (r.devCode ? `<br><small>(পরীক্ষার জন্য কোড: ${r.devCode})</small>` : '');
-    codeForm.code.value = '';
-    codeForm.code.focus();
+  /** Runs a form's request with its button busy and its error line filled in on failure. */
+  function handle(form, label, fn) {
+    const btn = form.querySelector('button[type=submit]');
+    const err = form.querySelector('[data-acct-error]');
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      err.textContent = '';
+      const was = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = label;
+      try { await fn(); } catch (x) { err.textContent = x.message; } finally { btn.disabled = false; btn.textContent = was; }
+    });
   }
 
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    err.textContent = '';
-    if (mode === 'signup' && form.name.value.trim().length < 2) { err.textContent = 'আপনার নাম লিখুন।'; form.name.focus(); return; }
-    if (mode === 'signup' && !/^(\+?88)?01[3-9]\d{8}$/.test(bnDigits(form.phone.value).replace(/[\s-]/g, ''))) { err.textContent = 'সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।'; form.phone.focus(); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(form.email.value.trim())) { err.textContent = 'সঠিক ইমেইল লিখুন, যেমন rahim@gmail.com'; form.email.focus(); return; }
-    sendBtn.disabled = true;
-    sendBtn.textContent = 'কোড পাঠানো হচ্ছে…';
-    try { await requestCode(); } catch (x) { err.textContent = x.message; } finally { sendBtn.disabled = false; sendBtn.textContent = 'ইমেইলে কোড পাঠান'; }
+  handle(forms.signin, 'সাইন ইন হচ্ছে…', async () => {
+    const f = forms.signin;
+    if (!f.login.value.trim() || !f.password.value) throw new Error('ইমেইল বা মোবাইল নম্বর আর পাসওয়ার্ড লিখুন।');
+    await send('/api/account/login', 'POST', { login: bnDigits(f.login.value.trim()), password: f.password.value });
+    goNext();
   });
 
-  codeForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    codeErr.textContent = '';
-    const code = bnDigits(codeForm.code.value).replace(/\D/g, '');
-    if (code.length !== 6) { codeErr.textContent = 'ইমেইলে আসা ৬ সংখ্যার কোডটি লিখুন।'; codeForm.code.focus(); return; }
-    const go = codeForm.querySelector('[data-code-go]');
-    go.disabled = true;
+  handle(forms.signup, 'অ্যাকাউন্ট খোলা হচ্ছে…', async () => {
+    const f = forms.signup;
+    if (f.name.value.trim().length < 2) { f.name.focus(); throw new Error('আপনার নাম লিখুন।'); }
+    if (!/^(\+?88)?01[3-9]\d{8}$/.test(bnDigits(f.phone.value).replace(/[\s-]/g, ''))) { f.phone.focus(); throw new Error('সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।'); }
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(f.email.value.trim())) { f.email.focus(); throw new Error('সঠিক ইমেইল লিখুন, যেমন rahim@gmail.com'); }
+    if (f.password.value.length < 6) { f.password.focus(); throw new Error('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন।'); }
     try {
-      await send('/api/account/verify', 'POST', { email, code });
-      const next = page.dataset.next;
-      location.href = next || '/account';
-    } catch (x) { codeErr.textContent = x.message; go.disabled = false; }
+      await send('/api/account/signup', 'POST', { name: f.name.value.trim(), phone: bnDigits(f.phone.value.trim()), email: f.email.value.trim(), password: f.password.value, offers: f.offers.checked, turnstileToken: tokens.signup });
+    } finally { tokens.signup = ''; window.turnstile?.reset?.(f.querySelector('.cf-turnstile')); }
+    goNext();
   });
-  // The code arrives as 6 digits: submit as soon as they are all there.
-  codeForm.code.addEventListener('input', () => { if (bnDigits(codeForm.code.value).replace(/\D/g, '').length === 6) codeForm.requestSubmit(); });
-  codeForm.querySelector('[data-code-again]').addEventListener('click', async () => {
-    codeErr.textContent = '';
-    try { await requestCode(); toast('নতুন কোড পাঠানো হয়েছে।'); } catch (x) { codeErr.textContent = x.message; }
+
+  async function requestReset() {
+    try {
+      const r = await send('/api/account/reset-code', 'POST', { email: resetEmail, turnstileToken: tokens.reset });
+      forms.reset.querySelector('[data-code-sent]').innerHTML = `<b>${resetEmail.replace(/[<>&"]/g, '')}</b>-এ অ্যাকাউন্ট থাকলে একটি ৬ সংখ্যার কোড পাঠানো হয়েছে। কোড আর নতুন পাসওয়ার্ড লিখুন। ইনবক্সে না পেলে Spam দেখুন।`
+        + (r.devCode ? `<br><small>(পরীক্ষার জন্য কোড: ${r.devCode})</small>` : '');
+    } finally { tokens.reset = ''; window.turnstile?.reset?.(forms.forgot.querySelector('.cf-turnstile')); }
+  }
+  handle(forms.forgot, 'কোড পাঠানো হচ্ছে…', async () => {
+    resetEmail = forms.forgot.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(resetEmail)) throw new Error('অ্যাকাউন্টের ইমেইলটি লিখুন, যেমন rahim@gmail.com');
+    await requestReset();
+    show('reset');
   });
-  codeForm.querySelector('[data-code-back]').addEventListener('click', () => {
-    codeForm.hidden = true;
-    form.hidden = false;
-    page.querySelector('.acct-tabs')?.removeAttribute('hidden');
-    form.email.focus();
+  handle(forms.reset, 'বদলানো হচ্ছে…', async () => {
+    const f = forms.reset;
+    const code = bnDigits(f.code.value).replace(/\D/g, '');
+    if (code.length !== 6) { f.code.focus(); throw new Error('ইমেইলে আসা ৬ সংখ্যার কোডটি লিখুন।'); }
+    if (f.password.value.length < 6) { f.password.focus(); throw new Error('নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন।'); }
+    await send('/api/account/reset', 'POST', { email: resetEmail, code, password: f.password.value });
+    toast('পাসওয়ার্ড বদলানো হয়েছে।');
+    goNext();
+  });
+  forms.reset.querySelector('[data-code-again]').addEventListener('click', async () => {
+    const err = forms.reset.querySelector('[data-acct-error]');
+    err.textContent = '';
+    try { await requestReset(); toast('নতুন কোড পাঠানো হয়েছে।'); } catch (x) { err.textContent = x.message; }
   });
 }
 

@@ -1,9 +1,12 @@
-/** Customer accounts (customer_accounts, account_codes; migration 0013): email-code sign-in, profile, orders, offers. */
+/**
+ * Customer accounts (customer_accounts, account_codes; migrations 0013, 0014): sign-up and sign-in with a password, the
+ * email code for "forgot password", profile, orders and offers.
+ */
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 
 export interface AccountRow {
   id: number; email: string; name: string; phone: string | null; address_line: string | null; zone_id: number | null; offers: number;
-  created_at: string; last_login_at: string | null;
+  created_at: string; last_login_at: string | null; password_hash: string | null; email_verified_at: string | null;
 }
 export interface CodeRow { email: string; code_hash: string; name: string | null; phone: string | null; offers: number; attempts: number; expires_at: string }
 
@@ -13,6 +16,38 @@ export function accountByEmail(db: D1Database, email: string): Promise<AccountRo
 
 export function accountById(db: D1Database, id: number): Promise<AccountRow | null> {
   return db.prepare('SELECT * FROM customer_accounts WHERE id = ?').bind(id).first<AccountRow>();
+}
+
+/** The account a mobile number (8801XXXXXXXXX) belongs to, for signing in with the mobile number. */
+export function accountByPhone(db: D1Database, phone: string): Promise<AccountRow | null> {
+  return db.prepare('SELECT * FROM customer_accounts WHERE phone = ? ORDER BY id LIMIT 1').bind(phone).first<AccountRow>();
+}
+
+/** A new account, signed in straight away (sign-up needs no code). Returns null if the email already has one. */
+export async function createAccount(db: D1Database, a: { email: string; name: string; phone: string; passwordHash: string; offers: boolean }): Promise<AccountRow | null> {
+  const r = await db.prepare(`INSERT INTO customer_accounts (email, name, phone, password_hash, offers, created_at, last_login_at) VALUES (?, ?, ?, ?, ?, ${NOW}, ${NOW})
+      ON CONFLICT(email) DO NOTHING RETURNING id`).bind(a.email, a.name, a.phone, a.passwordHash, a.offers ? 1 : 0).first<{ id: number }>();
+  if (!r) return null;
+  const row = (await accountById(db, r.id))!;
+  await linkCustomer(db, row);
+  return row;
+}
+
+export async function touchLogin(db: D1Database, id: number): Promise<void> {
+  await db.prepare(`UPDATE customer_accounts SET last_login_at = ${NOW} WHERE id = ?`).bind(id).run();
+}
+
+/** A new password after the email code: the email is now proven, and the code is used up. */
+export async function setPassword(db: D1Database, id: number, email: string, passwordHash: string): Promise<void> {
+  await db.batch([
+    db.prepare(`UPDATE customer_accounts SET password_hash = ?, email_verified_at = COALESCE(email_verified_at, ${NOW}), last_login_at = ${NOW} WHERE id = ?`).bind(passwordHash, id),
+    db.prepare('DELETE FROM account_codes WHERE email = ?').bind(email),
+  ]);
+}
+
+/** An order placed while signed in belongs to the account. */
+export async function linkOrderToAccount(db: D1Database, orderId: number, accountId: number): Promise<void> {
+  await db.prepare('UPDATE orders SET account_id = ? WHERE id = ?').bind(accountId, orderId).run();
 }
 
 /** A new code for this email (replacing an older one, with fresh tries), plus the sign-up details waiting for it. */
@@ -39,23 +74,6 @@ export async function deleteCode(db: D1Database, email: string): Promise<void> {
 /** Old codes nobody typed are removed by the cron. */
 export async function deleteExpiredCodes(db: D1Database, nowIso: string): Promise<void> {
   await db.prepare('DELETE FROM account_codes WHERE expires_at < ?').bind(nowIso).run();
-}
-
-/**
- * The right code was typed: the account is created (sign-up) or found (sign-in) and its sign-in time noted. The
- * customer's offers choice also goes on the shop's customer record for that mobile number, so offers emails reach them.
- */
-export async function signedIn(db: D1Database, a: { email: string; name: string | null; phone: string | null; offers: boolean }): Promise<AccountRow> {
-  const stmts = [
-    db.prepare(`INSERT INTO customer_accounts (email, name, phone, offers, created_at, last_login_at) VALUES (?, ?, ?, ?, ${NOW}, ${NOW})
-        ON CONFLICT(email) DO UPDATE SET last_login_at = ${NOW}, name = COALESCE(NULLIF(customer_accounts.name, ''), excluded.name), phone = COALESCE(customer_accounts.phone, excluded.phone)`)
-      .bind(a.email, a.name ?? a.email.split('@')[0], a.phone, a.offers ? 1 : 0),
-    db.prepare('DELETE FROM account_codes WHERE email = ?').bind(a.email),
-  ];
-  await db.batch(stmts);
-  const row = (await accountByEmail(db, a.email))!;
-  if (row.phone) await linkCustomer(db, row);
-  return row;
 }
 
 /**
@@ -86,16 +104,19 @@ export interface AccountOrder {
   courier: string | null; tracking_id: string | null; items: number; first_item: string | null; image: string | null;
 }
 
-/** The account's orders: every order placed with its verified email, newest first. */
-export async function accountOrders(db: D1Database, email: string, limit = 50): Promise<AccountOrder[]> {
+/**
+ * The account's orders, newest first: those placed while signed in, and, once the email is proven (a code was typed),
+ * every order placed with that email.
+ */
+export async function accountOrders(db: D1Database, a: Pick<AccountRow, 'id' | 'email' | 'email_verified_at'>, limit = 50): Promise<AccountOrder[]> {
   return (await db.prepare(
     `SELECT o.id, o.order_no, o.access_token, o.created_at, o.status, o.total_paisa, o.invoice_no, o.courier, o.tracking_id,
             (SELECT COALESCE(SUM(i.qty), 0) FROM order_items i WHERE i.order_id = o.id) AS items,
             (SELECT i.name FROM order_items i WHERE i.order_id = o.id ORDER BY i.id LIMIT 1) AS first_item,
             (SELECT m.url FROM order_items i JOIN product_media m ON m.product_id = i.product_id AND m.kind = 'image'
               WHERE i.order_id = o.id ORDER BY i.id, m.sort_order, m.id LIMIT 1) AS image
-       FROM orders o WHERE o.customer_email = ? AND o.is_test = 0 ORDER BY o.id DESC LIMIT ?`,
-  ).bind(email, limit).all<AccountOrder>()).results;
+       FROM orders o WHERE (o.account_id = ? OR (? AND o.customer_email = ?)) AND o.is_test = 0 ORDER BY o.id DESC LIMIT ?`,
+  ).bind(a.id, a.email_verified_at ? 1 : 0, a.email, limit).all<AccountOrder>()).results;
 }
 
 export interface MemberOffer { code: string; kind: 'percent' | 'fixed' | 'free_delivery'; value: number; min_subtotal_paisa: number; max_discount_paisa: number | null; ends_at: string | null; note: string | null }

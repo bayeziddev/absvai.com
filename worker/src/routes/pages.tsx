@@ -22,7 +22,7 @@ import { cleanLanding } from '../lib/landing';
 import { LandingPage, landingVariants } from '../views/landing';
 import { getCookie } from 'hono/cookie';
 import { SESSION_COOKIE } from '../lib/auth';
-import { checkUnsubscribe, customerEmailReady } from '../services/email';
+import { checkUnsubscribe } from '../services/email';
 import { trackOrders, type TrackResult } from '../services/tracking';
 import { unsubscribeCustomer } from '../repo/email';
 import { expandQuery } from '../lib/search';
@@ -301,13 +301,11 @@ pages.get('/checkout', async c => {
   const wallets = settingJson<Array<{ wallet: string; number: string; type?: string }>>(sh.settings, 'manual_wallets', []);
   return render(c, sh, {
     title: 'চেকআউট', path: '/checkout', noindex: true, scripts: ['/js/checkout.js'], turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
-    pageData: {
-      freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings),
-      // The "have an account? sign in" line shows only while sign-in codes can be emailed.
-      accounts: (c.env.ENVIRONMENT === 'development' && !c.env.RESEND_API_KEY) || (await customerEmailReady(c.env, sh.settings)),
-    },
+    pageData: { freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings) },
     children: <CheckoutPage wallets={wallets} areas={areas} whatsapp={sh.settings.whatsapp_number?.replace(/\D/g, '') || null} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} />,
-  });
+    // Nothing personal is in the page (the cart, the prices and a signed-in customer's details come from the browser), so
+    // it is answered from the edge cache like a product page; a delivery-area or settings change refreshes it.
+  }, { cache: ['zones'] });
 });
 
 /** The delivery areas a customer chooses from at checkout (Settings → Delivery charges). */
@@ -401,17 +399,16 @@ pages.get('/account', async c => {
   const next = c.req.query('next') ?? '';
   let view: AccountView | null = null;
   if (a) {
-    const [orders, offers] = await Promise.all([accountOrders(c.env.DB, a.email), memberOffers(c.env.DB, new Date().toISOString())]);
+    const [orders, offers] = await Promise.all([accountOrders(c.env.DB, a), memberOffers(c.env.DB, new Date().toISOString())]);
     view = {
       account: publicAccount(a),
       orders: orders.map(o => ({ orderNo: o.order_no, token: o.access_token, createdAt: o.created_at, status: o.status, totalPaisa: Number(o.total_paisa), items: Number(o.items), firstItem: o.first_item, image: o.image })),
       offers: offers.map(offerView),
     };
   }
-  const emailReady = Boolean(a) || (c.env.ENVIRONMENT === 'development' && !c.env.RESEND_API_KEY) || (await customerEmailReady(c.env, sh.settings));
   return render(c, sh, {
-    title: 'আমার অ্যাকাউন্ট', path: '/account', tab: 'account', noindex: true, scripts: ['/js/account.js'], styles: ['/css/account.css'], turnstileSiteKey: a || !emailReady ? undefined : c.env.TURNSTILE_SITE_KEY,
-    children: <AccountPage view={view} emailReady={emailReady} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} next={/^\/(?!\/)[\w\-/?=&.%]*$/.test(next) ? next : null} />,
+    title: 'আমার অ্যাকাউন্ট', path: '/account', tab: 'account', noindex: true, scripts: ['/js/account.js'], styles: ['/css/account.css'], turnstileSiteKey: a ? undefined : c.env.TURNSTILE_SITE_KEY,
+    children: <AccountPage view={view} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} next={/^\/(?!\/)[\w\-/?=&.%]*$/.test(next) ? next : null} />,
   });
 });
 

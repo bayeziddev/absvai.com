@@ -14,7 +14,7 @@ import { areaIdForChoice, geoHierarchy, postcodeMap, unionsOf } from '../repo/ge
 import { sessionStatus } from '../repo/incomplete';
 import { addNotifyRequest, addWholesaleInquiry } from '../repo/misc';
 import { customerByPhone, orderByNo, submitAdvance } from '../repo/orders';
-import { accountById, rememberDelivery } from '../repo/accounts';
+import { accountById, linkOrderToAccount, rememberDelivery } from '../repo/accounts';
 import { priceCart, sanitizeLines } from '../services/cart';
 import { quote } from '../services/checkout';
 import { recordAttempt } from '../services/fraud';
@@ -264,7 +264,10 @@ api.post('/checkout/place', async c => {
     email: acct?.email ?? (str(body.email, 120) || null), emailOffers: acct ? Boolean(acct.offers) : body.emailOffers === true,
     couponCode: str(body.couponCode, 30) || null, landingPageId: landing?.id ?? null,
   }, { channel: 'web', identity: id, checkoutSessionId: sid, route: '/api/checkout/place' });
-  if (acct) await rememberDelivery(c.env.DB, acct.id, { phone: normalizeBdPhone(str(body.phone, 20)) ?? '', addressLine: str(body.addressLine, 300), zoneId: await chosenArea(c, body) });
+  if (acct) {
+    await linkOrderToAccount(c.env.DB, placed.orderId, acct.id);
+    await rememberDelivery(c.env.DB, acct.id, { phone: normalizeBdPhone(str(body.phone, 20)) ?? '', addressLine: str(body.addressLine, 300), zoneId: await chosenArea(c, body) });
+  }
   return c.json(placed, 201);
 });
 

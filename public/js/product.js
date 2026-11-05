@@ -1,5 +1,5 @@
 // Product page: the selectors come from the product's template; price, stock, unit price and photo follow the chosen option.
-import { added, buyNow, cart, showPhoto, taka } from './app.js';
+import { added, buyNow, cart, showPhoto, taka, snaps } from './app.js';
 
 const data = JSON.parse(document.getElementById('page-data').textContent);
 const form = document.querySelector('[data-pdp-form]');
@@ -65,8 +65,9 @@ form.querySelectorAll('[data-qty]').forEach(b => b.addEventListener('click', () 
 }));
 
 const qty = () => Math.max(1, Math.min(Number(qtyInput.max) || 99, Number(qtyInput.value) || 1));
-document.querySelectorAll('[data-pdp-add]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) { cart.add(v.id, qty()); added(data.product.name); } }));
-document.querySelectorAll('[data-pdp-order]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) buyNow(v.id, qty()); }));
+const snap = v => snaps.put([{ variantId: v.id, name: data.product.name, label: data.attributes.map(a => v.attributes[a]).filter(Boolean).join(' · '), unitPaisa: v.pricePaisa, image: v.image ?? document.getElementById('pdp-main')?.getAttribute('src'), slug: data.product.slug }]);
+document.querySelectorAll('[data-pdp-add]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) { snap(v); cart.add(v.id, qty()); added(data.product.name); } }));
+document.querySelectorAll('[data-pdp-order]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) { snap(v); buyNow(v.id, qty()); } }));
 // Order on WhatsApp: a ready-to-send message with the product, the chosen option, the quantity and the price.
 document.querySelector('[data-wa-product]')?.addEventListener('click', e => {
   const v = match();

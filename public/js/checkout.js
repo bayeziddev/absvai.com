@@ -2,7 +2,7 @@
 // follows by itself), the address in the customer's own words, and payment. The server re-validates everything on submit
 // and reads the district out of the address for the shop's map. "Order on WhatsApp" sends the same order as a message.
 // Customers read the checkout in Bangla and may type in Bangla or English.
-import { api as apiEn, cart, esc, small, taka } from './app.js';
+import { api as apiEn, cart, esc, small, snaps, taka } from './app.js';
 
 // ── Bangla: the server's messages are in English (the admin uses the same rules), so the ones a customer can meet at
 // checkout are put into Bangla here. A message not listed shows as the server sent it. ──
@@ -161,6 +161,7 @@ async function refreshQuote() {
   try {
     lastQuote = await api('/api/checkout/quote', { lines, zoneId: area(), withAreas: true, paymentMethod: payment(), phone: form.phone.value, couponCode });
   } catch (e) { errorBox.textContent = e.message; return; }
+  snaps.put(lastQuote.lines.map(l => ({ variantId: l.variantId, name: l.name, label: l.variantLabel, unitPaisa: l.unitPaisa, image: l.image, slug: l.slug })));
   renderSummary(lastQuote);
 }
 
@@ -293,7 +294,7 @@ form.addEventListener('submit', async e => {
 async function fillFromAccount() {
   const note = $('[data-co-account]');
   if (!/(^|;\s*)vm_in=1/.test(document.cookie)) {
-    if (note && !onLanding && pd.accounts) { note.hidden = false; note.innerHTML = 'অ্যাকাউন্ট আছে? <a href="/account?next=/checkout' + encodeURIComponent(location.search) + '">সাইন ইন করুন</a>, আপনার তথ্য নিজে থেকেই বসে যাবে। অ্যাকাউন্ট ছাড়াও অর্ডার করা যায়।'; }
+    if (note && !onLanding) { note.hidden = false; note.innerHTML = 'অ্যাকাউন্ট আছে? <a href="/account?next=/checkout' + encodeURIComponent(location.search) + '">সাইন ইন করুন</a>, আপনার তথ্য নিজে থেকেই বসে যাবে। অ্যাকাউন্ট ছাড়াও অর্ডার করা যায়।'; }
     return;
   }
   let a = null;
@@ -313,6 +314,13 @@ async function boot() {
   if (!lines.length) {
     form.innerHTML = '<div class="empty"><h2>আপনার কার্ট খালি</h2><p>আগে পছন্দের পণ্য কার্টে যোগ করুন, তারপর এখানে আসুন।</p><a class="btn btn-primary" href="/shop">কেনাকাটা শুরু করুন</a></div>';
     return;
+  }
+  // The products as last seen show at once (no "Loading"); the quote with the delivery charges follows in a moment.
+  const seen = snaps.lines(lines);
+  if (seen) {
+    $('[data-co-lines]').innerHTML = seen.map(l => `
+      <div class="co-line"><img src="${esc(small(l.image))}" alt=""><div>${esc(l.name)}<small>${esc(l.label)}${l.label ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small></div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
+    $('[data-subtotal]').textContent = taka(seen.reduce((s, l) => s + l.lineTotalPaisa, 0));
   }
   refreshQuote();
   fillFromAccount();

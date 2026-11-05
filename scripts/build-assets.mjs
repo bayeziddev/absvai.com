@@ -54,6 +54,10 @@ try {
     const p = join(dist, 'js', f);
     writeFileSync(p, transformSync(readFileSync(p, 'utf8'), { loader: 'js', minify: true }).code);
   }
+  // The admin is one bundle: its ~25 modules arrive in one request instead of a chain of imports, one after another,
+  // which is what kept the admin on "Loading…" on a phone. The unbundled files stay next to it (nothing loads them).
+  const { buildSync } = await import('esbuild');
+  buildSync({ entryPoints: [join(root, 'admin/js/app.js')], outfile: join(dist, 'admin/js/app.js'), allowOverwrite: true, bundle: true, format: 'esm', minify: true, target: 'es2022', legalComments: 'none', logLevel: 'warning' });
 } catch (e) {
   if (e?.code !== 'ERR_MODULE_NOT_FOUND') throw e;
   console.warn('esbuild not found: storefront CSS and JS are not minified.');

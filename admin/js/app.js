@@ -15,7 +15,30 @@ export const fromPaisa = p => (p === null || p === undefined ? '' : String(Numbe
 export const date = iso => (iso ? new Date(iso.length === 10 ? `${iso}T00:00:00+06:00` : iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', ...(iso.length > 10 ? { hour: '2-digit', minute: '2-digit' } : {}), timeZone: 'Asia/Dhaka' }) : '—');
 export const qs = () => new URLSearchParams(location.hash.split('?')[1] ?? '');
 
+// Screens read the same data again and again (the dashboard, orders, products): a GET answer is kept for 30 seconds, so
+// going back to a screen is instant, and any change (POST / PUT / DELETE) clears it so nothing shown is out of date.
+const getCache = new Map();
+const FRESH_MS = 30_000;
 export async function api(path, method = 'GET', body) {
+  if (method === 'GET' && body === undefined) {
+    const hit = getCache.get(path);
+    if (hit && Date.now() - hit.at < FRESH_MS) return hit.promise;
+    const promise = request(path, 'GET');
+    getCache.set(path, { at: Date.now(), promise });
+    promise.catch(() => getCache.delete(path));
+    return promise;
+  }
+  getCache.clear();
+  return request(path, method, body);
+}
+/** Starts loading a screen's data early (while the rest of the admin starts), without any sign-in prompt. */
+function prime(path) {
+  const promise = fetch(`/api/admin${path}`, { credentials: 'same-origin' }).then(r => (r.ok ? r.json() : Promise.reject(new Error('not ready'))));
+  getCache.set(path, { at: Date.now(), promise });
+  promise.catch(() => getCache.delete(path));
+}
+
+async function request(path, method, body) {
   const opts = { method, credentials: 'same-origin', headers: { 'x-csrf-token': state.csrf } };
   if (body instanceof FormData) opts.body = body;
   else if (body !== undefined) { opts.headers['content-type'] = 'application/json'; opts.body = JSON.stringify(body); }
@@ -211,15 +234,20 @@ async function route() {
   document.getElementById('side')?.classList.remove('open');
   const handler = routes[name] ?? routes.dashboard;
   const v = view();
-  v.innerHTML = '<p class="muted">Loading…</p>';
+  v.innerHTML = SKELETON;
   try { await handler(v, path.split('/').slice(1)); } catch (e) { if (e.status !== 401) v.innerHTML = `<div class="notice err">${esc(e.message)}</div>`; }
 }
+
+/** Shown for the moment a screen's data is on its way: the shape of a page, not the word "Loading". */
+const SKELETON = '<div class="skel" aria-busy="true" aria-label="Loading"><i class="skel-h"></i><i class="skel-row"></i><i class="skel-row"></i><i class="skel-box"></i><i class="skel-row short"></i></div>';
 
 addEventListener('hashchange', route);
 
 autoLabelTables();
 
 (async () => {
+  // The overview's numbers load at the same time as the sign-in check (the screen most visits open first).
+  if (!location.hash || location.hash.startsWith('#/dashboard')) prime('/dashboard');
   try {
     const me = await fetch('/api/admin/me', { credentials: 'same-origin' });
     if (!me.ok) throw new Error();

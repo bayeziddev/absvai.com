@@ -157,17 +157,15 @@ describe('storefront checkout', () => {
     await ctx.close();
   });
 
-  it('account: sign up with the email code, order with the details filled in, download the invoice', async () => {
+  it('account: sign up with a password (no code), order with the details filled in, invoice, forgot password', async () => {
     const { ctx, page, errors } = await phone();
     await page.goto(`${server.base}/account?signup=1`);
-    await page.fill('[data-acct-form] input[name=name]', 'Account Buyer');
-    await page.fill('[data-acct-form] input[name=phone]', '01710000006');
-    await page.fill('[data-acct-form] input[name=email]', 'buyer@example.com');
-    // Development has no Resend: the code comes back in the answer (live, it arrives by email).
-    const [resp] = await Promise.all([page.waitForResponse(r => r.url().endsWith('/api/account/code')), page.click('[data-acct-send]')]);
-    const { devCode } = await resp.json();
-    assert.match(devCode, /^\d{6}$/);
-    await page.fill('[data-code-form] input[name=code]', devCode); // six digits submit by themselves
+    const f = '[data-acct-form="signup"]';
+    await page.fill(`${f} input[name=name]`, 'Account Buyer');
+    await page.fill(`${f} input[name=phone]`, '01710000006');
+    await page.fill(`${f} input[name=email]`, 'buyer@example.com');
+    await page.fill(`${f} input[name=password]`, 'gur-2026');
+    await page.click(`${f} button[type=submit]`);
     await page.waitForSelector('.acct-head');
     assert.match(await page.textContent('.acct-head h1'), /Account Buyer/);
     await page.goto(`${server.base}/p/khejur-patali-gur`);
@@ -184,6 +182,38 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('.acct-orders'), new RegExp(orderNo));
     await page.goto(`${server.base}${invoice}`);
     assert.match(await page.textContent('.sheet'), /অর্ডার রসিদ[\s\S]*Account Buyer[\s\S]*সর্বমোট/);
+    // Sign out, then sign in with the mobile number; forgot password sets a new one with the emailed code.
+    await page.goto(`${server.base}/account`);
+    await page.click('[data-logout]');
+    await page.waitForSelector('[data-acct-form="signin"]');
+    await page.click('[data-forgot]');
+    await page.fill('[data-acct-form="forgot"] input[name=email]', 'buyer@example.com');
+    // Development has no Resend: the code comes back in the answer (live, it arrives by email).
+    const [resp] = await Promise.all([page.waitForResponse(r => r.url().endsWith('/api/account/reset-code')), page.click('[data-acct-form="forgot"] button[type=submit]')]);
+    const { devCode } = await resp.json();
+    assert.match(devCode, /^\d{6}$/);
+    await page.fill('[data-acct-form="reset"] input[name=code]', devCode);
+    await page.fill('[data-acct-form="reset"] input[name=password]', 'new-gur-27');
+    await page.click('[data-acct-form="reset"] button[type=submit]');
+    await page.waitForSelector('.acct-head');
+    await page.click('[data-logout]');
+    await page.waitForSelector('[data-acct-form="signin"]');
+    await page.fill('[data-acct-form="signin"] input[name=login]', '01710000006');
+    await page.fill('[data-acct-form="signin"] input[name=password]', 'new-gur-27');
+    await page.click('[data-acct-form="signin"] button[type=submit]');
+    await page.waitForSelector('.acct-head');
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+
+  it('cards open their option picker at once, from the page itself (no request)', async () => {
+    const { ctx, page, errors } = await phone();
+    await page.goto(`${server.base}/c/sealers`);
+    const requests = [];
+    page.on('request', r => { if (r.url().includes('/api/catalog/products/')) requests.push(r.url()); });
+    await page.click('[data-product="electronic-impulse-sealer-pfs"] [data-action="add"]');
+    await page.waitForSelector('#pick-sheet:not([hidden]) label:has-text("300mm")', { timeout: 1000 });
+    assert.deepEqual(requests, []);
     assert.deepEqual(errors, []);
     await ctx.close();
   });

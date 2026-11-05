@@ -4,7 +4,7 @@ import { parseJson } from '../lib/http';
 import { formatUnitPrice, unitPrice, type NetUnit } from '../lib/money';
 import { categoryVisible, isSeasonActive, productAvailability, type Availability, type SeasonRow } from '../lib/seasons';
 import { likeEscape } from '../lib/search';
-import { cardKeySpecLine, type ProductTemplate } from '../lib/templates';
+import { cardKeySpecLine, effectiveVariantAttributes, type ProductTemplate } from '../lib/templates';
 import { loadTemplate } from './templates';
 
 export interface Variant {
@@ -49,7 +49,12 @@ export interface ProductCard {
   availability: Availability;
   variantCount: number;
   defaultVariantId: number | null;
+  /** Products with several options: what the card's quick picker needs, in the page, so it opens with no request. */
+  options: CardOptions | null;
 }
+
+/** [id, attributes, price, old price (0 if none), in stock] per option, and the option groups in the product's order. */
+export interface CardOptions { attributes: Array<{ id: string; label: string; values: string[] }>; variants: Array<[number, Record<string, string>, number, number, number]> }
 
 const templateCache = new Map<string, { t: ProductTemplate; at: number }>();
 
@@ -223,6 +228,12 @@ export function toCard(r: Record<string, unknown>, template: ProductTemplate, se
     availability,
     variantCount: variants.length,
     defaultVariantId: variants.length === 1 ? variants[0].id : cheapest?.id ?? null,
+    options: variants.length > 1 ? {
+      attributes: effectiveVariantAttributes(template, parseJson<string[]>(r.promoted_spec_keys, []))
+        .filter(a => variants.some(v => v.attributes[a.attributeTypeId]))
+        .map(a => ({ id: a.attributeTypeId, label: a.label, values: [...new Set(variants.map(v => v.attributes[a.attributeTypeId]).filter(Boolean))] })),
+      variants: variants.map(v => [v.id, v.attributes, v.pricePaisa, v.compareAtPricePaisa ?? 0, v.available]),
+    } : null,
   };
 }
 

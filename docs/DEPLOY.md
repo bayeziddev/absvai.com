@@ -63,11 +63,11 @@ then open Cloudflare dashboard → **Turnstile** → your widget → **Hostname 
 "Order on WhatsApp" instead.
 
 ### 4. Email to customers (Resend)
-Customer emails (sign-in codes, receipts, offers) need the shop's domain verified in Resend; Resend cannot send as a
+Customer emails ("forgot password" codes, receipts, offers) need the shop's domain verified in Resend; Resend cannot send as a
 gmail.com address. The domain `vandarmart.com` is already added in Resend (region Tokyo), and `EMAIL_DOMAIN` in
 `wrangler.toml` names it. The Worker tries to send as `Vandar Mart <hello@vandarmart.com>` (replies go to the owner's Gmail);
 while Resend says the domain is not verified, it sends from Resend's test sender instead (only the owner gets those), the
-account page says sign-in is coming soon, and it tries the domain again every 30 minutes. So once the records below are in
+"forgot password" says the code cannot be sent yet, and it tries the domain again every 30 minutes. So once the records below are in
 **Cloudflare → vandarmart.com → DNS** and Resend shows the domain **Verified** (Resend → Domains → vandarmart.com →
 **Verify DNS records**), customer emails and sign-in start by themselves, with no deploy. With a full-access Resend key and
 a Cloudflare token that may edit DNS, each deploy also adds the records and asks Resend to verify by itself.

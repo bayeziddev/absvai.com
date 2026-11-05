@@ -28,6 +28,26 @@ function store(key, fallback) {
 }
 
 const cartStore = store('absvai.cart', []);
+
+// What the shop last showed for each option (name, option, price, photo). The cart and the checkout paint these at once,
+// then check them with the server and repaint: they never sit on "Loading". Server prices always win.
+const snapStore = store('absvai.snap', {});
+export const snaps = {
+  get: id => snapStore.get()[id] ?? null,
+  put(list) {
+    const all = snapStore.get();
+    for (const s of list) if (s && Number.isInteger(s.variantId) && Number.isFinite(s.unitPaisa)) all[s.variantId] = { name: s.name, label: s.label ?? '', unitPaisa: s.unitPaisa, image: s.image ?? null, slug: s.slug ?? '', at: Date.now() };
+    snapStore.set(Object.fromEntries(Object.entries(all).sort((a, b) => b[1].at - a[1].at).slice(0, 80)));
+  },
+  /** The lines as last priced, or null when one of them was never seen. */
+  lines(lines) {
+    const all = snapStore.get();
+    const out = lines.map(l => (all[l.variantId] ? { ...all[l.variantId], variantId: l.variantId, qty: l.qty, lineTotalPaisa: all[l.variantId].unitPaisa * l.qty } : null));
+    return out.every(Boolean) && out.length ? out : null;
+  },
+};
+/** A card's single option, for the snapshot. */
+const cardSnap = card => ({ variantId: Number(card.dataset.variant), name: card.dataset.name, unitPaisa: Number(card.dataset.price), image: card.querySelector('.card-media img')?.getAttribute('src'), slug: card.dataset.product });
 const wishStore = store('absvai.wish', []);
 
 /** Tracking events for track.js (Pixel/GA4). Queued, so nothing is lost if track.js loads later or never. */
@@ -170,22 +190,39 @@ function setupCarousels() {
 }
 
 // ── Quick option picker for multi-option products on cards ──
-// The options are fetched as soon as a finger (or the mouse) touches the button, and kept, so the sheet opens with them.
+// Every card with several options carries them in the page (data-opts), so the sheet opens at once, with no request.
+// A card without them (an older cached page) fetches them as soon as a finger or the mouse touches the button.
 const optionsCache = new Map();
+function cardProduct(card) {
+  if (!card?.dataset.opts) return null;
+  try {
+    const o = JSON.parse(card.dataset.opts);
+    const state = card.dataset.state;
+    const label = card.dataset.stateLabel ?? '';
+    const availability = stock => (state === 'pre_order' || state === 'made_to_order' ? { state, canBuy: true, label }
+      : state === 'out_of_season' ? { state, canBuy: false, label }
+      : stock > 0 ? { state: 'available', canBuy: true, label: 'In stock' } : { state: 'out_of_stock', canBuy: false, label: 'Out of stock' });
+    return {
+      name: card.dataset.name, image: card.querySelector('.card-media img')?.getAttribute('src') ?? null, attributes: o.attributes,
+      variants: o.variants.map(([id, attributes, pricePaisa, compareAtPricePaisa, stock]) => ({ id, attributes, pricePaisa, compareAtPricePaisa, stock, availability: availability(stock) })),
+    };
+  } catch { return null; }
+}
 const productOptions = slug => {
   if (!optionsCache.has(slug)) optionsCache.set(slug, api(`/api/catalog/products/${encodeURIComponent(slug)}`).catch(e => { optionsCache.delete(slug); throw e; }));
   return optionsCache.get(slug);
 };
-async function openPicker(slug, mode) {
+async function openPicker(card, mode) {
+  const slug = card.dataset.product;
   const sheet = $('#pick-sheet');
   const body = $('[data-sheet-body]', sheet);
   const backdrop = $('.sheet-backdrop');
-  body.innerHTML = '<p class="muted">Loading options…</p>';
+  let p = cardProduct(card);
+  if (!p) body.innerHTML = '<p class="muted">Loading options…</p>';
   sheet.hidden = false; backdrop.hidden = false;
   const close = () => { sheet.hidden = true; backdrop.hidden = true; };
   $$('[data-sheet-close]').forEach(b => { b.onclick = close; });
-  let p;
-  try { p = await productOptions(slug); } catch (e) { body.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  if (!p) { try { p = await productOptions(slug); } catch (e) { body.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; } }
   const buyable = p.variants.filter(v => v.availability?.canBuy && (v.stock > 0 || v.availability.state === 'made_to_order'));
   const choice = Object.fromEntries(p.attributes.map(a => [a.id, (buyable[0] ?? p.variants[0])?.attributes[a.id]]));
   const match = () => p.variants.find(v => p.attributes.every(a => v.attributes[a.id] === choice[a.id]));
@@ -199,8 +236,9 @@ async function openPicker(slug, mode) {
       <p class="avail ${ok ? 'avail-available' : 'avail-muted'}">${v ? esc(ok ? v.availability.label : v.stock <= 0 ? 'Out of stock' : v.availability.label) : 'This combination is not available'}</p>
       <div class="sheet-actions"><button class="btn btn-outline" type="button" data-s-add ${ok ? '' : 'disabled'}>Add to Cart</button><button class="btn btn-primary" type="button" data-s-order ${ok ? '' : 'disabled'}>${v?.availability?.state === 'pre_order' ? 'Pre-order' : 'Order Now'}</button></div>`;
     $$('input[type=radio]', body).forEach(r => r.addEventListener('change', () => { choice[r.name.slice(6)] = r.value; render(); }));
-    $('[data-s-add]', body).onclick = () => { cart.add(v.id); close(); added(p.name); };
-    $('[data-s-order]', body).onclick = () => buyNow(v.id);
+    const snap = () => snaps.put([{ variantId: v.id, name: p.name, label: p.attributes.map(a => v.attributes[a.id]).filter(Boolean).join(' · '), unitPaisa: v.pricePaisa, image: p.image, slug }]);
+    $('[data-s-add]', body).onclick = () => { snap(); cart.add(v.id); close(); added(p.name); };
+    $('[data-s-order]', body).onclick = () => { snap(); buyNow(v.id); };
   };
   render();
   if (mode === 'order' && p.variants.length === 1) buyNow(p.variants[0].id);
@@ -209,7 +247,7 @@ async function openPicker(slug, mode) {
 function setupCards() {
   const warm = e => {
     const card = e.target.closest?.('[data-action]')?.closest('[data-product]');
-    if (card && !Number(card.dataset.variant)) productOptions(card.dataset.product).catch(() => {});
+    if (card && !Number(card.dataset.variant) && !card.dataset.opts) productOptions(card.dataset.product).catch(() => {});
   };
   document.addEventListener('pointerdown', warm, { passive: true });
   document.addEventListener('mouseover', warm, { passive: true });
@@ -219,9 +257,10 @@ function setupCards() {
       const card = btn.closest('[data-product]');
       const variant = Number(card.dataset.variant);
       if (variant) {
+        if (card.dataset.price) snaps.put([cardSnap(card)]);
         if (btn.dataset.action === 'order') buyNow(variant);
         else { cart.add(variant); added(card.dataset.name); }
-      } else openPicker(card.dataset.product, btn.dataset.action);
+      } else openPicker(card, btn.dataset.action);
       return;
     }
     const w = e.target.closest('[data-wish]');

@@ -13,8 +13,11 @@ export const TAG = {
   policy: 'policies',
 };
 
-/** Paths served from the edge cache. Cart, checkout, account, orders, admin and APIs are never cached. */
-const CACHEABLE = [/^\/$/, /^\/c\/[\w-]+$/, /^\/p\/[\w-]+$/, /^\/season\/[\w-]+$/, /^\/(shop|deals|originals|free-delivery|new|categories|contact)$/, /^\/policies\/[\w-]+$/, /^\/lp\/[\w-]+$/];
+/**
+ * Paths served from the edge cache. The checkout page holds nothing personal (the cart and the customer's details come
+ * from the browser), so it is cached too; cart, account, orders, admin and APIs never are.
+ */
+const CACHEABLE = [/^\/checkout$/, /^\/$/, /^\/c\/[\w-]+$/, /^\/p\/[\w-]+$/, /^\/season\/[\w-]+$/, /^\/(shop|deals|originals|free-delivery|new|categories|contact)$/, /^\/policies\/[\w-]+$/, /^\/lp\/[\w-]+$/];
 
 export function isCacheablePath(path: string): boolean {
   return CACHEABLE.some(re => re.test(path));

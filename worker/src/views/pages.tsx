@@ -711,28 +711,18 @@ const AccountLinks = () => (
 );
 
 /**
- * /account: signed out, a sign-in / open-an-account form (email, then the 6-digit code from the email; public/js/account.js);
- * signed in, the customer's orders with tracking and invoices, the offers for members and their details.
+ * /account: signed out, sign in (email or mobile number and password), open an account (name, mobile, email, password,
+ * no code) or "forgot password" (a 6-digit code by email, then a new password); public/js/account.js drives them.
+ * Signed in: the customer's orders with tracking and invoices, the offers for members and their details.
  */
-export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: string; next?: string | null; emailReady?: boolean }) {
-  // Sign-in codes go by email: until the shop's email domain is verified, say so instead of a form that cannot work.
-  if (!p.view && p.emailReady === false) {
-    return (
-      <div class="container narrow acct" lang="bn" data-account-page>
-        <div class="acct-hero">
-          <h1>আমার অ্যাকাউন্ট</h1>
-          <p class="notice">অ্যাকাউন্ট খোলা ও সাইন ইন খুব শীঘ্রই চালু হবে। ততক্ষণ অ্যাকাউন্ট ছাড়াই অর্ডার করুন, আর মোবাইল নম্বর দিয়ে যেকোনো সময় অর্ডার ট্র্যাক করুন ও ইনভয়েস ডাউনলোড করুন।</p>
-        </div>
-        <AccountLinks />
-      </div>
-    );
-  }
+export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: string; next?: string | null }) {
   if (!p.view) {
+    const turnstile = p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="vmAccountTurnstile" />;
     return (
       <div class="container narrow acct" lang="bn" data-account-page data-next={p.next ?? ''}>
         <div class="acct-hero">
           <h1>আমার অ্যাকাউন্ট</h1>
-          <p>অ্যাকাউন্ট খুললে সব অর্ডার এক জায়গায় দেখবেন, অর্ডার ট্র্যাক করবেন, ইনভয়েস ডাউনলোড করবেন আর সদস্যদের জন্য বিশেষ অফার পাবেন। পাসওয়ার্ড লাগবে না: প্রতিবার ইমেইলে একটি কোড আসবে।</p>
+          <p>অ্যাকাউন্ট খুললে সব অর্ডার এক জায়গায় দেখবেন, অর্ডার ট্র্যাক করবেন, ইনভয়েস ডাউনলোড করবেন আর সদস্যদের জন্য বিশেষ অফার পাবেন। খুলতে এক মিনিটও লাগে না।</p>
           <ul class="acct-perks">
             <li><Icon name="box" size={18} />সব অর্ডার ও ট্র্যাকিং</li>
             <li><Icon name="file" size={18} />ইনভয়েস ডাউনলোড</li>
@@ -745,24 +735,41 @@ export function AccountPage(p: { view: AccountView | null; turnstileSiteKey?: st
             <button type="button" role="tab" aria-selected="true" data-acct-tab="signin">সাইন ইন</button>
             <button type="button" role="tab" aria-selected="false" data-acct-tab="signup">নতুন অ্যাকাউন্ট খুলুন</button>
           </div>
-          <form data-acct-form novalidate>
-            <div data-signup-only hidden>
-              <label class="field"><span>আপনার নাম <b class="req">*</b></span><input name="name" autocomplete="name" maxlength={120} placeholder="আপনার পুরো নাম" /></label>
-              <label class="field"><span>মোবাইল নম্বর <b class="req">*</b></span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} /></label>
-            </div>
-            <label class="field"><span>ইমেইল <b class="req">*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com" maxlength={120} required /></label>
-            <label class="check-line" data-signup-only hidden><input type="checkbox" name="offers" checked /> <span>নতুন অফার ও ছাড়ের খবর ইমেইলে পেতে চাই</span></label>
-            {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="vmAccountTurnstile" />}
+          <form data-acct-form="signin" novalidate>
+            <label class="field"><span>ইমেইল বা মোবাইল নম্বর</span><input name="login" autocomplete="username" maxlength={120} placeholder="you@gmail.com অথবা 01XXXXXXXXX" required /></label>
+            <label class="field"><span>পাসওয়ার্ড</span><input name="password" type="password" autocomplete="current-password" maxlength={200} required /></label>
+            <label class="check-line small"><input type="checkbox" data-show-password /> <span>পাসওয়ার্ড দেখান</span></label>
             <p class="form-msg error" data-acct-error role="alert" />
-            <button class="btn btn-primary btn-lg btn-block" type="submit" data-acct-send>ইমেইলে কোড পাঠান</button>
-            <p class="small muted">কোড আসতে এক মিনিট লাগতে পারে। ইনবক্সে না পেলে Spam / Promotions দেখুন।</p>
+            <button class="btn btn-primary btn-lg btn-block" type="submit">সাইন ইন</button>
+            <p class="small acct-again"><button type="button" class="link-btn" data-forgot>পাসওয়ার্ড ভুলে গেছেন?</button></p>
           </form>
-          <form data-code-form hidden novalidate>
+          <form data-acct-form="signup" hidden novalidate>
+            <label class="field"><span>আপনার নাম <b class="req">*</b></span><input name="name" autocomplete="name" maxlength={120} placeholder="আপনার পুরো নাম" required /></label>
+            <label class="field"><span>মোবাইল নম্বর <b class="req">*</b></span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required /></label>
+            <label class="field"><span>ইমেইল <b class="req">*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com" maxlength={120} required /></label>
+            <label class="field"><span>পাসওয়ার্ড <b class="req">*</b> <small class="opt">কমপক্ষে ৬ অক্ষর</small></span><input name="password" type="password" autocomplete="new-password" minlength={6} maxlength={200} required /></label>
+            <label class="check-line small"><input type="checkbox" data-show-password /> <span>পাসওয়ার্ড দেখান</span></label>
+            <label class="check-line"><input type="checkbox" name="offers" checked /> <span>নতুন অফার ও ছাড়ের খবর ইমেইলে পেতে চাই</span></label>
+            {turnstile}
+            <p class="form-msg error" data-acct-error role="alert" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit">অ্যাকাউন্ট খুলুন</button>
+          </form>
+          <form data-acct-form="forgot" hidden novalidate>
+            <p class="acct-sent">অ্যাকাউন্টের ইমেইলটি লিখুন। ইমেইলে একটি ৬ সংখ্যার কোড যাবে, সেটি দিয়ে নতুন পাসওয়ার্ড দেবেন।</p>
+            <label class="field"><span>ইমেইল</span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com" maxlength={120} required /></label>
+            {!p.turnstileSiteKey ? null : <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="vmResetTurnstile" />}
+            <p class="form-msg error" data-acct-error role="alert" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit">ইমেইলে কোড পাঠান</button>
+            <p class="small acct-again"><button type="button" class="link-btn" data-back-signin>← সাইন ইন-এ ফিরে যান</button></p>
+          </form>
+          <form data-acct-form="reset" hidden novalidate>
             <p class="acct-sent" data-code-sent />
             <label class="field"><span>ইমেইলে আসা ৬ সংখ্যার কোড</span><input class="code-input" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength={6} placeholder="••••••" /></label>
-            <p class="form-msg error" data-code-error role="alert" />
-            <button class="btn btn-primary btn-lg btn-block" type="submit" data-code-go>যাচাই করে প্রবেশ করুন</button>
-            <p class="small acct-again"><button type="button" class="link-btn" data-code-again>নতুন কোড পাঠান</button> · <button type="button" class="link-btn" data-code-back>ইমেইল বদলান</button></p>
+            <label class="field"><span>নতুন পাসওয়ার্ড <small class="opt">কমপক্ষে ৬ অক্ষর</small></span><input name="password" type="password" autocomplete="new-password" minlength={6} maxlength={200} /></label>
+            <label class="check-line small"><input type="checkbox" data-show-password /> <span>পাসওয়ার্ড দেখান</span></label>
+            <p class="form-msg error" data-acct-error role="alert" />
+            <button class="btn btn-primary btn-lg btn-block" type="submit">পাসওয়ার্ড বদলে সাইন ইন করুন</button>
+            <p class="small acct-again"><button type="button" class="link-btn" data-code-again>নতুন কোড পাঠান</button> · <button type="button" class="link-btn" data-back-signin>সাইন ইন-এ ফিরে যান</button></p>
           </form>
         </div>
         <AccountLinks />

@@ -104,8 +104,8 @@ describe('edge cache keys and tags (Section 2.1)', () => {
     expect(cacheKey(new URL('https://absvai.com/?fbclid=1'))).toBe('/');
   });
   it('never caches private paths', () => {
-    for (const p of ['/', '/c/gur', '/p/patali-gur', '/season/winter', '/policies/returns']) expect(isCacheablePath(p)).toBe(true);
-    for (const p of ['/cart', '/checkout', '/account', '/order/AV-1', '/admin/', '/api/checkout/place', '/api/geo/version']) expect(isEdgeServed(p)).toBe(false);
+    for (const p of ['/', '/c/gur', '/p/patali-gur', '/season/winter', '/policies/returns', '/checkout']) expect(isCacheablePath(p)).toBe(true);
+    for (const p of ['/cart', '/account', '/order/AV-1', '/order/AV-1/invoice', '/admin/', '/api/checkout/place', '/api/account/me', '/api/geo/version']) expect(isEdgeServed(p)).toBe(false);
     expect(isEdgeServed('/api/live')).toBe(true);
   });
   it('builds a de-duplicated Cache-Tag header', () => expect(tagHeader(['site', 'home', 'site', 'prod-1', 'bad tag!'])).toBe('site,home,prod-1'));

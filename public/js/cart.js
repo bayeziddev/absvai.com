@@ -1,5 +1,5 @@
 // Cart page: the browser keeps only variant IDs and quantities; every price comes from the server.
-import { api, cart, esc, small, taka } from './app.js';
+import { api, cart, esc, small, snaps, taka } from './app.js';
 
 const root = document.querySelector('[data-cart-page]');
 const pd = JSON.parse(document.getElementById('page-data')?.textContent || '{}');
@@ -10,11 +10,19 @@ async function render() {
     root.innerHTML = '<div class="empty"><h2>Your cart is empty</h2><p>Browse the season’s best and add something you like.</p><a class="btn btn-primary" href="/shop">Start shopping</a></div>';
     return;
   }
+  // The cart as last seen shows at once; the server's prices and stock replace it a moment later.
+  const seen = snaps.lines(lines);
+  if (seen) paint({ lines: seen.map(l => ({ ...l, variantLabel: l.label, basePaisa: l.unitPaisa, maxQty: 99, problem: null })), subtotalPaisa: seen.reduce((s, l) => s + l.lineTotalPaisa, 0), problems: [] });
   let r;
-  try { r = await api('/api/cart/price', { lines }); } catch (e) { root.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  try { r = await api('/api/cart/price', { lines }); } catch (e) { if (!seen) root.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  snaps.put(r.lines.map(l => ({ variantId: l.variantId, name: l.name, label: l.variantLabel, unitPaisa: l.unitPaisa, image: l.image, slug: l.slug })));
   // Drop items that no longer exist.
   const known = new Set(r.lines.map(l => l.variantId));
   lines.filter(l => !known.has(l.variantId)).forEach(l => cart.setQty(l.variantId, 0));
+  paint(r);
+}
+
+function paint(r) {
   const gap = pd.freeThresholdPaisa ? pd.freeThresholdPaisa - r.subtotalPaisa : 0;
   root.innerHTML = `
     ${r.problems.length ? `<div class="notice notice-error" role="alert">${r.problems.map(esc).join('<br>')}</div>` : ''}

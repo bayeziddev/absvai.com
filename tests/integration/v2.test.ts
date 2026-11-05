@@ -308,12 +308,15 @@ describe('edge cache (Section 2.1)', () => {
     expect((await t.fetch('/p/khejur-patali-gur', { headers: { 'if-none-match': etag } })).status).toBe(304);
   });
 
-  it('never caches carts, checkout or admin', async () => {
-    for (const p of ['/cart', '/checkout']) {
+  it('never caches the cart or the account; the checkout page (nothing personal in it) is cached and follows delivery areas', async () => {
+    for (const p of ['/cart', '/account']) {
       const r = await t.fetch(p);
       expect(r.headers.get('cache-control')).toContain('no-store');
       expect(r.headers.get('cache-tag')).toBeNull();
     }
+    const co = await t.fetch('/checkout');
+    expect(co.headers.get('cache-tag')).toBe('site,zones');
+    expect(co.headers.get('set-cookie')).toBeNull();
   });
 
   it('a stock change refreshes the product page tag through the Storefront entrypoint', async () => {

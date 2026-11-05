@@ -43,7 +43,8 @@ export function Card({ p, eager, sizes = SIZES.card }: { p: ProductCard; eager?:
   const a = p.availability;
   const href = `/p/${p.slug}`;
   return (
-    <article class="card" data-product={p.slug} data-product-id={String(p.id)} data-variant={p.variantCount === 1 && p.defaultVariantId ? String(p.defaultVariantId) : undefined} data-name={p.name}>
+    <article class="card" data-product={p.slug} data-product-id={String(p.id)} data-variant={p.variantCount === 1 && p.defaultVariantId ? String(p.defaultVariantId) : undefined} data-name={p.name}
+      data-price={p.variantCount === 1 ? String(p.pricePaisa) : undefined} data-opts={p.options && a.canBuy ? JSON.stringify(p.options) : undefined} data-state={p.options ? a.state : undefined} data-state-label={p.options ? a.label : undefined}>
       <a class="card-media" href={href} tabindex={-1} aria-hidden="true">
         <img src={p.image} srcset={srcsetOf(p.image)} sizes={sizes} alt="" width="600" height="600" loading={eager ? 'eager' : 'lazy'} decoding="async" />
         <Burst savePaisa={p.savePaisa} />
