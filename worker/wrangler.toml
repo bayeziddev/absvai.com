@@ -1,16 +1,13 @@
-# Abs Vai: one Worker serves the storefront, the admin app, every /api/* route and the scheduled jobs.
+# The shop: one Worker serves the storefront, the admin app, every /api/* route and the scheduled jobs.
 # Production runs on the Workers Paid plan (D1 queries on the Free plan stop at the daily limits).
 name = "absvai"
 main = "src/worker.ts"
 compatibility_date = "2026-09-01"
 # ctx.exports (the gateway → Storefront loopback) is on by default from 2025-11-17.
 
-# Production domains (top-level key: it must stay above the first [table] header). The deploy workflow drops this
-# line when the absvai.com zone is not in the Cloudflare account yet, so the first deploy goes to workers.dev.
-routes = [
-  { pattern = "absvai.com", custom_domain = true },
-  { pattern = "www.absvai.com", custom_domain = true },
-]
+# The shop's domain (vandarmart.com) is added to the Worker in the Cloudflare dashboard (Workers & Pages → absvai →
+# Settings → Domains & Routes). There are deliberately no routes here: Wrangler then leaves dashboard domains alone. The
+# deploy reads which domain is attached and sets SITE_URL to it (scripts/ensure-cloudflare-resources.mjs).
 
 # Edge cache (Workers Cache): on for the Storefront entrypoint only. The default entrypoint is the gateway and runs on
 # every request; it forwards public GETs to Storefront with a normalised cache key (see src/worker.ts).
@@ -58,5 +55,5 @@ bucket_name = "absvai-media"
 crons = ["5 18 * * *", "*/30 * * * *"]
 
 [vars]
-SITE_URL = "https://absvai.com"
+SITE_URL = "https://vandarmart.com"
 ENVIRONMENT = "production"

@@ -1,5 +1,5 @@
 import { api, badge, can, date, esc, taka } from '../app.js';
-import { barChart, compactTaka, fillDays, funnel, hBars, lineChart, tableView } from './charts.js';
+import { barChart, compactTaka, districtMap, fillDays, funnel, hBars, lineChart, tableView } from './charts.js';
 
 export async function dashboard(v) {
   const d = await api('/dashboard');
@@ -56,8 +56,11 @@ function chartsSection(ch) {
         <div class="ch" id="ch-orders" data-label="Orders per day, last 30 days"></div>${tableView(['Day', 'Orders'], days.map(x => [x.day, String(x.orders)]))}</div>
       <div class="card ch-card"><div class="ch-head"><h2>From checkout to delivery</h2></div><p class="ch-sub">Website orders: how many customers reach each step.</p>
         <div id="ch-funnel"></div>${tableView(['Step', 'Customers'], [['Started checkout', f.started], ['Placed the order', f.placed], ['Confirmed', f.confirmed], ['Sent to courier', f.shipped], ['Delivered', f.delivered]].map(([a, b]) => [a, String(b)]))}</div>
-      <div class="card ch-card"><div class="ch-head"><h2>Top delivery areas</h2></div><p class="ch-sub">Districts with the most orders, from delivery addresses.</p>
-        <div id="ch-places"></div>${tableView(['District', 'Orders', 'Sales'], ch.places.map(x => [x.district, String(x.orders), taka(x.revenue)]))}</div>
+      <div class="card ch-card ch-wide ch-where"><div class="ch-head"><h2>Where your customers are</h2><b class="ch-total">${ch.places.length} district(s)</b></div>
+        <p class="ch-sub">Last 30 days, read from the addresses customers typed. Darker = more orders.</p>
+        <div class="ch-where-grid"><div id="ch-map"></div><div><h3 class="ch-mini">Top districts</h3><div id="ch-places"></div>
+          <h3 class="ch-mini">By delivery area</h3><div id="ch-areas"></div></div></div>
+        ${tableView(['District', 'Orders', 'Sales'], ch.places.map(x => [x.district, String(x.orders), taka(x.revenue)]))}</div>
       <div class="card ch-card"><div class="ch-head"><h2>Best customers</h2></div><p class="ch-sub">By money spent (cancelled and returned orders left out).</p>
         ${ch.customers.length ? `<ul class="ch-people">${ch.customers.map((x, i) => `<li><span class="ch-rank">${i + 1}</span><div><b>${esc(x.name)}</b><br><span class="small muted">${esc(x.district)} · ${esc(x.phone)}</span></div><div class="right"><b>${taka(x.spent)}</b><br><span class="small muted">${x.orders} order(s)</span></div></li>`).join('')}</ul>` : '<p class="muted small">No orders in the last 30 days yet.</p>'}</div>
       <div class="card ch-card"><div class="ch-head"><h2>Orders by channel</h2></div><p class="ch-sub">Where orders came from: website, Messenger, phone…</p>
@@ -82,6 +85,8 @@ function drawCharts(v, ch) {
     { label: 'Started checkout', value: f.started }, { label: 'Placed the order', value: f.placed }, { label: 'Confirmed', value: f.confirmed },
     { label: 'Sent to courier', value: f.shipped }, { label: 'Delivered', value: f.delivered },
   ]);
-  hBars(v.querySelector('#ch-places'), ch.places.map(x => ({ label: x.district, value: Number(x.orders), revenue: Number(x.revenue) })), { fmt: n => `${n} order(s)`, sub: x => taka(x.revenue) });
+  hBars(v.querySelector('#ch-places'), ch.places.slice(0, 6).map(x => ({ label: x.district, value: Number(x.orders), revenue: Number(x.revenue) })), { fmt: n => `${n} order(s)`, sub: x => taka(x.revenue) });
+  hBars(v.querySelector('#ch-areas'), (ch.areas ?? []).map(x => ({ label: x.area, value: Number(x.orders), revenue: Number(x.revenue) })), { fmt: n => `${n} order(s)`, sub: x => taka(x.revenue) });
+  districtMap(v.querySelector('#ch-map'), `${ch.geoBase}/districts.json`, Object.fromEntries(ch.places.map(x => [x.id, { orders: Number(x.orders), revenue: Number(x.revenue) }])), { fmtMoney: taka });
   hBars(v.querySelector('#ch-channels'), ch.channels.map(x => ({ label: x.label, value: Number(x.orders) })), { fmt: n => `${n} order(s)` });
 }

@@ -19,8 +19,10 @@ function categoryOptions(cats, selected) {
  * @param {{ cats?: any[], categoryId?: number, done?: () => void }} opts
  */
 export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
-  cats ??= await api('/categories');
-  let d = id ? await api(`/products/${id}`) : null;
+  // The shop's own lists (every colour with its swatch, every size) fill the choices a category leaves open.
+  const [catList, attrTypes, data] = await Promise.all([cats ? cats : api('/categories'), api('/attribute-types').catch(() => []), id ? api(`/products/${id}`) : null]);
+  cats = catList;
+  let d = data;
   let template = d?.template ?? null;
   const so = slideOver(id ? `Edit · ${d.product.name}` : 'Add a product', { wide: true, onClose: () => done?.() });
   const write = can('catalog:write');
@@ -37,6 +39,8 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
     newPhotos: [],         // { file, url }
     removed: [],
     sizeChart: d?.product.size_chart ?? null,
+    // Every product says how delivery works: the customer pays the delivery charge (Cash on Delivery), or it is free.
+    delivery: d ? (d.product.free_delivery ? 'free' : 'charge') : null,
   };
   for (const v of d?.variants.filter(x => x.isActive) ?? []) {
     st.rows.set(keyOf(v.attributes), { ...v });
@@ -48,6 +52,10 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
   const attrs = () => (sameTemplate() ? d.effectiveVariantAttributes : template?.variantAttributes) ?? [];
   const required = () => ((sameTemplate() ? d.effectiveSpecFields : template?.specFields) ?? []).filter(f => f.required && f.type !== 'file');
   const sizeAttr = () => attrs().find(a => /size/.test(a.attributeTypeId));
+  const typeValues = tid => attrTypes.find(t => t.id === tid)?.values ?? [];
+  /** The choices to tap: the category's own list, or else the shop's list for that option (all colours, all sizes). */
+  const poolOf = a => [...new Set([...(a.presetValues.length ? a.presetValues : typeValues(a.attributeTypeId).map(x => x.value)), ...(st.chosen[a.attributeTypeId] ?? [])])];
+  const swatch = (tid, v) => { const hex = typeValues(tid).find(x => x.value === v)?.hex; return hex && /^#[0-9a-f]{6}$/i.test(hex) ? `<i class="sw" style="background:${hex}"></i>` : ''; };
 
   async function loadTemplate() {
     const opt = so.body.querySelector('#q-cat')?.selectedOptions[0];
@@ -107,10 +115,10 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
 
       ${t ? `<section class="qp-card"><h3><span class="qp-n">3</span> Sizes, prices and stock</h3>
         ${attrs().map(a => {
-          const pool = [...new Set([...a.presetValues, ...(st.chosen[a.attributeTypeId] ?? [])])];
-          const block = `<div class="qp-attr" data-attr="${esc(a.attributeTypeId)}"><b>${esc(a.label)}</b> ${a.required ? '<span class="req">*</span>' : '<span class="small muted">(optional)</span>'}
-            <div class="chips">${pool.map(x => `<button type="button" class="chip" aria-pressed="${(st.chosen[a.attributeTypeId] ?? []).includes(x)}" data-val="${esc(x)}">${esc(x)}</button>`).join('')}
-            ${a.allowCustomValues ? '<button type="button" class="chip add" data-custom>+ Other</button>' : ''}</div></div>`;
+          const pool = poolOf(a);
+          const block = `<div class="qp-attr" data-attr="${esc(a.attributeTypeId)}"><b>${esc(a.label)}</b> ${a.required ? '<span class="req">*</span>' : '<span class="small muted">(optional)</span>'} <span class="small muted">Tap every ${esc(a.label.toLowerCase())} you sell.</span>
+            <div class="chips">${pool.map(x => `<button type="button" class="chip" aria-pressed="${(st.chosen[a.attributeTypeId] ?? []).includes(x)}" data-val="${esc(x)}">${swatch(a.attributeTypeId, x)}${esc(x)}</button>`).join('')}</div>
+            ${a.allowCustomValues ? `<div class="qp-other"><input data-custom-in maxlength="40" placeholder="Another ${esc(a.label.toLowerCase())}, e.g. ${/colou?r/i.test(a.label) ? 'Sky blue' : /size/i.test(a.label) ? '42' : '3kg family pack'}"><button type="button" class="btn btn-sm btn-outline" data-custom>+ Add</button></div>` : ''}</div>`;
           // Required choices are open; when none is required (food: weight or volume), the first one is open too.
           const open = a.required || (st.chosen[a.attributeTypeId] ?? []).length || (!attrs().some(x => x.required) && a === attrs()[0]);
           return open ? block : `<details class="qp-more"><summary>Add ${esc(a.label.toLowerCase())} choices (optional)</summary>${block}</details>`;
@@ -123,6 +131,9 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
         </tbody></table></div>
         ${st.rows.size > 1 ? '<div class="row" style="margin-top:8px"><input class="i" id="q-same" inputmode="decimal" placeholder="৳" style="width:100px"><button type="button" class="btn btn-sm btn-outline" id="q-same-go">Same price for all</button></div>' : ''}
         <label class="f" style="margin-top:12px">Parcel weight with box (grams) <span class="req">*</span><span class="help">Used for the delivery charge. Weigh one packed parcel, e.g. 650 for a 500 g jar.</span><input id="q-parcel" type="number" min="1" value="${esc(st.parcel)}" placeholder="e.g. 650"></label>
+        <div class="qp-delivery" role="radiogroup" aria-label="Delivery for this product"><b>Delivery for this product <span class="req">*</span></b>
+          <label class="qp-dl"><input type="radio" name="q-dl" value="charge" ${st.delivery === 'charge' ? 'checked' : ''}><span><b>💵 Cash on Delivery + delivery charge</b><small>The customer pays the delivery charge of their area (set in Settings → Delivery charges).</small></span></label>
+          <label class="qp-dl"><input type="radio" name="q-dl" value="free" ${st.delivery === 'free' ? 'checked' : ''}><span><b>🎁 Free delivery</b><small>You pay the delivery. The product shows a “Free delivery” badge.</small></span></label></div>
       </section>` : ''}
 
       ${t && required().length ? `<section class="qp-card"><h3><span class="qp-n">4</span> Required details</h3><div class="grid-2">${required().map(field).join('')}</div></section>` : ''}
@@ -146,6 +157,8 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
     if (g('#q-short')) st.short = g('#q-short').value.trim();
     if (g('#q-brand')) st.brand = g('#q-brand').value.trim();
     if (g('#q-parcel')) st.parcel = Number(g('#q-parcel').value) || '';
+    const dl = b.querySelector('[name=q-dl]:checked');
+    if (dl) st.delivery = dl.value;
     b.querySelectorAll('[data-spec]').forEach(i => { st.specs[i.dataset.spec] = i.value.trim(); });
     b.querySelectorAll('tr[data-row]').forEach(tr => {
       const r = st.rows.get(tr.dataset.row);
@@ -172,14 +185,17 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
       if (i >= 0) list.splice(i, 1); else list.push(c.dataset.val);
       syncRows(); render();
     }));
-    b.querySelectorAll('[data-custom]').forEach(c => c.addEventListener('click', () => {
-      const val = prompt('Type the choice, e.g. “3kg family pack” or “XXL”')?.trim();
-      if (!val) return;
+    // Another choice typed in the box next to the list (Enter or + Add).
+    const addCustom = box => {
+      const val = box.querySelector('[data-custom-in]').value.trim();
+      if (!val) return toast('Type the choice first.', true);
       collect();
-      const a = c.closest('[data-attr]').dataset.attr;
+      const a = box.closest('[data-attr]').dataset.attr;
       (st.chosen[a] ??= []).includes(val) || st.chosen[a].push(val);
       syncRows(); render();
-    }));
+    };
+    b.querySelectorAll('[data-custom]').forEach(c => c.addEventListener('click', () => addCustom(c.closest('.qp-other'))));
+    b.querySelectorAll('[data-custom-in]').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(i.closest('.qp-other')); } }));
     b.querySelector('#q-same-go')?.addEventListener('click', () => {
       const p = toPaisa(b.querySelector('#q-same').value);
       if (!p) return toast('Type the price first.', true);
@@ -212,6 +228,7 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
     if (!st.categoryId) throw new Error('Choose the category first.');
     if (!st.name) throw new Error('Type the product name.');
     if (!st.rows.size) throw new Error('Choose at least one option (for example a size or weight).');
+    if (!st.delivery) throw new Error('Choose the delivery for this product: “Cash on Delivery + delivery charge” or “Free delivery”.');
     so.body.inert = true;
     try {
       if (!id) {
@@ -230,7 +247,7 @@ export async function quickProduct(id, { cats, categoryId = null, done } = {}) {
       const payload = {
         ...base, categoryId: st.categoryId, name: st.name, shortDescription: st.short, brand: template?.requiresBrand ? st.brand : base.brand,
         specs: { ...base.specs, ...Object.fromEntries(Object.entries(st.specs).filter(([, x]) => x !== '')) },
-        sizeChart: st.sizeChart ?? base.sizeChart,
+        sizeChart: st.sizeChart ?? base.sizeChart, freeDelivery: st.delivery === 'free',
         variants: [...st.rows.values()].map(r => ({ ...r, id: r.id ?? null, packedWeightGrams: parcel || r.packedWeightGrams || 0, isActive: true })),
       };
       if (!base.slug || base.slug === 'untitled-product') payload.slug = '';

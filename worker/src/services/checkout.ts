@@ -1,6 +1,6 @@
 /** Checkout quote: repriced cart + live delivery charge + advance rules, shown before the customer places the order. */
 import { deliveryCharge, type ChargeResult } from '../lib/delivery-charge';
-import { resolveZone } from '../repo/geo';
+import { deliveryAreas, resolveZone } from '../repo/geo';
 import { settingInt } from '../repo/settings';
 import { formatTaka } from '../lib/money';
 import { priceCart, type CartLineIn, type PricedLine } from './cart';
@@ -22,6 +22,8 @@ export interface Quote {
   advance: AdvanceRule;
   totalPaisa: number | null;
   hasPreOrder: boolean;
+  /** Checkout: every delivery area with what delivery to it costs for this cart. */
+  areas?: Array<{ id: number; name: string; chargePaisa: number | null; status: ChargeResult['status']; etaText: string; isDefault: boolean }>;
 }
 
 /**
@@ -64,28 +66,42 @@ export function advanceFor(lines: PricedLine[], delivery: ChargeResult | null, o
 export async function quote(
   db: D1Database,
   settings: Record<string, string>,
-  input: { lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number; couponCode?: string | null; phone?: string | null },
+  input: {
+    lines: CartLineIn[]; districtId: number | null; upazilaId: number | null; paymentMethod: string; customerIsNewOrRisky?: boolean; discountPaisa?: number; couponCode?: string | null; phone?: string | null;
+    /** The delivery area the customer chose at checkout (instead of a district). */
+    zoneId?: number | null;
+    /** Also price delivery to every area, for the checkout's area choices. */
+    withAreas?: boolean;
+  },
   now = new Date(),
 ): Promise<Quote> {
   const priced = await priceCart(db, input.lines, now);
   let delivery: ChargeResult | null = null;
   let needsArea = false;
   let defaultCourier: string | null = null;
-  if (input.districtId) {
+  const chargeLines = priced.lines.map(l => ({ qty: l.qty, packedWeightGrams: l.packedWeightGrams, freeDelivery: l.freeDelivery, shippingProfile: l.shippingProfile, bulkyDeliveryMode: l.bulkyDeliveryMode, lineTotalPaisa: l.lineTotalPaisa }));
+  const chargeOpts = {
+    freeThresholdPaisa: settingInt(settings, 'free_delivery_threshold_paisa'),
+    freeExcludesBulky: settings.free_delivery_excludes_bulky !== '0',
+    codFeePaisa: settingInt(settings, 'cod_fee_paisa'),
+  };
+  let areas: Quote['areas'];
+  if (input.zoneId || input.withAreas) {
+    const all = await deliveryAreas(db);
+    const chosen = all.find(z => z.id === input.zoneId);
+    if (chosen) { defaultCourier = chosen.defaultCourier; delivery = deliveryCharge(chargeLines, chosen, chargeOpts, input.paymentMethod); }
+    if (input.withAreas) {
+      areas = all.map(z => {
+        const r = deliveryCharge(chargeLines, z, chargeOpts, input.paymentMethod);
+        return { id: z.id, name: z.name, chargePaisa: r.chargePaisa, status: r.status, etaText: z.etaText, isDefault: z.isDefault };
+      });
+    }
+  } else if (input.districtId) {
     const z = await resolveZone(db, input.districtId, input.upazilaId);
     if (z) {
       needsArea = z.needsArea;
       defaultCourier = z.defaultCourier;
-      delivery = deliveryCharge(
-        priced.lines.map(l => ({ qty: l.qty, packedWeightGrams: l.packedWeightGrams, freeDelivery: l.freeDelivery, shippingProfile: l.shippingProfile, bulkyDeliveryMode: l.bulkyDeliveryMode, lineTotalPaisa: l.lineTotalPaisa })),
-        z.zone,
-        {
-          freeThresholdPaisa: settingInt(settings, 'free_delivery_threshold_paisa'),
-          freeExcludesBulky: settings.free_delivery_excludes_bulky !== '0',
-          codFeePaisa: settingInt(settings, 'cod_fee_paisa'),
-        },
-        input.paymentMethod,
-      );
+      delivery = deliveryCharge(chargeLines, z.zone, chargeOpts, input.paymentMethod);
     }
   }
   // Manual orders: a staff discount (role limits are checked by the caller). Web orders: a coupon. Product discounts never
@@ -122,5 +138,6 @@ export async function quote(
     advance,
     totalPaisa,
     hasPreOrder: priced.lines.some(l => l.fulfilmentMode === 'pre_order'),
+    ...(areas ? { areas } : {}),
   };
 }

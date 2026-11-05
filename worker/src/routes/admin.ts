@@ -6,6 +6,8 @@ import { hashPassword, passwordProblem, randomToken, ROLE_LABELS, ROLES, SESSION
 import { bad, clientIp, forbidden, HttpError, rateLimit, readJson, str } from '../lib/http';
 import { activeAdminByEmail, adminCount, createAdmin, listAdmins, staffOptions, touchLogin, updateAdmin } from '../repo/admins';
 import { audit, need } from './admin-helpers';
+import { storeName } from '../lib/brand';
+import { loadSettings } from '../repo/settings';
 import { adminCatalog } from './admin-catalog';
 import { adminOps } from './admin-ops';
 import { adminOrders } from './admin-orders';
@@ -24,7 +26,7 @@ async function startSession(c: Context<AppEnv>, a: { id: string; role: Role; nam
   return session;
 }
 
-admin.get('/setup-status', async c => c.json({ needsSetup: (await adminCount(c.env.DB)) === 0 }));
+admin.get('/setup-status', async c => c.json({ needsSetup: (await adminCount(c.env.DB)) === 0, storeName: storeName(await loadSettings(c.env.DB)) }));
 
 /** First-run: creates the first Super Admin. Needs the SETUP_TOKEN secret and only works while no admin exists. */
 admin.post('/setup', async c => {
@@ -76,7 +78,7 @@ admin.use('*', async (c, next) => {
   await next();
 });
 
-admin.get('/me', c => c.json({ user: { id: c.var.session.adminId, name: c.var.session.name, email: c.var.session.email, role: c.var.session.role }, csrf: c.var.session.csrf, roles: ROLE_LABELS }));
+admin.get('/me', async c => c.json({ user: { id: c.var.session.adminId, name: c.var.session.name, email: c.var.session.email, role: c.var.session.role }, csrf: c.var.session.csrf, roles: ROLE_LABELS, storeName: storeName(await loadSettings(c.env.DB)), siteHost: new URL(c.env.SITE_URL).host }));
 
 /** Active staff, for assignment pickers. */
 admin.get('/staff-options', need('orders:read'), async c => c.json(await staffOptions(c.env.DB)));

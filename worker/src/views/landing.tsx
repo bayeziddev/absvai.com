@@ -7,7 +7,7 @@ import { formatTaka } from '../lib/money';
 import { ACCENT_COLORS, youtubeId, type LandingContent } from '../lib/landing';
 import type { ProductDetail } from '../repo/catalog';
 import { Icon } from './icons';
-import { CheckoutForm } from './pages';
+import { CheckoutForm, type CheckoutArea } from './pages';
 import { ReviewsSection, type ReviewSummary } from './reviews';
 
 export interface LandingView {
@@ -15,6 +15,7 @@ export interface LandingView {
   c: LandingContent; d: ProductDetail; reviews: ReviewSummary;
   wallets: Array<{ wallet: string; number: string; type?: string }>; turnstileSiteKey?: string;
   phone: string | null; whatsapp: string | null; etaText: string | null;
+  areas: CheckoutArea[];
 }
 
 const optionLabel = (attrs: Record<string, string>) => Object.values(attrs).join(' · ');
@@ -135,7 +136,7 @@ export function LandingPage(v: LandingView) {
           <div class="lp-qty"><span>পরিমাণ</span>
             <div class="qty-stepper"><button type="button" data-lp-qty="-1" aria-label="One less">−</button><input type="number" min="1" max="20" value="1" data-lp-qty-input aria-label="Quantity" inputmode="numeric" /><button type="button" data-lp-qty="1" aria-label="One more">+</button></div>
           </div>
-          <CheckoutForm wallets={v.wallets} turnstileSiteKey={v.turnstileSiteKey} couponCode={c.couponCode} placeLabel={c.ctaText} compact />
+          <CheckoutForm wallets={v.wallets} areas={v.areas} whatsapp={v.whatsapp} turnstileSiteKey={v.turnstileSiteKey} couponCode={c.couponCode} placeLabel={c.ctaText} compact />
           {(v.phone || v.whatsapp) && (
             <p class="lp-help">অর্ডার করতে সমস্যা? {v.phone && <a href={`tel:${v.phone}`}><Icon name="phone" size={16} /> কল করুন {v.phone}</a>}{v.whatsapp && <a href={`https://wa.me/${v.whatsapp}`} target="_blank" rel="noopener"><Icon name="whatsapp" size={16} /> WhatsApp</a>}</p>
           )}

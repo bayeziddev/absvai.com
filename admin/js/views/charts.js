@@ -158,3 +158,42 @@ export function funnel(el, steps) {
 
 /** Accessible table version of a chart. */
 export const tableView = (head, rows) => `<details class="ch-table"><summary>Show as table</summary><div class="table-wrap"><table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+
+/**
+ * Map of Bangladesh's districts shaded by orders (darker = more). The outlines are the shop's static district file;
+ * tap or hover a district for its orders and sales. `counts` maps district id → { orders, revenue, district }.
+ */
+export async function districtMap(el, outlinesUrl, counts, { fmtMoney }) {
+  let geo;
+  try { geo = await (await fetch(outlinesUrl)).json(); } catch { el.innerHTML = '<p class="muted small">The map could not load. Check the connection.</p>'; return; }
+  const rings = f => (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates).flat();
+  let minX = 180, maxX = -180, minY = 90, maxY = -90;
+  for (const f of geo.features) for (const r of rings(f)) for (const [x, y] of r) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+  const kx = Math.cos(((minY + maxY) / 2) * Math.PI / 180);
+  const W = 320;
+  const scale = W / ((maxX - minX) * kx);
+  const H = Math.round((maxY - minY) * scale);
+  const pt = ([x, y]) => [((x - minX) * kx * scale).toFixed(1), ((maxY - y) * scale).toFixed(1)];
+  // Points closer than half a pixel add nothing at this size; dropping them keeps the map light.
+  const path = f => rings(f).map(r => {
+    let last = null;
+    const pts = r.map(pt).filter(p => { const keep = !last || Math.abs(p[0] - last[0]) + Math.abs(p[1] - last[1]) >= 0.5; if (keep) last = p; return keep; });
+    return pts.length > 2 ? `M${pts.join('L')}Z` : '';
+  }).join('');
+  const max = Math.max(1, ...Object.values(counts).map(c => c.orders));
+  const shade = n => (!n ? '#F1EADF' : ['#F9D9B0', '#F2B36B', '#E07B3C', '#C2412A', '#8C1D17'][Math.min(4, Math.floor(Math.sqrt(n / max) * 4.999))]);
+  el.innerHTML = `<div class="ch-map"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of orders by district">${geo.features.map(f => {
+      const c = counts[f.properties.id];
+      return `<path d="${path(f)}" fill="${shade(c?.orders ?? 0)}" data-id="${f.properties.id}" data-name="${esc(f.properties.name)}"><title>${esc(f.properties.name)}: ${c ? `${c.orders} order(s), ${fmtMoney(c.revenue)}` : 'no orders yet'}</title></path>`;
+    }).join('')}</svg>
+    <div class="ch-map-legend"><span>No orders</span><i style="background:#F1EADF"></i><i style="background:#F9D9B0"></i><i style="background:#F2B36B"></i><i style="background:#E07B3C"></i><i style="background:#C2412A"></i><i style="background:#8C1D17"></i><span>Most</span></div>
+    <p class="ch-map-info" aria-live="polite">Tap a district to see its orders.</p></div>`;
+  const info = el.querySelector('.ch-map-info');
+  const show = p => {
+    el.querySelectorAll('path.on').forEach(x => x.classList.remove('on'));
+    p.classList.add('on');
+    const c = counts[p.dataset.id];
+    info.innerHTML = `<b>${esc(p.dataset.name)}</b>: ${c ? `${c.orders} order(s) · ${esc(fmtMoney(c.revenue))}` : 'no orders yet'}`;
+  };
+  el.querySelectorAll('path').forEach(p => { p.addEventListener('click', () => show(p)); p.addEventListener('mouseenter', () => show(p)); });
+}

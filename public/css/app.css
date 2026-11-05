@@ -1,4 +1,4 @@
-/* Abs Vai storefront: "spice market meets Facebook ad". Mobile-first, no framework. */
+/* Storefront: "spice market meets Facebook ad". Mobile-first, no framework. */
 
 /* Self-hosted, latin subset (OFL). Text never waits for a font. Body text (Inter) is "optional": if it hasn't arrived
    by the first paint, that page keeps the phone's own font instead of re-drawing text while people read, and the
@@ -482,20 +482,17 @@ th, td { padding: 8px 10px; border-bottom: 1px solid var(--husk); text-align: le
 .co-step legend { display: flex; align-items: center; gap: 10px; font: 800 1.05rem var(--display); float: left; width: 100%; margin-bottom: 12px; }
 .co-step legend + * { clear: both; }
 .step-no { width: 28px; height: 28px; border-radius: 50%; background: var(--chili); color: var(--white); display: grid; place-items: center; font-size: .9rem; }
-.finder { display: grid; grid-template-columns: 1fr; gap: 8px; align-items: end; }
-.finder .field { margin: 0; }
-.finder-or { text-align: center; color: var(--muted); font-size: .85rem; }
-@media (min-width: 600px) { .finder { grid-template-columns: 1fr auto auto; } }
-.finder-msg { font-size: .88rem; margin: 8px 0; min-height: 1.2em; }
-.finder-msg.ok { color: var(--leaf); font-weight: 600; }
-.finder-msg.warn { color: #7A5A00; }
-.po-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.selects { display: grid; grid-template-columns: 1fr; gap: 0 12px; margin-top: 6px; }
-@media (min-width: 600px) { .selects { grid-template-columns: 1fr 1fr; } }
-.map-card { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--husk); margin: 4px 0 14px; background: var(--cream); }
-.map { height: 190px; background: var(--cream); }
-.map-card p { margin: 0; padding: 10px 12px; font-weight: 600; background: var(--white); display: flex; gap: 8px; }
-.map svg.outline { width: 100%; height: 100%; display: block; }
+.area-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.area-option { display: flex; gap: 10px; align-items: flex-start; border: 2px solid var(--husk); border-radius: 12px; padding: 10px 12px; cursor: pointer; background: var(--white); }
+.area-option:has(input:checked) { border-color: var(--chili); background: #FFF8F7; }
+.area-option input { width: 20px; height: 20px; accent-color: var(--chili); margin: 1px 0 0; flex: none; }
+.area-option strong { display: block; line-height: 1.25; }
+.area-option small { display: block; font-weight: 800; color: var(--chili); font-size: .95rem; }
+.co-delivery { margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--leaf-soft); color: #1F5A23; font-size: .95rem; }
+.co-delivery span { display: block; font-size: .82rem; opacity: .85; margin-top: 2px; }
+.co-delivery.free { background: #FFF6DB; color: #6B4A00; }
+.btn-whatsapp { margin-top: 10px; background: #25D366; color: #fff; border-color: #25D366; }
+.btn-whatsapp:hover { background: #1EBE5B; }
 .pay-option { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--husk); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; background: var(--white); }
 .pay-option:has(input:checked) { border-color: var(--chili); background: #FFF8F7; }
 .pay-option input { width: 20px; height: 20px; accent-color: var(--chili); margin-top: 2px; }

@@ -33,8 +33,10 @@ export function SectionTitle({ title, href, linkText = 'View all', id }: { title
   );
 }
 
-export function OriginalsSeal({ small }: { small?: boolean }) {
-  return <span class={`seal${small ? ' seal-sm' : ''}`} title="Made by Abs Vai"><Icon name="leaf" size={small ? 12 : 14} />Made by Abs Vai</span>;
+/** The shop's own products: "Original" on cards, "Made by <shop>" on the product page. */
+export function OriginalsSeal({ small, store }: { small?: boolean; store?: string }) {
+  const text = small || !store ? 'Original' : `Made by ${store}`;
+  return <span class={`seal${small ? ' seal-sm' : ''}`} title={text}><Icon name="leaf" size={small ? 12 : 14} />{text}</span>;
 }
 
 export function Card({ p, eager, sizes = SIZES.card }: { p: ProductCard; eager?: boolean; sizes?: string }) {

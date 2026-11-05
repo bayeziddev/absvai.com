@@ -1,5 +1,5 @@
 /**
- * Abs Vai: one Cloudflare Worker serves the storefront (server-rendered), the admin app (static assets)
+ * The shop: one Cloudflare Worker serves the storefront (server-rendered), the admin app (static assets)
  * and every /api/* route. Static files in dist/ are served by Workers Static Assets before this code runs.
  * The deployed entry point is worker.ts, which puts the edge cache in front of the storefront pages.
  */
@@ -19,9 +19,11 @@ const app = new Hono<AppEnv>();
 
 
 
+// www.<shop domain> → the shop domain (SITE_URL), so every page has one address.
 app.use('*', (c, next) => {
   const url = new URL(c.req.url);
-  return url.hostname === 'www.absvai.com' ? Promise.resolve(c.redirect(`https://absvai.com${url.pathname}${url.search}`, 301)) : next();
+  const site = new URL(c.env.SITE_URL);
+  return url.hostname === `www.${site.hostname}` ? Promise.resolve(c.redirect(`${site.origin}${url.pathname}${url.search}`, 301)) : next();
 });
 
 app.use('*', async (c, next) => {

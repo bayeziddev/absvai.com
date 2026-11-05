@@ -13,7 +13,7 @@ after(async () => { await browser?.close(); server?.stop(); });
 // No ctx.route() here: Playwright request interception makes Chromium skip cross-document view transitions and report it
 // as a page error. Fonts are self-hosted, so nothing external needs blocking.
 async function phone() {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, geolocation: { latitude: 24.3833, longitude: 90.0167 }, permissions: ['geolocation'] });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -25,10 +25,17 @@ async function waitFor(fn, ms = 8000) {
   throw new Error('timed out');
 }
 
-async function fillContact(page, number) {
-  await page.waitForSelector('select[name=divisionId] option:nth-child(3)', { state: 'attached' });
+// The checkout is in Bangla: mobile number, name, delivery area (a choice with its charge), the address in the
+// customer's own words (Bangla or English), payment.
+async function fillContact(page, number, name = 'Test Customer') {
+  await page.waitForSelector('[data-co-lines] .co-line');
   await page.fill('input[name=phone]', number);
-  await page.fill('input[name=name]', 'Test Customer');
+  await page.fill('input[name=name]', name);
+}
+
+async function chooseArea(page, name) {
+  await page.click(`.area-option:has-text("${name}")`);
+  await page.waitForFunction(n => !document.querySelector('[data-co-delivery]').hidden && document.querySelector('[data-co-delivery]').textContent.includes(n), name);
 }
 
 async function placeAndWait(page) {
@@ -40,7 +47,7 @@ async function placeAndWait(page) {
 }
 
 describe('storefront checkout', () => {
-  it('weighed food: 1kg patali gur, postcode auto-fill, COD', async () => {
+  it('weighed food: 1kg patali gur, Bangla checkout, the area charge adds itself to the total, COD', async () => {
     const { ctx, page, errors } = await phone();
     await page.goto(`${server.base}/p/khejur-patali-gur`);
     await page.click('[data-pdp-form] label:has-text("1kg")');
@@ -49,15 +56,19 @@ describe('storefront checkout', () => {
     await page.click('[data-pdp-form] [data-pdp-order]');
     await page.waitForURL(/\/checkout\?buy=/);
     await fillContact(page, '01710000001');
-    await page.fill('input[name=postcode]', '১২০৯'); // Bangla digits for 1209 (Jigatala TSO, Dhanmondi): district known, area to choose
-    await page.waitForFunction(() => document.querySelector('select[name=districtId]').selectedOptions[0]?.text === 'Dhaka');
-    assert.equal(await page.inputValue('input[name=postcode]'), '1209');
-    assert.match(await page.textContent('[data-finder-msg]'), /Jigatala TSO \(জিগাতলা TSO\) post office · Dhaka, Dhaka Division/);
-    await page.selectOption('select[name=upazilaId]', { label: 'Dhaka South City Corporation' });
-    await page.waitForFunction(() => /Inside Dhaka City/.test(document.querySelector('[data-eta]').textContent));
-    assert.equal(await page.textContent('[data-delivery]'), '৳85'); // 1.2kg packed: ৳70 + ৳15 for the extra kg
-    await page.fill('input[name=addressLine]', 'House 7, Road 3, Dhanmondi');
-    await page.locator('input[name=addressLine]').blur();
+    // Everything the customer reads is Bangla; no landmark box, no district or postcode lookups.
+    const legends = await page.$$eval('.co-step legend', l => l.map(x => x.textContent.replace(/^[০-৯]/, '')));
+    assert.deepEqual(legends, ['মোবাইল নম্বর', 'আপনার নাম', 'ডেলিভারি এলাকা', 'পুরো ঠিকানা', 'পেমেন্ট']);
+    assert.equal(await page.$('[name=landmark], [name=postcode], select[name=districtId]'), null);
+    assert.equal(await page.textContent('[data-delivery]'), 'এলাকা বেছে নিন');
+    // Each area shows what delivery costs for this cart: 1.2kg packed is ৳70 + ৳15 for the extra kg inside Dhaka city.
+    await page.waitForFunction(() => /৳85/.test(document.querySelector('.area-option').textContent));
+    await chooseArea(page, 'ঢাকা সিটির ভিতরে');
+    assert.equal(await page.textContent('[data-delivery]'), '৳85');
+    assert.equal(await page.textContent('[data-total]'), '৳805');
+    assert.match(await page.textContent('[data-co-delivery]'), /ডেলিভারি চার্জ \(ঢাকা সিটির ভিতরে\): ৳85 · সর্বমোট ৳805/);
+    await page.fill('textarea[name=addressLine]', 'বাসা ৭, রোড ৩, ধানমন্ডি, ঢাকা');
+    await page.locator('textarea[name=addressLine]').blur();
     // Incomplete-order capture: one row for this checkout as soon as the phone is valid.
     // The row starts on the phone blur and fills in as the customer keeps typing (debounced).
     const [row] = await waitFor(() => { const r = server.sql("SELECT status, name, subtotal_paisa FROM abandoned_checkouts WHERE phone = '8801710000001' AND name IS NOT NULL"); return r.length ? r : null; });
@@ -66,13 +77,13 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('h1'), /Thank you, Test!/);
     assert.equal(server.sql("SELECT COUNT(*) AS n FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].n, 1);
     assert.equal(server.sql("SELECT status FROM abandoned_checkouts WHERE phone = '8801710000001'")[0].status, 'converted');
-    const [o] = server.sql(`SELECT total_paisa, district_name, upazila_name, postcode, post_office FROM orders WHERE order_no = '${orderNo}'`);
-    assert.deepEqual(o, { total_paisa: 80500, district_name: 'Dhaka', upazila_name: 'Dhaka South City Corporation', postcode: '1209', post_office: 'Jigatala TSO' });
+    const [o] = server.sql(`SELECT total_paisa, delivery_charge_paisa, district_name, address_line FROM orders WHERE order_no = '${orderNo}'`);
+    assert.deepEqual(o, { total_paisa: 80500, delivery_charge_paisa: 8500, district_name: 'Dhaka', address_line: 'বাসা ৭, রোড ৩, ধানমন্ডি, ঢাকা' });
     assert.deepEqual(errors, []);
     await ctx.close();
   });
 
-  it('clothing: size + colour on the product page, cart, then location detection', async () => {
+  it('clothing: size + colour on the product page, cart, then an English address outside Dhaka', async () => {
     const { ctx, page, errors } = await phone();
     await page.goto(`${server.base}/p/mens-cotton-panjabi`);
     await page.click('[data-pdp-form] label:has-text("XL")');
@@ -84,20 +95,19 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('.cart-line'), /XL · Navy/);
     await page.click('.cart-summary a:has-text("Checkout")');
     await fillContact(page, '01710000002');
-    await page.click('[data-locate]');
-    await page.waitForFunction(() => /set your district: Tangail/.test(document.querySelector('[data-finder-msg]').textContent));
-    await page.selectOption('select[name=upazilaId]', { label: 'Kalihati' });
-    await page.waitForSelector('[data-map-card]:not([hidden]) .leaflet-container');
-    await page.fill('input[name=addressLine]', 'Village Bashail, Kalihati');
+    await chooseArea(page, 'ঢাকার বাইরে');
+    await page.fill('textarea[name=addressLine]', 'Village Bashail, Kalihati, Tangail');
     const orderNo = await placeAndWait(page);
     const [item] = server.sql(`SELECT i.sku, i.variant_label FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.order_no = '${orderNo}'`);
     assert.deepEqual(item, { sku: 'CLO-PNJB-XL-NAVY-0006', variant_label: 'XL · Navy' });
+    const [o] = server.sql(`SELECT district_name, upazila_name FROM orders WHERE order_no = '${orderNo}'`);
+    assert.deepEqual(o, { district_name: 'Tangail', upazila_name: 'Kalihati' }); // read from the address, for the dashboard map
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('absvai.cart')).length), 0); // cart cleared
     assert.deepEqual(errors, []);
     await ctx.close();
   });
 
-  it('machine with model options: Order Now from the card option picker', async () => {
+  it('machine with model options: Order Now from the card option picker, Bangla messages for missing details', async () => {
     const { ctx, page, errors } = await phone();
     await page.goto(`${server.base}/c/sealers`);
     await page.click('[data-product="electronic-impulse-sealer-pfs"] [data-action="order"]');
@@ -105,15 +115,21 @@ describe('storefront checkout', () => {
     await page.click('#pick-sheet label:has-text("300mm")');
     await page.click('#pick-sheet [data-s-order]');
     await page.waitForURL(/\/checkout\?buy=/);
+    await page.waitForSelector('[data-co-lines] .co-line');
+    await page.click('[data-place]');
+    assert.equal(await page.textContent('[data-co-error]'), 'সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।');
     await fillContact(page, '01710000003');
-    await page.selectOption('select[name=divisionId]', { label: 'Khulna' });
-    await page.selectOption('select[name=districtId]', { label: 'Jashore' });
-    await page.selectOption('select[name=upazilaId]', { index: 1 });
-    await page.fill('input[name=addressLine]', 'Shop 4, Rail Road Market');
-    await page.waitForFunction(() => document.querySelector('[data-delivery]').textContent === 'Free'); // ৳1,850 is over the threshold
+    await page.click('[data-place]');
+    assert.equal(await page.textContent('[data-co-error]'), 'ডেলিভারি এলাকা বেছে নিন।');
+    await chooseArea(page, 'ঢাকার বাইরে');
+    assert.equal(await page.textContent('[data-delivery]'), 'ফ্রি'); // ৳1,850 is over the free-delivery threshold
+    await page.click('[data-place]');
+    assert.match(await page.textContent('[data-co-error]'), /পুরো ঠিকানা লিখুন/);
+    await page.fill('textarea[name=addressLine]', 'Shop 4, Rail Road Market, Jashore');
     const orderNo = await placeAndWait(page);
     const [item] = server.sql(`SELECT i.sku FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.order_no = '${orderNo}'`);
     assert.equal(item.sku, 'MCH-SEAL-300MM-0002');
+    assert.equal(server.sql(`SELECT district_name FROM orders WHERE order_no = '${orderNo}'`)[0].district_name, 'Jashore');
     assert.deepEqual(errors, []);
     await ctx.close();
   });
@@ -124,12 +140,13 @@ describe('storefront checkout', () => {
     assert.match(await page.textContent('[data-avail]'), /Pre-order · ships from 2027-05-25/);
     await page.click('[data-pdp-form] [data-pdp-order]');
     await fillContact(page, '01710000004');
-    await page.fill('input[name=postcode]', '6300'); // Chapainawabganj Sadar
-    await page.waitForFunction(() => document.querySelector('select[name=upazilaId]').value !== '');
+    await chooseArea(page, 'ঢাকার বাইরে');
     await page.waitForSelector('[data-advance]:not([hidden])');
-    assert.match(await page.textContent('[data-advance-title]'), /advance of ৳200/);
+    assert.match(await page.textContent('[data-advance-title]'), /এই অর্ডারে ৳200 অ্যাডভান্স লাগবে/);
+    assert.match(await page.textContent('[data-advance-reasons]'), /প্রি-অর্ডারের অ্যাডভান্স/);
     assert.equal(await page.isChecked('input[value=manual_mobile]'), true);
-    await page.fill('input[name=addressLine]', 'Mohalla Baliadanga, Sadar');
+    assert.equal(await page.textContent('[data-place]'), 'প্রি-অর্ডার কনফার্ম করুন');
+    await page.fill('textarea[name=addressLine]', 'মহল্লা বালিয়াডাঙ্গা, চাঁপাইনবাবগঞ্জ সদর');
     await page.fill('input[name=advanceTrxId]', 'BK7Q2M9X1Z');
     const orderNo = await placeAndWait(page);
     assert.match(orderNo, /^PRE-/);
@@ -156,7 +173,6 @@ describe('admin smart upload form', () => {
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    page.on('dialog', d => d.accept('750g'));
     await page.goto(`${server.base}/admin/`);
     await page.fill('input[name=token]', 'e2e-setup-token');
     await page.fill('input[name=name]', 'Owner');
@@ -177,12 +193,14 @@ describe('admin smart upload form', () => {
     await page.fill('.over #q-name', 'Sundarban Honey');
     await page.fill('.over #q-short', 'Raw mangrove honey from the Sundarbans.');
     await page.click('.over [data-attr="weight"] .chip[data-val="500g"]');
-    await page.click('.over [data-attr="weight"] [data-custom]'); // the prompt answers "750g"
+    await page.fill('.over [data-attr="weight"] [data-custom-in]', '750g'); // a weight that is not in the list
+    await page.click('.over [data-attr="weight"] [data-custom]');
     assert.equal(await page.$$eval('.over tr[data-row]', r => r.length), 2);
     await page.fill('.over #q-same', '550');
     await page.click('.over #q-same-go');
     for (const i of [0, 1]) await page.fill(`.over tr[data-row] [data-r=stock] >> nth=${i}`, '10');
     await page.fill('.over #q-parcel', '700');
+    await page.click('.over [name=q-dl][value=charge]'); // every product says how delivery works
     // Only the details food needs, never Size, Colour or Warranty.
     const asked = await page.$$eval('.over [data-spec]', x => x.map(i => i.dataset.spec));
     assert.deepEqual(asked.sort(), ['batch_no', 'best_before', 'ingredients', 'origin', 'storage']);

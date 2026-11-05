@@ -33,6 +33,7 @@ import { addTrackNote } from '../repo/tracking';
 import { shopNoteLine } from '../lib/tracking';
 import { settingsOf } from './context';
 import { otpActive } from '../services/sms';
+import { companyName, storeName } from '../lib/brand';
 
 export const adminOrders = new Hono<AppEnv>();
 
@@ -414,10 +415,10 @@ async function slipData(c: Context<AppEnv>, ids: number[]): Promise<SlipData[]> 
     const advance = o.advance_status === 'paid' ? Number(o.advance_amount_paisa ?? 0) : 0;
     return {
       invoiceNo: String(o.invoice_no), orderNo: String(o.order_no), issuedAt: String(o.issued_at ?? o.confirmed_at ?? o.created_at),
-      company: { name: s.store_name || 'Abs Vai', phone: s.support_phone ?? '' },
+      company: { name: storeName(s), phone: s.support_phone ?? '' },
       customer: {
         name: String(o.customer_name), phone: localPhone(String(o.phone)),
-        address: [String(o.address_line), [o.landmark ? `Near ${o.landmark}` : '', o.union_name].filter(Boolean).join(', '), `${o.upazila_name}, ${o.district_name}${o.postcode ? ` ${o.postcode}` : ''}`].filter(Boolean),
+        address: [String(o.address_line), [o.landmark ? `Near ${o.landmark}` : '', o.union_name].filter(Boolean).join(', '), [o.upazila_name, o.district_name].filter(Boolean).join(', ') + (o.postcode ? ` ${o.postcode}` : '')].filter(x => x.trim()),
       },
       items: items.map(i => ({ sku: String(i.sku), name: String(i.name), variant: (i.variant_label as string) ?? null, qty: Number(i.qty), totalPaisa: Number(i.line_total_paisa) })),
       totalPaisa: Number(o.total_paisa), duePaisa: o.payment_status === 'paid' ? 0 : Math.max(0, Number(o.total_paisa) - advance),
@@ -437,10 +438,10 @@ adminOrders.get('/orders/:id/invoice.pdf', need('orders:read'), async c => {
   const s = await settingsOf(c);
   const pdf = buildInvoicePdf({
     invoiceNo: String(o.invoice_no), issuedAt: String(o.issued_at ?? o.confirmed_at), orderNo: String(o.order_no),
-    company: { name: s.store_name ?? 'Abs Vai', legalName: s.company_name ?? 'ABS VAI LTD', address: s.company_address ?? '', phone: s.support_phone ?? '', site: 'absvai.com' },
+    company: { name: storeName(s), legalName: companyName(s), address: s.company_address ?? '', phone: s.support_phone ?? '', site: new URL(c.env.SITE_URL).host },
     customer: {
       name: String(o.customer_name), phone: localPhone(String(o.phone)),
-      address: [String(o.address_line), [o.landmark ? `Near ${o.landmark}` : '', o.union_name].filter(Boolean).join(', '), `${o.upazila_name}, ${o.district_name}, ${o.division_name} Division${o.postcode ? ` ${o.postcode}` : ''}`].filter(Boolean),
+      address: [String(o.address_line), [o.landmark ? `Near ${o.landmark}` : '', o.union_name].filter(Boolean).join(', '), [o.upazila_name, o.district_name, o.division_name ? `${o.division_name} Division` : ''].filter(Boolean).join(', ') + (o.postcode ? ` ${o.postcode}` : '')].filter(x => x.trim()),
     },
     paymentMethod: String(o.payment_method), paymentStatus: String(o.payment_status), advancePaidPaisa: o.advance_status === 'paid' ? Number(o.advance_amount_paisa ?? 0) : 0,
     items: x.items.map(i => ({ sku: String(i.sku), name: String(i.name), variant: (i.variant_label as string) ?? null, qty: Number(i.qty), unitPaisa: Number(i.unit_price_paisa), totalPaisa: Number(i.line_total_paisa) })),

@@ -179,10 +179,10 @@ const DEMO: DemoProduct[] = [
     image: '/img/photos/sq/p-honey.webp',
   },
   {
-    slug: '42-item-master-masala', category: 'spices-masala', template: 'packaged_food', name: '42 Item Master Masala', code: 'MMSL', brand: 'Abs Vai', original: true, home: true,
+    slug: '42-item-master-masala', category: 'spices-masala', template: 'packaged_food', name: '42 Item Master Masala', code: 'MMSL', brand: 'Vandar Mart', original: true, home: true,
     short: 'One masala for fuchka, chotpoti, jhal muri, velpuri and haleem.',
-    description: 'Our own blend of 42 spices, ground and packed by ABS VAI LTD. Cooking directions are printed on the box.',
-    chips: ['42 spices in one pack', 'Recipe on the box', 'Made by Abs Vai'], sold: 312,
+    description: 'Our own blend of 42 spices, ground and packed by Vandar Mart. Cooking directions are printed on the box.',
+    chips: ['42 spices in one pack', 'Recipe on the box', 'Made by Vandar Mart'], sold: 312,
     specs: { ingredients: 'Coriander, cumin, chili, black salt, dried mango, black pepper, fennel, cinnamon, cardamom, clove and 32 more spices (full list on the box).', best_before: '2027-09-30', manufacturer: 'ABS VAI LTD, Bangladesh (full address on the pack)', usage: 'Add 1 teaspoon per plate of chotpoti or jhal muri. See the box for fuchka water and haleem.', used_for: 'fuchka, chotpoti, jhal muri, velpuri, haleem', spice_level: 'Medium' },
     variants: [
       { attrs: { pack_size: '250g' }, price: 18000, stock: 120, packed: 300, net: [250, 'g'] },
@@ -196,7 +196,7 @@ const DEMO: DemoProduct[] = [
     short: 'Seal chips, chanachur and masala pouches neatly in seconds.',
     description: 'A desk impulse sealer with a timer dial. Heats only while you press, so it is safe and quick for small packaging runs.',
     chips: ['Fast and safe', 'Neat, airtight seal', 'Spare element included'], shipping: 'standard', sold: 76,
-    specs: { model_no: 'PFS-200 / 300 / 400', body_material: 'Painted steel body, aluminium arm', capacity: 'About 10 seals per minute', in_the_box: 'Sealer, 1 spare heating element, 1 spare Teflon strip', warranty_period: '6 months', warranty_by: 'Abs Vai', power_watts: '300', voltage: '220V AC' },
+    specs: { model_no: 'PFS-200 / 300 / 400', body_material: 'Painted steel body, aluminium arm', capacity: 'About 10 seals per minute', in_the_box: 'Sealer, 1 spare heating element, 1 spare Teflon strip', warranty_period: '6 months', warranty_by: 'Vandar Mart', power_watts: '300', voltage: '220V AC' },
     variants: [
       { attrs: { model_size: '200mm' }, price: 145000, stock: 15, packed: 2200 },
       { attrs: { model_size: '300mm' }, price: 185000, compare: 210000, stock: 25, packed: 2900 },
@@ -209,7 +209,7 @@ const DEMO: DemoProduct[] = [
     short: 'Make chanachur, jhuri bhaja and sev at home or for your shop.',
     description: 'A screw press with a food-grade cylinder and five interchangeable dies. Built for daily use in small food businesses.',
     chips: ['5 dies included', 'Food-grade cylinder', 'Business guide included'], bulkyMode: 'zone_fixed', sold: 41,
-    specs: { model_no: 'CP-4 / CP-6', body_material: 'Cast iron frame, stainless steel cylinder', capacity: '8–10 kg per hour (4-inch)', in_the_box: 'Press, 5 dies, handle, cleaning brush', warranty_period: '1 year (body)', warranty_by: 'Abs Vai' },
+    specs: { model_no: 'CP-4 / CP-6', body_material: 'Cast iron frame, stainless steel cylinder', capacity: '8–10 kg per hour (4-inch)', in_the_box: 'Press, 5 dies, handle, cleaning brush', warranty_period: '1 year (body)', warranty_by: 'Vandar Mart' },
     variants: [
       { attrs: { model_size: '4-inch' }, price: 450000, compare: 480000, stock: 6, packed: 9000 },
       { attrs: { model_size: '6-inch' }, price: 650000, stock: 3, packed: 14000 },
@@ -281,7 +281,7 @@ const DEMO: DemoProduct[] = [
   {
     slug: 'smart-watch-basic', category: 'gadgets-electronics', template: 'electronics', name: 'Smart Watch (basic)', code: 'SMWT', brand: 'Generic',
     short: 'Step counter, heart-rate and call alerts.', description: 'A basic smart watch with a magnetic charger.',
-    specs: { model_no: 'SW-9', warranty_period: '3 months', warranty_by: 'Abs Vai', in_the_box: 'Watch, magnetic charger, manual', power_spec: '250mAh, magnetic USB charging' },
+    specs: { model_no: 'SW-9', warranty_period: '3 months', warranty_by: 'Vandar Mart', in_the_box: 'Watch, magnetic charger, manual', power_spec: '250mAh, magnetic USB charging' },
     variants: [{ attrs: { color: 'Black' }, price: 149000, compare: 169000, stock: 10, packed: 300 }, { attrs: { color: 'Pink' }, price: 149000, compare: 169000, stock: 6, packed: 300 }],
     image: '/img/photos/sq/cat-gadgets.webp',
   },
@@ -319,7 +319,7 @@ for (const p of DEMO) {
   const tpl = TEMPLATES.find(t => t.id === p.template)!;
   demo.push(insert('products', {
     slug: p.slug, category_id: catSel, template_id: p.template, name: p.name, code: p.code, short_description: p.short, description: p.description,
-    brand: p.brand ?? (p.original ? 'Abs Vai' : null), is_original: p.original ? 1 : 0, show_on_home: p.home ? 1 : 0, benefit_chips: JSON.stringify(p.chips ?? []),
+    brand: p.brand ?? (p.original ? 'Vandar Mart' : null), is_original: p.original ? 1 : 0, show_on_home: p.home ? 1 : 0, benefit_chips: JSON.stringify(p.chips ?? []),
     status: 'published', published_at: '2026-10-01T00:00:00.000Z', fulfilment_mode: p.fulfilment ?? 'in_stock',
     preorder_dispatch_date: p.preorder?.dispatch ?? null, preorder_advance_type: p.preorder?.type ?? null, preorder_advance_paisa: p.preorder?.advance ?? null,
     made_to_order_lead_days: p.fulfilment === 'made_to_order' ? Number(p.specs.lead_time_days ?? 3) : null,

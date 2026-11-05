@@ -31,6 +31,8 @@ import { productRow } from '../repo/catalog-admin';
 import { sendSms } from '../services/sms';
 import { COURIERS, ORDER_SOURCES } from '../services/orders';
 import { allowed, audit, need, refresh } from './admin-helpers';
+import { GEO_VERSION } from '../generated/geo-version';
+import { storeName } from '../lib/brand';
 
 export const adminOps = new Hono<AppEnv>();
 
@@ -114,6 +116,8 @@ adminOps.get('/dashboard', need('dashboard'), async c => {
       // Sales Agents see masked numbers, as everywhere else.
       customers: charts.customers.map(x => ({ ...x, phone: c.var.session.role === 'order_processor' ? maskPhone(String(x.phone)) : localPhone(String(x.phone)) })),
       channels: charts.channels.map(x => ({ ...x, label: ORDER_SOURCES[x.source] ?? x.source })),
+      // The district outlines for the map (static, cached for a year).
+      geoBase: `/geo/${GEO_VERSION}`,
     },
   });
 });
@@ -183,7 +187,7 @@ adminOps.post('/assistant', async c => {
   ]);
   const live = `orders waiting to be confirmed ${stages.new} (on hold ${stages.held}), confirmed ${stages.confirmed}, packed ${stages.packed}, with the courier ${stages.in_courier}, returns to scan ${stages.awaitingReturnScan}, incomplete checkouts in the last 7 days ${incomplete}, options with 5 or fewer in stock ${low.length}.`;
   const question = turns[turns.length - 1].content;
-  const ai = await askModel(c.env, adminSystemPrompt({ store: settings.store_name || 'Abs Vai', role: c.var.session.role, page: str(b.page, 40) || 'Overview', guide: guide.slice(0, 80_000), live }), turns,
+  const ai = await askModel(c.env, adminSystemPrompt({ store: storeName(settings), role: c.var.session.role, page: str(b.page, 40) || 'Overview', guide: guide.slice(0, 80_000), live }), turns,
     { budgetKey: 'admin', dailyLimit: settingInt(settings, 'admin_assistant_daily_limit', 100), maxTokens: 700 });
   if (ai) return c.json({ ai: true, reply: ai, sections: [] });
   const found = matchGuide(guideSections(guide), question);
@@ -268,23 +272,24 @@ async function saveZone(c: Context<AppEnv>, id: number | null) {
   const money = (k: string) => { const n = int(b[k]); if (n === null || n < 0) throw bad('Charges must be 0 or more.'); return n; };
   const courier = str(b.defaultCourier, 30) || null;
   if (courier && !(courier in COURIERS)) throw bad('Unknown courier.');
+  let saved: number;
   try {
-    await saveZoneRow(c.env.DB, id, {
+    saved = await saveZoneRow(c.env.DB, id, {
       name, baseChargePaisa: money('baseChargePaisa'), baseWeightGrams: posInt(b.baseWeightGrams) ?? 1000, extraPerKgPaisa: money('extraPerKgPaisa'),
       bulkyChargePaisa: money('bulkyChargePaisa'), etaText: str(b.etaText, 40) || '3–5 days', isDefault: Boolean(b.isDefault), sortOrder: int(b.sortOrder) ?? 0, defaultCourier: courier,
     });
-  } catch { throw bad('A zone with that name already exists.'); }
-  await audit(c, id ? 'zone.update' : 'zone.create', 'zone', id, { name });
+  } catch { throw bad(`There is already a delivery area called “${name}”. Choose another name.`); }
+  await audit(c, id ? 'zone.update' : 'zone.create', 'zone', saved, { name });
   await refresh(c, ['zones']);
-  return c.json({ ok: true }, id ? 200 : 201);
+  return c.json({ ok: true, id: saved }, id ? 200 : 201);
 }
 
 adminOps.post('/zones', need('geo:write'), c => saveZone(c, null));
-adminOps.put('/zones/:id', need('geo:write'), c => saveZone(c, posInt(c.req.param('id'))));
-adminOps.delete('/zones/:id', need('geo:write'), async c => {
+adminOps.put('/zones/:id{[0-9]+}', need('geo:write'), c => saveZone(c, posInt(c.req.param('id'))));
+adminOps.delete('/zones/:id{[0-9]+}', need('geo:write'), async c => {
   const id = posInt(c.req.param('id')) ?? 0;
   if (await zoneIsDefault(c.env.DB, id)) throw bad('Choose another default zone first.');
-  if (await zoneUsedByOrders(c.env.DB, id)) throw bad('Orders use this zone. Move its districts instead of deleting it.');
+  if (await zoneUsedByOrders(c.env.DB, id)) throw bad('Orders already went to this delivery area, so it cannot be removed. Rename it or change its charge instead.');
   await deleteZone(c.env.DB, id);
   await audit(c, 'zone.delete', 'zone', id);
   await refresh(c, ['zones']);

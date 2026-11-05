@@ -2,6 +2,7 @@ import type { Child } from 'hono/jsx';
 import type { CategoryNode } from '../repo/catalog';
 import { DEFAULT_COLORS, parseBrandColors, SOCIAL_NETWORKS, TRACKING_FORMATS, type PopupBanner } from '../lib/settings-schema';
 import { smallOf, srcsetOf } from '../lib/images';
+import { companyName, storeName } from '../lib/brand';
 import { Icon } from './icons';
 
 export interface LayoutProps {
@@ -60,7 +61,7 @@ function trackingConfig(s: Record<string, string>, path: string) {
 
 export function Layout(p: LayoutProps) {
   const s = p.settings;
-  const store = s.store_name || 'Abs Vai';
+  const store = storeName(s);
   // Admin → Sellers has the on/off switch: off hides these links and closes /sell.
   const sellersOpen = s.sellers_open !== '0';
   const fullTitle = p.path === '/' ? `${store} · ${s.tagline || 'Seasonal goods, honest prices.'}` : `${p.title} · ${store}`;
@@ -76,7 +77,7 @@ export function Layout(p: LayoutProps) {
   const brandVars = (Object.keys(DEFAULT_COLORS) as Array<keyof typeof DEFAULT_COLORS>).filter(k => colors[k] !== DEFAULT_COLORS[k]).map(k => `--${k}:${colors[k]}`).join(';');
   const tracking = trackingConfig(s, p.path);
   const popup = popupFor(s, p.path);
-  // Without a logo the shop name is the wordmark: first word in ink, the rest in the main colour ("Abs" "Vai").
+  // Without a logo the shop name is the wordmark: first word in ink, the rest in the main colour ("Vandar" "Mart").
   const [firstWord, ...restWords] = store.split(/\s+/);
   const Wordmark = (props: { light?: boolean }) => (
     <a class={`wordmark${props.light ? ' wordmark-light' : ''}`} href="/" aria-label={`${store} home`}>{logo ? <img src={logo} alt={store} height="32" /> : <>{firstWord}{restWords.length > 0 && <span>{restWords.join(' ')}</span>}</>}</a>
@@ -122,14 +123,14 @@ export function Layout(p: LayoutProps) {
             <Wordmark />
             <form class="search" action="/search" method="get" role="search" data-search>
               <label class="sr-only" for="q">Search products</label>
-              <input id="q" name="q" type="search" placeholder="Search gur, masala, sealer…" autocomplete="off" enterkeyhint="search" />
+              <input id="q" name="q" type="search" placeholder="Search products" autocomplete="off" enterkeyhint="search" />
               <button type="submit" aria-label="Search"><Icon name="search" size={20} /></button>
               <div class="suggest" role="listbox" hidden data-suggest />
             </form>
             <nav class="header-links" aria-label="Main">
               <a href="/shop">Shop</a>
               <a href="/deals">Hot Deals</a>
-              <a href="/originals">Abs Vai Originals</a>
+              <a href="/originals">{store} Originals</a>
               <a href="/track">Track Order</a>
               {sellersOpen && <a href="/sell">Sell with us</a>}
             </nav>
@@ -166,7 +167,7 @@ export function Layout(p: LayoutProps) {
                 </ul>
               </details>
             </li>
-            <li><a href="/originals"><Icon name="leaf" />Abs Vai Originals</a></li>
+            <li><a href="/originals"><Icon name="leaf" />{store} Originals</a></li>
             <li><a href="/deals"><Icon name="tag" />Hot Deals</a></li>
             <li><a href="/free-delivery"><Icon name="truck" />Free Delivery</a></li>
             <li><a href="/new"><Icon name="box" />New Arrivals</a></li>
@@ -185,7 +186,7 @@ export function Layout(p: LayoutProps) {
             <div>
               <Wordmark light />
               <p>{s.tagline || 'Seasonal goods, honest prices.'}</p>
-              <p class="small">{s.company_name || 'ABS VAI LTD'}{s.company_address ? ` · ${s.company_address}` : ''}</p>
+              <p class="small">{companyName(s)}{s.company_address ? ` · ${s.company_address}` : ''}</p>
             </div>
             <ul>
               <li><a href="/shop">All products</a></li>
@@ -206,7 +207,7 @@ export function Layout(p: LayoutProps) {
               {social.map(([k, v]) => <li><a href={v} target="_blank" rel="noopener">{SOCIAL_NETWORKS[k as keyof typeof SOCIAL_NETWORKS].replace(' page', '')}</a></li>)}
             </ul>
           )}
-          <p class="footer-copy">© {new Date().getFullYear()} {s.company_name || 'ABS VAI LTD'}. Prices in Bangladeshi taka.</p>
+          <p class="footer-copy">© {new Date().getFullYear()} {companyName(s)}. Prices in Bangladeshi taka.</p>
         </footer>
 
         <nav class="tabbar" aria-label="Quick links">

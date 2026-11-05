@@ -96,11 +96,11 @@ describe('delivery charge quotes', () => {
   const quote = async (lines: Array<{ variantId: number; qty: number }>, districtId: number, upazilaId: number | null) =>
     (await t.json('/api/checkout/quote', { method: 'POST', body: { lines, districtId, upazilaId, paymentMethod: 'cod' } })).body;
 
-  it('charges Inside Dhaka City, Dhaka Suburbs and Outside Dhaka by zone', async () => {
+  it('charges inside Dhaka city, the Dhaka suburbs and outside Dhaka by zone (Bangla area names)', async () => {
     const lines = [{ variantId: await variant('SPC-MMSL-250G-0001'), qty: 1 }];
-    expect((await quote(lines, ids.dhaka, ids.dhakaSouth)).delivery).toMatchObject({ zoneName: 'Inside Dhaka City', chargePaisa: 7000 });
-    expect((await quote(lines, ids.dhaka, ids.savar)).delivery).toMatchObject({ zoneName: 'Dhaka Suburbs', chargePaisa: 10000 });
-    expect((await quote(lines, ids.tangail, ids.kalihati)).delivery).toMatchObject({ zoneName: 'Outside Dhaka', chargePaisa: 13000 });
+    expect((await quote(lines, ids.dhaka, ids.dhakaSouth)).delivery).toMatchObject({ zoneName: 'ঢাকা সিটির ভিতরে', chargePaisa: 7000 });
+    expect((await quote(lines, ids.dhaka, ids.savar)).delivery).toMatchObject({ zoneName: 'ঢাকার আশেপাশে (সাভার, গাজীপুর, নারায়ণগঞ্জ)', chargePaisa: 10000 });
+    expect((await quote(lines, ids.tangail, ids.kalihati)).delivery).toMatchObject({ zoneName: 'ঢাকার বাইরে', chargePaisa: 13000 });
   });
 
   it('asks for the area in Dhaka before the charge is final', async () => {
@@ -436,7 +436,7 @@ describe('storefront pages and SEO', () => {
     expect(html.startsWith('<!DOCTYPE html>')).toBe(true);
     expect(html).toContain('Fresh khejur gur is here');
     expect(html).toContain('In Season Now');
-    expect(html).toContain('Abs Vai Originals');
+    expect(html).toContain('Vandar Mart Originals');
     expect(html).not.toMatch(/people (are )?viewing/i);
   });
 

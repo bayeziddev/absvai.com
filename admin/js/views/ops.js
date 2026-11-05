@@ -19,7 +19,7 @@ export async function seasons(v) {
       <div class="grid-3"><label class="f">Starts (Bangladesh date)<input type="date" id="st" value="${esc(s?.starts_on ?? '')}"></label><label class="f">Ends<input type="date" id="en" value="${esc(s?.ends_on ?? '')}"></label><label class="check"><input type="checkbox" id="on" ${s?.is_enabled !== 0 ? 'checked' : ''}> Enabled</label></div>
       <div class="grid-3"><label class="f">Badge text<input id="al" value="${esc(s?.accent_label ?? '')}" placeholder="Winter special"></label><label class="f">Accent colour<input type="color" id="ac" value="${esc(s?.accent_color ?? '#B3261E')}"></label><label class="f">“Back in season from …”<input id="back" value="${esc(s?.back_in_season_text ?? '')}" placeholder="November"></label></div>
       <label class="f">Landing page intro<input id="intro" value="${esc(s?.landing_intro ?? '')}"></label>
-      <h3>Banners while the season is live</h3><p class="small muted">These are the big pictures at the top of the homepage during the season. Each one shows how customers see it; press <b>✏️ Edit</b> to change it.</p>
+      <h3>Extra banners while the season is live</h3><p class="small muted">Optional. During the season these show on the homepage after your Website &amp; banners ones. For a banner that shows right away, use <a href="#/website">Website &amp; banners</a>.</p>
       <div id="season-banners" class="bn-list"></div>`;
     so.foot.innerHTML = `${s && can('seasons:write') ? '<button class="btn btn-ghost" id="del">Delete</button>' : '<span></span>'}${can('seasons:write') ? '<button class="btn btn-primary" id="save">Save season</button>' : ''}`;
     const g = id => so.body.querySelector(`#${id}`);

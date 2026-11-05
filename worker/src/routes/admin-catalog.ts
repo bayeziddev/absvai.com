@@ -13,6 +13,8 @@ import * as cat from '../repo/catalog-admin';
 import { nextSkuSequence } from '../repo/numbering';
 import { loadTemplate } from '../repo/templates';
 import { allowed, audit, need, needAny, refresh } from './admin-helpers';
+import { settingsOf } from './context';
+import { storeName } from '../lib/brand';
 
 export const adminCatalog = new Hono<AppEnv>();
 
@@ -505,7 +507,7 @@ export async function createProduct(c: Context<AppEnv>, b: Record<string, unknow
   const name = str(b.name, 160) || 'Untitled product';
   const id = await cat.insertProduct(c.env.DB, {
     slug: await uniqueSlug(c.env.DB, slugify(name), null), categoryId: ct.category.id, templateId: ct.templateId, name, code: productCodeFromName(name),
-    shippingProfile: t.defaultShippingProfile, brand: b.isOriginal ? 'Abs Vai' : null, isOriginal: Boolean(b.isOriginal),
+    shippingProfile: t.defaultShippingProfile, brand: b.isOriginal ? storeName(await settingsOf(c)) : null, isOriginal: Boolean(b.isOriginal),
   });
   await audit(c, 'product.create', 'product', id, { name });
   return id;
@@ -861,3 +863,42 @@ adminCatalog.post('/products/import', need('catalog:write'), async c => {
 
 // Seasons list for the product form's season picker.
 adminCatalog.get('/season-options', need('catalog:read'), async c => c.json((await getSeasons(c.env.DB)).map(s => ({ id: s.id, name: s.name, slug: s.slug, starts_on: s.starts_on, ends_on: s.ends_on }))));
+
+// ───────────── Prices and stock in one table ─────────────
+
+/** Every option of every product with its price, old price and stock, for the owner's one-page update. */
+adminCatalog.get('/quick-update', need('catalog:read'), async c => c.json(
+  (await cat.quickUpdateRows(c.env.DB)).map(r => ({ ...r, attributes: parseJson<Record<string, string>>(r.attributes as string, {}) })),
+));
+
+/** Saves the rows the owner changed: price, old price ("was" price, for a sale) and stock, all or nothing. */
+adminCatalog.put('/quick-update', need('catalog:write'), async c => {
+  const b = await readJson(c);
+  const rows = Array.isArray(b.rows) ? (b.rows as Array<Record<string, unknown>>).slice(0, 3000) : [];
+  if (!rows.length) throw bad('Nothing changed.');
+  const current = new Map((await cat.quickUpdateRows(c.env.DB)).map(r => [Number(r.id), r]));
+  const canStock = allowed(c, 'inventory:write');
+  const changes: Array<{ variantId: number; pricePaisa: number; compareAtPricePaisa: number | null; stockChange: number }> = [];
+  for (const r of rows) {
+    const id = posInt(r.variantId);
+    const now = id ? current.get(id) : undefined;
+    if (!now) throw bad('A product in the list was changed or removed. Reload the page.');
+    const name = `${now.name}${Object.values(parseJson<Record<string, string>>(now.attributes as string, {})).length ? ` (${Object.values(parseJson<Record<string, string>>(now.attributes as string, {})).join(' · ')})` : ''}`;
+    const price = int(r.pricePaisa);
+    if (price === null || price <= 0) throw bad(`${name}: the price must be more than 0.`);
+    const was = r.compareAtPricePaisa === null || r.compareAtPricePaisa === '' ? null : int(r.compareAtPricePaisa);
+    if (was !== null && was <= price) throw bad(`${name}: the old price must be higher than the price, or empty.`);
+    const stock = int(r.stock);
+    if (stock === null || stock < 0) throw bad(`${name}: stock must be 0 or more.`);
+    if (stock < Number(now.reserved)) throw bad(`${name}: ${now.reserved} are held for confirmed orders, so stock cannot go below that.`);
+    const stockChange = stock - Number(now.stock);
+    if (stockChange && !canStock) throw bad('Your role can change prices but not stock.');
+    if (price === Number(now.price_paisa) && was === (now.compare_at_price_paisa === null ? null : Number(now.compare_at_price_paisa)) && !stockChange) continue;
+    changes.push({ variantId: id!, pricePaisa: price, compareAtPricePaisa: was, stockChange });
+  }
+  await cat.quickUpdateApply(c.env.DB, changes, c.var.session.adminId);
+  await audit(c, 'catalog.quick_update', 'variant', null, { rows: changes.length });
+  const products = [...new Set(changes.map(x => Number(current.get(x.variantId)!.product_id)))];
+  if (products.length) await refresh(c, [...products.map(p => TAG.product(p)), TAG.listing, TAG.home]);
+  return c.json({ ok: true, saved: changes.length });
+});

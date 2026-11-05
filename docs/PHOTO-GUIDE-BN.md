@@ -1,6 +1,6 @@
 # ছবি ও ওয়েবসাইট গাইড (A থেকে Z): কোন ছবি কোথায়, কোন সাইজে, কীভাবে দেবেন
 
-এই গাইড দোকানের মালিক ও স্টাফদের জন্য। ওয়েবসাইটের কোন অংশে কী আছে, প্রতিটি জায়গায় কোন মাপের ছবি সবচেয়ে ভালো দেখায়, আর অ্যাডমিন থেকে কীভাবে ছবি দেবেন বা বদলাবেন, সব এখানে ধাপে ধাপে লেখা আছে। অ্যাডমিন খুলুন: [অ্যাডমিন ড্যাশবোর্ড](https://absvai.absvai.workers.dev/admin/)।
+এই গাইড দোকানের মালিক ও স্টাফদের জন্য। ওয়েবসাইটের কোন অংশে কী আছে, প্রতিটি জায়গায় কোন মাপের ছবি সবচেয়ে ভালো দেখায়, আর অ্যাডমিন থেকে কীভাবে ছবি দেবেন বা বদলাবেন, সব এখানে ধাপে ধাপে লেখা আছে। অ্যাডমিন খুলুন: [অ্যাডমিন ড্যাশবোর্ড](https://vandarmart.com/admin/)।
 
 ছোট করে মনে রাখুন: **ব্যানার = চওড়া ছবি (প্রায় ২০০০ × ৮৬০), বাকি সব = চারকোনা ছবি (১০০০ × ১০০০ বা বড়)।** মোবাইলের আসল ছবিই দিন, সিস্টেম নিজে ছোট করে নেয়।
 
@@ -8,14 +8,14 @@
 
 | কোথায় দেখায় | সবচেয়ে ভালো মাপ (পিক্সেল) | সবচেয়ে কম | আকার | কোথা থেকে দেবেন |
 |---|---|---|---|---|
-| হোমপেইজের বড় ব্যানার (পুরো জুড়ে ছবি) | ২০০০ × ৮৬০ | ১৬০০ × ৭০০ | চওড়া (প্রায় ২.৩ : ১) | শীত চলার সময় [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons), অন্য সময় [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) |
+| হোমপেইজের বড় ব্যানার (পুরো জুড়ে ছবি) | ২০০০ × ৮৬০ | ১৬০০ × ৭০০ | চওড়া (প্রায় ২.৩ : ১) | [Website & banners](https://vandarmart.com/admin/#/website) (Save চাপলেই সাথে সাথে দেখায়) |
 | বড় ব্যানার (ডান অর্ধেকে ছবি) | ১২০০ × ১২০০ | ৮০০ × ৮০০ | চারকোনা | ঐ একই জায়গা, ছবির ধরন **Photo on the right half** বেছে নিন |
-| হোমপেইজের দ্বিতীয় ব্যানার | ১২০০ × ১২০০ | ৮০০ × ৮০০ | চারকোনা | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Second banner** |
-| ক্যাটাগরির গোল ছবি | ১০০০ × ১০০০ | ৬০০ × ৬০০ | চারকোনা, জিনিস মাঝখানে | [Categories](https://absvai.absvai.workers.dev/admin/#/categories) → **Edit** |
-| প্রোডাক্টের ছবি | ১৫০০ × ১৫০০ | ১০০০ × ১০০০ | চারকোনা | [Products](https://absvai.absvai.workers.dev/admin/#/products) → প্রোডাক্ট → **Photos & video** |
-| ল্যান্ডিং পেইজের প্রধান ছবি ও গ্যালারি | ১২০০ × ১২০০ | ১০০০ × ১০০০ | চারকোনা | [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) → পেইজ খুলুন |
-| পপআপ ব্যানারের ছবি | ১২০০ × ৮০০ | ৯০০ × ৬০০ | একটু চওড়া (৩ : ২) | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Popup banner** |
-| লোগো | ৬০০ × ১৫০ | উচ্চতা ১২০ | চওড়া, স্বচ্ছ পটভূমি (PNG বা SVG) | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Shop name and logo** |
+| হোমপেইজের দ্বিতীয় ব্যানার | ১২০০ × ১২০০ | ৮০০ × ৮০০ | চারকোনা | [Website & banners](https://vandarmart.com/admin/#/website) → **Second banner** |
+| ক্যাটাগরির গোল ছবি | ১০০০ × ১০০০ | ৬০০ × ৬০০ | চারকোনা, জিনিস মাঝখানে | [Categories](https://vandarmart.com/admin/#/categories) → **Edit** |
+| প্রোডাক্টের ছবি | ১৫০০ × ১৫০০ | ১০০০ × ১০০০ | চারকোনা | [Products](https://vandarmart.com/admin/#/products) → প্রোডাক্ট → **Photos & video** |
+| ল্যান্ডিং পেইজের প্রধান ছবি ও গ্যালারি | ১২০০ × ১২০০ | ১০০০ × ১০০০ | চারকোনা | [Landing pages](https://vandarmart.com/admin/#/landing) → পেইজ খুলুন |
+| পপআপ ব্যানারের ছবি | ১২০০ × ৮০০ | ৯০০ × ৬০০ | একটু চওড়া (৩ : ২) | [Website & banners](https://vandarmart.com/admin/#/website) → **Popup banner** |
+| লোগো | ৬০০ × ১৫০ | উচ্চতা ১২০ | চওড়া, স্বচ্ছ পটভূমি (PNG বা SVG) | [Website & banners](https://vandarmart.com/admin/#/website) → **Shop name and logo** |
 
 - ফাইল: JPG, PNG বা WebP। মোবাইলের ১০ MB ছবিও দিতে পারেন: আপলোডের আগেই ফোন/কম্পিউটার ছবিটা ছোট করে নেয়।
 - ছবির মাপ জানতে: ফোনের গ্যালারিতে ছবি খুলে **Details / তথ্য (i)** চাপুন, সেখানে যেমন "4000 × 3000" লেখা থাকে।
@@ -25,32 +25,32 @@
 
 | # | অংশ | কী দেখায় | কোথা থেকে বদলাবেন |
 |---|---|---|---|
-| ১ | সবার উপরের লাল লাইন | ছোট ঘোষণা, যেমন "Cash on Delivery all over Bangladesh" | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Running message at the very top** |
-| ২ | হেডার | লোগো বা দোকানের নাম, সার্চ, মেনু (☰), পছন্দের তালিকা (♡), কার্ট | লোগো: Website & banners; মেনুর ক্যাটাগরি: [Categories](https://absvai.absvai.workers.dev/admin/#/categories) |
-| ৩ | বড় ব্যানার (স্লাইড) | ২ থেকে ৬টা ব্যানার, নিজে থেকে ঘোরে | শীত/রমজান/ঈদ চলার সময় [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons), অন্য সময় [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Big banners at the top of the homepage** |
-| ৪ | গোল ক্যাটাগরি সারি | প্রতিটি প্রধান ক্যাটাগরির ছবি ও নাম; সিজনের ক্যাটাগরিতে ☀ চিহ্ন | [Categories](https://absvai.absvai.workers.dev/admin/#/categories): ছবি **Edit** থেকে, ক্রম টেনে সাজিয়ে **Save arrangement** |
+| ১ | সবার উপরের লাল লাইন | ছোট ঘোষণা, যেমন "Cash on Delivery all over Bangladesh" | [Website & banners](https://vandarmart.com/admin/#/website) → **Running message at the very top** |
+| ২ | হেডার | লোগো বা দোকানের নাম, সার্চ, মেনু (☰), পছন্দের তালিকা (♡), কার্ট | লোগো: Website & banners; মেনুর ক্যাটাগরি: [Categories](https://vandarmart.com/admin/#/categories) |
+| ৩ | বড় ব্যানার (স্লাইড) | ২ থেকে ৬টা ব্যানার, নিজে থেকে ঘোরে | [Website & banners](https://vandarmart.com/admin/#/website) → **Big banners at the top of the homepage** (সিজন চললে সিজনের ব্যানার এগুলোর পরে) |
+| ৪ | গোল ক্যাটাগরি সারি | প্রতিটি প্রধান ক্যাটাগরির ছবি ও নাম; সিজনের ক্যাটাগরিতে ☀ চিহ্ন | [Categories](https://vandarmart.com/admin/#/categories): ছবি **Edit** থেকে, ক্রম টেনে সাজিয়ে **Save arrangement** |
 | ৫ | In Season Now | চলতি সিজনের প্রোডাক্ট | প্রোডাক্টে সিজন টিক দিন (Full editor → **Season & fulfilment**) |
 | ৬ | Picked for you | আপনার বাছাই করা প্রোডাক্ট | প্রোডাক্টে **Show on the homepage** টিক |
-| ৭ | Abs Vai Originals | নিজেদের বানানো প্রোডাক্ট, "Made by Abs Vai" সিল সহ | প্রোডাক্টে **Abs Vai Original** টিক |
+| ৭ | Vandar Mart Originals | নিজেদের বানানো প্রোডাক্ট, "Original" সিল সহ | প্রোডাক্টে **Our own product** টিক |
 | ৮ | Hot Deals | ছাড়ের প্রোডাক্ট, সবচেয়ে বেশি ছাড় আগে | প্রোডাক্টের দামের ঘরে **Original ৳** (আগের দাম) **Price ৳** এর চেয়ে বেশি দিন |
 | ৯ | ব্যবসার অংশ (For small food businesses) | মেশিন ও পাইকারি অফার, প্রেস মেশিনের ছবি | স্থায়ী অংশ; লেখা বা ছবি বদলাতে ডেভেলপারকে বলুন |
-| ১০ | দ্বিতীয় ব্যানার | একটি অফার ব্যানার | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Second banner** |
+| ১০ | দ্বিতীয় ব্যানার | একটি অফার ব্যানার | [Website & banners](https://vandarmart.com/admin/#/website) → **Second banner** |
 | ১১ | New Arrivals | সবচেয়ে নতুন প্রোডাক্ট | নিজে থেকে: নতুন প্রোডাক্ট পাবলিশ করলেই আসে |
-| ১২ | ভরসার সারি | Cash on Delivery, ৬৪ জেলা, সহজ ফেরত, WhatsApp | WhatsApp ও ফোন নম্বর: [Settings](https://absvai.absvai.workers.dev/admin/#/settings) → **Store** |
-| ১৩ | ফুটার | যোগাযোগ, নীতিমালা, Facebook/Instagram/YouTube/TikTok লিংক | [Settings](https://absvai.absvai.workers.dev/admin/#/settings) → **Store → Social media** |
-| ১৪ | সবুজ চ্যাট বাটন | WhatsApp ও AI সহকারী | [Settings](https://absvai.absvai.workers.dev/admin/#/settings) |
-| ১৫ | পপআপ | কয়েক সেকেন্ড পরে আসা অফার | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Popup banner** |
+| ১২ | ভরসার সারি | Cash on Delivery, ৬৪ জেলা, সহজ ফেরত, WhatsApp | WhatsApp ও ফোন নম্বর: [Settings](https://vandarmart.com/admin/#/settings) → **Store** |
+| ১৩ | ফুটার | যোগাযোগ, নীতিমালা, Facebook/Instagram/YouTube/TikTok লিংক | [Settings](https://vandarmart.com/admin/#/settings) → **Store → Social media** |
+| ১৪ | সবুজ চ্যাট বাটন | WhatsApp ও AI সহকারী | [Settings](https://vandarmart.com/admin/#/settings) |
+| ১৫ | পপআপ | কয়েক সেকেন্ড পরে আসা অফার | [Website & banners](https://vandarmart.com/admin/#/website) → **Popup banner** |
 
 মোবাইলে নিচে সবসময় একটি বার থাকে: Home, Categories, Cart, Wishlist, Account।
 
 ### অন্য পেইজগুলো
 
-- **প্রোডাক্ট পেইজ** (`/p/...`): ছবির গ্যালারি (প্রথম ছবিটাই প্রধান), দাম, সাইজ/ওজন, Add / Order Now, বিস্তারিত, রিভিউ। ছবি ও লেখা: [Products](https://absvai.absvai.workers.dev/admin/#/products)।
+- **প্রোডাক্ট পেইজ** (`/p/...`): ছবির গ্যালারি (প্রথম ছবিটাই প্রধান), দাম, সাইজ/ওজন, Add / Order Now, বিস্তারিত, রিভিউ। ছবি ও লেখা: [Products](https://vandarmart.com/admin/#/products)।
 - **ক্যাটাগরি পেইজ** (`/c/...`): ঐ ক্যাটাগরির সব প্রোডাক্ট, ফিল্টার। ক্যাটাগরির ছবি মেনু ও ক্যাটাগরির তালিকায় দেখায়।
-- **সিজন পেইজ** (`/season/winter`): সিজনের সব প্রোডাক্ট, [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons) থেকে।
-- **ল্যান্ডিং পেইজ** (`/lp/...`): বিজ্ঞাপনের জন্য একটা প্রোডাক্টের বিক্রির পেইজ, ছবি, ভিডিও, প্রশ্নোত্তর, রিভিউ আর অর্ডার ফর্ম সহ। [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing)।
-- **অর্ডার ট্র্যাকিং** ([/track](https://absvai.absvai.workers.dev/track)): কাস্টমার মোবাইল নম্বর বা অর্ডার নম্বর দিয়ে অর্ডারের অবস্থা দেখেন।
-- **Sell with us**: সেলার হতে চাওয়া মানুষের ফর্ম, [Sellers](https://absvai.absvai.workers.dev/admin/#/sellers) থেকে চালু/বন্ধ।
+- **সিজন পেইজ** (`/season/winter`): সিজনের সব প্রোডাক্ট, [Seasons](https://vandarmart.com/admin/#/seasons) থেকে।
+- **ল্যান্ডিং পেইজ** (`/lp/...`): বিজ্ঞাপনের জন্য একটা প্রোডাক্টের বিক্রির পেইজ, ছবি, ভিডিও, প্রশ্নোত্তর, রিভিউ আর অর্ডার ফর্ম সহ। [Landing pages](https://vandarmart.com/admin/#/landing)।
+- **অর্ডার ট্র্যাকিং** ([/track](https://vandarmart.com/track)): কাস্টমার মোবাইল নম্বর বা অর্ডার নম্বর দিয়ে অর্ডারের অবস্থা দেখেন।
+- **Sell with us**: সেলার হতে চাওয়া মানুষের ফর্ম, [Sellers](https://vandarmart.com/admin/#/sellers) থেকে চালু/বন্ধ।
 
 ## ৩. বড় ব্যানার: মোবাইল আর কম্পিউটারে কেমন দেখায়
 
@@ -68,7 +68,7 @@
 
 ### বড় ব্যানার
 
-1. শীত, রমজান বা ঈদের মতো কোনো সিজন চললে [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons) খুলে সিজনের সারিতে চাপুন; নিচে **Banners while the season is live**। সিজন না চললে [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Big banners at the top of the homepage**।
+1. [Website & banners](https://vandarmart.com/admin/#/website) → **Big banners at the top of the homepage**। এখানের ব্যানার **Save** চাপলেই সাথে সাথে হোমপেইজে সবার আগে দেখায়, কোনো তারিখ বা সিজন বাছতে হয় না। (শীত/রমজান/ঈদের জন্য বাড়তি ব্যানার চাইলে [Seasons](https://vandarmart.com/admin/#/seasons) এ দিন; সিজন চলার সময় সেগুলো এগুলোর পরে দেখায়।)
 2. প্রতিটি ব্যানার যেমন দেখাবে তেমন ছবিসহ দেখায় (**📱 On a phone**, **🖥 On a computer**)। বদলাতে ব্যানারের উপরে **✏️ Edit** চাপুন। নতুন ব্যানার: নিচে **+ Add a banner** / **+ Add another banner**।
 3. **ধাপ ১ · Photo (ছবি)**: **📷 Choose a photo** / **Change photo** চেপে ছবি দিন। ছবির ধরন নিজে থেকে বেছে নেয়; চাইলে **Photo fills the banner** বা **Photo on the right half** চাপুন।
 4. **ধাপ ২ · Words (লেখা)**: **Headline** (ছোট, ৩ থেকে ৬ শব্দ), দরকার হলে **Short line under it** (কম্পিউটার ও বড় ফোনে দেখায়)।
@@ -80,13 +80,13 @@
 
 ### ক্যাটাগরির গোল ছবি
 
-1. [Categories](https://absvai.absvai.workers.dev/admin/#/categories) → ক্যাটাগরির পাশে **Edit**।
+1. [Categories](https://vandarmart.com/admin/#/categories) → ক্যাটাগরির পাশে **Edit**।
 2. **Change picture** (বা **+ Add picture**) চেপে চারকোনা ছবি দিন। ছবিটা গোল করে কাটা হয়, তাই জিনিস **ঠিক মাঝখানে** রাখুন আর চারপাশে একটু ফাঁকা রাখুন।
 3. **Save**।
 
 ### প্রোডাক্টের ছবি
 
-1. [Products](https://absvai.absvai.workers.dev/admin/#/products) → প্রোডাক্টে চাপুন → **Photos & video** ধাপ (নতুন প্রোডাক্টে প্রথম ধাপেই **+ Add photos**)।
+1. [Products](https://vandarmart.com/admin/#/products) → প্রোডাক্টে চাপুন → **Photos & video** ধাপ (নতুন প্রোডাক্টে প্রথম ধাপেই **+ Add photos**)।
 2. **Drop photos here or tap to choose** চেপে একসাথে কয়েকটা ছবি দিন (৩ থেকে ৬টা ভালো)।
 3. প্রথম ছবিটা **Main**: কার্ডে আর গুগলে এটাই দেখায়। অন্য ছবি আগে আনতে **↑**, মুছতে **✕**।
 4. সাইজ বা রঙ অনুযায়ী আলাদা ছবি থাকলে **Options & prices** ধাপে প্রতিটি অপশনের **Photo** ঘরে ছবিটা বেছে দিন।
@@ -94,17 +94,17 @@
 
 ### দ্বিতীয় ব্যানার ও পপআপ
 
-- [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Second banner**: বড় ব্যানারের মতোই ছবি, লেখা, বাটন আর রঙ। চারকোনা ছবি দিন।
+- [Website & banners](https://vandarmart.com/admin/#/website) → **Second banner**: বড় ব্যানারের মতোই ছবি, লেখা, বাটন আর রঙ। চারকোনা ছবি দিন।
 - **Popup banner**: **Show the popup** টিক দিন, ছবি ও লেখা দিন, কত সেকেন্ড পরে আসবে, কতবার আর কোথায় দেখাবে বেছে নিন। কার্ট, চেকআউট বা অ্যাকাউন্ট পেইজে পপআপ আসে না।
 - শেষে **Save**।
 
 ### লোগো
 
-[Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Shop name and logo** → **+ Upload logo** (বা **Change logo**)। স্বচ্ছ পটভূমির PNG বা SVG দিন, চারপাশে বাড়তি ফাঁকা ছাড়া। লোগো সরাতে **Remove logo**: তখন দোকানের নাম লেখা হিসেবে দেখায়।
+[Website & banners](https://vandarmart.com/admin/#/website) → **Shop name and logo** → **+ Upload logo** (বা **Change logo**)। স্বচ্ছ পটভূমির PNG বা SVG দিন, চারপাশে বাড়তি ফাঁকা ছাড়া। লোগো সরাতে **Remove logo**: তখন দোকানের নাম লেখা হিসেবে দেখায়।
 
 ### ল্যান্ডিং পেইজের ছবি
 
-[Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) → পেইজ খুলুন → **Main photo** এ **+ Upload photo**, গ্যালারিতে **+ Add photos**। প্রধান ছবি না দিলে প্রোডাক্টের প্রথম ছবিটা নেয়।
+[Landing pages](https://vandarmart.com/admin/#/landing) → পেইজ খুলুন → **Main photo** এ **+ Upload photo**, গ্যালারিতে **+ Add photos**। প্রধান ছবি না দিলে প্রোডাক্টের প্রথম ছবিটা নেয়।
 
 ## ৫. ভালো ছবি তোলার টিপস
 
@@ -127,7 +127,7 @@
 | ক্যাটাগরির গোল ছবিতে জিনিস কাটা | চারকোনা ছবি দিন, জিনিস ঠিক মাঝখানে |
 | প্রোডাক্ট কার্ডে ভুল ছবি | প্রোডাক্ট → **Photos & video** → সঠিক ছবিকে **↑** দিয়ে প্রথমে আনুন |
 | ছবি আপলোড হয় না | JPG, PNG বা WebP দিন; ইন্টারনেট দেখুন; লাল লেখায় কারণ বলা থাকে |
-| বদল করলাম, দোকানে দেখায় না | পেইজ রিফ্রেশ করুন; তবুও না হলে [Settings](https://absvai.absvai.workers.dev/admin/#/settings) → **Refresh every page now** |
+| বদল করলাম, দোকানে দেখায় না | পেইজ রিফ্রেশ করুন; তবুও না হলে [Settings](https://vandarmart.com/admin/#/settings) → **Refresh every page now** |
 
 ## ৭. ছবি দেওয়ার আগে চেকলিস্ট
 
@@ -139,4 +139,4 @@
 - ☐ শিরোনাম ছোট, বাটনের লেখা ১ থেকে ৩ শব্দ
 - ☐ **Save** চাপা হয়েছে, মোবাইল আর কম্পিউটার দুটোতেই দোকান খুলে দেখা হয়েছে
 
-আরও কিছু জানতে: [সম্পূর্ণ বাংলা গাইড](https://absvai.absvai.workers.dev/admin/guide-bn.html), অথবা অ্যাডমিনের **Assistant** বাটনে বাংলায় প্রশ্ন লিখুন।
+আরও কিছু জানতে: [সম্পূর্ণ বাংলা গাইড](https://vandarmart.com/admin/guide-bn.html), অথবা অ্যাডমিনের **Assistant** বাটনে বাংলায় প্রশ্ন লিখুন।

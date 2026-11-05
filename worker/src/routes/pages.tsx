@@ -27,11 +27,13 @@ import { isSeasonActive, nextSeason } from '../lib/seasons';
 import { DEFAULT_COLORS, parseBrandColors } from '../lib/settings-schema';
 import { EDGE_HTML } from '../services/cache';
 import { parseListingQuery } from './api';
-import { GEO_VERSION } from '../generated/geo-version';
+import { companyName, storeName } from '../lib/brand';
+import { deliveryAreas } from '../repo/geo';
 import type { Banner } from '../views/components';
 import { Layout, type LayoutProps } from '../views/layout';
 import {
   AccountPage, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
+  type CheckoutArea,
 } from '../views/pages';
 
 export const pages = new Hono<AppEnv>();
@@ -86,7 +88,8 @@ pages.get('/', async c => {
   const cats = [...sh.visible].sort((a, b) => Number(seasonal.has(b.id) || b.children.some(k => seasonal.has(k.id))) - Number(seasonal.has(a.id) || a.children.some(k => seasonal.has(k.id))));
   const carousel = cats.flatMap(cn => (cn.children.some(k => seasonal.has(k.id)) ? [...cn.children.filter(k => seasonal.has(k.id)), cn] : [cn]));
   const seasonBanners = activeSeasons.flatMap(s => parseJson<Banner[]>(s.banners, []).map(b => ({ ...b, kicker: s.accent_label ?? s.name })));
-  const banners = seasonBanners.length ? seasonBanners : settingJson<Banner[]>(sh.settings, 'default_banners', []);
+  // The owner's banners (Website & banners) show at once, every day; a live season's banners follow them.
+  const banners = [...settingJson<Banner[]>(sh.settings, 'default_banners', []), ...seasonBanners];
   const [inSeason, featured, originals, deals, newest] = await Promise.all([
     queryProducts(c.env.DB, { seasonIds: sh.activeIds, limit: 12 }),
     queryProducts(c.env.DB, { featured: true, limit: 10 }),
@@ -97,11 +100,11 @@ pages.get('/', async c => {
   const s = sh.settings;
   const tags = [TAG.home, TAG.listing, ...activeSeasons.map(x => TAG.season(x.slug)), ...cardTags(inSeason.items, featured.items, originals.items, deals.items, newest.items)];
   return render(c, sh, {
-    title: s.store_name || 'Abs Vai', description: 'Seasonal food, Abs Vai masala, food-business machines, tools, clothing and gadgets. Cash on Delivery all over Bangladesh.',
+    title: storeName(s), description: 'Seasonal food, masala, food-business machines, tools, clothing and gadgets. Cash on Delivery all over Bangladesh.',
     path: '/', tab: 'home',
     jsonLd: [
-      { '@context': 'https://schema.org', '@type': 'Organization', name: s.company_name || 'ABS VAI LTD', url: c.env.SITE_URL, logo: `${c.env.SITE_URL}/favicon.svg` },
-      { '@context': 'https://schema.org', '@type': 'WebSite', name: s.store_name || 'Abs Vai', url: c.env.SITE_URL, potentialAction: { '@type': 'SearchAction', target: `${c.env.SITE_URL}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },
+      { '@context': 'https://schema.org', '@type': 'Organization', name: companyName(s), url: c.env.SITE_URL, logo: `${c.env.SITE_URL}/favicon.svg` },
+      { '@context': 'https://schema.org', '@type': 'WebSite', name: storeName(s), url: c.env.SITE_URL, potentialAction: { '@type': 'SearchAction', target: `${c.env.SITE_URL}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },
     ],
     children: <HomePage banners={banners} categories={carousel} seasonal={seasonal} activeSeason={sh.activeSeason} inSeason={inSeason.items} featured={featured.items} originals={originals.items}
       deals={deals.items} newArrivals={newest.items} promo={settingJson<Banner | null>(s, 'promo_banner', null)} settings={s} />,
@@ -141,15 +144,15 @@ pages.get('/c/:slug', async c => {
   const grand = parent?.parentId ? all.find(x => x.id === parent.parentId) : null;
   if (grand) crumbs.splice(1, 0, { name: grand.name, href: `/c/${grand.slug}` });
   return listing(c, sh, {
-    title: cat.name, description: cat.description || `Shop ${cat.name} at Abs Vai. Cash on Delivery all over Bangladesh.`, path: `/c/${cat.slug}`, crumbs, query: {}, categoryIds: ids,
+    title: cat.name, description: cat.description || `Shop ${cat.name} at ${storeName(sh.settings)}. Cash on Delivery all over Bangladesh.`, path: `/c/${cat.slug}`, crumbs, query: {}, categoryIds: ids,
     templateId: cat.templateId, subcategories: cat.children.filter(k => k.visible), banner, cache: [TAG.category(cat.id), ...ids.map(TAG.category), TAG.listing],
   });
 });
 
 const simpleListings: Array<{ path: string; title: string; description: string; query: Partial<ProductQuery> }> = [
-  { path: '/shop', title: 'All products', description: 'Everything in the Abs Vai store.', query: {} },
+  { path: '/shop', title: 'All products', description: 'Everything in the {store} store.', query: {} },
   { path: '/deals', title: 'Hot Deals', description: 'Real discounts on real prices. Offers end when the stock or the date runs out.', query: { deals: true } },
-  { path: '/originals', title: 'Abs Vai Originals', description: 'Products made and packed by ABS VAI LTD, starting with our 42 Item Master Masala.', query: { originals: true } },
+  { path: '/originals', title: '{store} Originals', description: 'Products made and packed by {company}, starting with our 42 Item Master Masala.', query: { originals: true } },
   { path: '/free-delivery', title: 'Free Delivery', description: 'Products that ship free anywhere in Bangladesh.', query: { freeDelivery: true } },
   { path: '/new', title: 'New Arrivals', description: 'The latest additions to the store.', query: { sort: 'newest' } },
 ];
@@ -157,7 +160,8 @@ for (const l of simpleListings) {
   pages.get(l.path, async c => {
     const sh = await shell(c);
     const sort = new URL(c.req.url).searchParams.get('sort') ? {} : l.query.sort ? { sort: l.query.sort } : {};
-    return listing(c, sh, { title: l.title, description: l.description, path: l.path, crumbs: [{ name: 'Home', href: '/' }, { name: l.title }], query: { ...l.query, ...sort }, cache: [TAG.listing] });
+    const named = (t: string) => t.replace('{store}', storeName(sh.settings)).replace('{company}', companyName(sh.settings));
+    return listing(c, sh, { title: named(l.title), description: named(l.description), path: l.path, crumbs: [{ name: 'Home', href: '/' }, { name: named(l.title) }], query: { ...l.query, ...sort }, cache: [TAG.listing] });
   });
 }
 
@@ -167,7 +171,7 @@ pages.get('/store/:slug', async c => {
   const s = await approvedSellerBySlug(c.env.DB, c.req.param('slug'));
   if (!s) return notFound(c, sh);
   return listing(c, sh, {
-    title: String(s.shop_name), description: String(s.about ?? `Products from ${s.shop_name}${s.district ? `, ${s.district}` : ''}, sold on ${sh.settings.store_name || 'Abs Vai'} with Cash on Delivery.`),
+    title: String(s.shop_name), description: String(s.about ?? `Products from ${s.shop_name}${s.district ? `, ${s.district}` : ''}, sold on ${storeName(sh.settings)} with Cash on Delivery.`),
     path: `/store/${s.slug}`, crumbs: [{ name: 'Home', href: '/' }, { name: 'Sellers' }, { name: String(s.shop_name) }], query: { sellerId: Number(s.id) },
     emptyText: 'This seller’s products will show here soon.', cache: [TAG.listing],
   });
@@ -177,7 +181,7 @@ pages.get('/store/:slug', async c => {
 pages.get('/sell', async c => {
   const sh = await shell(c);
   return render(c, sh, {
-    title: `Sell on ${sh.settings.store_name || 'Abs Vai'}`, description: 'Register as a seller: add your products, we handle orders, Cash on Delivery and delivery all over Bangladesh.',
+    title: `Sell on ${storeName(sh.settings)}`, description: 'Register as a seller: add your products, we handle orders, Cash on Delivery and delivery all over Bangladesh.',
     path: '/sell', tab: 'account', scripts: ['/js/sell.js'], children: <SellPage settings={sh.settings} open={sh.settings.sellers_open !== '0'} />,
   }, { cache: [] });
 });
@@ -268,12 +272,11 @@ pages.get('/lp/:slug', async c => {
     scripts: options.length ? ['/js/checkout.js', '/js/landing.js'] : ['/js/landing.js'], turnstileSiteKey: options.length ? c.env.TURNSTILE_SITE_KEY : undefined,
     bodyClass: `lp-page${content.focusMode ? ' lp-focus' : ''}`, styles: ['/css/landing.css'],
     pageData: {
-      outlinesBase: `/geo/${GEO_VERSION}`, mapTileUrl: sh.settings.map_tile_url || null, mapAttribution: sh.settings.map_tile_attribution || '',
-      freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY),
+      freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings),
       lines: options.length ? [{ variantId: options[0].id, qty: 1 }] : [], landingPageId: l.id, placeLabel: content.ctaText, draft,
     },
     children: <LandingPage id={l.id} title={l.title} slug={l.slug} draft={draft} c={content} d={d} reviews={reviews} wallets={wallets} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY}
-      phone={sh.settings.support_phone || null} whatsapp={wa} etaText={null} />,
+      phone={sh.settings.support_phone || null} whatsapp={wa} etaText={null} areas={await checkoutAreas(c.env.DB)} />,
   }, { cache: draft ? null : [TAG.landing(l.id), TAG.product(Number(d.product.id)), 'zones'] });
 });
 
@@ -288,14 +291,19 @@ pages.get('/cart', async c => {
 });
 
 pages.get('/checkout', async c => {
-  const sh = await shell(c);
+  const [sh, areas] = await Promise.all([shell(c), checkoutAreas(c.env.DB)]);
   const wallets = settingJson<Array<{ wallet: string; number: string; type?: string }>>(sh.settings, 'manual_wallets', []);
   return render(c, sh, {
-    title: 'Checkout', path: '/checkout', noindex: true, scripts: ['/js/checkout.js'], turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
-    pageData: { outlinesBase: `/geo/${GEO_VERSION}`, mapTileUrl: sh.settings.map_tile_url || null, mapAttribution: sh.settings.map_tile_attribution || '', freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY) },
-    children: <CheckoutPage wallets={wallets} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} />,
+    title: 'চেকআউট', path: '/checkout', noindex: true, scripts: ['/js/checkout.js'], turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
+    pageData: { freeThresholdPaisa: settingInt(sh.settings, 'free_delivery_threshold_paisa'), turnstile: Boolean(c.env.TURNSTILE_SITE_KEY), store: storeName(sh.settings) },
+    children: <CheckoutPage wallets={wallets} areas={areas} whatsapp={sh.settings.whatsapp_number?.replace(/\D/g, '') || null} turnstileSiteKey={c.env.TURNSTILE_SITE_KEY} />,
   });
 });
+
+/** The delivery areas a customer chooses from at checkout (Settings → Delivery charges). */
+async function checkoutAreas(db: D1Database): Promise<CheckoutArea[]> {
+  return (await deliveryAreas(db)).map(a => ({ id: a.id, name: a.name, baseChargePaisa: a.baseChargePaisa }));
+}
 
 pages.get('/order/:orderNo', async c => {
   const sh = await shell(c);
@@ -349,7 +357,7 @@ pages.get('/account', async c => {
 
 pages.get('/contact', async c => {
   const sh = await shell(c);
-  return render(c, sh, { title: 'Contact & wholesale', description: 'Call, WhatsApp or message Abs Vai. Dealer and bulk inquiries for Master Masala, machines and packaging.', path: '/contact', tab: 'account', children: <ContactPage settings={sh.settings} /> }, { cache: [] });
+  return render(c, sh, { title: 'Contact & wholesale', description: 'Call, WhatsApp or message us. Dealer and bulk inquiries for Master Masala, machines and packaging.', path: '/contact', tab: 'account', children: <ContactPage settings={sh.settings} /> }, { cache: [] });
 });
 
 

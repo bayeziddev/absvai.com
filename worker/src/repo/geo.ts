@@ -1,4 +1,5 @@
 /** Geo hierarchy, postcodes, delivery zones and courier area mapping. IDs always come from the imported data files. */
+import type { GeoNames } from '../lib/area-guess';
 import { rowToZone, type Zone } from '../lib/delivery-charge';
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
@@ -70,6 +71,42 @@ export async function resolveZone(db: D1Database, districtId: number, upazilaId:
   return { zone: rowToZone(zoneRow), needsArea, defaultCourier: (zoneRow.default_courier as string) ?? null };
 }
 
+// ───────────── Delivery areas chosen at checkout ─────────────
+
+export interface DeliveryArea extends Zone { defaultCourier: string | null; isDefault: boolean }
+
+const toArea = (r: Record<string, unknown>): DeliveryArea => ({ ...rowToZone(r), defaultCourier: (r.default_courier as string) ?? null, isDefault: Boolean(r.is_default) });
+
+/** Every delivery area in the owner's order: the choices at checkout. */
+export async function deliveryAreas(db: D1Database): Promise<DeliveryArea[]> {
+  return (await db.prepare('SELECT * FROM delivery_zones ORDER BY sort_order, id').all<Record<string, unknown>>()).results.map(toArea);
+}
+
+export async function deliveryAreaById(db: D1Database, id: number): Promise<DeliveryArea | null> {
+  const r = await db.prepare('SELECT * FROM delivery_zones WHERE id = ?').bind(id).first<Record<string, unknown>>();
+  return r ? toArea(r) : null;
+}
+
+/** The districts a delivery area covers (its districts and the districts of its city areas), to place an address in it. */
+export async function deliveryAreaDistricts(db: D1Database, zoneId: number): Promise<number[]> {
+  const rows = await db.prepare(`SELECT district_id AS id FROM zone_districts WHERE zone_id = ?1
+                                 UNION SELECT u.district_id FROM zone_upazila_overrides o JOIN geo_upazilas u ON u.id = o.upazila_id WHERE o.zone_id = ?1`).bind(zoneId).all<{ id: number }>();
+  return rows.results.map(r => r.id);
+}
+
+// Place names never change between deploys, so one isolate reads them once.
+let namesCache: Promise<GeoNames> | null = null;
+/** Divisions, districts and thanas with their Bangla names, for reading the place out of a typed address. */
+export function geoNames(db: D1Database): Promise<GeoNames> {
+  namesCache ??= db.batch([
+    db.prepare('SELECT id, 0 AS parentId, name, bn_name AS bn FROM geo_divisions'),
+    db.prepare('SELECT id, division_id AS parentId, name, bn_name AS bn FROM geo_districts'),
+    db.prepare('SELECT id, district_id AS parentId, name, bn_name AS bn FROM geo_upazilas'),
+  ]).then(([dv, ds, up]) => ({ divisions: dv.results, districts: ds.results, upazilas: up.results }) as GeoNames)
+    .catch(e => { namesCache = null; throw e; });
+  return namesCache;
+}
+
 // ───────────── Static geo JSON for checkout (versioned, cached forever) ─────────────
 
 export async function geoHierarchy(db: D1Database) {
@@ -108,7 +145,7 @@ export async function upazilasOf(db: D1Database, districtId: number) {
 export async function zonesOverview(db: D1Database) {
   const [zones, districts, overrides] = await db.batch([
     db.prepare('SELECT z.*, (SELECT COUNT(*) FROM zone_districts d WHERE d.zone_id = z.id) AS district_count FROM delivery_zones z ORDER BY z.sort_order'),
-    db.prepare('SELECT d.id, d.name, dv.name AS division, zd.zone_id FROM geo_districts d JOIN geo_divisions dv ON dv.id = d.division_id LEFT JOIN zone_districts zd ON zd.district_id = d.id ORDER BY dv.name, d.name'),
+    db.prepare('SELECT d.id, d.name, d.bn_name, dv.name AS division, zd.zone_id FROM geo_districts d JOIN geo_divisions dv ON dv.id = d.division_id LEFT JOIN zone_districts zd ON zd.district_id = d.id ORDER BY dv.name, d.name'),
     db.prepare('SELECT o.upazila_id, o.zone_id, u.name, d.name AS district FROM zone_upazila_overrides o JOIN geo_upazilas u ON u.id = o.upazila_id JOIN geo_districts d ON d.id = u.district_id ORDER BY d.name, u.name'),
   ]);
   return { zones: zones.results, districts: districts.results, overrides: overrides.results };
@@ -116,12 +153,14 @@ export async function zonesOverview(db: D1Database) {
 
 export interface ZoneInput { name: string; baseChargePaisa: number; baseWeightGrams: number; extraPerKgPaisa: number; bulkyChargePaisa: number; etaText: string; isDefault: boolean; sortOrder: number; defaultCourier: string | null }
 
-export async function saveZone(db: D1Database, id: number | null, z: ZoneInput): Promise<void> {
+/** Saves a zone and returns its id (the new one for a new zone). */
+export async function saveZone(db: D1Database, id: number | null, z: ZoneInput): Promise<number> {
   const vals = [z.name, z.baseChargePaisa, z.baseWeightGrams, z.extraPerKgPaisa, z.bulkyChargePaisa, z.etaText, z.isDefault ? 1 : 0, z.sortOrder, z.defaultCourier];
   const stmts = z.isDefault ? [db.prepare('UPDATE delivery_zones SET is_default = 0')] : [];
   if (id) stmts.push(db.prepare('UPDATE delivery_zones SET name = ?, base_charge_paisa = ?, base_weight_grams = ?, extra_per_kg_paisa = ?, bulky_charge_paisa = ?, eta_text = ?, is_default = ?, sort_order = ?, default_courier = ? WHERE id = ?').bind(...vals, id));
   else stmts.push(db.prepare('INSERT INTO delivery_zones (name, base_charge_paisa, base_weight_grams, extra_per_kg_paisa, bulky_charge_paisa, eta_text, is_default, sort_order, default_courier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(...vals));
-  await db.batch(stmts);
+  const res = await db.batch(stmts);
+  return id ?? Number(res[res.length - 1].meta.last_row_id);
 }
 
 export async function zoneIsDefault(db: D1Database, id: number): Promise<boolean> {

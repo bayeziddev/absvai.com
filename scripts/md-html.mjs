@@ -2,7 +2,7 @@
 // It handles what the guides use: headings, paragraphs, lists (one level of nesting), tables, quotes, bold, code and
 // links. Everything is escaped first; links to the live address become relative, so the page works on any domain.
 
-const LIVE = /^https:\/\/absvai\.absvai\.workers\.dev(?=\/)/;
+const LIVE = /^https:\/\/(?:absvai\.absvai\.workers\.dev|(?:www\.)?vandarmart\.com)(?=\/)/;
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export function inline(text) {
@@ -128,7 +128,7 @@ body { background: var(--bg); }
 </style>
 </head>
 <body>
-<header class="guide-top"><a class="wordmark" href="/admin/">Abs<span>Vai</span><small>Admin</small></a><a class="btn btn-sm btn-outline" href="/admin/#/help">Help center</a></header>
+<header class="guide-top"><a class="wordmark" href="/admin/">Vandar<span>Mart</span><small>Admin</small></a><a class="btn btn-sm btn-outline" href="/admin/#/help">Help center</a></header>
 <main class="guide">
 ${html.replace(/(<h1[^>]*>.*?<\/h1>)/, `$1\n<details class="toc" open><summary>সূচিপত্র</summary><ol>${toc.map(t => `<li><a href="#${t.id}">${t.html}</a></li>`).join('')}</ol></details>`)}
 </main>

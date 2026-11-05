@@ -363,3 +363,32 @@ export async function insertImportedRows(db: D1Database, productId: number, spec
 export async function deleteProductHard(db: D1Database, id: number): Promise<void> {
   await db.prepare('DELETE FROM products WHERE id = ?').bind(id).run();
 }
+
+// ───────────── Prices and stock in one table ─────────────
+
+/** Every live option of every product, for the one-table price and stock update. */
+export async function quickUpdateRows(db: D1Database) {
+  return (await db.prepare(
+    `SELECT v.id, v.product_id, p.name, p.status, v.attributes, v.sku, v.price_paisa, v.compare_at_price_paisa, v.stock, v.reserved,
+            (SELECT url FROM product_media m WHERE m.product_id = p.id AND m.kind = 'image' ORDER BY m.sort_order, m.id LIMIT 1) AS image_url
+       FROM product_variants v JOIN products p ON p.id = v.product_id
+      WHERE v.is_active = 1 AND p.deleted_at IS NULL ORDER BY p.name, v.sort_order, v.id LIMIT 3000`,
+  ).all<Record<string, unknown>>()).results;
+}
+
+/**
+ * Saves the changed rows in one go (all or nothing). A stock change goes through the stock ledger as a count
+ * correction, so Inventory → History still shows who changed what.
+ */
+export async function quickUpdateApply(db: D1Database, changes: Array<{ variantId: number; pricePaisa: number; compareAtPricePaisa: number | null; stockChange: number }>, adminId: string): Promise<void> {
+  const stmts: D1PreparedStatement[] = [];
+  for (const c of changes) {
+    stmts.push(db.prepare(`UPDATE product_variants SET price_paisa = ?, compare_at_price_paisa = ?, stock = stock + ?, updated_at = ${NOW} WHERE id = ? AND is_active = 1`)
+      .bind(c.pricePaisa, c.compareAtPricePaisa, c.stockChange, c.variantId));
+    if (c.stockChange) {
+      stmts.push(db.prepare(`INSERT INTO stock_movements (variant_id, change, kind, reason, note, admin_id) VALUES (?, ?, 'adjustment', 'count_correction', 'Quick update of prices and stock', ?)`)
+        .bind(c.variantId, c.stockChange, adminId));
+    }
+  }
+  if (stmts.length) await db.batch(stmts);
+}

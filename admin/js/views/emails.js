@@ -1,5 +1,5 @@
 // Emails: where shop alerts go, which emails are sent, a test button, offers to customers, and the log of every email.
-import { api, badge, busy, can, date, esc, toast } from '../app.js';
+import { api, badge, busy, can, date, esc, state, toast } from '../app.js';
 
 const KIND = {
   owner_new_order: 'New order (to you)', owner_update: 'Order update (to you)', owner_daily: 'Morning summary (to you)', owner_inquiry: 'Inquiry (to you)',
@@ -18,14 +18,14 @@ export async function emails(v) {
       <h2>Status</h2>
       <ul class="em-status">
         <li class="${d.connected ? 'ok' : 'bad'}">${d.connected ? 'Email is connected (Resend).' : 'Email is not connected yet. Add the <b>RESEND_API_KEY</b> secret in GitHub (Settings → Secrets and variables → Actions) and deploy.'}</li>
-        <li class="${d.canEmailCustomers ? 'ok' : 'warn'}">${d.canEmailCustomers ? 'Your own sender address is set, so customers get emails too.' : 'Only <b>you</b> get emails for now. To email customers, verify your domain (e.g. absvai.com) in Resend → Domains, then change “Emails come from” below to an address on it, like <b>Abs Vai &lt;orders@absvai.com&gt;</b>.'}</li>
+        <li class="${d.canEmailCustomers ? 'ok' : 'warn'}">${d.canEmailCustomers ? 'Your own sender address is set, so customers get emails too.' : 'Only <b>you</b> get emails for now. To email customers, verify your domain (e.g. vandarmart.com) in Resend → Domains, then change “Emails come from” below to an address on it, like <b>' + esc(state.store) + ' &lt;orders@vandarmart.com&gt;</b>.'}</li>
       </ul>
       <p class="small muted">Last 7 days: ${['sent', 'failed', 'skipped', 'queued'].map(k => `${d.counts[k] ?? 0} ${k}`).join(' · ')}</p>
     </div>
     <div class="card"><h2>Addresses</h2>
       <div class="grid-3">
         <label class="f">Send shop alerts to<input data-k="notify_email" type="email" value="${esc(val.notify_email)}" placeholder="absvai1020@gmail.com" ${dis}></label>
-        <label class="f">Emails come from<input data-k="email_from" value="${esc(val.email_from)}" placeholder="Abs Vai <onboarding@resend.dev>" ${dis}></label>
+        <label class="f">Emails come from<input data-k="email_from" value="${esc(val.email_from)}" placeholder="Vandar Mart <onboarding@resend.dev>" ${dis}></label>
         <label class="f">Customer replies go to<input data-k="email_reply_to" type="email" value="${esc(val.email_reply_to)}" placeholder="absvai1020@gmail.com" ${dis}></label>
       </div>
       <h3>Which emails</h3>

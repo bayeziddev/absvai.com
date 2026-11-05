@@ -18,7 +18,7 @@ export async function website(v) {
       <div class="card"><h2>Shop name and logo</h2>
         <div class="ws-head" aria-label="How the top of your shop looks"><span class="ws-menu"></span><span id="ws-mark"></span><span class="ws-icons"><i></i><i></i><i></i></span></div>
         <div class="grid-2">
-          <label class="f">Shop name <span class="req">*</span><input name="store_name" value="${esc(val.store_name || 'Abs Vai')}" maxlength="40" required ${dis}></label>
+          <label class="f">Shop name <span class="req">*</span><input name="store_name" value="${esc(val.store_name || 'Vandar Mart')}" maxlength="40" required ${dis}></label>
           <label class="f">Short line about the shop <span class="help">Shown in Google results and the browser tab.</span><input name="tagline" value="${esc(val.tagline)}" maxlength="80" placeholder="Seasonal goods, honest prices." ${dis}></label>
         </div>
         <div class="row ws-logo">
@@ -30,7 +30,7 @@ export async function website(v) {
       </div>
 
       <div class="card"><h2>Big banners at the top of the homepage</h2>
-        <p class="small muted">The big pictures at the top of the homepage. They slide one after another. Each one shows how customers see it on a phone and on a computer; press <b>✏️ Edit</b> to change it.</p>
+        <p class="small muted">The big pictures at the top of the homepage. They show <b>right after you press Save</b>, no dates needed, and slide one after another. Each one shows how customers see it on a phone and on a computer; press <b>✏️ Edit</b> to change it.</p>
         <p class="notice small" id="season-note" hidden></p>
         <div id="bn-home" class="bn-list"></div>
       </div>
@@ -52,7 +52,7 @@ export async function website(v) {
 
   const $ = s => v.querySelector(s);
   const mark = () => {
-    const name = $('[name=store_name]').value.trim() || 'Abs Vai';
+    const name = $('[name=store_name]').value.trim() || 'Vandar Mart';
     const [first, ...rest] = name.split(/\s+/);
     $('#ws-mark').innerHTML = val.brand_logo_url ? `<img src="${esc(val.brand_logo_url)}" alt="${esc(name)}">` : `<b>${esc(first)}<span>${esc(rest.join(' '))}</span></b>`;
   };
@@ -64,7 +64,7 @@ export async function website(v) {
     const live = list.find(x => x.state === 'active');
     if (!live) return;
     $('#season-note').hidden = false;
-    $('#season-note').textContent = `${live.name} is live now, so its own banners show at the top of the homepage. These come back when no season is live. To change the ${live.name} banners, open Seasons.`;
+    $('#season-note').textContent = `These banners show first on the homepage as soon as you press Save. ${live.name} is live too, so its banners (Seasons) show after these.`;
   }).catch(() => {});
 
   const links = await linkOptions();

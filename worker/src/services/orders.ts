@@ -11,7 +11,8 @@ import { assessRisk } from '../lib/risk';
 import { SMS } from '../lib/sms';
 import { COURIERS, courierLabel } from '../lib/tracking';
 import { canTransition, confirmBlockers, RESERVED_STAGES, RETURN_REASONS, STATUS_LABELS, validatePartialReturn, type Actor, type OrderStatus } from '../lib/state-machine';
-import { validateAddress } from '../repo/geo';
+import { guessArea } from '../lib/area-guess';
+import { deliveryAreaById, deliveryAreaDistricts, geoNames, validateAddress } from '../repo/geo';
 import { nextInvoiceNo, nextOrderNo } from '../repo/numbering';
 import {
   commitTransition, countOtpAttempt, customerByPhone, ensureCustomer, hasConfirmedCall, insertOrder, logRejectedTransition, markOtpVerified,
@@ -35,10 +36,13 @@ export const MANUAL_SOURCES = ['facebook_comment', 'messenger', 'whatsapp', 'pho
 export interface PlaceOrderInput {
   phone: string;
   name: string;
-  divisionId: number;
-  districtId: number;
-  upazilaId: number;
+  /** Staff orders pick the district and area. The website sends a delivery area and the address as typed instead. */
+  divisionId: number | null;
+  districtId: number | null;
+  upazilaId: number | null;
   unionId: number | null;
+  /** The delivery area chosen at checkout; the district and thana are then read from the typed address. */
+  zoneId?: number | null;
   postcode: string | null;
   addressLine: string;
   landmark: string | null;
@@ -108,10 +112,21 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     throw blockedError(block.type, settings.support_phone ?? '');
   }
 
-  const addr = await validateAddress(db, {
-    divisionId: input.divisionId, districtId: input.districtId, upazilaId: input.upazilaId, unionId: input.unionId, postcode: input.postcode,
-  });
-  if (!addr.ok) throw bad(addr.error);
+  // Where it goes: a chosen district and area (staff orders), or a delivery area plus the address as the customer typed it.
+  const byArea = !(input.divisionId && input.districtId && input.upazilaId);
+  let place = { divisionId: input.divisionId ?? 0, districtId: input.districtId ?? 0, upazilaId: input.upazilaId ?? 0, unionId: input.unionId };
+  let addr: { names: { division: string; district: string; upazila: string; union: string | null }; postOffice: string | null; postcodeMismatch: boolean };
+  if (byArea) {
+    if (!input.zoneId || !(await deliveryAreaById(db, input.zoneId))) throw bad('Choose your delivery area.');
+    const guess = guessArea(input.addressLine, await geoNames(db), { districtIds: await deliveryAreaDistricts(db, input.zoneId) });
+    place = { divisionId: guess?.divisionId ?? 0, districtId: guess?.districtId ?? 0, upazilaId: guess?.upazilaId ?? 0, unionId: null };
+    addr = { names: { division: guess?.division ?? '', district: guess?.district ?? '', upazila: guess?.upazila ?? '', union: null }, postOffice: null, postcodeMismatch: false };
+  } else {
+    const v = await validateAddress(db, { divisionId: place.divisionId, districtId: place.districtId, upazilaId: place.upazilaId, unionId: input.unionId, postcode: input.postcode });
+    if (!v.ok) throw bad(v.error);
+    addr = v;
+  }
+  const where = byArea ? { districtId: null, upazilaId: null, zoneId: input.zoneId } : { districtId: place.districtId, upazilaId: place.upazilaId };
 
   const customer = await customerByPhone(db, phone);
   const isNewOrRisky = !customer || customer.delivered_count === 0 || customer.returned_count > 0;
@@ -120,13 +135,13 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
   if (manual && ctx.discountPaisa) {
     if (!ctx.staff?.canDiscount) {
       const maxPct = settingInt(settings, 'manual_discount_max_percent', 10);
-      const pre = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod }, now);
+      const pre = await quote(db, settings, { lines: input.lines, ...where, paymentMethod: input.paymentMethod }, now);
       if (ctx.discountPaisa > Math.floor((pre.subtotalPaisa * maxPct) / 100)) throw bad(`Sales agents can give at most ${maxPct}% off. Ask a manager for a bigger discount.`);
     }
     discount = ctx.discountPaisa;
   }
   const couponCode = manual ? null : input.couponCode?.trim() || null;
-  const q = await quote(db, settings, { lines: input.lines, districtId: input.districtId, upazilaId: input.upazilaId, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount, couponCode, phone }, now);
+  const q = await quote(db, settings, { lines: input.lines, ...where, paymentMethod: input.paymentMethod, customerIsNewOrRisky: isNewOrRisky, discountPaisa: discount, couponCode, phone }, now);
   if (q.problems.length) throw new HttpError(409, q.problems[0], { problems: q.problems });
   // A coupon that stopped working (used up, expired, already used by this number) is reported, never silently dropped.
   if (couponCode && q.couponError) throw new HttpError(409, `${q.couponError} Remove the coupon to order without it.`, { coupon: q.couponError });
@@ -177,7 +192,7 @@ export async function placeOrder(env: Env, settings: Record<string, string>, inp
     advanceTrxId: input.advanceTrxId, advanceWallet: input.advanceWallet,
     subtotalPaisa: q.subtotalPaisa, deliveryChargePaisa: q.delivery.chargePaisa, deliveryChargeStatus: q.delivery.status, codFeePaisa: q.delivery.codFeePaisa,
     discountPaisa: q.discountPaisa, totalPaisa: q.totalPaisa ?? q.subtotalPaisa - q.discountPaisa, zoneId: q.delivery.zoneId, etaText: q.delivery.etaText,
-    name, phone, divisionId: input.divisionId, districtId: input.districtId, upazilaId: input.upazilaId, unionId: input.unionId, postcode: input.postcode,
+    name, phone, divisionId: place.divisionId, districtId: place.districtId, upazilaId: place.upazilaId, unionId: place.unionId, postcode: input.postcode,
     postOffice: addr.postOffice, names: addr.names, addressLine: input.addressLine.trim(), landmark: input.landmark, note: input.note,
     riskLevel: risk.level, riskReasons: risk.reasons, duplicateOf, holdReason: holds.map(h => h.reason).join(' ') || null,
     source: input.source, sourceDetail: input.sourceDetail, utm: input.utm, checkoutSessionId: ctx.checkoutSessionId,

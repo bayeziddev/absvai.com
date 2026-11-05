@@ -15,6 +15,7 @@ import { landing } from './views/landing.js';
 import { coupons } from './views/coupons.js';
 import { reviews } from './views/reviews.js';
 import { reports } from './views/reports.js';
+import { quickUpdate } from './views/quick-update.js';
 
 // `simple: true` items are the everyday screens shown in simple mode (the default); "Show all tools" reveals the rest.
 // Postcodes, cities and courier areas work by themselves (imported data, picked per order), so they have no screens;
@@ -30,6 +31,7 @@ export const NAV = [
   { route: 'preorders', label: 'Pre-orders & Notify-me', icon: 'clock' },
   { group: 'Catalog' },
   { route: 'products', simple: true, label: 'Products', icon: 'box' },
+  { route: 'quick-update', simple: true, label: 'Update prices & stock', icon: 'tag' },
   { route: 'categories', simple: true, label: 'Categories', icon: 'layers' },
   { route: 'templates', label: 'Product templates', icon: 'file' },
   { route: 'attributes', label: 'Attribute types', icon: 'tag' },
@@ -60,7 +62,7 @@ export const NAV = [
   { route: 'help', simple: true, label: 'Help center', icon: 'help' },
 ];
 
-export const routes = {
+export const routes = { 'quick-update': quickUpdate,
   dashboard, orders, incomplete, manual, returns, preorders, customers, wholesale, products, categories, templates, attributes, labels,
   inventory, seasons, synonyms, zones, settings, staff, security, outbox, audit, help, soon, website, emails, courier, sellers, landing, coupons, reviews, reports,
 };

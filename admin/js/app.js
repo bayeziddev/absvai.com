@@ -1,8 +1,10 @@
-// Abs Vai admin: a small hash-routed app. Every permission is enforced again on the server.
+// Shop admin: a small hash-routed app. Every permission is enforced again on the server.
 import { NAV, routes } from './routes.js';
 import { autoLabelTables } from './tables.js';
 
-export const state = { user: null, csrf: '' };
+export const state = { user: null, csrf: '', store: 'Vandar Mart', siteHost: location.host };
+/** The shop name as a two-tone wordmark: first word in ink, the rest in the main colour. */
+const wordmark = () => { const [a, ...b] = state.store.split(/\s+/); return `${esc(a)}<span>${esc(b.join(' '))}</span><small>Admin</small>`; };
 const app = document.getElementById('app');
 
 // ── Helpers ──
@@ -105,10 +107,11 @@ export const icon = (n, s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0
 
 // ── Auth screens ──
 async function renderLogin(message = '') {
-  const { needsSetup } = await fetch('/api/admin/setup-status').then(r => r.json()).catch(() => ({ needsSetup: false }));
+  const { needsSetup, storeName } = await fetch('/api/admin/setup-status').then(r => r.json()).catch(() => ({ needsSetup: false }));
+  if (storeName) { state.store = storeName; document.title = `${storeName} Admin`; }
   app.innerHTML = needsSetup ? `
     <form class="login" id="auth">
-      <p class="wordmark">Abs<span>Vai</span><small>Admin</small></p>
+      <p class="wordmark">${wordmark()}</p>
       <h1>First-time setup</h1>
       <p class="muted">Create the Super Admin account. You need the setup token from the deployment (the SETUP_TOKEN secret).</p>
       <label class="f">Setup token<input name="token" required autocomplete="off"></label>
@@ -119,7 +122,7 @@ async function renderLogin(message = '') {
       <button class="btn btn-primary" style="width:100%">Create account</button>
     </form>` : `
     <form class="login" id="auth">
-      <p class="wordmark">Abs<span>Vai</span><small>Admin</small></p>
+      <p class="wordmark">${wordmark()}</p>
       <h1>Sign in</h1>
       ${message ? `<p class="notice">${esc(message)}</p>` : ''}
       <label class="f">Email<input name="email" type="email" required autocomplete="username"></label>
@@ -156,7 +159,7 @@ function renderShell() {
   app.innerHTML = `
     <div class="shell${collapsed ? ' collapsed' : ''}">
       <aside class="side" id="side">
-        <div class="side-head"><a class="wordmark" href="#/dashboard">Abs<span>Vai</span><small>Admin</small></a><button class="icon-btn" id="collapse" aria-label="Collapse menu">«</button></div>
+        <div class="side-head"><a class="wordmark" href="#/dashboard">${wordmark()}</a><button class="icon-btn" id="collapse" aria-label="Collapse menu">«</button></div>
         <ul class="nav">${visibleNav().map(item => item.group ? `<li class="nav-group">${esc(item.group)}</li>` : `
           <li><a href="${item.soon ? '#/soon?m=' + encodeURIComponent(item.label) : '#/' + item.route}" data-route="${item.route ?? ''}" ${item.soon ? 'aria-disabled="true"' : ''} title="${esc(item.label)}">${icon(item.icon)}<span>${esc(item.label)}</span>${item.soon ? `<span class="soon">${esc(item.soon)}</span>` : ''}</a></li>`).join('')}</ul>
         <button class="nav-mode" id="nav-mode" type="button">${simpleMode() ? 'Show all tools' : 'Simple menu'}</button>
@@ -222,6 +225,7 @@ autoLabelTables();
     if (!me.ok) throw new Error();
     const j = await me.json();
     state.user = j.user; state.csrf = j.csrf;
+    if (j.storeName) { state.store = j.storeName; state.siteHost = j.siteHost ?? location.host; document.title = `${j.storeName} Admin`; }
     renderShell();
   } catch { renderLogin(); }
 })();

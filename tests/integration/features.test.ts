@@ -64,11 +64,11 @@ describe('emails through Resend', () => {
     const owner = sentToResend.at(-1)!;
     expect(owner.headers.authorization).toBe('Bearer re_test_key');
     expect(owner.headers['idempotency-key']).toMatch(/^absvai-email-\d+$/);
-    expect(owner.body).toMatchObject({ from: 'Abs Vai <onboarding@resend.dev>', to: ['absvai1020@gmail.com'], reply_to: 'absvai1020@gmail.com' });
+    expect(owner.body).toMatchObject({ from: 'Vandar Mart <onboarding@resend.dev>', to: ['absvai1020@gmail.com'], reply_to: 'absvai1020@gmail.com' });
     expect(String(owner.body.subject)).toMatch(/^New order AV-\d{6}-\d{4} · ৳/);
     expect(String(owner.body.html)).toContain('Rahima Akter');
 
-    expect((await t.adminJson('/settings', 'PUT', { email_from: 'Abs Vai <orders@absvai.com>' })).status).toBe(200);
+    expect((await t.adminJson('/settings', 'PUT', { email_from: 'Vandar Mart <orders@vandarmart.com>' })).status).toBe(200);
     const r2 = await place({ email: 'rahima@example.com', emailOffers: true });
     expect((await log(r2.body.orderId)).map(e => [e.kind, e.status])).toEqual([['owner_new_order', 'sent'], ['customer_receipt', 'sent']]);
     // Confirming sends the invoice; handing to the courier sends "on the way".
@@ -118,7 +118,7 @@ describe('shop assistant (chat popup)', () => {
   it('answers from the shop data without AI: delivery charges and matching products', async () => {
     const d = await ask('What is the delivery charge to Tangail?');
     expect(d.body.ai).toBe(false);
-    expect(d.body.reply).toMatch(/Outside Dhaka ৳\d+/);
+    expect(d.body.reply).toMatch(/ঢাকার বাইরে ৳\d+/);
     const p = await ask('do you have masala?');
     expect(p.body.products[0]).toMatchObject({ slug: expect.any(String), pricePaisa: expect.any(Number) });
     expect((await ask('')).status).toBe(400);

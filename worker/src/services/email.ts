@@ -17,19 +17,22 @@ import { dailyNumbers, markEmail, queueEmail, queuedEmails, trimEmailBodies } fr
 import { orderById, orderItems } from '../repo/orders';
 import { loadSettings } from '../repo/settings';
 import { courierLabel } from './orders';
+import { storeName } from '../lib/brand';
 
 const RESEND_URL = 'https://api.resend.com/emails';
-export const DEFAULT_FROM = 'Abs Vai <onboarding@resend.dev>';
+/** Until the owner's own domain is verified in Resend, emails come from Resend's shared address under the shop's name. */
+export const DEFAULT_FROM_ADDRESS = 'onboarding@resend.dev';
 const EMAIL_RE = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[a-z]{2,}$/i;
 
 export const emailConnected = (env: Env) => Boolean(env.RESEND_API_KEY);
 export const validEmail = (s: string) => s.length <= 120 && EMAIL_RE.test(s);
 /** Resend's test sender (onboarding@resend.dev) can only deliver to the Resend account's own email address. */
-export const canEmailCustomers = (settings: Record<string, string>) => !/@resend\.dev>?\s*$/i.test((settings.email_from || DEFAULT_FROM).trim());
+const senderOf = (s: Record<string, string>) => (s.email_from || `${storeName(s)} <${DEFAULT_FROM_ADDRESS}>`).trim();
+export const canEmailCustomers = (settings: Record<string, string>) => !/@resend\.dev>?\s*$/i.test(senderOf(settings));
 const on = (settings: Record<string, string>, key: string) => settings[key] !== '0';
 
 export function shopInfo(env: Env, s: Record<string, string>): T.ShopInfo {
-  return { store: s.store_name || 'Abs Vai', siteUrl: env.SITE_URL, phone: s.support_phone, whatsapp: s.whatsapp_number, company: s.company_name || undefined, address: s.company_address || undefined };
+  return { store: storeName(s), siteUrl: env.SITE_URL, phone: s.support_phone, whatsapp: s.whatsapp_number, company: s.company_name || undefined, address: s.company_address || undefined };
 }
 
 const PAYMENT: Record<string, string> = { cod: 'Cash on Delivery', manual_mobile: 'bKash / Nagad / Rocket' };
@@ -160,7 +163,7 @@ export async function flushEmails(env: Env, limit = 20): Promise<{ sent: number;
     return out;
   }
   const s = await loadSettings(env.DB);
-  const from = (s.email_from || DEFAULT_FROM).trim();
+  const from = senderOf(s);
   const replyTo = (s.email_reply_to || '').trim();
   for (const [i, e] of queue.entries()) {
     if (i) await new Promise(r => setTimeout(r, 550));

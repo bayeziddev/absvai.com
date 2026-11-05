@@ -43,8 +43,9 @@ describe('migration 0010', () => {
 
 describe('homepage photos', () => {
   it('loads the first banner photo first, in every width, and the other banners later', async () => {
-    // Winter is on (its banners show), whatever today's date is.
+    // Winter is on (its banners show), whatever today's date is, and the shop has no homepage banners of its own.
     await t.sql("UPDATE seasons SET starts_on = date('now', '-10 days'), ends_on = date('now', '+60 days'), is_enabled = 1 WHERE slug = 'winter'");
+    expect((await t.adminJson('/settings', 'PUT', { default_banners: '[]' })).status).toBe(200);
     const html = await (await t.fetch('/')).text();
     const bg = html.match(/<img class="hero-bg"[^>]*>/)![0];
     expect(bg).toContain('src="/img/photos/wide/hero-winter-gur.webp"');
@@ -60,5 +61,15 @@ describe('homepage photos', () => {
     // Category circles and product cards offer the small copies; no drawings are left on the page.
     expect(html).toMatch(/<img src="\/img\/photos\/sq\/cat-[\w-]+\.webp" srcset="[^"]*-240\.webp 240w/);
     expect(html).not.toContain('/img/placeholders/');
+  });
+
+  it('shows a banner the owner uploads straight away, first, with no season or dates to set', async () => {
+    const mine = [{ headline: 'Eid offer', subline: 'Up to 30% off', cta_text: 'Shop now', cta_href: '/deals', theme: 'chili', image: '/img/photos/wide/hero-food-business.webp', wide: true }];
+    expect((await t.adminJson('/settings', 'PUT', { default_banners: JSON.stringify(mine) })).status).toBe(200);
+    const html = await (await t.fetch('/')).text();
+    const bg = html.match(/<img class="hero-bg"[^>]*>/)![0];
+    expect(bg).toContain('src="/img/photos/wide/hero-food-business.webp"');
+    expect(bg).toContain('fetchpriority="high"');
+    expect(html.indexOf('Eid offer')).toBeLessThan(html.indexOf('hero-winter-gur'));
   });
 });

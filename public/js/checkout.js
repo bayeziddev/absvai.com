@@ -1,16 +1,88 @@
-// One-page checkout with automatic address detection (build prompt Section 6).
-// Three ways to find the address all fill the same Division → District → Area → Union selects:
-//   1. a 4-digit postcode (looked up in the browser, instantly),
-//   2. "Use my location" (district-level only: the data has district coordinates and outlines, nothing finer),
-//   3. the dropdowns themselves.
-// GPS coordinates never leave the browser. The server re-validates everything on submit.
-import { api, cart, esc, small, taka } from './app.js';
+// One-page checkout: mobile number, name, the delivery area (each shows what delivery costs for this cart, and the total
+// follows by itself), the address in the customer's own words, and payment. The server re-validates everything on submit
+// and reads the district out of the address for the shop's map. "Order on WhatsApp" sends the same order as a message.
+// Customers read the checkout in Bangla and may type in Bangla or English.
+import { api as apiEn, cart, esc, small, taka } from './app.js';
+
+// ── Bangla: the server's messages are in English (the admin uses the same rules), so the ones a customer can meet at
+// checkout are put into Bangla here. A message not listed shows as the server sent it. ──
+const T = '(৳[\\d,.]+)';
+const STOCK = [[/^Out of stock$/, 'স্টকে নেই'], [/^Only (\d+) left$/, 'মাত্র $1টি আছে'], [/^Back in season from (.+)$/, '$1 থেকে আবার পাওয়া যাবে']];
+const BN = [
+  // Delivery charge
+  [new RegExp(`^Free delivery: your order is over ${T}\\.$`), 'ফ্রি ডেলিভারি: আপনার অর্ডার $1-এর বেশি।'],
+  [/^Free delivery on these items\.$/, 'এই পণ্যগুলোর ডেলিভারি ফ্রি।'],
+  [new RegExp(`^(.+): ${T} up to ([\\d.]+)kg, \\+${T} per extra kg \\(([\\d.]+)kg packed\\)\\.$`), '$1: $3 কেজি পর্যন্ত $2, এর পরে প্রতি কেজিতে +$4 (প্যাকেটসহ ওজন $5 কেজি)।'],
+  [new RegExp(`^(.+): ${T} up to ([\\d.]+)kg\\.$`), '$1: $3 কেজি পর্যন্ত $2।'],
+  [/^Large item: we will call you to confirm the delivery charge before dispatch\.$/, 'বড় পণ্য: পাঠানোর আগে আমরা ফোন করে ডেলিভারি চার্জ জানিয়ে দেব।'],
+  [new RegExp(`^Large item delivery: ${T} each\\.$`), 'বড় পণ্যের ডেলিভারি চার্জ: প্রতিটি $1।'],
+  [/^Free delivery on the large item\.$/, 'বড় পণ্যের ডেলিভারি ফ্রি।'],
+  [/^The free-delivery threshold does not cover large items\.$/, 'ফ্রি ডেলিভারির সুবিধা বড় পণ্যে প্রযোজ্য নয়।'],
+  [new RegExp(`^Add ${T} more for free delivery\\.$`), 'আর $1-এর পণ্য নিলেই ডেলিভারি ফ্রি।'],
+  [new RegExp(`^Cash on Delivery fee: ${T} \\(charged by the courier\\)\\.$`), 'ক্যাশ অন ডেলিভারি চার্জ: $1 (কুরিয়ার নেয়)।'],
+  // Advance
+  [new RegExp(`^Pre-order advance for (.+): ${T}( × \\d+)?\\.$`), '$1 প্রি-অর্ডারের অ্যাডভান্স: $2$3।'],
+  [/^Pre-orders need the delivery charge paid in advance to book your slot \((.+)\)\.$/, 'প্রি-অর্ডার বুক করতে ডেলিভারি চার্জ আগে দিতে হয় ($1)।'],
+  [/^Large items need the delivery charge paid in advance\.$/, 'বড় পণ্যের ডেলিভারি চার্জ আগে দিতে হয়।'],
+  [new RegExp(`^Orders over ${T} from new customers need the delivery charge paid in advance\\.$`), 'নতুন গ্রাহকের $1-এর বেশি অর্ডারে ডেলিভারি চার্জ আগে দিতে হয়।'],
+  [/^We will tell you the exact advance when we call to confirm the delivery charge\.$/, 'ডেলিভারি চার্জ কনফার্ম করতে ফোন করার সময় অ্যাডভান্সের সঠিক পরিমাণ জানিয়ে দেব।'],
+  // Coupon
+  [/^Type the coupon code\.$/, 'কুপন কোড লিখুন।'],
+  [/^“(.+)” is not a valid coupon\.$/, '“$1” সঠিক কুপন নয়।'],
+  [/^This coupon starts on (.+)\.$/, 'এই কুপন $1 থেকে চালু হবে।'],
+  [/^This coupon has expired\.$/, 'এই কুপনের মেয়াদ শেষ।'],
+  [/^This coupon has been used up\.$/, 'এই কুপন আর ব্যবহার করা যাবে না।'],
+  [new RegExp(`^This coupon needs an order of at least ${T}\\.$`), 'এই কুপন ব্যবহার করতে কমপক্ষে $1-এর অর্ডার লাগবে।'],
+  [/^You have already used this coupon\.$/, 'আপনি এই কুপন আগেই ব্যবহার করেছেন।'],
+  [/^This coupon can be used (\d+) times per customer\.$/, 'একজন গ্রাহক এই কুপন $1 বার ব্যবহার করতে পারেন।'],
+  [/^(\d+)% off$/, '$1% ছাড়'],
+  [new RegExp(`^${T} off$`), '$1 ছাড়'],
+  [/^Free delivery$/, 'ফ্রি ডেলিভারি'],
+  [/^Delivery becomes free once you choose your area\.$/, 'এলাকা বেছে নিলেই ডেলিভারি ফ্রি হয়ে যাবে।'],
+  // Cart and order
+  [/^An item in your cart is no longer available and was removed\.$/, 'কার্টের একটি পণ্য আর পাওয়া যাচ্ছে না, তাই সরিয়ে দেওয়া হয়েছে।'],
+  [/^Enter a Bangladeshi mobile number like 01712345678\.$/, 'সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।'],
+  [/^Enter your name\.$/, 'আপনার নাম লিখুন।'],
+  [/^Enter your house, road or village so the courier can find you\.$/, 'কুরিয়ার যেন খুঁজে পায়, তাই বাসা/বাড়ি, রোড বা গ্রামের নাম লিখুন।'],
+  [/^Your cart is empty\.$/, 'আপনার কার্ট খালি।'],
+  [/^Check your email address, or leave it empty\.$/, 'ইমেইলটি ঠিক আছে কিনা দেখুন, অথবা খালি রাখুন।'],
+  [/^Choose your delivery area\.$/, 'ডেলিভারি এলাকা বেছে নিন।'],
+  [/^We could not work out delivery to this area\. Please call us\.$/, 'এই এলাকার ডেলিভারি চার্জ বের করা যায়নি। দয়া করে আমাদের ফোন করুন।'],
+  [new RegExp(`^This order needs an advance of ${T}\\. Choose bKash / Nagad / Rocket and enter the transaction ID\\.$`), 'এই অর্ডারে $1 অ্যাডভান্স লাগবে। বিকাশ / নগদ / রকেট বেছে নিয়ে ট্রানজেকশন আইডি দিন।'],
+  [/^Enter the transaction ID from your bKash \/ Nagad \/ Rocket payment\.$/, 'বিকাশ / নগদ / রকেটে টাকা পাঠানোর ট্রানজেকশন আইডি দিন।'],
+  [/^Your checkout session expired\. Reload the page( and try again)?\.$/, 'চেকআউটের সময় শেষ হয়ে গেছে। পেজটি রিলোড করে আবার চেষ্টা করুন।'],
+  [/^Please complete the "I am human" check\.$/, '“আমি মানুষ” যাচাইটি শেষ করুন।'],
+  [/^Too many requests\. Please wait a minute\.$/, 'অনেকবার চেষ্টা হয়েছে। এক মিনিট পরে আবার চেষ্টা করুন।'],
+  [/^Too many requests from this connection\. Please wait a little and try again, or call us\.$/, 'এই সংযোগ থেকে অনেকবার চেষ্টা হয়েছে। একটু পরে আবার চেষ্টা করুন, অথবা আমাদের ফোন করুন।'],
+  [/^Too many orders from this device\. Please wait a few minutes or call us\.$/, 'এই ডিভাইস থেকে অনেক অর্ডার হয়েছে। কয়েক মিনিট পরে চেষ্টা করুন, অথবা আমাদের ফোন করুন।'],
+  [/^We couldn't place this order\. Please call us( at (.+))?\.$/, 'অর্ডারটি নেওয়া যায়নি। দয়া করে আমাদের ফোন করুন $2।'],
+  [/^Please check your details and try again\.$/, 'তথ্যগুলো দেখে আবার চেষ্টা করুন।'],
+  [/^Something went wrong\. Please try again\.$/, 'কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।'],
+  [/^(Failed to fetch|NetworkError.*|Load failed|network error)$/i, 'ইন্টারনেট সংযোগ পাওয়া যাচ্ছে না। সংযোগ দেখে আবার চেষ্টা করুন।'],
+];
+const stockBn = t => { for (const [re, out] of STOCK) if (re.test(t)) return t.replace(re, out); return t; };
+/** One server message in Bangla ("Name (option): Out of stock." and "… Remove the coupon …" are put together). */
+function bn(text) {
+  const t = String(text ?? '').trim();
+  if (!t) return '';
+  const coupon = t.match(/^(.+) Remove the coupon to order without it\.$/);
+  if (coupon) return `${bn(coupon[1])} কুপন ছাড়া অর্ডার করতে কুপনটি মুছে দিন।`;
+  for (const [re, out] of BN) if (re.test(t)) return t.replace(re, out).replace(/\s+।$/, '।');
+  const line = t.match(/^(.+): (.+)\.$/);
+  if (line && stockBn(line[2]) !== line[2]) return `${line[1]}: ${stockBn(line[2])}।`;
+  return stockBn(t);
+}
+/** "1–2 days" → "১–২ দিন" (the shop may also write the time in Bangla already). */
+const bnDays = t => String(t ?? '').replace(/\bdays?\b/gi, 'দিন').replace(/\bhours?\b/gi, 'ঘণ্টা').replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+
+/** The checkout API, with its messages (shared with the English admin) put into Bangla for the customer. */
+async function api(path, body) {
+  try { return await apiEn(path, body); } catch (err) { err.message = bn(err.message); throw err; }
+}
 
 const pd = JSON.parse(document.getElementById('page-data').textContent);
 const form = document.getElementById('checkout-form');
 const $ = s => form.querySelector(s);
-const sel = { division: form.divisionId, district: form.districtId, upazila: form.upazilaId, union: form.unionId };
-const finderMsg = $('[data-finder-msg]');
 const placeBtn = $('[data-place]');
 const errorBox = $('[data-co-error]');
 
@@ -29,7 +101,6 @@ function applyCoupon() { couponCode = form.couponCode.value.trim().toUpperCase()
 $('[data-coupon-apply]')?.addEventListener('click', applyCoupon);
 form.couponCode?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } });
 
-let geo = null; // { divisions, districts, upazilas, postcodes }
 let lastQuote = null;
 
 // ── Checkout session (Section 8.1): after an invisible Turnstile check the server sets an HttpOnly session cookie and
@@ -44,152 +115,39 @@ async function startSession(turnstileToken) {
   }
   sessionWaiters.splice(0).forEach(fn => fn(session));
 }
+// The human check cannot start (it is blocked, or the page's address is not allowed for it): say so, never spin forever.
+let checkFailed = false;
+const CHECK_FAILED = 'নিরাপত্তা যাচাই চালু হয়নি। পেজটি রিলোড করুন, অথবা “WhatsApp-এ অর্ডার করুন” চেপে আমাদের অর্ডার পাঠান।';
 function checkoutToken() {
   if (session && Date.parse(session.expiresAt) - Date.now() > 60_000) return Promise.resolve(session.token);
+  if (checkFailed) return Promise.resolve(null);
   return new Promise(resolve => {
-    sessionWaiters.push(s => resolve(s?.token ?? null));
+    const done = s => { clearTimeout(timer); resolve(s?.token ?? null); };
+    const timer = setTimeout(() => { sessionWaiters = sessionWaiters.filter(f => f !== done); resolve(null); }, 15000);
+    sessionWaiters.push(done);
     if (session) { session = null; window.turnstile?.reset?.(); if (!pd.turnstile) startSession(''); }
   });
 }
-// Turnstile calls this (data-callback) once the invisible check passes.
-window.absvaiTurnstile = token => startSession(token);
+// Turnstile calls this (data-callback) once the invisible check passes, and absvaiTurnstileError when it cannot run.
+window.absvaiTurnstile = token => { checkFailed = false; startSession(token); };
+window.absvaiTurnstileError = () => {
+  checkFailed = true;
+  errorBox.textContent = CHECK_FAILED;
+  sessionWaiters.splice(0).forEach(fn => fn(null));
+  return true;
+};
 
-function fill(select, rows, placeholder) {
-  select.replaceChildren(new Option(placeholder, ''), ...rows.map(([id, name]) => new Option(name, String(id))));
-  select.disabled = rows.length === 0;
-}
-
-const districtsOf = div => geo.districts.filter(d => d[1] === div).map(d => [d[0], d[2]]);
-const upazilasOf = dis => geo.upazilas.filter(u => u[1] === dis).map(u => [u[0], u[2]]);
-
-async function loadUnions(upazilaId, selected) {
-  if (!upazilaId) { fill(sel.union, [], 'Select union'); return; }
-  try {
-    const rows = await api(`/api/geo/${geo.version}/unions/${upazilaId}`);
-    fill(sel.union, rows, rows.length ? 'Select union (optional)' : 'No unions listed');
-    if (selected) sel.union.value = String(selected);
-  } catch { fill(sel.union, [], 'Select union'); }
-}
-
-/** Sets the cascade. Upazila may be null (postcode not linked yet, or location detection). */
-function applyArea(divisionId, districtId, upazilaId) {
-  sel.division.value = String(divisionId);
-  fill(sel.district, districtsOf(divisionId), 'Select district');
-  sel.district.value = String(districtId);
-  fill(sel.upazila, upazilasOf(districtId), 'Select area');
-  sel.upazila.value = upazilaId ? String(upazilaId) : '';
-  loadUnions(upazilaId);
-  areaChanged();
-}
-
-function names() {
-  const t = s => (s.value ? s.options[s.selectedIndex].text : '');
-  return { division: t(sel.division), district: t(sel.district), upazila: sel.upazila.value ? t(sel.upazila) : '' };
-}
-
-function say(text, tone = '') { finderMsg.textContent = text; finderMsg.className = `finder-msg ${tone}`; }
-
-// ── 1. Postcode ──
-const picker = $('[data-po-picker]');
-form.postcode.addEventListener('input', () => {
-  // Bangla digits (১২০৬) work too.
-  form.postcode.value = form.postcode.value.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)).replace(/\D/g, '').slice(0, 4);
-  picker.hidden = true;
-  if (form.postcode.value.length !== 4 || !geo) { if (form.postcode.value.length < 4) say(''); return; }
-  const hits = geo.postcodes[form.postcode.value];
-  if (!hits) { say('We don’t know this postcode yet. Please choose your area below.', 'warn'); return; }
-  const use = ([office, div, dis, upa, officeBn]) => {
-    applyArea(div, dis, upa);
-    const n = names();
-    say(`${office}${officeBn ? ` (${officeBn})` : ''} post office · ${n.upazila ? `${n.upazila}, ` : ''}${n.district}, ${n.division} Division${upa ? '' : '. Please choose your area.'}`, upa ? 'ok' : 'warn');
-    picker.hidden = true;
-  };
-  if (hits.length === 1) { use(hits[0]); return; }
-  picker.innerHTML = '<p class="small">This postcode covers several post offices. Which is yours?</p>' + hits.map((h, i) => `<button class="btn btn-outline btn-sm" type="button" data-i="${i}">${esc(h[0])}${h[4] ? ` · ${esc(h[4])}` : ''}</button>`).join('');
-  picker.hidden = false;
-  picker.querySelectorAll('button').forEach(b => b.addEventListener('click', () => use(hits[Number(b.dataset.i)])));
-});
-
-// ── 2. Use my location (district-level) ──
-function inRing(x, y, ring) {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, yi] = ring[i]; const [xj, yj] = ring[j];
-    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-const inMulti = (lon, lat, coords) => coords.some(([outer, ...holes]) => inRing(lon, lat, outer) && !holes.some(h => inRing(lon, lat, h)));
-const km = (a, b, c, d) => { const r = x => (x * Math.PI) / 180; const s = Math.sin(r(c - a) / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(r(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(s)); };
-
-$('[data-locate]').addEventListener('click', () => {
-  if (!('geolocation' in navigator)) { say('Your browser cannot share location. Please type your postcode or choose below.', 'warn'); return; }
-  say('Finding your district…');
-  navigator.geolocation.getCurrentPosition(async pos => {
-    const { latitude: lat, longitude: lon } = pos.coords; // used here only, never sent or stored
-    if (lat < 20.3 || lat > 26.8 || lon < 88 || lon > 92.8) { say('That location is outside Bangladesh. Please choose your area below.', 'warn'); return; }
-    let districtId = null;
-    try {
-      const outlines = await (await fetch(`${pd.outlinesBase}/districts.json`)).json();
-      districtId = outlines.features.find(f => inMulti(lon, lat, f.geometry.coordinates))?.properties.id ?? null;
-    } catch { /* fall back to the nearest district centre */ }
-    if (!districtId) districtId = geo.districts.reduce((best, d) => (km(lat, lon, d[3], d[4]) < km(lat, lon, best[3], best[4]) ? d : best))[0];
-    const d = geo.districts.find(x => x[0] === districtId);
-    applyArea(d[1], d[0], null);
-    say(`We’ve set your district: ${d[2]}. Please choose your area.`, 'ok');
-    sel.upazila.focus();
-  }, err => {
-    say(err.code === 1 ? 'Location permission was not given. Type your postcode or choose your area below.' : 'We could not get your location. Please choose your area below.', 'warn');
-  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
-});
-
-// ── 3. Manual dropdowns ──
-sel.division.addEventListener('change', () => { fill(sel.district, sel.division.value ? districtsOf(Number(sel.division.value)) : [], 'Select district'); fill(sel.upazila, [], 'Select area'); fill(sel.union, [], 'Select union'); areaChanged(); });
-sel.district.addEventListener('change', () => { fill(sel.upazila, sel.district.value ? upazilasOf(Number(sel.district.value)) : [], 'Select area'); fill(sel.union, [], 'Select union'); areaChanged(); });
-sel.upazila.addEventListener('change', () => { loadUnions(Number(sel.upazila.value) || null); areaChanged(); });
-
-// ── Map card: Leaflet is loaded only after a district is known ──
-let leafletReady = null;
-let map = null;
-let layer = null;
-function loadLeaflet() {
-  leafletReady ??= new Promise((resolve, reject) => {
-    const css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css';
-    document.head.append(css);
-    const s = document.createElement('script');
-    s.src = '/vendor/leaflet/leaflet.js'; s.onload = () => resolve(window.L); s.onerror = reject;
-    document.head.append(s);
-  });
-  return leafletReady;
-}
-
-async function showMap(districtId) {
-  const card = $('[data-map-card]');
-  if (!districtId) { card.hidden = true; return; }
-  const n = names();
-  card.hidden = false;
-  card.querySelector('[data-map-label]').textContent = [n.upazila, n.district, `${n.division} Division`].filter(Boolean).join(', ');
-  try {
-    const [L, outline] = await Promise.all([loadLeaflet(), fetch(`${pd.outlinesBase}/outlines/${districtId}.json`).then(r => r.json())]);
-    const el = card.querySelector('[data-map]');
-    if (!map) {
-      map = L.map(el, { zoomControl: false, attributionControl: Boolean(pd.mapTileUrl), dragging: true, scrollWheelZoom: false });
-      if (pd.mapTileUrl) L.tileLayer(pd.mapTileUrl, { attribution: pd.mapAttribution, maxZoom: 14 }).addTo(map);
-    }
-    layer?.remove();
-    layer = L.geoJSON(outline, { style: { color: '#B3261E', weight: 2, fillColor: '#F2B705', fillOpacity: 0.25 } }).addTo(map);
-    map.fitBounds(layer.getBounds(), { padding: [12, 12] });
-  } catch { /* the label still shows the place name */ }
-}
+// ── Delivery area: a choice, never a lookup ──
+const area = () => Number(form.querySelector('input[name=zoneId]:checked')?.value) || null;
+const areaName = id => form.querySelector(`input[name=zoneId][value="${id}"]`)?.closest('label').querySelector('strong').textContent ?? '';
+form.querySelectorAll('input[name=zoneId]').forEach(r => r.addEventListener('change', areaChanged));
 
 // ── Quote, advance and summary ──
 let quoteTimer;
 let captureTimer;
 function areaChanged() {
   clearTimeout(quoteTimer);
-  quoteTimer = setTimeout(refreshQuote, 120);
-  showMap(Number(sel.district.value) || null);
+  quoteTimer = setTimeout(refreshQuote, 60);
   captureSoon();
 }
 
@@ -199,42 +157,51 @@ form.querySelectorAll('input[name=paymentMethod]').forEach(r => r.addEventListen
 async function refreshQuote() {
   if (!lines.length) return;
   try {
-    lastQuote = await api('/api/checkout/quote', { lines, districtId: Number(sel.district.value) || null, upazilaId: Number(sel.upazila.value) || null, paymentMethod: payment(), phone: form.phone.value, couponCode });
+    lastQuote = await api('/api/checkout/quote', { lines, zoneId: area(), withAreas: true, paymentMethod: payment(), phone: form.phone.value, couponCode });
   } catch (e) { errorBox.textContent = e.message; return; }
   renderSummary(lastQuote);
 }
 
 function renderSummary(q) {
   $('[data-co-lines]').innerHTML = q.lines.map(l => `
-    <div class="co-line"><img src="${esc(small(l.image))}" alt=""><div>${esc(l.name)}<small>${esc(l.variantLabel)}${l.variantLabel ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small>${l.problem ? `<small class="problem">${esc(l.problem)}</small>` : ''}</div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
+    <div class="co-line"><img src="${esc(small(l.image))}" alt=""><div>${esc(l.name)}<small>${esc(l.variantLabel)}${l.variantLabel ? ' · ' : ''}${l.qty} × ${taka(l.unitPaisa)}</small>${l.problem ? `<small class="problem">${esc(bn(l.problem))}</small>` : ''}</div><strong>${taka(l.lineTotalPaisa)}</strong></div>`).join('');
   $('[data-subtotal]').textContent = taka(q.subtotalPaisa);
   const off = q.discountPaisa > 0;
   $('[data-discount-row]').hidden = !off; $('[data-discount]').hidden = !off;
   if (off) $('[data-discount]').textContent = `−${taka(q.discountPaisa)}`;
   if (couponMsg) {
     couponMsg.className = `coupon-msg ${q.coupon ? 'ok' : q.couponError ? 'error' : ''}`;
-    couponMsg.textContent = q.coupon ? `✓ ${q.coupon.code}: ${q.coupon.label}${q.coupon.discountPaisa ? ` (−${taka(q.coupon.discountPaisa)})` : ''}${q.coupon.note ? `. ${q.coupon.note}` : ''}` : q.couponError ?? '';
+    couponMsg.textContent = q.coupon ? `✓ ${q.coupon.code}: ${bn(q.coupon.label)}${q.coupon.discountPaisa ? ` (−${taka(q.coupon.discountPaisa)})` : ''}${q.coupon.note ? `। ${bn(q.coupon.note)}` : ''}` : bn(q.couponError ?? '');
   }
   const d = q.delivery;
-  $('[data-delivery]').textContent = !d ? 'Choose your area' : d.status === 'to_confirm' ? 'Confirmed by phone' : d.chargePaisa === 0 ? 'Free' : taka(d.chargePaisa) + (q.needsArea ? ' (choose your area)' : '');
+  const charge = a => (a.status === 'to_confirm' ? 'ফোনে জানানো হবে' : a.chargePaisa === 0 ? 'ফ্রি' : taka(a.chargePaisa));
+  for (const a of q.areas ?? []) { const el = form.querySelector(`[data-area-charge="${a.id}"]`); if (el) el.textContent = charge(a); }
+  $('[data-delivery]').textContent = !d ? 'এলাকা বেছে নিন' : d.status === 'to_confirm' ? 'ফোনে জানানো হবে' : d.chargePaisa === 0 ? 'ফ্রি' : taka(d.chargePaisa);
+  const box = $('[data-co-delivery]');
+  box.hidden = !d;
+  if (d) {
+    box.className = `co-delivery${d.chargePaisa === 0 ? ' free' : ''}`;
+    box.innerHTML = d.status === 'to_confirm' ? `🚚 <b>ডেলিভারি (${esc(d.zoneName)})</b>: চার্জ আমরা ফোনে জানিয়ে দেব।`
+      : `${d.chargePaisa === 0 ? '🎁' : '🚚'} <b>ডেলিভারি চার্জ (${esc(d.zoneName)}): ${d.chargePaisa === 0 ? 'ফ্রি' : taka(d.chargePaisa)}</b>${q.totalPaisa !== null ? ` · সর্বমোট <b>${taka(q.totalPaisa)}</b>` : ''}<span>পৌঁছাতে সাধারণত ${esc(bnDays(d.etaText))} লাগে</span>`;
+  }
   const cod = d?.codFeePaisa > 0;
   $('[data-cod-row]').hidden = !cod; $('[data-cod-fee]').hidden = !cod;
   if (cod) $('[data-cod-fee]').textContent = taka(d.codFeePaisa);
-  $('[data-total]').textContent = q.totalPaisa === null ? (d ? `${taka(q.subtotalPaisa)} + delivery` : '—') : taka(q.totalPaisa);
-  $('[data-explain]').innerHTML = (d?.explanation ?? (q.subtotalPaisa && pd.freeThresholdPaisa ? [`Free delivery on orders over ${taka(pd.freeThresholdPaisa)} (large items excluded).`] : [])).map(t => `<li>${esc(t)}</li>`).join('');
-  $('[data-eta]').textContent = d ? `Delivery to ${d.zoneName}: usually ${d.etaText}` : '';
+  $('[data-total]').textContent = q.totalPaisa === null ? (d ? `${taka(q.subtotalPaisa)} + ডেলিভারি চার্জ` : '—') : taka(q.totalPaisa);
+  $('[data-explain]').innerHTML = (d?.explanation ?? (q.subtotalPaisa && pd.freeThresholdPaisa ? [`${taka(pd.freeThresholdPaisa)}-এর বেশি অর্ডারে ডেলিভারি ফ্রি (বড় পণ্য ছাড়া)।`] : [])).map(t => `<li>${esc(bn(t))}</li>`).join('');
+  $('[data-eta]').textContent = d ? `ডেলিভারির সময় (${d.zoneName}): সাধারণত ${bnDays(d.etaText)}` : '';
 
   const adv = $('[data-advance]');
   adv.hidden = !q.advance.required;
   if (q.advance.required) {
-    $('[data-advance-title]').textContent = q.advance.amountPaisa ? `This order needs an advance of ${taka(q.advance.amountPaisa)}` : 'This order needs an advance';
-    $('[data-advance-reasons]').innerHTML = q.advance.reasons.map(r => `<li>${esc(r)}</li>`).join('');
+    $('[data-advance-title]').textContent = q.advance.amountPaisa ? `এই অর্ডারে ${taka(q.advance.amountPaisa)} অ্যাডভান্স লাগবে` : 'এই অর্ডারে অ্যাডভান্স লাগবে';
+    $('[data-advance-reasons]').innerHTML = q.advance.reasons.map(r => `<li>${esc(bn(r))}</li>`).join('');
     const mobile = form.querySelector('input[value=manual_mobile]');
     if (q.advance.amountPaisa && mobile && !mobile.closest('[hidden]') && payment() !== 'manual_mobile') { mobile.checked = true; refreshQuote(); }
   }
-  errorBox.textContent = q.problems.join(' ');
+  errorBox.textContent = q.problems.map(bn).join(' ');
   placeBtn.disabled = q.problems.length > 0 || !q.lines.length;
-  placeBtn.textContent = q.hasPreOrder ? 'Place pre-order' : pd.placeLabel || 'Place order';
+  placeBtn.textContent = q.hasPreOrder ? 'প্রি-অর্ডার কনফার্ম করুন' : pd.placeLabel || 'অর্ডার কনফার্ম করুন';
 }
 
 // ── Incomplete-order capture (Section 8.1): starts only once the phone number is valid. Blur on the phone field, a
@@ -249,8 +216,7 @@ function utm() {
 }
 function snapshot(token) {
   return {
-    token, phone: form.phone.value, name: form.name.value, lines, divisionId: Number(sel.division.value) || null, districtId: Number(sel.district.value) || null,
-    upazilaId: Number(sel.upazila.value) || null, postcode: form.postcode.value, addressLine: form.addressLine.value, landmark: form.landmark.value, utm: utm(),
+    token, phone: form.phone.value, name: form.name.value, lines, zoneId: area(), addressLine: form.addressLine.value, utm: utm(),
   };
 }
 let lastSent = '';
@@ -266,8 +232,7 @@ async function capture() {
 }
 function captureSoon() { clearTimeout(captureTimer); captureTimer = setTimeout(capture, 1000); }
 form.phone.addEventListener('blur', capture);
-['phone', 'name', 'addressLine', 'landmark', 'postcode'].forEach(n => form[n].addEventListener('input', captureSoon));
-Object.values(sel).forEach(s => s.addEventListener('change', captureSoon));
+['phone', 'name', 'addressLine'].forEach(n => form[n].addEventListener('input', captureSoon));
 function beacon() {
   if (placed || !validPhone() || !session || !navigator.sendBeacon) return;
   const body = JSON.stringify(snapshot(session.token));
@@ -287,13 +252,11 @@ function invalid(field, message) {
 
 function validate() {
   form.querySelectorAll('[aria-invalid]').forEach(f => f.removeAttribute('aria-invalid'));
-  if (!/^(\+?88)?01[3-9]\d{8}$/.test(form.phone.value.replace(/[\s-]/g, ''))) return invalid(form.phone, 'Enter a Bangladeshi mobile number like 01712345678.');
-  if (form.name.value.trim().length < 2) return invalid(form.name, 'Enter your name.');
-  if (!sel.division.value) return invalid(sel.division, 'Choose your division.');
-  if (!sel.district.value) return invalid(sel.district, 'Choose your district.');
-  if (!sel.upazila.value) return invalid(sel.upazila, 'Choose your area (upazila or thana).');
-  if (form.addressLine.value.trim().length < 5) return invalid(form.addressLine, 'Enter your house, road or village so the courier can find you.');
-  if (payment() === 'manual_mobile' && lastQuote?.advance.amountPaisa && !form.advanceTrxId?.value.trim()) return invalid(form.advanceTrxId, 'Enter the transaction ID from your bKash / Nagad / Rocket payment.');
+  if (!/^(\+?88)?01[3-9]\d{8}$/.test(form.phone.value.replace(/[\s-]/g, ''))) return invalid(form.phone, 'সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।');
+  if (form.name.value.trim().length < 2) return invalid(form.name, 'আপনার নাম লিখুন।');
+  if (!area()) { form.querySelector('[data-areas]').scrollIntoView({ block: 'center', behavior: 'smooth' }); errorBox.textContent = 'ডেলিভারি এলাকা বেছে নিন।'; return false; }
+  if (form.addressLine.value.trim().length < 8) return invalid(form.addressLine, 'পুরো ঠিকানা লিখুন: বাসা/বাড়ি, রোড, এলাকা, থানা ও জেলা।');
+  if (payment() === 'manual_mobile' && lastQuote?.advance.amountPaisa && !form.advanceTrxId?.value.trim()) return invalid(form.advanceTrxId, 'বিকাশ / নগদ / রকেটে টাকা পাঠানোর ট্রানজেকশন আইডি দিন।');
   return true;
 }
 
@@ -301,14 +264,13 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   if (!validate()) return;
   placeBtn.disabled = true;
-  placeBtn.textContent = 'Placing your order…';
+  placeBtn.textContent = 'অর্ডার হচ্ছে…';
   errorBox.textContent = '';
   try {
     const token = await checkoutToken();
-    if (!token) throw new Error('Your checkout session could not start. Reload the page and try again.');
+    if (!token) throw new Error(pd.turnstile ? CHECK_FAILED : 'চেকআউট চালু হয়নি। পেজটি রিলোড করে আবার চেষ্টা করুন।');
     const r = await api('/api/checkout/place', {
-      phone: form.phone.value, name: form.name.value, divisionId: Number(sel.division.value), districtId: Number(sel.district.value), upazilaId: Number(sel.upazila.value),
-      unionId: Number(sel.union.value) || null, postcode: form.postcode.value || null, addressLine: form.addressLine.value, landmark: form.landmark.value, note: form.note.value,
+      phone: form.phone.value, name: form.name.value, zoneId: area(), addressLine: form.addressLine.value, note: form.note.value,
       email: form.email.value.trim(), emailOffers: form.emailOffers.checked,
       paymentMethod: payment(), advanceTrxId: form.advanceTrxId?.value || null, advanceWallet: form.advanceWallet?.value || null,
       lines, token, utm: utm(), website: form.website?.value ?? '',
@@ -320,29 +282,38 @@ form.addEventListener('submit', async e => {
   } catch (err) {
     errorBox.textContent = err.message;
     placeBtn.disabled = false;
-    placeBtn.textContent = pd.placeLabel || 'Place order';
+    placeBtn.textContent = pd.placeLabel || 'অর্ডার কনফার্ম করুন';
     if (err.status === 409) refreshQuote();
     if (err.status === 401) { session = null; window.turnstile?.reset?.(); if (!pd.turnstile) startSession(''); }
   }
 });
 
-// ── Boot: geo data is only fetched on the checkout page, from versioned URLs cached forever ──
+// ── Boot: the prices and the delivery charges come from one quote; nothing else to load ──
 async function boot() {
   if (!lines.length) {
-    form.innerHTML = '<div class="empty"><h2>Your cart is empty</h2><p>Add something first, then come back here.</p><a class="btn btn-primary" href="/shop">Start shopping</a></div>';
+    form.innerHTML = '<div class="empty"><h2>আপনার কার্ট খালি</h2><p>আগে পছন্দের পণ্য কার্টে যোগ করুন, তারপর এখানে আসুন।</p><a class="btn btn-primary" href="/shop">কেনাকাটা শুরু করুন</a></div>';
     return;
   }
   refreshQuote();
   // Without a Turnstile site key (local development) the session starts straight away.
   if (!pd.turnstile) startSession('');
-  try {
-    const { version } = await api('/api/geo/version');
-    const [h, postcodes] = await Promise.all([api(`/api/geo/${version}/hierarchy.json`), api(`/api/geo/${version}/postcodes.json`)]);
-    geo = { version, ...h, postcodes };
-    fill(sel.division, h.divisions, 'Select division');
-  } catch {
-    say('We could not load the area list. Check your connection and reload the page.', 'warn');
-  }
 }
+
+// ── Order on WhatsApp: the same order as a ready-to-send message to the shop ──
+$('[data-wa-order]')?.addEventListener('click', e => {
+  const q = lastQuote;
+  const d = q?.delivery;
+  const text = [
+    `আসসালামু আলাইকুম! আমি ${pd.store || 'আপনাদের শপ'} থেকে অর্ডার করতে চাই:`,
+    ...(q?.lines ?? []).map(l => `• ${l.name}${l.variantLabel ? ` (${l.variantLabel})` : ''} × ${l.qty} = ${taka(l.lineTotalPaisa)}`),
+    d ? `ডেলিভারি (${d.zoneName}): ${d.status === 'to_confirm' ? 'ফোনে জানাবেন' : d.chargePaisa === 0 ? 'ফ্রি' : taka(d.chargePaisa)}` : '',
+    q?.discountPaisa ? `ছাড়: −${taka(q.discountPaisa)}` : '',
+    q?.totalPaisa != null ? `সর্বমোট: ${taka(q.totalPaisa)}` : '',
+    form.name.value.trim() && `নাম: ${form.name.value.trim()}`,
+    form.phone.value.trim() && `মোবাইল: ${form.phone.value.trim()}`,
+    form.addressLine.value.trim() && `ঠিকানা: ${form.addressLine.value.trim()}`,
+  ].filter(Boolean).join('\n');
+  e.currentTarget.href = `${e.currentTarget.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+});
 
 boot();

@@ -1,4 +1,4 @@
-import { api, badge, busy, can, confirmBox, date, esc, fromPaisa, qs, slideOver, taka, toast, toPaisa } from '../app.js';
+import { api, badge, busy, can, confirmBox, date, esc, fromPaisa, qs, slideOver, state, taka, toast, toPaisa } from '../app.js';
 import { quickProduct } from './quick-product.js';
 
 // ───────────── Product list ─────────────
@@ -147,6 +147,8 @@ export async function openProduct(id, done, startStep = 1) {
 
   // Reads the current step's inputs into f.
   function collect() {
+    const dl = so.body.querySelector('[name=fe-dl]:checked');
+    if (dl) f.freeDelivery = dl.dataset.dl === 'free';
     so.body.querySelectorAll('[data-k]').forEach(el => {
       const k = el.dataset.k;
       const val = el.type === 'checkbox' ? el.checked : el.value;
@@ -325,9 +327,9 @@ export async function openProduct(id, done, startStep = 1) {
       case 1: return `<label class="f">Product name <span class="req">*</span><input data-k="name" value="${esc(f.name)}"></label>
         <label class="f">Short description <span class="req">*</span><span class="help">One line. Shows on product cards.</span><input data-k="shortDescription" value="${esc(f.shortDescription)}" maxlength="300"></label>
         <label class="f">Full description<textarea data-k="description" rows="6">${esc(f.description)}</textarea></label>
-        <div class="grid-2"><label class="f">Brand${d.template.requiresBrand ? ' <span class="req">*</span>' : ''}<input data-k="brand" value="${esc(f.brand)}" placeholder="${f.isOriginal ? 'Abs Vai' : ''}"></label>
+        <div class="grid-2"><label class="f">Brand${d.template.requiresBrand ? ' <span class="req">*</span>' : ''}<input data-k="brand" value="${esc(f.brand)}" placeholder="${f.isOriginal ? esc(state.store) : ''}"></label>
         <label class="f">Product code <span class="help">Used in SKUs, e.g. PTGR.</span><input data-k="code" value="${esc(f.code)}" maxlength="8"></label></div>
-        <label class="check"><input type="checkbox" data-k="isOriginal" ${f.isOriginal ? 'checked' : ''}> Abs Vai Original (shows the “Made by Abs Vai” seal)</label>
+        <label class="check"><input type="checkbox" data-k="isOriginal" ${f.isOriginal ? 'checked' : ''}> Our own product (shows the “Original” seal)</label>
         <label class="check"><input type="checkbox" data-k="showOnHome" ${f.showOnHome ? 'checked' : ''}> Show on the homepage (“Featured” rail)</label>
         <label class="f" style="margin-top:12px">Benefit chips <span class="help">Up to 4, one per line, e.g. “Strong build”, “Free poly sheet”. Real facts only.</span><textarea id="chips" rows="4">${esc(f.benefitChips.join('\n'))}</textarea></label>`;
       case 2: return `<p class="explain">${esc(d.template.explanation)}</p><div class="grid-2">${fieldsNow().map(field).join('')}</div>
@@ -341,14 +343,16 @@ export async function openProduct(id, done, startStep = 1) {
             <label class="f">Advance<select data-k="preorderAdvanceType"><option value="delivery_charge" ${f.preorderAdvanceType === 'delivery_charge' ? 'selected' : ''}>The delivery charge</option><option value="fixed" ${f.preorderAdvanceType === 'fixed' ? 'selected' : ''}>A fixed amount per item</option></select></label>
             <label class="f">Fixed advance (৳)<input data-k="preorderAdvancePaisa" inputmode="decimal" value="${esc(fromPaisa(f.preorderAdvancePaisa))}"></label></div>
           <div id="mto" ${f.fulfilmentMode === 'made_to_order' ? '' : 'hidden'} style="margin-top:12px"><label class="f">Days to make it<input type="number" min="1" data-k="madeToOrderLeadDays" value="${esc(f.madeToOrderLeadDays ?? '')}"></label></div></div>`;
-      case 6: return `<label class="check"><input type="checkbox" data-k="freeDelivery" ${f.freeDelivery ? 'checked' : ''}> Free delivery on this product (shows a badge)</label>
+      case 6: return `<div class="qp-delivery" role="radiogroup" aria-label="Delivery for this product"><b>Delivery for this product <span class="req">*</span></b>
+          <label class="qp-dl"><input type="radio" name="fe-dl" data-dl="charge" ${f.freeDelivery ? '' : 'checked'}><span><b>💵 Cash on Delivery + delivery charge</b><small>The customer pays the delivery charge of their area (Settings → Delivery charges).</small></span></label>
+          <label class="qp-dl"><input type="radio" name="fe-dl" data-dl="free" ${f.freeDelivery ? 'checked' : ''}><span><b>🎁 Free delivery</b><small>You pay the delivery. The product shows a “Free delivery” badge.</small></span></label></div>
         <label class="f" style="margin-top:12px">Shipping profile <span class="help">Pre-set from the template (${esc(PROFILES[d.template.defaultShippingProfile])}). Change it if this product is different, e.g. a small sealer is not bulky.</span><select data-k="shippingProfile">${Object.entries(PROFILES).map(([k, l]) => `<option value="${k}" ${f.shippingProfile === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
         <label class="f">Large-item delivery<select data-k="bulkyDeliveryMode"><option value="zone_fixed" ${f.bulkyDeliveryMode === 'zone_fixed' ? 'selected' : ''}>Fixed bulky charge for the zone</option><option value="confirm_by_phone" ${f.bulkyDeliveryMode === 'confirm_by_phone' ? 'selected' : ''}>Charge confirmed by phone (order is held)</option></select><span class="help">Only used when the profile is Heavy / bulky.</span></label>`;
-      case 7: return `<label class="f">Web address<div class="unit-wrap"><span style="border-radius:9px 0 0 9px;border-left:1px solid var(--husk);border-right:0">absvai.com/p/</span><input data-k="slug" value="${esc(f.slug)}" style="border-radius:0 9px 9px 0"></div></label>
+      case 7: return `<label class="f">Web address<div class="unit-wrap"><span style="border-radius:9px 0 0 9px;border-left:1px solid var(--husk);border-right:0">${esc(state.siteHost)}/p/</span><input data-k="slug" value="${esc(f.slug)}" style="border-radius:0 9px 9px 0"></div></label>
         <label class="f">Page title <span class="help">Leave blank to use the product name.</span><input data-k="metaTitle" value="${esc(f.metaTitle)}" placeholder="${esc(f.name)}" maxlength="120"></label>
         <label class="f">Search description<textarea data-k="metaDescription" rows="2" placeholder="${esc(f.shortDescription)}" maxlength="300">${esc(f.metaDescription)}</textarea></label>
         <label class="f">Other names customers search for <span class="help">Comma separated, e.g. “nolen gur, patali, jaggery”.</span><input data-k="searchKeywords" value="${esc(f.searchKeywords)}"></label>
-        <div class="card"><p class="small muted">Google preview</p><p style="color:#1a0dab;font-size:1.05rem;margin:0">${esc(f.metaTitle || f.name)} · Abs Vai</p><p class="small" style="color:#006621;margin:0">absvai.com/p/${esc(f.slug)}</p><p class="small">${esc(f.metaDescription || f.shortDescription)}</p></div>`;
+        <div class="card"><p class="small muted">Google preview</p><p style="color:#1a0dab;font-size:1.05rem;margin:0">${esc(f.metaTitle || f.name)} · ${esc(state.store)}</p><p class="small" style="color:#006621;margin:0">${esc(state.siteHost)}/p/${esc(f.slug)}</p><p class="small">${esc(f.metaDescription || f.shortDescription)}</p></div>`;
       case 8: return `<div class="split"><div><div class="card"><h3>Publish checklist</h3><p class="small muted">Drafts can be saved at any time. Publish turns on when every line is ticked.</p>
           ${(() => { const todo = d.checklist.items.filter(i => !i.ok); const passed = d.checklist.items.length - todo.length;
             return todo.length ? `<p><b>${todo.length} thing(s) left before you can publish:</b></p><ul class="checklist">${todo.map(i => `<li><span class="no">✕</span><span>${esc(i.message)}</span></li>`).join('')}</ul><p class="small muted"><span class="ok">✓</span> ${passed} other checks passed.</p>`

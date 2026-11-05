@@ -41,7 +41,7 @@ export async function dashboardFigures(db: D1Database, a: { todayStartIso: strin
  */
 export async function dashboardCharts(db: D1Database, sinceIso: string) {
   const real = "is_test = 0 AND status NOT IN ('cancelled')";
-  const [daily, funnel, started, places, customers, channels] = await db.batch([
+  const [daily, funnel, started, places, customers, channels, areas] = await db.batch([
     db.prepare(`SELECT substr(datetime(created_at, '+6 hours'), 1, 10) AS day, COUNT(*) AS orders,
                        COALESCE(SUM(CASE WHEN status != 'returned' THEN total_paisa END), 0) AS revenue
                   FROM orders WHERE created_at >= ? AND ${real} GROUP BY day ORDER BY day`).bind(sinceIso),
@@ -51,11 +51,16 @@ export async function dashboardCharts(db: D1Database, sinceIso: string) {
                        SUM(status IN ('delivered','partial_delivered')) AS delivered
                   FROM orders WHERE created_at >= ? AND is_test = 0 AND source IN ('web','landing')`).bind(sinceIso),
     db.prepare('SELECT COUNT(*) AS n FROM abandoned_checkouts WHERE created_at >= ?').bind(sinceIso),
-    db.prepare(`SELECT district_name AS district, division_name AS division, COUNT(*) AS orders, COALESCE(SUM(total_paisa), 0) AS revenue
-                  FROM orders WHERE created_at >= ? AND ${real} GROUP BY district_name ORDER BY orders DESC, revenue DESC LIMIT 8`).bind(sinceIso),
+    // Every district orders came from (the map shades them all; the list shows the top ones). District 0 = the address
+    // named no place the shop could read.
+    db.prepare(`SELECT district_id AS id, district_name AS district, division_name AS division, COUNT(*) AS orders, COALESCE(SUM(total_paisa), 0) AS revenue
+                  FROM orders WHERE created_at >= ? AND ${real} AND district_id > 0 GROUP BY district_id ORDER BY orders DESC, revenue DESC`).bind(sinceIso),
     db.prepare(`SELECT phone, MAX(customer_name) AS name, MAX(district_name) AS district, COUNT(*) AS orders, COALESCE(SUM(total_paisa), 0) AS spent
                   FROM orders WHERE created_at >= ? AND ${real} AND status != 'returned' GROUP BY phone ORDER BY spent DESC LIMIT 5`).bind(sinceIso),
     db.prepare(`SELECT source, COUNT(*) AS orders FROM orders WHERE created_at >= ? AND ${real} GROUP BY source ORDER BY orders DESC`).bind(sinceIso),
+    db.prepare(`SELECT COALESCE(z.name, 'Other') AS area, COUNT(*) AS orders, COALESCE(SUM(o.total_paisa), 0) AS revenue, SUM(o.district_id = 0) AS unplaced
+                  FROM orders o LEFT JOIN delivery_zones z ON z.id = o.delivery_zone_id
+                 WHERE o.created_at >= ? AND o.is_test = 0 AND o.status NOT IN ('cancelled') GROUP BY o.delivery_zone_id ORDER BY orders DESC`).bind(sinceIso),
   ]);
   const f = funnel.results[0] as Record<string, number>;
   const placed = Number(f.placed ?? 0);
@@ -63,7 +68,8 @@ export async function dashboardCharts(db: D1Database, sinceIso: string) {
     daily: daily.results as Array<{ day: string; orders: number; revenue: number }>,
     // Every website order starts as a captured checkout; the max() keeps the funnel honest if a capture was missed.
     funnel: { started: Math.max(Number((started.results[0] as { n: number }).n ?? 0), placed), placed, confirmed: Number(f.confirmed ?? 0), shipped: Number(f.shipped ?? 0), delivered: Number(f.delivered ?? 0) },
-    places: places.results as Array<{ district: string; division: string; orders: number; revenue: number }>,
+    places: places.results as Array<{ id: number; district: string; division: string; orders: number; revenue: number }>,
+    areas: areas.results as Array<{ area: string; orders: number; revenue: number; unplaced: number }>,
     customers: customers.results as Array<{ phone: string; name: string; district: string; orders: number; spent: number }>,
     channels: channels.results as Array<{ source: string; orders: number }>,
   };

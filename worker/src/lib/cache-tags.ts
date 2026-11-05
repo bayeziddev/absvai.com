@@ -22,7 +22,7 @@ export function isCacheablePath(path: string): boolean {
 
 /** Other public GET paths that go through the cached entrypoint: live price/stock, versioned geo JSON, media, SEO files. */
 export function isEdgeServed(path: string): boolean {
-  return isCacheablePath(path) || path === '/api/live' || (path.startsWith('/api/geo/') && path !== '/api/geo/version') || path.startsWith('/media/')
+  return isCacheablePath(path) || path === '/api/live' || /^\/api\/catalog\/products\/[\w-]+$/.test(path) || (path.startsWith('/api/geo/') && path !== '/api/geo/version') || path.startsWith('/media/')
     || path === '/sitemap.xml' || path === '/robots.txt' || path === '/brand.css';
 }
 

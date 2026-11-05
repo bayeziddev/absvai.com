@@ -1,7 +1,8 @@
-# Deploying Abs Vai to Cloudflare with GitHub Actions
+# Deploying Vandar Mart to Cloudflare with GitHub Actions
 
 The workflow `.github/workflows/ci.yml` tests every change and deploys the Worker. Nothing on Cloudflare needs creating by hand:
-the deploy job finds or creates the D1 database (`absvai`), the KV namespace (`absvai-kv`) and the R2 bucket (`absvai-media`),
+the deploy job finds or creates the D1 database (`absvai`), the KV namespace (`absvai-kv`) and the R2 bucket (`absvai-media`)
+(internal names from the first launch; customers never see them),
 applies the migrations, uploads the Worker together with its secrets, and checks that the live site answers.
 
 ## When it deploys
@@ -12,15 +13,16 @@ applies the migrations, uploads the Worker together with its secrets, and checks
 | Push to `main` | Tests, then deploy |
 | **Actions → Test and deploy → Run workflow** | Tests, then deploy from the branch you pick; tick *Load the demo catalog* to fill an empty store with the 17 demo products |
 
-Live now at **https://absvai.absvai.workers.dev** (admin: **https://absvai.absvai.workers.dev/admin/**). Once `absvai.com` is added
-to the Cloudflare account, the next deploy attaches `absvai.com` and `www.absvai.com` by itself.
+Live at **https://vandarmart.com** (admin: **https://vandarmart.com/admin/**). The `workers.dev` address
+(https://absvai.absvai.workers.dev) keeps working too.
 
 ## One-time setup (about 10 minutes)
 
 ### 1. Cloudflare API token
 Cloudflare dashboard → **My Profile → API Tokens → Create Token → "Edit Cloudflare Workers"** template, then **add** the permission
-**Account → D1 → Edit**. Scope it to your account and, under Zone Resources, to the `absvai.com` zone. The template includes
-Workers Scripts, Workers KV Storage, Workers R2 Storage, Workers Routes and Account Settings.
+**Account → D1 → Edit**. Scope it to your account and, under Zone Resources, to the `vandarmart.com` zone. The template includes
+Workers Scripts, Workers KV Storage, Workers R2 Storage, Workers Routes and Account Settings. Also add **Account → Turnstile → Edit**:
+then the deploy adds the shop's domain to the Turnstile widget by itself (step 3).
 
 **Photo storage (R2)**: switch R2 on once (dashboard → R2 Object Storage → Get started; the free tier is enough, Cloudflare asks
 for a payment method). Until then the store still deploys and works, but photo and logo uploads say *"Photo storage is not
@@ -38,7 +40,7 @@ GitHub → the repository → **Settings → Secrets and variables → Actions �
 | `CLOUDFLARE_ACCOUNT_ID` | yes | dashboard → Workers & Pages → Account ID (right side) |
 | `SETUP_TOKEN` | yes | any long random text you choose (like a password); you type it once at `/admin/` to create the Super Admin |
 | `OTP_PEPPER`, `SIGNING_KEY`, `SETTINGS_KEY` | **no, created for you** | internal random keys nobody types (they hash SMS codes, sign checkout sessions and encrypt passwords saved in Settings). The first deploy creates them and keeps them on Cloudflare; later deploys keep the same ones. Add your own only if you want a copy (`openssl rand -base64 32` each) |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `absvai.absvai.workers.dev` and `absvai.com`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET` | recommended | **not random**: Cloudflare dashboard → **Turnstile** → **Add widget** → hostnames `vandarmart.com`, `www.vandarmart.com` and `absvai.absvai.workers.dev`, mode **Managed** → copy the *Site Key* and *Secret Key*. Add both or neither (the deploy refuses only one) |
 | `SMS_PROVIDER`, `SMS_API_KEY` | later | once the SMS gateway is chosen; until then messages are logged in Admin → SMS outbox |
 
 The deploy never replaces those three keys once they exist: if it can't read the Worker's secrets it stops instead. If you ever
@@ -46,10 +48,19 @@ delete the Worker or change `SETTINGS_KEY`, credentials saved in Settings must b
 checkouts and resets device/IP block matching.
 
 ### 3. The domain
-The Worker attaches `absvai.com` and `www.absvai.com` as custom domains when the **absvai.com zone is in the same Cloudflare
-account** (add the site in Cloudflare and point the domain's nameservers to it at the registrar). Until then the workflow removes the
-routes for that run and deploys to `https://absvai.<your-subdomain>.workers.dev`, and says so in the run summary. Run it again after
-the zone is active.
+Add the domain in the Cloudflare dashboard: **Workers & Pages → `absvai` → Settings → Domains & Routes → Add → Custom domain**
+(`vandarmart.com`, and `www.vandarmart.com` if you want it; `www` is sent on to the main address). The domain's zone must be in the
+same Cloudflare account (point its nameservers to Cloudflare at the registrar). `wrangler.toml` lists no routes on purpose, so a
+deploy never removes a domain added in the dashboard.
+
+Each deploy finds the domains attached to the Worker and uses the first one as the shop's address (links in emails, SMS, invoices,
+the sitemap and the smoke test); with none it uses the `workers.dev` address. The run summary shows which.
+
+**Turnstile**: the checkout's human check only runs on the hostnames its widget lists. Each deploy checks that the shop's domains
+are listed and adds the missing ones (this needs the Turnstile permission from step 1). If it cannot, the run shows a warning:
+then open Cloudflare dashboard → **Turnstile** → your widget → **Hostname management** and add `vandarmart.com` and
+`www.vandarmart.com`. Until a domain is listed there, the checkout on it says the security check could not start and offers
+"Order on WhatsApp" instead.
 
 ## First run
 1. Push (or press **Run workflow**). The run summary lists the D1/KV/R2 ids, whether each was created, the live URL and the smoke

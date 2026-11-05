@@ -1,4 +1,4 @@
-# Abs Vai owner guide
+# Vandar Mart owner guide
 
 Plain steps for running the store from `absvai.com/admin/`. No coding needed. A full guide in Bangla with a direct link for
 every page is in [ADMIN-GUIDE-BN.md](ADMIN-GUIDE-BN.md), and inside the admin at **Help center → বাংলা গাইড** (`/admin/guide-bn.html`).
@@ -28,7 +28,9 @@ The admin opens in a **simple menu** with the everyday screens: Overview, Orders
 Seasons and Settings. Press **Show all tools** at the bottom of the menu for everything else (templates, security, audit log…),
 and **Simple menu** to go back. Postcodes, cities and courier areas need no screen: they come with the shop and work by themselves.
 On a phone, every list (orders, products, stock…) shows one card per row, so nothing is squeezed. The Overview shows the last 30 days: sales and orders per day, how many website
-customers go from checkout to delivery, the districts that order most, your best customers and where orders come from.
+customers go from checkout to delivery, a map of Bangladesh showing where your customers are (darker districts order more; tap
+one for its orders), the top districts and delivery areas, your best customers and where orders come from. The shop's name
+(Website & banners → Shop name) is used everywhere: the store, emails, SMS and invoices. The shop's address is vandarmart.com.
 
 ## Add a product (the quick way)
 
@@ -38,13 +40,20 @@ customers go from checkout to delivery, the districts that order most, your best
 
 1. **Photos**: press *+ Add photos* and pick them from your phone or computer. The first one is the main photo.
 2. **What is it?**: choose the category, type the name and one line about it.
-3. **Sizes, prices and stock**: tap the sizes or weights you sell (*+ Other* for an odd one), then type the price and how many you
-   have. *Same price for all* fills every row. Type the **parcel weight with the box** once.
+3. **Sizes, prices and stock**: tap the sizes, weights or colours you sell. Clothing lists every size and every colour (with a
+   colour dot); type another one in the box beside the list and press **+ Add** (e.g. "Sky blue" or "42"). Each combination
+   (M · Black…) gets a row: type the price and how many you have. *Same price for all* fills every row. Type the **parcel weight
+   with the box** once, and choose **Delivery for this product** (required): **Cash on Delivery + delivery charge** (the customer
+   pays their area's charge) or **Free delivery** (you pay; the product shows a "Free delivery" badge).
 4. **Required details**: only what this category needs (food: origin, batch, best-before, ingredients, storage).
 5. Press **Save and publish**. If something is missing, it tells you in plain words and keeps it as a draft.
 
 To change a price, stock or photo later, tap the product in the list: the same page opens. **Full editor** (on each row) has
 everything else: SEO, seasons, wholesale prices, barcodes, video.
+
+**Update prices & stock** (in the menu) lists every option of every product in one table: search, change the price, the old
+price (higher than the price = on sale, in Hot Deals) or the stock, then press **Save** once. Changed rows turn yellow; stock
+changes are recorded in Inventory → History.
 
 ## Add a category
 
@@ -131,8 +140,8 @@ screen.
 only once per customer, or every visit) and where (homepage only or every page). It never shows on the cart, checkout or account
 pages, and customers can close it.
 
-The **second banner** sits further down the homepage. While a season is live, the season's own banners show at the top instead
-(the page tells you so); change those in **Seasons**, which uses the same banner editor.
+The **second banner** sits further down the homepage. The big banners show **as soon as you press Save**, first on the
+homepage, with no dates to set. A live season's own banners (Seasons, optional) show after them.
 
 ### Changing the pictures: banners, categories and products
 
@@ -140,8 +149,7 @@ The shop now shows real photos instead of drawings. To put in your own:
 
 | Picture | Where | What photo |
 |---|---|---|
-| Big homepage banners while a season is live (winter now) | **Seasons** → tap **Winter** → *Banners while the season is live* → **✏️ Edit** → **Change photo** | Wide, about 2000 × 860 px, products on the right, empty space on the left |
-| Big homepage banners when no season is live | **Website & banners** → *Big banners at the top of the homepage* | The same kind of wide photo |
+| Big homepage banners (show right after Save) | **Website & banners** → *Big banners at the top of the homepage* → **✏️ Edit** | The same kind of wide photo |
 | Second banner (lower on the homepage) | **Website & banners** → *Second banner* | Square, 1000 px or more |
 | Round category pictures | **Categories** → **Edit** → **Change picture** | Square, the thing in the middle (it is cut into a circle) |
 | Product photos | **Products** → tap the product → **Photos & video** | Square, 1000–2000 px, in good light |
@@ -178,7 +186,7 @@ once, while setting up.
 Email is sent with Resend. The key is the GitHub secret **RESEND_API_KEY** (GitHub → Settings → Secrets and variables →
 Actions); the deploy copies it to the Worker. Until your own domain (for example absvai.com) is verified in **Resend → Domains**,
 Resend delivers only to the email address of the Resend account, so customer emails are skipped and say so. After verifying
-the domain, change **Emails come from** to an address on it, such as `Abs Vai <orders@absvai.com>`.
+the domain, change **Emails come from** to an address on it, such as `Vandar Mart <orders@vandarmart.com>`.
 
 ## Sellers (marketplace)
 
@@ -192,7 +200,7 @@ have keep working). The same card sets the commission new sellers start with.
    (optionally) their bKash / Nagad / Rocket number.
 2. **The seller signs in at once** at `/seller/` and adds products (photos, details, prices, stock, parcel weight) and their
    **payment accounts** (bKash, Nagad, Rocket or a bank account). The portal tells them it is waiting for your approval.
-   Sellers can’t set cost prices, the homepage, seasons, free delivery or Abs Vai Originals.
+   Sellers can’t set cost prices, the homepage, seasons, free delivery or Originals.
 3. **You approve the seller** in **Sellers** (in the menu). Open the seller, set the **commission** (%) you keep on each
    delivered sale, and press **Approve seller**, or **Don’t approve** with a short reason (they see it when they sign in).
 4. **You approve each product** in **Sellers → Products to approve**: **Open** to check it, then **Approve & publish**, or
@@ -216,7 +224,7 @@ Admin can change them.
 
 | Courier | Where to find the keys | Paste into Couriers | Webhook to add in the courier's panel |
 |---|---|---|---|
-| Steadfast | Steadfast merchant panel → API | **API Key**, **Secret Key** | **Callback URL** `https://absvai.absvai.workers.dev/api/webhooks/steadfast` and the **Auth Token (Bearer)** shown on the Couriers page |
+| Steadfast | Steadfast merchant panel → API | **API Key**, **Secret Key** | **Callback URL** `https://vandarmart.com/api/webhooks/steadfast` and the **Auth Token (Bearer)** shown on the Couriers page |
 | Pathao | Pathao merchant panel → Developers API → Merchant API Credentials | **Client ID**, **Client Secret**, your Pathao **login email** and **password**; then **Test connection** and pick the **pickup store** | The **Callback URL** shown on the Couriers page (it ends with a secret code). If Pathao shows an integration secret, paste it into Couriers |
 
 After `absvai.com` is connected, the addresses change to `https://absvai.com/…`; the Couriers page always shows the right ones.
@@ -380,18 +388,24 @@ Every stage change, every courier update and every **message for the customer** 
 customer something ("Delayed by rain, it arrives tomorrow"), open the order → **Message for the customer** → **Post**; **see
 it** opens their tracking page.
 
-## Postcodes
+## Checkout
 
-Postcodes fill the customer's area at checkout by themselves; there is nothing to set up. Customers can type them in Bangla
-digits too (১২০৬), and the post office shows in English and Bangla ("Gazipur Sadar (গাজীপুর সদর)"). For the city thanas that
-have no area of their own, checkout fills the division and district and the customer picks the area.
+Customers read the checkout in **Bangla** (on the checkout page and on every landing page); the admin stays in English. Checkout
+has no dropdowns or postcodes. The customer types their mobile number and name, taps their **delivery area** (each
+button shows what delivery costs for this cart; the total updates by itself), types the full address in their own words
+(Bangla or English), and places the order. The district and thana are read from the address for the dashboard map ("Where your
+customers are") and the courier. **Order on WhatsApp**, under *Place order* and under *Order Now* on product pages, sends the
+order as a ready-made WhatsApp message to the shop's number (Settings → Store). Pathao needs the thana: when an address names
+none, book it with Steadfast or call the customer.
 
 ## Delivery charges
 
-**Settings → Delivery charges**: for each zone (Inside Dhaka City, Dhaka Suburbs with Dhaka, Gazipur and Narayanganj, and
-Outside Dhaka for every other district) type the charge up to 1 kg, each extra kg and the delivery time, then **Save**.
-Free delivery from (৳) and the Cash on Delivery fee are just below. To move a district to another zone (rarely needed), use the
-**zone details** link there.
+**Settings → Delivery charges → Delivery areas**: the areas customers choose from at checkout. Rename any area, change its charge
+up to 1 kg, each extra kg and the delivery time at any time. **+ Add a delivery area** adds one (e.g. "Rajbari", ৳70); an area
+named after a district also covers that district for orders the team types in. **Remove** takes one away (an area that already
+has orders can only be renamed or re-priced). Name areas in Bangla: customers see the name exactly as you type it (the starting
+three are ঢাকা সিটির ভিতরে, ঢাকার আশেপাশে and ঢাকার বাইরে). *ঢাকার বাইরে* (outside Dhaka) is the main area for everywhere not listed. Free delivery from (৳)
+and the Cash on Delivery fee are just below.
 
 ## Good to know
 

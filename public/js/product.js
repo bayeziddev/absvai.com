@@ -67,6 +67,17 @@ form.querySelectorAll('[data-qty]').forEach(b => b.addEventListener('click', () 
 const qty = () => Math.max(1, Math.min(Number(qtyInput.max) || 99, Number(qtyInput.value) || 1));
 document.querySelectorAll('[data-pdp-add]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) { cart.add(v.id, qty()); added(data.product.name); } }));
 document.querySelectorAll('[data-pdp-order]').forEach(b => b.addEventListener('click', () => { const v = match(); if (buyable(v)) buyNow(v.id, qty()); }));
+// Order on WhatsApp: a ready-to-send message with the product, the chosen option, the quantity and the price.
+document.querySelector('[data-wa-product]')?.addEventListener('click', e => {
+  const v = match();
+  const option = v ? Object.values(v.attributes).join(' · ') : '';
+  const text = [
+    `আসসালামু আলাইকুম! আমি অর্ডার করতে চাই: ${data.product.name}${option ? ` (${option})` : ''} × ${qty()}${v ? ` = ${taka(v.pricePaisa * qty())}` : ''}`,
+    location.href.split('#')[0].split('?')[0],
+    'আমার নাম ও পুরো ঠিকানা:',
+  ].join('\n');
+  e.currentTarget.href = `${e.currentTarget.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+});
 
 document.querySelectorAll('[data-thumb]').forEach(t => t.addEventListener('click', () => {
   showPhoto(document.getElementById('pdp-main'), t.dataset.thumb);

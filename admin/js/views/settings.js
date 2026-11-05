@@ -38,23 +38,25 @@ function fieldHtml(f, value, { write, canSecrets }) {
   }
 }
 
-// Delivery charges per zone, in plain words: the charge, each extra kg and the delivery time. Which districts are in which
-// zone rarely changes, so it stays one link away (#/zones).
-function zoneAreas(z, zd) {
-  const over = zd.overrides.filter(o => o.zone_id === z.id).map(o => o.name.replace(' City Corporation', ' City'));
-  const dists = zd.districts.filter(x => x.zone_id === z.id).map(x => x.name);
-  const all = [...over, ...dists];
-  if (z.is_default) return all.length ? `${all.join(', ')} and every other district` : 'Every district not in another zone';
-  return all.join(', ') || 'No district yet';
+// Delivery areas, in plain words: customers choose one at checkout and its charge is added to their total. The owner adds,
+// renames and re-prices them here (e.g. "Rajbari" ৳70). An area named like a district also covers that district for
+// orders the team types in.
+function zoneRow(z, write) {
+  const dis = write ? '' : 'disabled';
+  const id = z.id ?? `new-${Math.random().toString(36).slice(2, 8)}`;
+  return `<div class="zone-row" data-zone="${esc(String(id))}">
+      <label class="f zone-name">Area name <span class="help">Customers see it at checkout</span><input data-zf="name" maxlength="60" value="${esc(z.name ?? '')}" placeholder="e.g. Rajbari" ${dis}></label>
+      <label class="f">Charge up to ${(z.base_weight_grams ?? 1000) / 1000} kg (৳)<input data-zf="base" inputmode="decimal" value="${esc(z.base_charge_paisa === undefined ? '' : fromPaisa(z.base_charge_paisa))}" placeholder="70" ${dis}></label>
+      <label class="f">Each extra kg (৳)<input data-zf="extra" inputmode="decimal" value="${esc(fromPaisa(z.extra_per_kg_paisa ?? 0))}" ${dis}></label>
+      <label class="f">Delivery time<input data-zf="eta" maxlength="40" value="${esc(z.eta_text ?? '3–5 days')}" ${dis}></label>
+      <div class="zone-end">${z.is_default ? '<span class="small muted">Main area: for everywhere not listed</span>' : write ? '<button type="button" class="btn btn-sm btn-ghost" data-zone-del>Remove</button>' : ''}</div></div>`;
 }
 function zonesHtml(zd, write) {
-  const dis = write ? '' : 'disabled';
-  return `<h3>Charge by area</h3><div class="zone-rows">${zd.zones.map(z => `<div class="zone-row" data-zone="${z.id}">
-      <div><b>${esc(z.name)}</b><span class="small muted">${esc(zoneAreas(z, zd))}</span></div>
-      <label class="f">Charge up to ${z.base_weight_grams / 1000} kg (৳)<input data-zf="base" inputmode="decimal" value="${esc(fromPaisa(z.base_charge_paisa))}" ${dis}></label>
-      <label class="f">Each extra kg (৳)<input data-zf="extra" inputmode="decimal" value="${esc(fromPaisa(z.extra_per_kg_paisa))}" ${dis}></label>
-      <label class="f">Delivery time<input data-zf="eta" maxlength="40" value="${esc(z.eta_text)}" ${dis}></label></div>`).join('')}</div>
-    <p class="small muted">To move a district to another zone (rarely needed): <a href="#/zones">zone details</a>.</p><h3 style="margin-top:14px">Free delivery and the COD fee</h3>`;
+  return `<h3>Delivery areas <span class="small muted">(customers choose one at checkout; the charge is added by itself)</span></h3>
+    <div class="zone-rows" id="zone-rows">${zd.zones.map(z => zoneRow(z, write)).join('')}</div>
+    ${write ? '<button type="button" class="btn btn-outline btn-sm" id="zone-add" style="margin-top:8px">+ Add a delivery area</button>' : ''}
+    <p class="small muted">Example: add “Rajbari” with ৳70. Areas show at checkout in this order. Press <b>Save</b> at the bottom when done.</p>
+    <h3 style="margin-top:14px">Free delivery and the COD fee</h3>`;
 }
 
 export async function settings(v) {
@@ -92,6 +94,45 @@ export async function settings(v) {
   v.querySelectorAll('[data-color]').forEach(i => i.addEventListener('input', () => { i.nextElementSibling.textContent = i.value.toUpperCase(); }));
   $('#reset-colors')?.addEventListener('click', () => v.querySelectorAll('[data-color]').forEach(i => { i.value = DEFAULTS[i.dataset.color]; i.nextElementSibling.textContent = i.value; }));
   busy($('#purge'), async () => { await api('/cache/purge-all', 'POST', {}); toast('Every page will be rebuilt on its next visit.'); });
+  // Delivery areas: add a row, remove one (it goes when you press Save).
+  const removedZones = [];
+  $('#zone-add')?.addEventListener('click', () => {
+    const main = zd.zones.find(z => z.is_default) ?? zd.zones[0] ?? {};
+    $('#zone-rows').insertAdjacentHTML('beforeend', zoneRow({ extra_per_kg_paisa: main.extra_per_kg_paisa ?? 1500, eta_text: main.eta_text ?? '3–5 days', base_weight_grams: 1000 }, true));
+    $('#zone-rows').lastElementChild.querySelector('[data-zf=name]').focus();
+  });
+  /** New, changed and removed delivery areas; an area named like a district also covers it for staff orders. */
+  async function saveZones(f) {
+    const main = zd.zones.find(z => z.is_default) ?? zd.zones[0];
+    const district = name => zd.districts.find(x => [x.name, x.bn_name].filter(Boolean).some(n => n.trim().toLowerCase() === name.trim().toLowerCase()));
+    const rows = [...f.querySelectorAll('[data-zone]')];
+    const names = rows.map(r => r.querySelector('[data-zf=name]').value.trim().toLowerCase());
+    if (names.some((n, i) => n && names.indexOf(n) !== i)) throw new Error('Two delivery areas have the same name. Give each its own name.');
+    for (const [i, row] of rows.entries()) {
+      const val = k => row.querySelector(`[data-zf="${k}"]`).value.trim();
+      const z = zd.zones.find(x => String(x.id) === row.dataset.zone);
+      const next = { name: val('name'), base: toPaisa(val('base') || '0'), extra: toPaisa(val('extra') || '0'), eta: val('eta') || '3–5 days' };
+      if (!next.name) throw new Error('Give every delivery area a name, e.g. “Rajbari”.');
+      if (next.base === null || next.extra === null) throw new Error(`Check the charges for ${next.name}: numbers only.`);
+      if (z && next.name === z.name && next.base === z.base_charge_paisa && next.extra === z.extra_per_kg_paisa && next.eta === z.eta_text && i === z.sort_order) continue;
+      const payload = { name: next.name, baseChargePaisa: next.base, baseWeightGrams: z?.base_weight_grams ?? 1000, extraPerKgPaisa: next.extra, bulkyChargePaisa: z?.bulky_charge_paisa ?? main?.bulky_charge_paisa ?? 0, etaText: next.eta, isDefault: Boolean(z?.is_default), sortOrder: i, defaultCourier: z?.default_courier ?? main?.default_courier ?? null };
+      const { id } = await api(z ? `/zones/${z.id}` : '/zones', z ? 'PUT' : 'POST', payload);
+      if (z) Object.assign(z, { name: next.name, base_charge_paisa: next.base, extra_per_kg_paisa: next.extra, eta_text: next.eta, sort_order: i });
+      const d = district(next.name);
+      if (d && d.zone_id !== id && !z?.is_default) await api('/zones/assign-district', 'PUT', { districtId: d.id, zoneId: id });
+    }
+    for (const id of removedZones.splice(0)) {
+      for (const d of zd.districts.filter(x => x.zone_id === id)) await api('/zones/assign-district', 'PUT', { districtId: d.id, zoneId: null });
+      await api(`/zones/${id}`, 'DELETE');
+    }
+  }
+  $('#zone-rows')?.addEventListener('click', e => {
+    const del = e.target.closest('[data-zone-del]');
+    if (!del) return;
+    const row = del.closest('[data-zone]');
+    if (/^\d+$/.test(row.dataset.zone)) removedZones.push(Number(row.dataset.zone));
+    row.remove();
+  });
   busy($('#save'), async () => {
     const f = $('#f');
     const body = {};
@@ -105,19 +146,10 @@ export async function settings(v) {
     body.brand_colors = Object.entries(picked).every(([k, x]) => x === DEFAULTS[k]) ? '' : JSON.stringify(picked);
     f.querySelectorAll('[data-secret]').forEach(i => { if (i.value.trim()) body[i.dataset.secret] = i.value.trim(); });
     f.querySelectorAll('[data-clear]:checked').forEach(c => { body[c.dataset.clear] = { clear: true }; });
-    if (zd && zoneWrite) {
-      for (const row of f.querySelectorAll('[data-zone]')) {
-        const z = zd.zones.find(x => x.id === Number(row.dataset.zone));
-        const val = k => row.querySelector(`[data-zf="${k}"]`).value.trim();
-        const next = { base: toPaisa(val('base') || '0'), extra: toPaisa(val('extra') || '0'), eta: val('eta') };
-        if (next.base === null || next.extra === null) throw new Error(`Check the charges for ${z.name}: numbers only.`);
-        if (next.base === z.base_charge_paisa && next.extra === z.extra_per_kg_paisa && next.eta === z.eta_text) continue;
-        await api(`/zones/${z.id}`, 'PUT', { name: z.name, baseChargePaisa: next.base, baseWeightGrams: z.base_weight_grams, extraPerKgPaisa: next.extra, bulkyChargePaisa: z.bulky_charge_paisa, etaText: next.eta, isDefault: Boolean(z.is_default), sortOrder: z.sort_order, defaultCourier: z.default_courier ?? null });
-        Object.assign(z, { base_charge_paisa: next.base, extra_per_kg_paisa: next.extra, eta_text: next.eta });
-      }
-    }
+    if (zd && zoneWrite) await saveZones(f);
     const r = await api('/settings', 'PUT', body);
     toast(r.changed.length ? `Saved ${r.changed.length} change(s).` : 'Saved.');
+    if (zd && zoneWrite && (removedZones.length || f.querySelector('[data-zone^="new-"]'))) return settings(v);
     $('#contrast').innerHTML = r.contrastWarnings.map(w => `<p class="notice err small">${esc(w)}</p>`).join('');
     f.querySelectorAll('[data-secret]').forEach(i => { i.value = ''; });
     if (f.querySelector('[data-clear]:checked') || Object.keys(body).some(k => f.querySelector(`[data-secret="${k}"]`))) settings(v);
@@ -160,8 +192,8 @@ export function help(v) {
     <div class="card"><h2>Order tracking</h2><p>Customers type their <b>mobile number or order number</b> at <a href="/track" target="_blank">/track</a> and see every step. To tell a customer something, open the order → <b>Message for the customer</b> → <b>Post</b>.</p></div>
     <div class="card"><h2>Sell more</h2><ul><li><a href="#/landing/new">Landing pages</a>: a sales page for one product with Order now buttons and the order form, for your ads. Copy the link from the list.</li><li><a href="#/coupons">Coupons</a>: percent off, taka off or free delivery, with dates and limits.</li><li><a href="#/reviews">Reviews</a>: publish customers’ reviews and reply to them.</li><li><a href="#/reports">Reports</a>: sales for any dates, with CSV downloads.</li></ul></div>
     <div class="card"><h2>Sellers</h2><p>Turn seller registration on or off at the top of <a href="#/sellers">Sellers</a>. Approve the seller, then each product (Products to approve) and each payment account before you pay into it.</p></div>
-    <div class="card"><h2>Delivery charges</h2><p><a href="#/settings">Settings → Delivery charges</a>: the charge for Inside Dhaka City, Dhaka Suburbs (Dhaka, Gazipur, Narayanganj) and Outside Dhaka, the free-delivery amount and the COD fee. Postcodes and areas need no setup.</p></div>
-    <div class="card"><h2>Change the pictures</h2><ul><li><b>Big homepage banners</b>: while a season is live (winter now) in <a href="#/seasons">Seasons</a> → the season → its banners; otherwise in <a href="#/website">Website &amp; banners</a>. Each banner shows how it looks on a phone and a computer: press <b>✏️ Edit</b>. Use a wide photo, about 2000 × 860 px, products on the right.</li><li><b>Round category pictures</b>: <a href="#/categories">Categories</a> → <b>Edit</b> → <b>Change picture</b> (square photo, the thing in the middle).</li><li><b>Product photos</b>: <a href="#/products">Products</a> → the product → <b>Photos &amp; video</b> (square, 1000 px or more).</li></ul><p class="small muted">Each photo is saved in several sizes, so phones load fast and big screens stay sharp. Use photos straight from the camera, not from WhatsApp.</p><p><a class="btn btn-sm btn-outline" href="/admin/photo-guide-bn.html" target="_blank" rel="noopener">ছবি ও ওয়েবসাইট গাইড (Photo guide, A to Z)</a></p></div>
+    <div class="card"><h2>Delivery charges</h2><p><a href="#/settings">Settings → Delivery charges</a>: the delivery areas customers choose at checkout, each with its charge. Rename them, change a charge or press <b>+ Add a delivery area</b> (e.g. Rajbari ৳70) at any time. At checkout the charge is added to the total by itself. <a href="#/quick-update">Update prices &amp; stock</a> changes every product's price and stock in one table.</p></div>
+    <div class="card"><h2>Change the pictures</h2><ul><li><b>Big homepage banners</b>: <a href="#/website">Website &amp; banners</a>. They show as soon as you press Save, first on the homepage. Each banner shows how it looks on a phone and a computer: press <b>✏️ Edit</b>. Use a wide photo, about 2000 × 860 px, products on the right.</li><li><b>Round category pictures</b>: <a href="#/categories">Categories</a> → <b>Edit</b> → <b>Change picture</b> (square photo, the thing in the middle).</li><li><b>Product photos</b>: <a href="#/products">Products</a> → the product → <b>Photos &amp; video</b> (square, 1000 px or more).</li></ul><p class="small muted">Each photo is saved in several sizes, so phones load fast and big screens stay sharp. Use photos straight from the camera, not from WhatsApp.</p><p><a class="btn btn-sm btn-outline" href="/admin/photo-guide-bn.html" target="_blank" rel="noopener">ছবি ও ওয়েবসাইট গাইড (Photo guide, A to Z)</a></p></div>
     <div class="card"><h2>Start a season</h2><ol><li><a href="#/seasons">Seasons</a> → open the season → set this year’s start and end dates (Ramadan and Eid change every year).</li><li>Add banners and tick the season on its products.</li><li>On the start date the homepage and menu switch by themselves, and “Notify me” customers get an SMS.</li></ol></div>
     <div class="card"><h2>Stuck?</h2><p>Press <b>Assistant</b> (bottom right) and ask in Bangla or English, for example “কীভাবে অর্ডার কনফার্ম করব?”.</p></div>`;
 }

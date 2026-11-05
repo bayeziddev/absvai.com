@@ -11,6 +11,7 @@ import { POLICIES } from '../lib/policies';
 import { expandQuery } from '../lib/search';
 import { queryProducts, suggestCategories, synonymGroups, zoneSummaries, type ProductCard } from '../repo/catalog';
 import { settingInt } from '../repo/settings';
+import { storeName } from '../lib/brand';
 
 /** Google Gemma 4 on Workers AI: on the Workers Free plan, multilingual (Bangla and English), 256k context. */
 export const AI_MODEL = '@cf/google/gemma-4-26b-a4b-it';
@@ -64,7 +65,7 @@ const tk = (paisa: number | null | undefined) => (paisa ? formatTaka(paisa) : nu
 
 /** Everything the shop assistant may say: facts from settings and delivery zones, and the products matching the question. */
 export async function shopFacts(db: D1Database, settings: Record<string, string>, question: string, activeSeason: string | null): Promise<ShopFacts> {
-  const store = settings.store_name || 'Abs Vai';
+  const store = storeName(settings);
   const terms = expandQuery(question, await synonymGroups(db));
   const [found, zones, cats] = await Promise.all([
     terms.length ? queryProducts(db, { terms, limit: 5, sort: 'best_selling' }) : Promise.resolve({ items: [] as ProductCard[], total: 0 }),

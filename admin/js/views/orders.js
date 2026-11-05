@@ -150,7 +150,7 @@ export async function openOrder(id, { onChange } = {}) {
         </div>
         <div>
           <div class="card"><h2>Customer</h2><dl class="kv"><dt>Name</dt><dd>${esc(o.customer_name)}</dd><dt>Phone</dt><dd>${o.phone.includes('X') ? `${esc(o.phone)} ${write ? '<button class="btn btn-sm btn-outline" id="claim">Claim to see the number</button>' : ''}` : `<a href="tel:${esc(o.phone)}">${esc(o.phone)}</a> · <a href="https://wa.me/88${esc(o.phone)}" target="_blank" rel="noopener">WhatsApp</a>`}</dd>
-            <dt>Address</dt><dd>${esc(o.address_line)}${o.landmark ? `<br>Near ${esc(o.landmark)}` : ''}<br>${[o.union_name, o.upazila_name, o.district_name, `${o.division_name} Division`].filter(Boolean).map(esc).join(', ')}${o.postcode ? ` ${esc(o.postcode)}` : ''}${o.post_office ? `<br><span class="muted small">Post office: ${esc(o.post_office)}</span>` : ''}</dd>
+            <dt>Address</dt><dd>${esc(o.address_line)}${o.landmark ? `<br>Near ${esc(o.landmark)}` : ''}<br>${[o.union_name, o.upazila_name, o.district_name, (o.division_name ? `${o.division_name} Division` : '')].filter(Boolean).map(esc).join(', ')}${o.postcode ? ` ${esc(o.postcode)}` : ''}${o.post_office ? `<br><span class="muted small">Post office: ${esc(o.post_office)}</span>` : ''}</dd>
             <dt>History</dt><dd>${d.customer ? `${d.customer.order_count} orders · ${d.customer.delivered_count} delivered · ${d.customer.returned_count} returned${d.customer.is_trusted ? ' · <span class="badge b-green">trusted</span>' : ''}` : 'New'}</dd>
             <dt>Risk</dt><dd>${badge(o.risk_level)}${o.risk_reasons.map(r => `<br><span class="small">${esc(r.detail)}</span>`).join('')}</dd>
             ${o.otp_verified_at ? `<dt>Verified</dt><dd>SMS code ✓ ${date(o.otp_verified_at)}</dd>` : d.verificationRequired ? '<dt>Verified</dt><dd>Not yet</dd>' : ''}
@@ -260,12 +260,12 @@ function printInvoice(d) {
   const row = (l, x) => `<tr><td>${esc(l)}</td><td style="text-align:right">${x}</td></tr>`;
   w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(o.invoice_no)}</title>
     <style>body{font:14px/1.5 system-ui,sans-serif;color:#2A1F1A;margin:32px}h1{font-size:28px;color:#B3261E;margin:0}table{width:100%;border-collapse:collapse;margin:16px 0}td,th{padding:6px 8px;border-bottom:1px solid #E9DCC6;text-align:left}.r{text-align:right}.head{display:flex;justify-content:space-between}.muted{color:#6B5A4E}</style></head><body>
-    <div class="head"><div><h1>Abs Vai</h1><div class="muted">ABS VAI LTD · absvai.com</div></div><div style="text-align:right"><b>INVOICE ${esc(o.invoice_no)}</b><br>Order ${esc(o.order_no)}<br>${date(o.confirmed_at)}</div></div>
-    <p><b>${esc(o.customer_name)}</b> · ${esc(o.phone)}<br>${esc(o.address_line)}${o.landmark ? `, near ${esc(o.landmark)}` : ''}<br>${[o.union_name, o.upazila_name, o.district_name, `${o.division_name} Division`].filter(Boolean).map(esc).join(', ')} ${esc(o.postcode ?? '')}</p>
+    <div class="head"><div><h1>${esc(state.store)}</h1><div class="muted">${esc(state.siteHost)}</div></div><div style="text-align:right"><b>INVOICE ${esc(o.invoice_no)}</b><br>Order ${esc(o.order_no)}<br>${date(o.confirmed_at)}</div></div>
+    <p><b>${esc(o.customer_name)}</b> · ${esc(o.phone)}<br>${esc(o.address_line)}${o.landmark ? `, near ${esc(o.landmark)}` : ''}<br>${[o.union_name, o.upazila_name, o.district_name, (o.division_name ? `${o.division_name} Division` : '')].filter(Boolean).map(esc).join(', ')} ${esc(o.postcode ?? '')}</p>
     <table><thead><tr><th>SKU</th><th>Item</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr></thead><tbody>
     ${d.items.map(i => `<tr><td>${esc(i.sku)}</td><td>${esc(i.name)}${i.variant_label ? ` (${esc(i.variant_label)})` : ''}</td><td class="r">${i.qty}</td><td class="r">${taka(i.unit_price_paisa)}</td><td class="r">${taka(i.line_total_paisa)}</td></tr>`).join('')}</tbody></table>
     <table style="width:320px;margin-left:auto">${row('Subtotal', taka(o.subtotal_paisa))}${o.discount_paisa ? row('Discount', `−${taka(o.discount_paisa)}`) : ''}${row('Delivery', o.delivery_charge_paisa === null ? 'To be confirmed' : taka(o.delivery_charge_paisa))}${o.cod_fee_paisa ? row('COD fee', taka(o.cod_fee_paisa)) : ''}${row('<b>Total</b>', `<b>${taka(o.total_paisa)}</b>`)}${o.advance_status === 'paid' ? row('Advance paid', `−${taka(o.advance_amount_paisa)}`) : ''}</table>
-    <p class="muted">Payment: ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Mobile wallet'} · ${esc(o.payment_status)}. Thank you for shopping with Abs Vai.</p></body></html>`);
+    <p class="muted">Payment: ${o.payment_method === 'cod' ? 'Cash on Delivery' : 'Mobile wallet'} · ${esc(o.payment_status)}. Thank you for shopping with ${esc(state.store)}.</p></body></html>`);
   w.document.close();
   w.focus();
   w.print();

@@ -1,4 +1,4 @@
-/* Abs Vai admin: same identity as the store, calmer and denser for daily work. Chili only for primary actions and alerts. */
+/* Shop admin: same identity as the store, calmer and denser for daily work. Chili only for primary actions and alerts. */
 :root {
   --chili: #B3261E; --chili-dark: #8C1D17; --turmeric: #F2B705; --turmeric-soft: #FCE7A6; --cream: #FFF8EC; --leaf: #2E7D32; --leaf-soft: #E3F1E4;
   --clove: #2A1F1A; --husk: #E9DCC6; --muted: #6B5A4E; --white: #fff; --bg: #F7F2EA; --line: #EDE3D3;
@@ -231,6 +231,18 @@ body:has(.save-bar) .toast { bottom: 92px; }
 .ch-table { margin-top: 8px; font-size: .8rem; }
 .ch-table summary { color: var(--muted); cursor: pointer; }
 .ch-hbars, .ch-funnel, .ch-people { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+/* Where customers are: the district map beside the top districts and delivery areas. */
+.ch-where-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 760px) { .ch-where-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+.ch-mini { font-size: .86rem; margin: 0 0 8px; color: var(--muted); }
+.ch-mini:not(:first-child) { margin-top: 16px; }
+.ch-map svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+.ch-map path { stroke: #fff; stroke-width: .6; cursor: pointer; transition: opacity .15s; }
+.ch-map path:hover, .ch-map path.on { stroke: var(--clove); stroke-width: 1.4; }
+.ch-map-legend { display: flex; align-items: center; justify-content: center; gap: 3px; font-size: .74rem; color: var(--muted); margin-top: 8px; }
+.ch-map-legend i { width: 18px; height: 10px; border-radius: 2px; }
+.ch-map-legend span { margin: 0 4px; }
+.ch-map-info { text-align: center; font-size: .86rem; margin: 6px 0 0; min-height: 1.3em; }
 .ch-hbar-label, .ch-funnel-head { display: flex; justify-content: space-between; gap: 10px; font-size: .86rem; margin-bottom: 4px; }
 .ch-hbar-track, .ch-funnel-track { height: 10px; background: var(--cream); border-radius: 999px; overflow: hidden; }
 .ch-hbar, .ch-funnel-bar { height: 100%; background: var(--chili); border-radius: 0 999px 999px 0; }
@@ -256,6 +268,15 @@ body:has(.save-bar) .toast { bottom: 92px; }
 .qp-add:hover { border-color: var(--chili); background: #FFF5F4; }
 .qp-attr { margin-bottom: 12px; }
 .qp-attr .chips { margin-top: 6px; }
+.chip .sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin: 0 6px -2px 0; border: 1px solid rgba(0, 0, 0, .18); }
+.chip { min-height: 36px; }
+.qp-other { display: flex; gap: 6px; margin-top: 8px; max-width: 360px; }
+.qp-other input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; }
+.qp-delivery { display: grid; gap: 8px; margin-top: 14px; }
+.qp-dl { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; background: #fff; }
+.qp-dl:has(input:checked) { border-color: var(--clove); background: var(--cream); }
+.qp-dl input { margin-top: 3px; accent-color: var(--clove); }
+.qp-dl small { display: block; color: var(--muted); font-size: .8rem; }
 .qp-more { margin-bottom: 10px; }
 .qp-more summary { color: var(--chili); cursor: pointer; font-weight: 600; font-size: .86rem; }
 .qp-rows input { width: 100%; min-width: 80px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
@@ -412,7 +433,9 @@ body:has(.over) .ai-fab, body:has(.over) .ai-panel, body:has(dialog[open]) .ai-f
 .zone-rows { display: grid; gap: 10px; margin-bottom: 8px; }
 .zone-row { display: grid; gap: 0 12px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #FFFDF8; }
 .zone-row > div { display: grid; gap: 2px; margin-bottom: 8px; }
-@media (min-width: 900px) { .zone-row { grid-template-columns: 1.4fr 1fr 1fr 1fr; align-items: end; } .zone-row > div { margin-bottom: 12px; } }
+@media (min-width: 900px) { .zone-row { grid-template-columns: 1.4fr 1fr 1fr 1fr auto; align-items: end; } .zone-row > div { margin-bottom: 12px; } }
+.zone-row .zone-name input { font-weight: 700; }
+.zone-end { min-height: 20px; }
 
 /* Count bubble on tabs and lists */
 .pill { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--chili); color: #fff; font-size: .72rem; font-weight: 700; line-height: 1; }
@@ -477,3 +500,13 @@ body:has(.over) .ai-fab, body:has(.over) .ai-panel, body:has(dialog[open]) .ai-f
 .rp-card { margin: 0; min-width: 0; }
 .rp-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 8px; }
 .rp-head h2 { margin: 0; }
+
+/* Update prices & stock: one table, changed rows highlighted. */
+.qu-tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.qu-tools .i { flex: 1; min-width: 200px; max-width: 420px; }
+.qu-table input { width: 100%; min-width: 80px; max-width: 140px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.qu-prod { display: flex; gap: 10px; align-items: center; }
+.qu-prod img, .qu-noimg { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--cream); flex: none; }
+.qu-held { display: block; margin-top: 2px; }
+tr.qu-changed td { background: #FFF6DB; }
+tr.qu-changed { outline: 2px solid var(--turmeric); outline-offset: -2px; }

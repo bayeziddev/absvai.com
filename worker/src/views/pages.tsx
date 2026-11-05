@@ -3,6 +3,7 @@ import { formatDate, formatDateTime } from '../lib/dates';
 import { TRACK_STAGES } from '../lib/tracking';
 import type { TrackedOrder, TrackResult } from '../services/tracking';
 import { SIZES, smallOf, srcsetOf } from '../lib/images';
+import { companyName, storeName } from '../lib/brand';
 import { formatTaka, formatUnitPrice, unitPrice } from '../lib/money';
 import { localPhone, maskPhone } from '../lib/phone';
 import { STATUS_LABELS, type OrderStatus } from '../lib/state-machine';
@@ -41,9 +42,9 @@ export function HomePage(p: {
       )}
       {p.originals.length > 0 && (
         <section class="section section-originals cv">
-          <SectionTitle title="Abs Vai Originals" href="/originals" />
-          <p class="section-lead">Made and packed by ABS VAI LTD.</p>
-          <Rail items={p.originals} label="Abs Vai Originals" />
+          <SectionTitle title={`${storeName(p.settings)} Originals`} href="/originals" />
+          <p class="section-lead">Made and packed by {companyName(p.settings)}.</p>
+          <Rail items={p.originals} label={`${storeName(p.settings)} Originals`} />
         </section>
       )}
       {p.deals.length > 0 && (
@@ -157,6 +158,7 @@ export function ListingPage(p: {
 const youtubeId = (url: string) => url.match(/(?:v=|youtu\.be\/)([\w-]{6,})/)?.[1] ?? null;
 
 export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones: Array<{ name: string; eta_text: string; base_charge_paisa: number }>; freeThresholdPaisa: number; settings: Record<string, string>; soldBy?: { shop_name: string; slug: string } | null; reviews?: ReviewSummary }) {
+  const wa = p.settings.whatsapp_number?.replace(/\D/g, '') || null;
   const { d } = p;
   const prod = d.product as Record<string, string | number | null>;
   const attrs = effectiveVariantAttributes(d.template, d.promotedSpecKeys).filter(a => d.variants.some(v => v.attributes[a.attributeTypeId]));
@@ -190,10 +192,10 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
         </div>
 
         <div class="pdp-info">
-          {prod.is_original ? <OriginalsSeal /> : null}
+          {prod.is_original ? <OriginalsSeal store={storeName(p.settings)} /> : null}
           <h1 class="pdp-title">{prod.name}</h1>
           {p.reviews && <RatingLine s={p.reviews} />}
-          {p.soldBy && <p class="sold-by"><Icon name="shield" size={14} />Sold by <a href={`/store/${p.soldBy.slug}`}>{p.soldBy.shop_name}</a> · delivered by {p.settings.store_name || 'Abs Vai'}</p>}
+          {p.soldBy && <p class="sold-by"><Icon name="shield" size={14} />Sold by <a href={`/store/${p.soldBy.slug}`}>{p.soldBy.shop_name}</a> · delivered by {storeName(p.settings)}</p>}
           {prod.short_description && <p class="pdp-short">{prod.short_description}</p>}
           {d.claims.length > 0 && <ul class="claims">{d.claims.map(c => <li><Icon name="shield" size={14} />{c.claim}</li>)}</ul>}
 
@@ -243,6 +245,11 @@ export function ProductPage(p: { d: ProductDetail; related: ProductCard[]; zones
               <button class="btn btn-outline btn-lg" type="button" data-pdp-add>Add to Cart</button>
               <button class="btn btn-primary btn-lg" type="button" data-pdp-order>{a.state === 'pre_order' ? 'Pre-order now' : 'Order Now'}</button>
             </div>
+            {wa && a.canBuy && (
+              <a class="btn btn-whatsapp btn-lg btn-block" href={`https://wa.me/${wa}`} target="_blank" rel="noopener" data-wa-product>
+                <Icon name="whatsapp" size={20} />WhatsApp-এ অর্ডার করুন
+              </a>
+            )}
           </form>
 
           {d.availability.state === 'out_of_season' && (
@@ -350,109 +357,111 @@ export function CartPage() {
   );
 }
 
-export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; turnstileSiteKey?: string }) {
+export function CheckoutPage(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; areas: CheckoutArea[]; whatsapp?: string | null; turnstileSiteKey?: string }) {
   return (
-    <div class="container">
-      <h1>Checkout</h1>
-      <noscript><p class="notice">Checkout needs JavaScript. You can also order by phone.</p></noscript>
-      <CheckoutForm wallets={p.wallets} turnstileSiteKey={p.turnstileSiteKey} />
+    <div class="container" lang="bn">
+      <h1>অর্ডার করুন</h1>
+      <noscript><p class="notice">অর্ডার করতে ব্রাউজারে JavaScript চালু রাখুন, অথবা ফোন করে অর্ডার দিন।</p></noscript>
+      <CheckoutForm wallets={p.wallets} areas={p.areas} whatsapp={p.whatsapp} turnstileSiteKey={p.turnstileSiteKey} />
     </div>
   );
 }
 
 /**
  * The one-page checkout form (public/js/checkout.js drives it). The checkout page and every landing page use it, so a
- * landing-page order gets the same address finder, coupon, fraud checks and incomplete-order capture.
+ * landing-page order gets the same delivery areas, coupon, fraud checks and incomplete-order capture. The customer picks
+ * a delivery area (the charge is worked out for them) and types the address in their own words, in Bangla or English.
+ * Customers read the form in Bangla; the shop's admin stays in English.
  */
-export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; turnstileSiteKey?: string; couponCode?: string | null; placeLabel?: string; compact?: boolean }) {
+/** A delivery area the customer can choose at checkout, with the charge for up to 1 kg (the exact charge follows). */
+export interface CheckoutArea { id: number; name: string; baseChargePaisa: number }
+
+export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: string; type?: string }>; areas: CheckoutArea[]; whatsapp?: string | null; turnstileSiteKey?: string; couponCode?: string | null; placeLabel?: string; compact?: boolean }) {
   return (
-      <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout novalidate>
+      <form class={`checkout${p.compact ? ' checkout-compact' : ''}`} id="checkout-form" data-checkout lang="bn" novalidate>
         <div class="co-main">
           <fieldset class="co-step">
-            <legend><span class="step-no">1</span>Mobile number</legend>
+            <legend><span class="step-no">১</span>মোবাইল নম্বর</legend>
             <label class="field">
-              <span>We’ll call or text this number to confirm your order.</span>
+              <span>অর্ডার কনফার্ম করতে আমরা এই নম্বরে কল বা SMS করব।</span>
               <input name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength={14} required />
             </label>
-            <p class="field-note" data-capture-note>We save your details as you type so we can help if your order doesn’t go through. <a href="/policies/privacy">Privacy</a></p>
+            <p class="field-note" data-capture-note>অর্ডার কোনো কারণে আটকে গেলে যেন আমরা সাহায্য করতে পারি, তাই লেখার সাথে সাথে আপনার তথ্য সেভ হয়। <a href="/policies/privacy">প্রাইভেসি</a></p>
             {/* Honeypot: hidden from people, filled by bots. Orders with it filled are rejected. */}
             <label class="hp" aria-hidden="true">Website<input name="website" tabindex={-1} autocomplete="off" /></label>
           </fieldset>
           <fieldset class="co-step">
-            <legend><span class="step-no">2</span>Your name</legend>
-            <label class="field"><span class="sr-only">Full name</span><input name="name" autocomplete="name" placeholder="Full name" maxlength={120} required /></label>
+            <legend><span class="step-no">২</span>আপনার নাম</legend>
+            <label class="field"><span class="sr-only">পুরো নাম</span><input name="name" autocomplete="name" placeholder="আপনার পুরো নাম (বাংলা বা English)" maxlength={120} required /></label>
           </fieldset>
           <fieldset class="co-step">
-            <legend><span class="step-no">3</span>Delivery address</legend>
-            <div class="finder" role="group" aria-label="Find your address">
-              <label class="field finder-postcode">
-                <span>Postcode (fills your area for you)</span>
-                <input name="postcode" inputmode="numeric" maxlength={4} pattern="\d{4}" placeholder="e.g. 1000" autocomplete="postal-code" />
-              </label>
-              <span class="finder-or">or</span>
-              <button class="btn btn-outline" type="button" data-locate><Icon name="pin" size={18} />Use my location</button>
+            <legend><span class="step-no">৩</span>ডেলিভারি এলাকা</legend>
+            <p class="field-note">পার্সেল কোথায় যাবে বেছে নিন। ডেলিভারি চার্জ নিজে থেকেই মোট দামে যোগ হবে।</p>
+            <div class="area-options" role="radiogroup" aria-label="ডেলিভারি এলাকা" data-areas>
+              {p.areas.map(a => (
+                <label class="area-option">
+                  <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
+                  <span><strong>{a.name}</strong><small data-area-charge={String(a.id)}>{a.baseChargePaisa ? formatTaka(a.baseChargePaisa) : 'ফ্রি'}</small></span>
+                </label>
+              ))}
             </div>
-            <p class="finder-msg" data-finder-msg aria-live="polite" />
-            <div class="po-picker" data-po-picker hidden />
-            <div class="selects">
-              <label class="field"><span>Division</span><select name="divisionId" required><option value="">Loading…</option></select></label>
-              <label class="field"><span>District</span><select name="districtId" required disabled><option value="">Select district</option></select></label>
-              <label class="field"><span>Area / Upazila / Thana</span><select name="upazilaId" required disabled><option value="">Select area</option></select></label>
-              <label class="field"><span>Union (optional)</span><select name="unionId" disabled><option value="">Select union</option></select></label>
-            </div>
-            <div class="map-card" data-map-card hidden>
-              <div class="map" data-map role="img" aria-label="Map of your district" />
-              <p data-map-label />
-            </div>
-            <label class="field"><span>House, road / village</span><input name="addressLine" autocomplete="street-address" placeholder="House 12, Road 5, Block C" maxlength={300} required /></label>
-            <label class="field"><span>Nearby landmark (optional)</span><input name="landmark" placeholder="Opposite the mosque, next to Sonali Bank" maxlength={200} /></label>
-            <label class="field"><span>Email (optional) <small class="muted">for your receipt and invoice</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength={120} placeholder="you@example.com" /></label>
-            <label class="check-line"><input type="checkbox" name="emailOffers" /> <span>Email me offers and new arrivals (you can stop any time)</span></label>
-            <label class="field"><span>Note for us (optional)</span><textarea name="note" rows={2} maxlength={500} /></label>
+            <p class="co-delivery" data-co-delivery aria-live="polite" hidden />
           </fieldset>
           <fieldset class="co-step">
-            <legend><span class="step-no">4</span>Payment</legend>
-            <label class="pay-option"><input type="radio" name="paymentMethod" value="cod" checked /><span><strong>Cash on Delivery</strong><small>Pay the delivery person when it arrives.</small></span></label>
-            <label class="pay-option" data-pay-mobile hidden={!p.wallets.length}><input type="radio" name="paymentMethod" value="manual_mobile" /><span><strong>bKash / Nagad / Rocket</strong><small>Send money first, then enter the transaction ID.</small></span></label>
+            <legend><span class="step-no">৪</span>পুরো ঠিকানা</legend>
+            <label class="field"><span>বাসা/বাড়ি, রোড, এলাকা, থানা ও জেলা লিখুন (বাংলা বা ইংরেজি, যেকোনো ভাষায়)</span><textarea name="addressLine" rows={2} autocomplete="street-address" placeholder="যেমন: বাসা ১২, রোড ৫, মিরপুর ১০, ঢাকা" maxlength={300} required /></label>
+            <label class="field"><span>ইমেইল <small class="muted">(না দিলেও চলবে · রসিদ ও ইনভয়েস পেতে)</small></span><input name="email" type="email" inputmode="email" autocomplete="email" maxlength={120} placeholder="you@example.com" /></label>
+            <label class="check-line"><input type="checkbox" name="emailOffers" /> <span>নতুন অফার ও নতুন পণ্যের খবর ইমেইলে পেতে চাই (যেকোনো সময় বন্ধ করা যাবে)</span></label>
+            <label class="field"><span>আমাদের জন্য কোনো কথা <small class="muted">(না দিলেও চলবে)</small></span><textarea name="note" rows={2} maxlength={500} placeholder="যেমন: বিকেলে ডেলিভারি দিলে ভালো হয়" /></label>
+          </fieldset>
+          <fieldset class="co-step">
+            <legend><span class="step-no">৫</span>পেমেন্ট</legend>
+            <label class="pay-option"><input type="radio" name="paymentMethod" value="cod" checked /><span><strong>ক্যাশ অন ডেলিভারি</strong><small>পণ্য হাতে পেয়ে ডেলিভারি ম্যানকে টাকা দিন।</small></span></label>
+            <label class="pay-option" data-pay-mobile hidden={!p.wallets.length}><input type="radio" name="paymentMethod" value="manual_mobile" /><span><strong>বিকাশ / নগদ / রকেট</strong><small>আগে টাকা পাঠান, তারপর ট্রানজেকশন আইডি দিন।</small></span></label>
             <div class="advance" data-advance hidden>
               <p class="advance-title" data-advance-title />
               <ul class="advance-reasons" data-advance-reasons />
               {p.wallets.length > 0 && (
                 <div class="wallets">
-                  <p>Send the advance to:</p>
+                  <p>অ্যাডভান্স পাঠান এই নম্বরে:</p>
                   <ul>{p.wallets.map(w => <li><strong>{w.wallet}</strong> {w.number}{w.type ? ` (${w.type})` : ''}</li>)}</ul>
                   <div class="row-2">
-                    <label class="field"><span>Wallet used</span><select name="advanceWallet">{p.wallets.map(w => <option>{w.wallet}</option>)}</select></label>
-                    <label class="field"><span>Transaction ID</span><input name="advanceTrxId" autocomplete="off" placeholder="e.g. 9JK4L2M8QX" maxlength={30} /></label>
+                    <label class="field"><span>কোন ওয়ালেট থেকে পাঠালেন</span><select name="advanceWallet">{p.wallets.map(w => <option>{w.wallet}</option>)}</select></label>
+                    <label class="field"><span>ট্রানজেকশন আইডি</span><input name="advanceTrxId" autocomplete="off" placeholder="যেমন: 9JK4L2M8QX" maxlength={30} /></label>
                   </div>
                 </div>
               )}
-              <p class="small">The advance is taken off your total. If we cannot deliver, we refund it in full.</p>
+              <p class="small">অ্যাডভান্সের টাকা মোট দাম থেকে বাদ যাবে। ডেলিভারি দিতে না পারলে পুরো টাকা ফেরত দেওয়া হবে।</p>
             </div>
           </fieldset>
         </div>
-        <aside class="co-summary" aria-label="Order summary">
-          <h2>Order summary</h2>
-          <div data-co-lines><p class="muted">Loading…</p></div>
+        <aside class="co-summary" aria-label="আপনার অর্ডার">
+          <h2>আপনার অর্ডার</h2>
+          <div data-co-lines><p class="muted">লোড হচ্ছে…</p></div>
           <div class="coupon-box">
-            <label class="field"><span>Coupon code</span>
-              <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="e.g. EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>Apply</button></span>
+            <label class="field"><span>কুপন কোড</span>
+              <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="যেমন: EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>প্রয়োগ</button></span>
             </label>
             <p class="coupon-msg" data-coupon-msg aria-live="polite" />
           </div>
           <dl class="totals">
-            <dt>Subtotal</dt><dd data-subtotal>—</dd>
-            <dt data-discount-row hidden>Discount</dt><dd data-discount hidden>—</dd>
-            <dt>Delivery</dt><dd data-delivery>Choose your area</dd>
-            <dt data-cod-row hidden>COD fee</dt><dd data-cod-fee hidden>—</dd>
-            <dt class="total">Total</dt><dd class="total" data-total>—</dd>
+            <dt>পণ্যের দাম</dt><dd data-subtotal>—</dd>
+            <dt data-discount-row hidden>ছাড়</dt><dd data-discount hidden>—</dd>
+            <dt>ডেলিভারি চার্জ</dt><dd data-delivery>এলাকা বেছে নিন</dd>
+            <dt data-cod-row hidden>COD চার্জ</dt><dd data-cod-fee hidden>—</dd>
+            <dt class="total">সর্বমোট</dt><dd class="total" data-total>—</dd>
           </dl>
           <ul class="explain" data-explain />
           <p class="eta" data-eta />
-          {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" />}
+          {p.turnstileSiteKey && <div class="cf-turnstile" data-sitekey={p.turnstileSiteKey} data-theme="light" data-size="flexible" data-appearance="interaction-only" data-callback="absvaiTurnstile" data-error-callback="absvaiTurnstileError" />}
           <p class="form-msg error" data-co-error role="alert" />
-          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>{p.placeLabel ?? 'Place order'}</button>
-          <p class="small muted">We save your details as you type so our team can help if checkout fails. We never store your GPS location.</p>
+          <button class="btn btn-primary btn-lg btn-block" type="submit" data-place>{p.placeLabel ?? 'অর্ডার কনফার্ম করুন'}</button>
+          {p.whatsapp && (
+            <a class="btn btn-whatsapp btn-lg btn-block" href={`https://wa.me/${p.whatsapp}`} target="_blank" rel="noopener" data-wa-order>
+              <Icon name="whatsapp" size={20} />WhatsApp-এ অর্ডার করুন
+            </a>
+          )}
+          <p class="small muted">অর্ডারে সমস্যা হলে আমাদের টিম যেন সাহায্য করতে পারে, তাই আপনার তথ্য সেভ রাখা হয়।</p>
         </aside>
       </form>
   );
@@ -607,7 +616,7 @@ function TrackedOrderCard({ o }: { o: TrackedOrder }) {
 }
 
 export function SellPage(p: { settings: Record<string, string>; open: boolean }) {
-  const store = p.settings.store_name || 'Abs Vai';
+  const store = storeName(p.settings);
   return (
     <div class="container narrow sell-page">
       <div class="sell-hero">

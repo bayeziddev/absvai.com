@@ -1,4 +1,4 @@
-# Abs Vai অ্যাডমিন ড্যাশবোর্ড: সম্পূর্ণ বাংলা ব্যবহার নির্দেশিকা
+# Vandar Mart অ্যাডমিন ড্যাশবোর্ড: সম্পূর্ণ বাংলা ব্যবহার নির্দেশিকা
 
 এই গাইডে অ্যাডমিন ড্যাশবোর্ডের প্রতিটি পেইজ কী কাজের, কোথায় কী চাপতে হয় আর প্রতিদিনের কাজ কীভাবে করবেন, তা ধাপে ধাপে লেখা আছে। কোনো কোড লাগবে না। প্রতিটি অংশে সরাসরি লিংক দেওয়া আছে: লিংকে চাপলেই সেই পেইজ খুলবে (আগে অ্যাডমিনে লগইন করা থাকতে হবে)।
 
@@ -6,59 +6,59 @@
 
 ## সরাসরি লিংক (এক নজরে)
 
-এখনকার ঠিকানা `https://absvai.absvai.workers.dev`। absvai.com ডোমেইন যুক্ত হলে একই পেইজ `https://absvai.com/...` ঠিকানাতেও খুলবে।
+এখনকার ঠিকানা `https://vandarmart.com`। absvai.com ডোমেইন যুক্ত হলে একই পেইজ `https://absvai.com/...` ঠিকানাতেও খুলবে।
 
 | কাজ | লিংক |
 |---|---|
-| অ্যাডমিনে লগইন | [/admin/](https://absvai.absvai.workers.dev/admin/) |
-| ওভারভিউ (আজকের হিসাব) | [Overview](https://absvai.absvai.workers.dev/admin/#/dashboard) |
-| সব অর্ডার | [Orders](https://absvai.absvai.workers.dev/admin/#/orders) |
-| নতুন অর্ডার (কনফার্ম করতে হবে) | [Orders → New](https://absvai.absvai.workers.dev/admin/#/orders?status=new) |
-| হোল্ডে থাকা অর্ডার | [Orders → On hold](https://absvai.absvai.workers.dev/admin/#/orders?status=held) |
-| অসম্পূর্ণ অর্ডার | [Incomplete orders](https://absvai.absvai.workers.dev/admin/#/incomplete) |
-| ফোন / ফেসবুকের অর্ডার নেওয়া | [New manual order](https://absvai.absvai.workers.dev/admin/#/manual) |
-| ফেরত পার্সেল স্ক্যান | [Returns scan](https://absvai.absvai.workers.dev/admin/#/returns) |
-| বিক্রির রিপোর্ট | [Reports](https://absvai.absvai.workers.dev/admin/#/reports) |
-| প্রোডাক্ট তালিকা | [Products](https://absvai.absvai.workers.dev/admin/#/products) |
-| নতুন প্রোডাক্ট যোগ | [+ Add product](https://absvai.absvai.workers.dev/admin/#/products?new=1) |
-| ক্যাটাগরি | [Categories](https://absvai.absvai.workers.dev/admin/#/categories) |
-| স্টক | [Inventory](https://absvai.absvai.workers.dev/admin/#/inventory) |
-| কুরিয়ার (Steadfast, Pathao) | [Couriers](https://absvai.absvai.workers.dev/admin/#/courier) |
-| ল্যান্ডিং পেইজ (বিজ্ঞাপনের পেইজ) | [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) |
-| নতুন ল্যান্ডিং পেইজ | [+ New landing page](https://absvai.absvai.workers.dev/admin/#/landing/new) |
-| কুপন | [Coupons](https://absvai.absvai.workers.dev/admin/#/coupons) |
-| কাস্টমারের রিভিউ | [Reviews](https://absvai.absvai.workers.dev/admin/#/reviews) |
-| দোকানের নাম, লোগো, ব্যানার, পপআপ | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) |
+| অ্যাডমিনে লগইন | [/admin/](https://vandarmart.com/admin/) |
+| ওভারভিউ (আজকের হিসাব) | [Overview](https://vandarmart.com/admin/#/dashboard) |
+| সব অর্ডার | [Orders](https://vandarmart.com/admin/#/orders) |
+| নতুন অর্ডার (কনফার্ম করতে হবে) | [Orders → New](https://vandarmart.com/admin/#/orders?status=new) |
+| হোল্ডে থাকা অর্ডার | [Orders → On hold](https://vandarmart.com/admin/#/orders?status=held) |
+| অসম্পূর্ণ অর্ডার | [Incomplete orders](https://vandarmart.com/admin/#/incomplete) |
+| ফোন / ফেসবুকের অর্ডার নেওয়া | [New manual order](https://vandarmart.com/admin/#/manual) |
+| ফেরত পার্সেল স্ক্যান | [Returns scan](https://vandarmart.com/admin/#/returns) |
+| বিক্রির রিপোর্ট | [Reports](https://vandarmart.com/admin/#/reports) |
+| প্রোডাক্ট তালিকা | [Products](https://vandarmart.com/admin/#/products) |
+| নতুন প্রোডাক্ট যোগ | [+ Add product](https://vandarmart.com/admin/#/products?new=1) |
+| ক্যাটাগরি | [Categories](https://vandarmart.com/admin/#/categories) |
+| স্টক | [Inventory](https://vandarmart.com/admin/#/inventory) |
+| কুরিয়ার (Steadfast, Pathao) | [Couriers](https://vandarmart.com/admin/#/courier) |
+| ল্যান্ডিং পেইজ (বিজ্ঞাপনের পেইজ) | [Landing pages](https://vandarmart.com/admin/#/landing) |
+| নতুন ল্যান্ডিং পেইজ | [+ New landing page](https://vandarmart.com/admin/#/landing/new) |
+| কুপন | [Coupons](https://vandarmart.com/admin/#/coupons) |
+| কাস্টমারের রিভিউ | [Reviews](https://vandarmart.com/admin/#/reviews) |
+| দোকানের নাম, লোগো, ব্যানার, পপআপ | [Website & banners](https://vandarmart.com/admin/#/website) |
 | ব্যানার, ক্যাটাগরি ও প্রোডাক্টের ছবি বদলানো | [নিচের "ছবি বদলানো" অংশ](#ছবি-বদলানো-ব্যানার-ক্যাটাগরি-আর-প্রোডাক্ট) |
-| ছবি ও ওয়েবসাইট গাইড (কোন অংশে কী, কোন ছবি কোন মাপে, A থেকে Z) | [ছবি ও ওয়েবসাইট গাইড](https://absvai.absvai.workers.dev/admin/photo-guide-bn.html) |
-| ইমেইল | [Emails](https://absvai.absvai.workers.dev/admin/#/emails) |
-| কাস্টমার | [Customers](https://absvai.absvai.workers.dev/admin/#/customers) |
-| সেলার (মার্কেটপ্লেস) | [Sellers](https://absvai.absvai.workers.dev/admin/#/sellers) |
-| সেলারের প্রোডাক্ট অনুমোদন | [Products to approve](https://absvai.absvai.workers.dev/admin/#/sellers?tab=products) |
-| সিজন (শীত, রমজান, ঈদ…) | [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons) |
-| সেটিংস (ফোন, ডেলিভারি চার্জ, বিকাশ নম্বর) | [Settings](https://absvai.absvai.workers.dev/admin/#/settings) |
-| সাহায্য | [Help center](https://absvai.absvai.workers.dev/admin/#/help) |
-| স্টাফ যোগ করা | [Staff & roles](https://absvai.absvai.workers.dev/admin/#/staff) |
-| ব্লক লিস্ট | [Security](https://absvai.absvai.workers.dev/admin/#/security) |
-| SMS আউটবক্স | [SMS outbox](https://absvai.absvai.workers.dev/admin/#/outbox) |
+| ছবি ও ওয়েবসাইট গাইড (কোন অংশে কী, কোন ছবি কোন মাপে, A থেকে Z) | [ছবি ও ওয়েবসাইট গাইড](https://vandarmart.com/admin/photo-guide-bn.html) |
+| ইমেইল | [Emails](https://vandarmart.com/admin/#/emails) |
+| কাস্টমার | [Customers](https://vandarmart.com/admin/#/customers) |
+| সেলার (মার্কেটপ্লেস) | [Sellers](https://vandarmart.com/admin/#/sellers) |
+| সেলারের প্রোডাক্ট অনুমোদন | [Products to approve](https://vandarmart.com/admin/#/sellers?tab=products) |
+| সিজন (শীত, রমজান, ঈদ…) | [Seasons](https://vandarmart.com/admin/#/seasons) |
+| সেটিংস (ফোন, ডেলিভারি চার্জ, বিকাশ নম্বর) | [Settings](https://vandarmart.com/admin/#/settings) |
+| সাহায্য | [Help center](https://vandarmart.com/admin/#/help) |
+| স্টাফ যোগ করা | [Staff & roles](https://vandarmart.com/admin/#/staff) |
+| ব্লক লিস্ট | [Security](https://vandarmart.com/admin/#/security) |
+| SMS আউটবক্স | [SMS outbox](https://vandarmart.com/admin/#/outbox) |
 
 দোকানের (কাস্টমারের) দিকের লিংক:
 
 | পেইজ | লিংক |
 |---|---|
-| দোকান (হোমপেইজ) | [/](https://absvai.absvai.workers.dev/) |
-| সব প্রোডাক্ট | [/shop](https://absvai.absvai.workers.dev/shop) |
-| অর্ডার ট্র্যাক | [/track](https://absvai.absvai.workers.dev/track) |
-| সেলার রেজিস্ট্রেশন | [/sell](https://absvai.absvai.workers.dev/sell) |
-| সেলার পোর্টাল (সেলারের লগইন) | [/seller/](https://absvai.absvai.workers.dev/seller/) |
-| যোগাযোগ | [/contact](https://absvai.absvai.workers.dev/contact) |
+| দোকান (হোমপেইজ) | [/](https://vandarmart.com/) |
+| সব প্রোডাক্ট | [/shop](https://vandarmart.com/shop) |
+| অর্ডার ট্র্যাক | [/track](https://vandarmart.com/track) |
+| সেলার রেজিস্ট্রেশন | [/sell](https://vandarmart.com/sell) |
+| সেলার পোর্টাল (সেলারের লগইন) | [/seller/](https://vandarmart.com/seller/) |
+| যোগাযোগ | [/contact](https://vandarmart.com/contact) |
 
 ## প্রথমবার লগইন
 
-1. [অ্যাডমিন](https://absvai.absvai.workers.dev/admin/) খুলুন।
+1. [অ্যাডমিন](https://vandarmart.com/admin/) খুলুন।
 2. প্রথমবার **First-time setup** পেইজ আসবে। ডেভেলপার যে **Setup token** দিয়েছেন সেটা দিন, তারপর আপনার নাম, ইমেইল আর পাসওয়ার্ড (কমপক্ষে ১০ অক্ষর, একটা সংখ্যাসহ) দিয়ে **Create account** চাপুন। এটাই মালিকের (**Super Admin**) অ্যাকাউন্ট।
 3. এরপর থেকে শুধু ইমেইল আর পাসওয়ার্ড দিয়ে **Sign in** করবেন।
-4. প্রথম দিনেই [Settings](https://absvai.absvai.workers.dev/admin/#/settings) এ গিয়ে সাপোর্ট ফোন, WhatsApp নম্বর, ফেসবুক পেইজের লিংক, বিকাশ/নগদ/রকেট নম্বর আর কোম্পানির ঠিকানা লিখে **Save** চাপুন।
+4. প্রথম দিনেই [Settings](https://vandarmart.com/admin/#/settings) এ গিয়ে সাপোর্ট ফোন, WhatsApp নম্বর, ফেসবুক পেইজের লিংক, বিকাশ/নগদ/রকেট নম্বর আর কোম্পানির ঠিকানা লিখে **Save** চাপুন।
 
 পাসওয়ার্ড কাউকে বলবেন না। স্টাফদের জন্য আলাদা অ্যাকাউন্ট খুলুন (নিচে **স্টাফ ও রোল** অংশ দেখুন)।
 
@@ -71,22 +71,23 @@
 - **View store** চাপলে নিজের দোকান খোলে; **Sign out** দিয়ে বের হবেন।
 - মোবাইলে প্রতিটি তালিকা (অর্ডার, প্রোডাক্ট, স্টক) এক একটা কার্ড হিসেবে দেখায়, তাই কিছু চাপা পড়ে না।
 
-পোস্টকোড, শহর, এলাকা আর কুরিয়ারের এলাকা নিয়ে কিছু সেট করতে হয় না: এগুলো দোকানের সাথেই দেওয়া আছে, নিজে নিজে কাজ করে।
+দোকানের ঠিকানা এখন **vandarmart.com**। দোকানের নাম একটাই জায়গায় থাকে: [Website & banners](https://vandarmart.com/admin/#/website) → **Shop name**; ওয়েবসাইট, ইমেইল, SMS আর ইনভয়েস সবখানে এই নামই দেখায়।
 
 ## ওভারভিউ (ড্যাশবোর্ড)
 
-[Overview](https://absvai.absvai.workers.dev/admin/#/dashboard) পেইজে এক নজরে সব:
+[Overview](https://vandarmart.com/admin/#/dashboard) পেইজে এক নজরে সব:
 
 - **সবুজ/হলুদ চিহ্ন**: কোন সার্ভিস চালু (Cash on Delivery, ছবি রাখার জায়গা, ইমেইল, কুরিয়ার, SMS)। হলুদ মানে এখনো যুক্ত হয়নি।
 - **Order pipeline**: কোন ধাপে কয়টা অর্ডার (New, Confirmed, Packed, In Courier…)। কোনো ঘরে চাপলে সেই অর্ডারগুলো খোলে।
 - **আজকের অর্ডার ও বিক্রি**, স্টকের মোট দাম।
-- **Last 30 days**: প্রতিদিনের বিক্রি ও অর্ডারের চার্ট, কোন জেলা থেকে বেশি অর্ডার, সেরা কাস্টমার, কোথা থেকে অর্ডার আসছে (ওয়েবসাইট, মেসেঞ্জার, ফোন)। প্রতিটি চার্টের নিচে **Show as table** চাপলে টেবিলে দেখাবে।
+- **Last 30 days**: প্রতিদিনের বিক্রি ও অর্ডারের চার্ট, সেরা কাস্টমার, কোথা থেকে অর্ডার আসছে (ওয়েবসাইট, মেসেঞ্জার, ফোন)। প্রতিটি চার্টের নিচে **Show as table** চাপলে টেবিলে দেখাবে।
+- **Where your customers are**: বাংলাদেশের ম্যাপ, যে জেলা থেকে যত বেশি অর্ডার সেই জেলা তত গাঢ় রঙ। জেলায় চাপলে তার অর্ডার আর বিক্রি দেখায়। পাশে সেরা জেলাগুলো আর কোন ডেলিভারি এরিয়া থেকে কত অর্ডার। জেলা আসে কাস্টমারের লেখা ঠিকানা থেকে (যেমন "পাংশা, রাজবাড়ী" লিখলে রাজবাড়ী)।
 - **Needs your attention today**: আজ যা দেখা দরকার (কম স্টক, হোল্ডে থাকা অর্ডার, নতুন সেলার, সেলারের প্রোডাক্ট বা পেমেন্ট অ্যাকাউন্ট অনুমোদন, সিজনের তারিখ বাকি)। লেখায় চাপলে সরাসরি সেই কাজের পেইজ খোলে।
 - **+ Manual order** আর **+ Add product** বাটন দিয়ে দ্রুত কাজ শুরু করা যায়।
 
 ## অর্ডারের ৮টি ধাপ
 
-[Orders](https://absvai.absvai.workers.dev/admin/#/orders) পেইজে উপরের বোতামগুলো (All, New, Confirmed, Packed, In Courier, Delivered…) দিয়ে ধাপ অনুযায়ী অর্ডার দেখবেন। কোনো অর্ডারে চাপলে ডান পাশে পুরো বিবরণ খোলে।
+[Orders](https://vandarmart.com/admin/#/orders) পেইজে উপরের বোতামগুলো (All, New, Confirmed, Packed, In Courier, Delivered…) দিয়ে ধাপ অনুযায়ী অর্ডার দেখবেন। কোনো অর্ডারে চাপলে ডান পাশে পুরো বিবরণ খোলে।
 
 | ধাপ | মানে | আপনার কাজ |
 |---|---|---|
@@ -101,7 +102,7 @@
 
 ### অর্ডার কনফার্ম করা (প্রতিদিনের প্রধান কাজ)
 
-1. [Orders → New](https://absvai.absvai.workers.dev/admin/#/orders?status=new) খুলুন, একটা অর্ডারে চাপুন।
+1. [Orders → New](https://vandarmart.com/admin/#/orders?status=new) খুলুন, একটা অর্ডারে চাপুন।
 2. কাস্টমারের নম্বরে কল করুন (নম্বরের পাশে **WhatsApp** লিংকও আছে)।
 3. কাস্টমার নিশ্চিত করলে সরাসরি অর্ডারটিকে **Confirmed** এ নিন। কোনো কোড বা যাচাই লাগবে না। এতে ইনভয়েস নম্বর (INV-…) তৈরি হয় আর কাস্টমার SMS/ইমেইল পান।
 4. চাইলে **Confirmation call** অংশে কলের ফলাফল লিখে রাখতে পারেন (Confirmed, No answer, Call back, Wrong number, Wants to cancel) আর **Log call** চাপুন। এটা ঐচ্ছিক, শুধু টিমের হিসাবের জন্য।
@@ -127,7 +128,7 @@
 
 ### প্রথমবার সংযোগ (একবারই করতে হয়)
 
-[Couriers](https://absvai.absvai.workers.dev/admin/#/courier) পেইজে প্রতিটি কুরিয়ারের জন্য আলাদা কার্ড আছে, সাথে ধাপে ধাপে লেখা।
+[Couriers](https://vandarmart.com/admin/#/courier) পেইজে প্রতিটি কুরিয়ারের জন্য আলাদা কার্ড আছে, সাথে ধাপে ধাপে লেখা।
 
 | কুরিয়ার | কী লাগবে | কোথায় পাবেন |
 |---|---|---|
@@ -150,7 +151,7 @@
 
 ## কাস্টমার যেভাবে অর্ডার ট্র্যাক করেন
 
-দোকানের মেনুতে **Track Order** ([/track](https://absvai.absvai.workers.dev/track)) আছে। কাস্টমার **যেকোনো একটি** লিখবেন:
+দোকানের মেনুতে **Track Order** ([/track](https://vandarmart.com/track)) আছে। কাস্টমার **যেকোনো একটি** লিখবেন:
 
 - **মোবাইল নম্বর** (যেটা দিয়ে অর্ডার করেছেন): ঐ নম্বরের সাম্প্রতিক সব অর্ডার একটা টেবিলে আসবে, নিচে প্রতিটির বিস্তারিত।
 - **অর্ডার নম্বর** (যেমন AV-261031-0001): শুধু সেই অর্ডার। ইনভয়েস নম্বর বা কুরিয়ারের ট্র্যাকিং কোড দিলেও হয়। বাংলা সংখ্যা (০১৭…) লিখলেও কাজ করে।
@@ -161,7 +162,7 @@
 
 ## অসম্পূর্ণ অর্ডার
 
-কেউ চেকআউটে ঠিক মোবাইল নম্বর লিখে অর্ডার শেষ না করলে [Incomplete orders](https://absvai.absvai.workers.dev/admin/#/incomplete) এ আসে, কার্টসহ।
+কেউ চেকআউটে ঠিক মোবাইল নম্বর লিখে অর্ডার শেষ না করলে [Incomplete orders](https://vandarmart.com/admin/#/incomplete) এ আসে, কার্টসহ।
 1. কল বা WhatsApp করুন।
 2. ফলাফল বেছে নিন: Contacted, Not interested, Unreachable, Spam।
 3. কাস্টমার রাজি হলে **Convert to order** চাপুন: সব তথ্য বসানো একটা ম্যানুয়াল অর্ডার খুলবে।
@@ -170,7 +171,7 @@
 
 ## ফোন, ফেসবুক, মেসেঞ্জার বা WhatsApp এর অর্ডার
 
-[New manual order](https://absvai.absvai.workers.dev/admin/#/manual):
+[New manual order](https://vandarmart.com/admin/#/manual):
 1. আগে কাস্টমারের মোবাইল নম্বর লিখুন: আগের অর্ডার, ফেরত আর ঠিকানা দেখাবে। **Paste chat** এ পুরো চ্যাট পেস্ট করলে নম্বর নিজে খুঁজে দেয়।
 2. **Where did the order come from?** (কোথা থেকে অর্ডার এলো) অবশ্যই বেছে নিন।
 3. প্রোডাক্টের নাম লিখে খুঁজুন বা বারকোড স্ক্যান করুন, পরিমাণ দিন।
@@ -179,20 +180,25 @@
 
 ## ফেরত পার্সেল স্ক্যান
 
-ফেরত পার্সেল দোকানে এলে [Returns scan](https://absvai.absvai.workers.dev/admin/#/returns) খুলে ইনভয়েস বা কুরিয়ার লেবেলের বারকোড স্ক্যান করুন (বা অর্ডার/ট্র্যাকিং নম্বর লিখুন)। জিনিস স্টকে ফেরত যায়। একটা পার্সেল একবারই নেওয়া যায়।
+ফেরত পার্সেল দোকানে এলে [Returns scan](https://vandarmart.com/admin/#/returns) খুলে ইনভয়েস বা কুরিয়ার লেবেলের বারকোড স্ক্যান করুন (বা অর্ডার/ট্র্যাকিং নম্বর লিখুন)। জিনিস স্টকে ফেরত যায়। একটা পার্সেল একবারই নেওয়া যায়।
 
 ## প্রোডাক্ট যোগ করা
 
 ### সহজ উপায়
 
-[Products → + Add product](https://absvai.absvai.workers.dev/admin/#/products?new=1):
+[Products → + Add product](https://vandarmart.com/admin/#/products?new=1):
 1. **Photos**: **+ Add photos** চেপে মোবাইল/কম্পিউটার থেকে ছবি দিন। প্রথম ছবিটাই প্রধান ছবি। ছবি নিজে থেকে ছোট করে নেয়।
 2. **What is it?**: ক্যাটাগরি বেছে নিন, নাম আর এক লাইনের বর্ণনা লিখুন।
-3. **Sizes, prices and stock**: কোন সাইজ/ওজন বিক্রি করবেন তাতে চাপুন (অন্য কোনো সাইজ হলে **+ Other**), দাম আর কয়টা আছে লিখুন। **Same price for all** চাপলে সব ঘরে একই দাম বসে। বাক্সসহ **পার্সেলের ওজন** একবার লিখুন (ডেলিভারি চার্জ এ থেকে হিসাব হয়)।
+3. **Sizes, prices and stock**: কোন সাইজ/ওজন/রঙ বিক্রি করবেন তাতে চাপুন। কাপড়ে সাইজ (S, M, L, XL…) আর রঙ (Black, White, Maroon… রঙের ছোট গোল চিহ্নসহ) দুটোই চাপবেন; তালিকায় না থাকলে পাশের ঘরে লিখে **+ Add** (যেমন "Sky blue" বা "42")। প্রতিটি মিল (যেমন M · Black) আলাদা সারি হয়: দাম আর কয়টা আছে লিখুন, **Same price for all** চাপলে সব ঘরে একই দাম বসে। বাক্সসহ **পার্সেলের ওজন** একবার লিখুন।
+   - **Delivery for this product** অবশ্যই বেছে নিন: **💵 Cash on Delivery + delivery charge** (কাস্টমার তার এরিয়ার ডেলিভারি চার্জ দেবেন) অথবা **🎁 Free delivery** (ডেলিভারি আপনি দেবেন, প্রোডাক্টে "Free delivery" লেখা দেখাবে)।
 4. **Required details**: ক্যাটাগরি যা চায় শুধু সেটুকু (খাবারে: কোথাকার, ব্যাচ, মেয়াদ, উপাদান, রাখার নিয়ম)।
 5. **Save and publish** চাপুন। কিছু বাকি থাকলে সহজ ভাষায় বলে দেবে আর ড্রাফট হিসেবে রেখে দেবে।
 
 পরে দাম, স্টক বা ছবি বদলাতে তালিকায় প্রোডাক্টে চাপুন: একই পেইজ খোলে।
+
+### সব প্রোডাক্টের দাম আর স্টক একসাথে
+
+[Update prices & stock](https://vandarmart.com/admin/#/quick-update): সব প্রোডাক্টের সব অপশন এক তালিকায়। উপরে নাম লিখে খুঁজুন, **Price** (দাম), **Old price** (আগের দাম: দামের চেয়ে বেশি দিলে প্রোডাক্টটি ছাড়ে দেখায়, Hot Deals এ আসে) আর **In stock** (কয়টা আছে) বদলান। বদলানো সারি হলুদ হয়; শেষে একবার **Save**। স্টকের বদল Inventory → History তেও লেখা থাকে।
 
 ### আরও কিছু
 
@@ -203,14 +209,14 @@
 
 ## ক্যাটাগরি
 
-[Categories](https://absvai.absvai.workers.dev/admin/#/categories): তিন স্তর পর্যন্ত (ক্যাটাগরি → সাব-ক্যাটাগরি → তার ভেতরে)।
+[Categories](https://vandarmart.com/admin/#/categories): তিন স্তর পর্যন্ত (ক্যাটাগরি → সাব-ক্যাটাগরি → তার ভেতরে)।
 - নতুন: **+ Add category** চাপুন, নাম, ছবি, কোন ক্যাটাগরির ভেতরে থাকবে আর কী ধরনের প্রোডাক্ট থাকবে বেছে **Save**।
 - সাজানো: সারি টেনে আরেকটার উপরে/নিচে বা ভেতরে রাখুন, অথবা **↑ ↓ ←** বাটন চাপুন। শেষে **Save arrangement**।
 - **Edit** চেপে নাম, ছবি বা সিজন বদলান।
 
 ## স্টক
 
-[Inventory](https://absvai.absvai.workers.dev/admin/#/inventory): সবচেয়ে কম স্টক আগে দেখায়।
+[Inventory](https://vandarmart.com/admin/#/inventory): সবচেয়ে কম স্টক আগে দেখায়।
 - **On hand** = হাতে আছে; **Available** = কনফার্ম অর্ডারের জন্য রাখা বাদ দিয়ে বিক্রি করা যাবে।
 - নতুন মাল এলে বা নষ্ট/হারানো হলে **Adjust** চেপে পরিমাণ আর কারণ লিখুন। খাবারে ব্যাচ নম্বর দিন।
 - **History** চাপলে স্টকের প্রতিটি পরিবর্তন কারণসহ দেখা যায়।
@@ -221,7 +227,7 @@
 
 ### নতুন পেইজ বানানো
 
-1. [Landing pages → + New landing page](https://absvai.absvai.workers.dev/admin/#/landing/new) খুলুন।
+1. [Landing pages → + New landing page](https://vandarmart.com/admin/#/landing/new) খুলুন।
 2. **Product this page sells**: কোন পণ্য বিক্রি করবেন বেছে নিন। পণ্যের নাম, ছোট বর্ণনা, বিবরণ, ছবি আর সুবিধাগুলো নিজে থেকে বসে যায়; আপনি শুধু বদলাবেন।
 3. **Page address**: লিংকের শেষ অংশ, যেমন `khejur-gur-offer` (ইংরেজি অক্ষর, সংখ্যা, ড্যাশ)। খালি রাখলে নিজে তৈরি হয়।
 4. **Top of the page**: অফারের ব্যাজ (যেমন "আজকের অফার ২০% ছাড়"), বড় শিরোনাম, নিচের লাইন, প্রধান ছবি, আর চাইলে আগের দাম (কেটে দেখাবে, পাশে "৳X ছাড়")।
@@ -235,7 +241,7 @@
 
 ### লিংক বিজ্ঞাপনে দেওয়া আর ফল দেখা
 
-- [Landing pages](https://absvai.absvai.workers.dev/admin/#/landing) তালিকায় **Copy link** চাপুন, ফেসবুক বিজ্ঞাপন বা পোস্টে পেস্ট করুন। লিংক দেখতে এমন: `https://absvai.absvai.workers.dev/lp/khejur-gur-offer`।
+- [Landing pages](https://vandarmart.com/admin/#/landing) তালিকায় **Copy link** চাপুন, ফেসবুক বিজ্ঞাপন বা পোস্টে পেস্ট করুন। লিংক দেখতে এমন: `https://vandarmart.com/lp/khejur-gur-offer`।
 - তালিকায় প্রতিটি পেইজের **Visits** (কতজন দেখেছেন), **Orders**, **Sales** আর **Conversion** (দেখা থেকে অর্ডারের হার) দেখায়।
 - এই পেইজ থেকে আসা অর্ডার Orders এ "Landing page" হিসেবে দেখায়, একই নিয়মে কনফার্ম ও ডেলিভারি হয়।
 - **Copy page** দিয়ে একটা পেইজ কপি করে নতুন অফার বানান; **Delete** দিলে লিংক বন্ধ হয় (আগের অর্ডার থাকে)।
@@ -243,7 +249,7 @@
 
 ## কুপন
 
-[Coupons](https://absvai.absvai.workers.dev/admin/#/coupons): কাস্টমার চেকআউটে কোড লিখলে ছাড় পান, অর্ডার দেওয়ার আগেই মোট টাকায় ছাড় দেখায়।
+[Coupons](https://vandarmart.com/admin/#/coupons): কাস্টমার চেকআউটে কোড লিখলে ছাড় পান, অর্ডার দেওয়ার আগেই মোট টাকায় ছাড় দেখায়।
 
 1. **+ New coupon** চাপুন।
 2. **Code**: কাস্টমার যা লিখবেন, যেমন `EID100` (**Make one** চাপলে নিজে তৈরি হয়)।
@@ -264,14 +270,14 @@
 
 - প্রতিটি প্রোডাক্ট পেইজের নিচে **Customer reviews** অংশ থাকে: গড় স্টার, কতজন রিভিউ দিয়েছেন, আর **Write a review** ফর্ম (নাম, যে নম্বর দিয়ে অর্ডার করেছেন, স্টার, মতামত)। নম্বর কখনো দেখানো হয় না।
 - যে নম্বরে ঐ পণ্য ডেলিভারি হয়েছে, তার রিভিউতে **Verified buyer** ব্যাজ থাকে। একই নম্বরে একটা পণ্যে একবারই রিভিউ দেওয়া যায়।
-- [Reviews](https://absvai.absvai.workers.dev/admin/#/reviews) এ নতুন রিভিউ **Waiting** ট্যাবে আসে: **Publish** (দেখাবে), **Hide** (লুকাবে), **Reply** (আপনার উত্তর সবাই দেখবে), **Delete**।
+- [Reviews](https://vandarmart.com/admin/#/reviews) এ নতুন রিভিউ **Waiting** ট্যাবে আসে: **Publish** (দেখাবে), **Hide** (লুকাবে), **Reply** (আপনার উত্তর সবাই দেখবে), **Delete**।
 - উপরের সুইচ দিয়ে রিভিউ ফর্ম চালু/বন্ধ করুন। **Publish verified buyers' reviews at once** টিক দিলে যাচাই করা ক্রেতার রিভিউ সাথে সাথে দেখায়।
 - **+ Add a review**: কাস্টমার ফেসবুক বা WhatsApp এ যা বলেছেন সেটা যোগ করুন (Verified ব্যাজ ছাড়া)।
 - প্রকাশিত রিভিউর স্টার গুগল সার্চেও দেখাতে পারে। শুধু আসল রিভিউ প্রকাশ করবেন।
 
 ## রিপোর্ট
 
-[Reports](https://absvai.absvai.workers.dev/admin/#/reports): যেকোনো তারিখের বিক্রির হিসাব (বাংলাদেশ সময়ে)। টেস্ট অর্ডার বাদ, বাতিল অর্ডার বিক্রিতে ধরা হয় না।
+[Reports](https://vandarmart.com/admin/#/reports): যেকোনো তারিখের বিক্রির হিসাব (বাংলাদেশ সময়ে)। টেস্ট অর্ডার বাদ, বাতিল অর্ডার বিক্রিতে ধরা হয় না।
 
 - উপরে **Today, Yesterday, Last 7 days, Last 30 days, This month, Last month** অথবা নিজে তারিখ দিয়ে **Show**।
 - উপরের কার্ডে: মোট বিক্রি, গড় অর্ডার, ডেলিভারি হওয়া টাকা, ডেলিভারির হার, খোলা অর্ডার, বাতিল, ছাড়, ডেলিভারি চার্জ, আর (মালিক ও হিসাবরক্ষকের জন্য) পণ্যের লাভ।
@@ -281,26 +287,25 @@
 
 ## ওয়েবসাইট ও ব্যানার
 
-[Website & banners](https://absvai.absvai.workers.dev/admin/#/website):
+[Website & banners](https://vandarmart.com/admin/#/website):
 - **Shop name and logo**: দোকানের নাম, ছোট এক লাইন, **+ Upload logo** (স্বচ্ছ ব্যাকগ্রাউন্ডের PNG/SVG ভালো দেখায়)। **Remove logo** চাপলে নাম দেখায়। সবার উপরের চলমান লেখাও এখানে।
 - **Big banners at the top of the homepage**: হোমপেইজের বড় ছবি। প্রতিটি ব্যানার মোবাইলে আর কম্পিউটারে ঠিক যেমন দেখাবে তেমন দেখায়। **✏️ Edit** চেপে চার ধাপে বদলান: **Photo** (ছবি), **Words** (শিরোনাম, ছোট লাইন), **Button** (বাটনের লেখা, কোন পেইজে যাবে), **Colour** (রঙ)। **↑ ↓** দিয়ে ক্রম, **🗑** দিয়ে মুছুন। ছবি ছোট বা শিরোনাম লম্বা হলে হলুদ **⚠** লেখায় বলে দেয়।
 - **Popup banner**: **Show the popup** টিক দিন, ব্যানার বানান, কত সেকেন্ড পরে আসবে, কতবার (দিনে একবার / একবারই / প্রতিবার) আর কোথায় (শুধু হোমপেইজ / সব পেইজ) বেছে নিন। কার্ট, চেকআউট বা অ্যাকাউন্ট পেইজে কখনো আসে না।
 - **Second banner**: হোমপেইজের নিচের দিকের ব্যানার।
 - শেষে স্ক্রিনের নিচের **Save** চাপুন। কয়েক সেকেন্ডের মধ্যে দোকানে বদল দেখাবে।
 
-কোনো সিজন চালু থাকলে উপরে সিজনের ব্যানার দেখায়; সেগুলো **Seasons** পেইজে বদলাবেন।
+এখানের ব্যানার **Save চাপলেই সাথে সাথে** হোমপেইজে সবার আগে দেখায়; কোনো তারিখ বা সিজন বাছতে হয় না। কোনো সিজন চললে সেই সিজনের ব্যানার (যদি দেন) এগুলোর পরে দেখায়।
 
 ## ছবি বদলানো: ব্যানার, ক্যাটাগরি আর প্রোডাক্ট
 
-দোকানে এখন কার্টুন নয়, আসল ছবি আছে। সব খুঁটিনাটি (কোন অংশে কী আছে, কোন ছবি কোন মাপে, ছবি তোলার টিপস) আলাদা [ছবি ও ওয়েবসাইট গাইডে](https://absvai.absvai.workers.dev/admin/photo-guide-bn.html) আছে। নিজের ছবি দিতে:
+দোকানে এখন কার্টুন নয়, আসল ছবি আছে। সব খুঁটিনাটি (কোন অংশে কী আছে, কোন ছবি কোন মাপে, ছবি তোলার টিপস) আলাদা [ছবি ও ওয়েবসাইট গাইডে](https://vandarmart.com/admin/photo-guide-bn.html) আছে। নিজের ছবি দিতে:
 
 | কোন ছবি | কোথায় বদলাবেন | কেমন ছবি দেবেন |
 |---|---|---|
-| হোমপেইজের বড় ব্যানার, সিজন চলার সময় (এখন শীত) | [Seasons](https://absvai.absvai.workers.dev/admin/#/seasons) → **Winter** সারিতে চাপুন → **Banners while the season is live** → **✏️ Edit** → **Change photo** | চওড়া ছবি, প্রায় ২০০০ × ৮৬০ পিক্সেল: জিনিস ডান দিকে, বাম দিকে ফাঁকা জায়গা (সেখানে লেখা বসে) |
-| হোমপেইজের বড় ব্যানার, কোনো সিজন না থাকলে | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Big banners at the top of the homepage** → **✏️ Edit** → **Change photo** | একই রকম চওড়া ছবি |
-| হোমপেইজের নিচের দ্বিতীয় ব্যানার | [Website & banners](https://absvai.absvai.workers.dev/admin/#/website) → **Second banner** | চারকোনা (বর্গ) ছবি, ১০০০ পিক্সেল বা বড় |
-| ক্যাটাগরির গোল ছবি | [Categories](https://absvai.absvai.workers.dev/admin/#/categories) → ক্যাটাগরির **Edit** → **Change picture** | চারকোনা ছবি, জিনিস ঠিক মাঝখানে (ছবিটা গোল করে কাটা হয়) |
-| প্রোডাক্টের ছবি | [Products](https://absvai.absvai.workers.dev/admin/#/products) → প্রোডাক্টে চাপুন → **Photos & video** | চারকোনা ছবি, ১০০০ থেকে ২০০০ পিক্সেল, ভালো আলোতে তোলা |
+| হোমপেইজের বড় ব্যানার (Save চাপলেই সাথে সাথে দেখায়) | [Website & banners](https://vandarmart.com/admin/#/website) → **Big banners at the top of the homepage** → **✏️ Edit** → **Change photo** | চওড়া ছবি, প্রায় ২০০০ × ৮৬০ পিক্সেল: জিনিস ডান দিকে, বাম দিকে ফাঁকা জায়গা (সেখানে লেখা বসে) |
+| হোমপেইজের নিচের দ্বিতীয় ব্যানার | [Website & banners](https://vandarmart.com/admin/#/website) → **Second banner** | চারকোনা (বর্গ) ছবি, ১০০০ পিক্সেল বা বড় |
+| ক্যাটাগরির গোল ছবি | [Categories](https://vandarmart.com/admin/#/categories) → ক্যাটাগরির **Edit** → **Change picture** | চারকোনা ছবি, জিনিস ঠিক মাঝখানে (ছবিটা গোল করে কাটা হয়) |
+| প্রোডাক্টের ছবি | [Products](https://vandarmart.com/admin/#/products) → প্রোডাক্টে চাপুন → **Photos & video** | চারকোনা ছবি, ১০০০ থেকে ২০০০ পিক্সেল, ভালো আলোতে তোলা |
 
 - মোবাইলে ব্যানার চওড়া কিন্তু চিকন দেখায়, শুধু শিরোনাম আর বাটন সহ; তাই শিরোনাম ছোট রাখুন (৩ থেকে ৬ শব্দ)।
 - ছবি দিলে সিস্টেম নিজে ছবির ধরন বেছে নেয়: চওড়া ছবি হলে **Photo fills the banner** (ছবি পুরো ব্যানার জুড়ে, লেখার পেছনে হালকা কালো ছায়া), চারকোনা ছবি হলে **Photo on the right half** (ছবি ডান অর্ধেকে, বাকিটা ব্যানারের রঙ)। চাইলে নিজে বদলাতে পারেন।
@@ -311,7 +316,7 @@
 
 ## সিজন
 
-[Seasons](https://absvai.absvai.workers.dev/admin/#/seasons): শীত (খেজুর গুড়), আম, রমজান, ঈদ…
+[Seasons](https://vandarmart.com/admin/#/seasons): শীত (খেজুর গুড়), আম, রমজান, ঈদ…
 1. সিজন খুলে এই বছরের **শুরু ও শেষের তারিখ** দিন (রমজান-ঈদের তারিখ প্রতি বছর বদলায়, তাই প্রতি বছর দিতে হয়)।
 2. সিজনের ব্যানার দিন।
 3. সিজনের প্রোডাক্টে সিজন টিক দেওয়া আছে কি না দেখুন।
@@ -320,7 +325,7 @@
 
 ## কাস্টমার
 
-[Customers](https://absvai.absvai.workers.dev/admin/#/customers): প্রতিটি কাস্টমারের অর্ডার, ডেলিভারি আর ফেরতের হিসাব। যারা সবসময় পার্সেল নেন তাদের **trusted** টিক দিন।
+[Customers](https://vandarmart.com/admin/#/customers): প্রতিটি কাস্টমারের অর্ডার, ডেলিভারি আর ফেরতের হিসাব। যারা সবসময় পার্সেল নেন তাদের **trusted** টিক দিন।
 
 ## সেলার (মার্কেটপ্লেস)
 
@@ -328,17 +333,17 @@
 
 ### চালু / বন্ধ করা
 
-[Sellers](https://absvai.absvai.workers.dev/admin/#/sellers) পেইজের উপরে একটা সুইচ আছে:
+[Sellers](https://vandarmart.com/admin/#/sellers) পেইজের উপরে একটা সুইচ আছে:
 - **ON (সবুজ)**: দোকানের মেনু আর ফুটারে **Sell with us** লিংক দেখায়, নতুন সেলার রেজিস্টার করতে পারেন।
-- **OFF**: লিংক লুকানো থাকে, [/sell](https://absvai.absvai.workers.dev/sell) পেইজে "রেজিস্ট্রেশন বন্ধ" লেখা দেখায়। আগের সেলাররা কাজ চালিয়ে যেতে পারেন।
+- **OFF**: লিংক লুকানো থাকে, [/sell](https://vandarmart.com/sell) পেইজে "রেজিস্ট্রেশন বন্ধ" লেখা দেখায়। আগের সেলাররা কাজ চালিয়ে যেতে পারেন।
 - একই কার্ডে **New sellers' commission (%)**: নতুন সেলার কত কমিশন দিয়ে শুরু করবেন।
 
 ### ধাপগুলো
 
-1. **সেলার রেজিস্টার করেন** [/sell](https://absvai.absvai.workers.dev/sell) পেইজে: দোকানের নাম, নিজের নাম, মোবাইল, ইমেইল, পাসওয়ার্ড, জেলা, কী বিক্রি করবেন, আর চাইলে বিকাশ/নগদ/রকেট নম্বর।
-2. **সেলার সাথে সাথে লগইন করতে পারেন** [সেলার পোর্টালে](https://absvai.absvai.workers.dev/seller/) আর প্রোডাক্ট (ছবি, দাম, স্টক) ও পেমেন্ট অ্যাকাউন্ট (বিকাশ, নগদ, রকেট বা ব্যাংক) যোগ করতে পারেন। পোর্টালে লেখা থাকে যে অনুমোদনের অপেক্ষায় আছে।
-3. **আপনি সেলার অনুমোদন দেন**: [Sellers](https://absvai.absvai.workers.dev/admin/#/sellers) এ সেলারে চাপুন, **Commission (%)** ঠিক করুন, **Approve seller** চাপুন। না দিতে চাইলে কারণ লিখে **Don't approve** (সেলার লগইনের সময় কারণ দেখবেন)।
-4. **আপনি প্রতিটি প্রোডাক্ট অনুমোদন দেন**: [Products to approve](https://absvai.absvai.workers.dev/admin/#/sellers?tab=products) এ **Open** চেপে দেখুন, তারপর **Approve & publish**, অথবা কী বদলাতে হবে লিখে **Send back**। সেলার অনুমোদিত না হলে বাটনে **Approve the seller first** লেখা থাকে। অনুমোদিত প্রোডাক্ট দোকানে "Sold by …" সহ দেখায়।
+1. **সেলার রেজিস্টার করেন** [/sell](https://vandarmart.com/sell) পেইজে: দোকানের নাম, নিজের নাম, মোবাইল, ইমেইল, পাসওয়ার্ড, জেলা, কী বিক্রি করবেন, আর চাইলে বিকাশ/নগদ/রকেট নম্বর।
+2. **সেলার সাথে সাথে লগইন করতে পারেন** [সেলার পোর্টালে](https://vandarmart.com/seller/) আর প্রোডাক্ট (ছবি, দাম, স্টক) ও পেমেন্ট অ্যাকাউন্ট (বিকাশ, নগদ, রকেট বা ব্যাংক) যোগ করতে পারেন। পোর্টালে লেখা থাকে যে অনুমোদনের অপেক্ষায় আছে।
+3. **আপনি সেলার অনুমোদন দেন**: [Sellers](https://vandarmart.com/admin/#/sellers) এ সেলারে চাপুন, **Commission (%)** ঠিক করুন, **Approve seller** চাপুন। না দিতে চাইলে কারণ লিখে **Don't approve** (সেলার লগইনের সময় কারণ দেখবেন)।
+4. **আপনি প্রতিটি প্রোডাক্ট অনুমোদন দেন**: [Products to approve](https://vandarmart.com/admin/#/sellers?tab=products) এ **Open** চেপে দেখুন, তারপর **Approve & publish**, অথবা কী বদলাতে হবে লিখে **Send back**। সেলার অনুমোদিত না হলে বাটনে **Approve the seller first** লেখা থাকে। অনুমোদিত প্রোডাক্ট দোকানে "Sold by …" সহ দেখায়।
 5. **আপনি প্রতিটি পেমেন্ট অ্যাকাউন্ট অনুমোদন দেন**: সেলার খুলে **Payment accounts** অংশে **Approve**, অথবা কারণ লিখে **Don't approve**। শুধু অনুমোদিত অ্যাকাউন্টেই টাকা পাঠাবেন; পাঠানোর আগে সেলারকে ফোন করে নাম আর নম্বর মিলিয়ে নিন। সর্বশেষ অনুমোদিত অ্যাকাউন্টটাই সেলারের প্রধান অ্যাকাউন্ট হিসেবে দেখায়।
 
 ### পরে যা হয়
@@ -350,32 +355,33 @@
 
 ## ইমেইল
 
-[Emails](https://absvai.absvai.workers.dev/admin/#/emails):
+[Emails](https://vandarmart.com/admin/#/emails):
 - **আপনার কাছে** (absvai1020@gmail.com): প্রতিটি নতুন অর্ডার, বাতিল/ফেরত/ডেলিভারি, পাইকারি জিজ্ঞাসা, নতুন সেলার, আর প্রতিদিন সকালে আগের দিনের হিসাব।
 - **কাস্টমারের কাছে** (যারা চেকআউটে ইমেইল দেন): অর্ডারের রসিদ, কনফার্ম হলে ইনভয়েস, কুরিয়ারে গেলে ট্র্যাকিং, ডেলিভারি হলে খবর।
 - **Send an offer**: যারা "Email me offers" টিক দিয়েছেন তাদের সবাইকে অফার পাঠান।
 - **Send me a test email** চেপে দেখে নিন ইমেইল আসছে কি না। নিচের তালিকায় প্রতিটি ইমেইল আর না গেলে কারণ দেখায়।
 
-কাস্টমারকে ইমেইল পাঠাতে Resend এ নিজের ডোমেইন (যেমন absvai.com) যাচাই করতে হয়; তার আগ পর্যন্ত শুধু আপনার ইমেইলে যায়। ডোমেইন যাচাই হলে **Emails come from** ঘরে যেমন `Abs Vai <orders@absvai.com>` লিখুন।
+কাস্টমারকে ইমেইল পাঠাতে Resend এ নিজের ডোমেইন (যেমন vandarmart.com) যাচাই করতে হয়; তার আগ পর্যন্ত শুধু আপনার ইমেইলে যায়। ডোমেইন যাচাই হলে **Emails come from** ঘরে যেমন `Vandar Mart <orders@vandarmart.com>` লিখুন।
 
 ## সেটিংস
 
-[Settings](https://absvai.absvai.workers.dev/admin/#/settings): যা বদলাবেন বদলে স্ক্রিনের নিচের **Save** চাপুন।
+[Settings](https://vandarmart.com/admin/#/settings): যা বদলাবেন বদলে স্ক্রিনের নিচের **Save** চাপুন।
 - **Store**: ফেসবুক, ইনস্টাগ্রাম, ইউটিউব, টিকটকের লিংক (খালি রাখলে লুকানো থাকে), সাপোর্ট ফোন, WhatsApp নম্বর, কোম্পানির নাম ও ঠিকানা (ইনভয়েসে ছাপা হয়)।
 - **Colours**: দোকানের রঙ। লেখা পড়তে কষ্ট হলে সতর্ক করে। **Back to the default colours** দিয়ে আগের রঙে ফেরত।
-- **Delivery charges**: প্রতিটি জোনের জন্য ১ কেজি পর্যন্ত চার্জ, প্রতি বাড়তি কেজি, আর কতদিনে পৌঁছায়:
-  - **Inside Dhaka City**: ঢাকা উত্তর ও দক্ষিণ সিটি।
-  - **Dhaka Suburbs**: ঢাকা জেলা, গাজীপুর, নারায়ণগঞ্জ।
-  - **Outside Dhaka**: বাকি সব জেলা।
+- **Delivery charges → Delivery areas**: চেকআউটে কাস্টমার এই এরিয়াগুলোর একটা বেছে নেন, আর তার চার্জ নিজে থেকে টোটালে যোগ হয়। প্রতিটি এরিয়ার **Area name** (চেকআউটে যে নাম দেখায়), ১ কেজি পর্যন্ত চার্জ, প্রতি বাড়তি কেজি আর কতদিনে পৌঁছায় যেকোনো সময় বদলাতে পারবেন।
+  - নতুন এরিয়া: **+ Add a delivery area** → নাম (যেমন **Rajbari** বা **রাজবাড়ী**) আর চার্জ (যেমন **70**) → **Save**। নাম কোনো জেলার নামের সাথে মিললে ফোনে নেওয়া অর্ডারেও সেই জেলায় এই চার্জ লাগে।
+  - মুছতে **Remove** (যে এরিয়ায় আগে অর্ডার হয়েছে সেটা মোছা যায় না; নাম বা চার্জ বদলান)।
+  - শুরুর তিনটি এরিয়ার নাম বাংলায়: **ঢাকা সিটির ভিতরে**, **ঢাকার আশেপাশে (সাভার, গাজীপুর, নারায়ণগঞ্জ)**, **ঢাকার বাইরে**। কাস্টমার চেকআউটে ঠিক যে নাম লিখবেন সেটাই দেখেন, তাই নাম বাংলায় লিখুন।
+  - **ঢাকার বাইরে** মূল এরিয়া: তালিকায় নেই এমন সব জায়গার জন্য।
 
-  নিচে **Free delivery from (৳)** (কত টাকার অর্ডারে ফ্রি ডেলিভারি) আর **Cash on Delivery fee**। কোনো জেলা অন্য জোনে নিতে চাইলে (খুব কম লাগে) **zone details** লিংক।
+  নিচে **Free delivery from (৳)** (কত টাকার অর্ডারে ফ্রি ডেলিভারি) আর **Cash on Delivery fee**।
 - **Payments**: অগ্রিম নেওয়ার জন্য বিকাশ/নগদ/রকেট নম্বর (Merchant বা Personal)।
 - **Advanced settings** (নিচে, বন্ধ করা থাকে): ট্র্যাকিং কোড, ফ্রড সুরক্ষা, SMS, AI, কুরিয়ারের কী, ম্যাপ। সেটআপের সময় একবার লাগে; সাধারণত হাত দিতে হয় না।
 - উপরের **Refresh every page now**: বাইরে থেকে কিছু বদলালে আর দোকানে না দেখালে চাপুন।
 
 ## স্টাফ ও রোল
 
-**Show all tools** → [Staff & roles](https://absvai.absvai.workers.dev/admin/#/staff) (শুধু মালিক): **+ Add staff** চেপে নাম, ইমেইল, রোল আর একটা অস্থায়ী পাসওয়ার্ড দিন।
+**Show all tools** → [Staff & roles](https://vandarmart.com/admin/#/staff) (শুধু মালিক): **+ Add staff** চেপে নাম, ইমেইল, রোল আর একটা অস্থায়ী পাসওয়ার্ড দিন।
 
 | রোল | কী করতে পারেন |
 |---|---|
@@ -390,7 +396,7 @@
 
 ## ব্লক লিস্ট
 
-**Show all tools** → [Security](https://absvai.absvai.workers.dev/admin/#/security): বারবার পার্সেল না নেওয়া নম্বর কারণসহ ব্লক করুন। ব্লক করা কাস্টমার অনলাইনে অর্ডার দিতে পারেন না, ফোন করতে বলা হয়। **Blocked attempts** এ ভুল করে আটকানো আসল কাস্টমার থাকলে **Review** চেপে ব্লক তুলে দিন।
+**Show all tools** → [Security](https://vandarmart.com/admin/#/security): বারবার পার্সেল না নেওয়া নম্বর কারণসহ ব্লক করুন। ব্লক করা কাস্টমার অনলাইনে অর্ডার দিতে পারেন না, ফোন করতে বলা হয়। **Blocked attempts** এ ভুল করে আটকানো আসল কাস্টমার থাকলে **Review** চেপে ব্লক তুলে দিন।
 
 ## চ্যাট ও অ্যাসিস্ট্যান্ট
 
@@ -402,9 +408,17 @@
 
 অর্ডারের সময় কোনো কোড যাচাই নেই: কাস্টমার শুধু অর্ডার দেন, অর্ডার পেইজে লেখা থাকে "আমরা কল করে কনফার্ম করব", আর আপনি অ্যাডমিনে সরাসরি **Confirmed** করেন। ভবিষ্যতে SMS গেটওয়ে যুক্ত করে **Settings → Advanced → SMS → Ask for an SMS code on Cash on Delivery orders** টিক দিলে তবেই কোড চালু হবে (তখন কোড অথবা লগ করা কল লাগবে)। ততদিন সব SMS **SMS outbox** এ জমা থাকে।
 
-## পোস্টকোড
+## চেকআউট: কাস্টমার যেভাবে অর্ডার দেন
 
-পোস্টকোড নিয়ে কিছু করতে হবে না। কাস্টমার চেকআউটে পোস্টকোড লিখলে (বাংলা সংখ্যাতেও, যেমন ১৭০০) এলাকা নিজে বসে যায়, পোস্ট অফিসের নাম ইংরেজি ও বাংলায় দেখায় (যেমন "Gazipur Sadar (গাজীপুর সদর)")। শহরের কিছু থানার জন্য বিভাগ ও জেলা বসে, কাস্টমার নিজে এলাকা বেছে নেন।
+চেকআউট বক্স (মূল ওয়েবসাইট আর প্রতিটি ল্যান্ডিং পেইজ, দুই জায়গাতেই) পুরোটা **বাংলায়** দেখায়। কাস্টমার বাংলা বা ইংরেজি, যেকোনো ভাষায় লিখতে পারেন। কোনো ড্রপডাউন বা পোস্টকোড নেই, আর "কাছের পরিচিত স্থান" ঘরটিও নেই:
+1. **মোবাইল নম্বর** আর **আপনার নাম**।
+2. **ডেলিভারি এলাকা**: আপনার বানানো এরিয়াগুলো বাটন হিসেবে দেখায়, প্রতিটির নিচে এই কার্টের ডেলিভারি চার্জ। একটা চাপলেই সবুজ বক্সে "ডেলিভারি চার্জ (রাজবাড়ী): ৳70 · সর্বমোট ৳…" দেখায়, মোট দাম নিজে হিসাব হয়।
+3. **পুরো ঠিকানা**: বাসা/বাড়ি, রোড, এলাকা, থানা, জেলা নিজের ভাষায় লেখা (যেমন "বাসা ১২, পাংশা, রাজবাড়ী" বা "House 12, Pangsa, Rajbari")। ঠিকানা থেকে জেলা আর থানা নিজে পড়ে নেয় (ড্যাশবোর্ডের ম্যাপ আর কুরিয়ারের জন্য)।
+4. **পেমেন্ট** (ক্যাশ অন ডেলিভারি, অথবা বিকাশ / নগদ / রকেট), তারপর **অর্ডার কনফার্ম করুন**। ল্যান্ডিং পেইজে এই বাটনে আপনার দেওয়া লেখা দেখায় (যেমন "এখনই অর্ডার করুন")।
+- ভুল হলে লাল লেখাও বাংলায় আসে, যেমন "সঠিক মোবাইল নম্বর লিখুন" বা "ডেলিভারি এলাকা বেছে নিন"।
+- **অর্ডার কনফার্ম করুন** এর নিচে সবুজ **WhatsApp-এ অর্ডার করুন** বাটন: চাপলে প্রোডাক্ট, দাম, ডেলিভারি, সর্বমোট, নাম, মোবাইল আর ঠিকানাসহ বাংলায় লেখা তৈরি হয়ে আপনার WhatsApp এ যায়। প্রোডাক্ট পেইজে **Order Now** এর নিচেও একই বাটন। WhatsApp নম্বর: [Settings](https://vandarmart.com/admin/#/settings) → **Store**।
+- অ্যাডমিন প্যানেল আগের মতো ইংরেজিতেই থাকে।
+- Pathao দিয়ে পাঠাতে থানা লাগে: ঠিকানায় থানা না থাকলে Steadfast দিয়ে পাঠান, অথবা কাস্টমারকে ফোন করে থানা জেনে নিন।
 
 ## সমস্যা হলে
 
@@ -414,9 +428,9 @@
 | ছবি ঝাপসা দেখায় | আসল বড় ছবিটা দিন (WhatsApp থেকে নেওয়া ছোট ছবি নয়): ব্যানারে প্রায় ২০০০ পিক্সেল চওড়া, প্রোডাক্ট ও ক্যাটাগরিতে ১০০০ পিক্সেল বা বড় |
 | Save চাপলে লাল লেখা আসে | লাল লেখায় কোন ঘরে কী ভুল তা বলা থাকে; ঠিক করে আবার Save |
 | "Please sign in again" | অনেকক্ষণ বসে থাকলে লগআউট হয়ে যায়; আবার লগইন করুন |
-| ইমেইল আসছে না | [Emails](https://absvai.absvai.workers.dev/admin/#/emails) এ Status দেখুন, **Send me a test email** চাপুন, স্প্যাম ফোল্ডার দেখুন |
-| কুরিয়ার বুক হচ্ছে না | [Couriers](https://absvai.absvai.workers.dev/admin/#/courier) এ **Test connection** চাপুন; কী ভুল হলে আবার পেস্ট করে Save |
-| কাস্টমার বলছেন অর্ডার খুঁজে পাচ্ছেন না | অর্ডার যে মোবাইল নম্বর দিয়ে করেছেন সেটা দিয়ে [/track](https://absvai.absvai.workers.dev/track) এ খুঁজতে বলুন, অথবা অ্যাডমিনের সার্চে নম্বর লিখে নিজে খুঁজুন |
+| ইমেইল আসছে না | [Emails](https://vandarmart.com/admin/#/emails) এ Status দেখুন, **Send me a test email** চাপুন, স্প্যাম ফোল্ডার দেখুন |
+| কুরিয়ার বুক হচ্ছে না | [Couriers](https://vandarmart.com/admin/#/courier) এ **Test connection** চাপুন; কী ভুল হলে আবার পেস্ট করে Save |
+| কাস্টমার বলছেন অর্ডার খুঁজে পাচ্ছেন না | অর্ডার যে মোবাইল নম্বর দিয়ে করেছেন সেটা দিয়ে [/track](https://vandarmart.com/track) এ খুঁজতে বলুন, অথবা অ্যাডমিনের সার্চে নম্বর লিখে নিজে খুঁজুন |
 | অর্ডার হোল্ডে আটকে আছে | কাস্টমারকে কল করে **Release hold** |
 | কোনো ধাপ বুঝছি না | অ্যাডমিনের **Assistant** বাটনে বাংলায় প্রশ্ন লিখুন |
 

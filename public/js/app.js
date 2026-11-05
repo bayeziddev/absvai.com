@@ -1,4 +1,4 @@
-// Abs Vai storefront: shared behaviour for every page. No framework. Third-party tracking only runs through track.js when
+// Storefront: shared behaviour for every page. No framework. Third-party tracking only runs through track.js when
 // the owner turns it on, and never for a prerendered page the visitor did not open.
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -170,6 +170,12 @@ function setupCarousels() {
 }
 
 // ── Quick option picker for multi-option products on cards ──
+// The options are fetched as soon as a finger (or the mouse) touches the button, and kept, so the sheet opens with them.
+const optionsCache = new Map();
+const productOptions = slug => {
+  if (!optionsCache.has(slug)) optionsCache.set(slug, api(`/api/catalog/products/${encodeURIComponent(slug)}`).catch(e => { optionsCache.delete(slug); throw e; }));
+  return optionsCache.get(slug);
+};
 async function openPicker(slug, mode) {
   const sheet = $('#pick-sheet');
   const body = $('[data-sheet-body]', sheet);
@@ -179,7 +185,7 @@ async function openPicker(slug, mode) {
   const close = () => { sheet.hidden = true; backdrop.hidden = true; };
   $$('[data-sheet-close]').forEach(b => { b.onclick = close; });
   let p;
-  try { p = await api(`/api/catalog/products/${encodeURIComponent(slug)}`); } catch (e) { body.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  try { p = await productOptions(slug); } catch (e) { body.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
   const buyable = p.variants.filter(v => v.availability?.canBuy && (v.stock > 0 || v.availability.state === 'made_to_order'));
   const choice = Object.fromEntries(p.attributes.map(a => [a.id, (buyable[0] ?? p.variants[0])?.attributes[a.id]]));
   const match = () => p.variants.find(v => p.attributes.every(a => v.attributes[a.id] === choice[a.id]));
@@ -201,6 +207,12 @@ async function openPicker(slug, mode) {
 }
 
 function setupCards() {
+  const warm = e => {
+    const card = e.target.closest?.('[data-action]')?.closest('[data-product]');
+    if (card && !Number(card.dataset.variant)) productOptions(card.dataset.product).catch(() => {});
+  };
+  document.addEventListener('pointerdown', warm, { passive: true });
+  document.addEventListener('mouseover', warm, { passive: true });
   document.addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
     if (btn) {

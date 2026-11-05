@@ -8,7 +8,7 @@ export const POLICIES: Record<string, { title: string; body: string[] }> = {
   returns: { title: 'Returns & refunds', body: [
     'Please check your parcel in front of the delivery person. If something is wrong, damaged or not what you ordered, you can return it on the spot.',
     'Food items cannot be returned once opened, except when they are spoiled or damaged on arrival. Tell us within 24 hours with a photo.',
-    'Refunds for advances and returns are sent to the wallet you paid from, usually within 3 working days. (Final policy to be confirmed by ABS VAI LTD.)',
+    'Refunds for advances and returns are sent to the wallet you paid from, usually within 3 working days. (Final policy to be confirmed by the shop.)',
   ] },
   privacy: { title: 'Privacy', body: [
     'We use your phone number, name and address only to deliver your order, confirm it and tell you about it. We do not sell your details.',

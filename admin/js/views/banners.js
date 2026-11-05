@@ -16,7 +16,7 @@ const GUIDE = '<a href="/admin/photo-guide-bn.html" target="_blank" rel="noopene
 export async function linkOptions() {
   const [cats, seasons] = await Promise.all([api('/categories').catch(() => []), api('/season-options').catch(() => [])]);
   return [
-    ['/', 'Homepage'], ['/shop', 'All products'], ['/deals', 'Deals'], ['/new', 'New arrivals'], ['/originals', 'Abs Vai Originals'],
+    ['/', 'Homepage'], ['/shop', 'All products'], ['/deals', 'Deals'], ['/new', 'New arrivals'], ['/originals', 'Our Originals'],
     ...cats.filter(c => c.is_active).map(c => [`/c/${c.slug}`, `Category: ${c.name}`]),
     ...seasons.filter(s => s.slug).map(s => [`/season/${s.slug}`, `Season: ${s.name}`]),
   ];

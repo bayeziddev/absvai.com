@@ -25,7 +25,7 @@ import { trackOrders } from '../services/tracking';
 import { addLandingView, landingById } from '../repo/landing';
 import { addReview, deliveredPurchase, reviewExists } from '../repo/reviews';
 import { purge } from '../services/cache';
-import { TAG } from '../lib/cache-tags';
+import { TAG, tagHeader } from '../lib/cache-tags';
 import { checkoutSessionId, ensureDeviceId, limiterKeys, requestIdentity, setCheckoutSession, settingsOf } from './context';
 
 export const api = new Hono<AppEnv>();
@@ -71,6 +71,10 @@ api.get('/catalog/products/:slug', async c => {
     })),
     media: d.media.filter(m => m.kind === 'image'),
     availability: d.availability,
+  }, 200, {
+    // Kept at the edge for a few minutes (saving the product refreshes it); checkout checks stock again on its own.
+    'Cache-Control': 'public, max-age=0, must-revalidate', 'CDN-Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+    'Cache-Tag': tagHeader([TAG.site, TAG.product(Number(d.product.id))]),
   });
 });
 
@@ -218,7 +222,7 @@ api.post('/checkout/quote', async c => {
     customerIsNewOrRisky = !cust || cust.delivered_count === 0 || cust.returned_count > 0;
   }
   return c.json(await quote(c.env.DB, await settingsOf(c), {
-    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId),
+    lines: sanitizeLines(body.lines), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), zoneId: posInt(body.zoneId), withAreas: body.withAreas === true,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod', customerIsNewOrRisky,
     couponCode: str(body.couponCode, 30) || null, phone,
   }));
@@ -252,7 +256,7 @@ api.post('/checkout/place', async c => {
   const landing = landingId ? await landingById(c.env.DB, landingId) : null;
   const placed = await placeOrder(c.env, await settingsOf(c), {
     phone: str(body.phone, 20), name: str(body.name, 120),
-    divisionId: int(body.divisionId) ?? 0, districtId: int(body.districtId) ?? 0, upazilaId: int(body.upazilaId) ?? 0, unionId: posInt(body.unionId),
+    divisionId: posInt(body.divisionId), districtId: posInt(body.districtId), upazilaId: posInt(body.upazilaId), unionId: posInt(body.unionId), zoneId: posInt(body.zoneId),
     postcode: asciiDigits(str(body.postcode, 4)) || null, addressLine: str(body.addressLine, 300), landmark: str(body.landmark, 200) || null, note: str(body.note, 500) || null,
     paymentMethod: body.paymentMethod === 'manual_mobile' ? 'manual_mobile' : 'cod',
     advanceTrxId: str(body.advanceTrxId, 40) || null, advanceWallet: str(body.advanceWallet, 20) || null,

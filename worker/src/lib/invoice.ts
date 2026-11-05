@@ -92,7 +92,7 @@ export function buildInvoicePdf(d: InvoiceData): Uint8Array<ArrayBuffer> {
   row(d.paymentMethod === 'cod' ? 'Due on delivery' : 'Balance due', formatTakaAscii(due), true);
 
   pdf.line(L, 70, R, 70);
-  pdf.text(L, 54, 'Thank you for shopping with Abs Vai.', { size: 9, bold: true });
+  pdf.text(L, 54, `Thank you for shopping with ${d.company.name}.`, { size: 9, bold: true });
   pdf.text(L, 41, 'Please check the parcel in front of the delivery person. Keep this invoice for returns and warranty.', { size: 8, color: '#5A4A40' });
   return pdf.toBytes();
 }

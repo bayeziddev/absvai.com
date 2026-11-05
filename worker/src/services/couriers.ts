@@ -123,6 +123,8 @@ export async function bookOrder(env: Env, orderId: number, courier: ApiCourier, 
     consignmentId = String(c.consignment_id ?? '');
     trackingId = String(c.tracking_code ?? consignmentId);
   } else {
+    // Pathao needs the thana. An address the customer typed without one (no district or thana read from it) cannot go.
+    if (!Number(o.upazila_id)) throw bad('Pathao needs the thana, and this address does not name one. Book it with Steadfast, or call the customer for the thana and enter the order again.');
     const area = await courierAreaFor(env.DB, 'pathao', Number(o.upazila_id));
     if (!area?.city || !area.zone) throw new HttpError(409, `Choose Pathao's city and zone for ${o.upazila_name}, ${o.district_name} first.`, { needsArea: { upazilaId: Number(o.upazila_id), name: `${o.upazila_name}, ${o.district_name}` } });
     const storeId = Number(s.pathao_store_id);
