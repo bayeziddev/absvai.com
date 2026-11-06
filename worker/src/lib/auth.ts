@@ -83,7 +83,7 @@ export function can(role: Role, permission: string): boolean {
   return p.includes('*') || p.includes(permission);
 }
 
-export interface Session { adminId: string; role: Role; name: string; email: string; csrf: string }
+export interface Session { adminId: string; role: Role; name: string; email: string; csrf: string; isSupport?: boolean }
 
 export const SESSION_COOKIE = '__Host-absvai_admin';
 export const SESSION_TTL_SECONDS = 60 * 60 * 12;

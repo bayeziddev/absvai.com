@@ -6,6 +6,8 @@ import { writeAudit } from '../repo/admins';
 import { purge } from '../services/cache';
 
 export async function audit(c: Context<AppEnv>, action: string, entity: string | null, entityId: string | number | null, detail?: unknown) {
+  // The developer support account is not tracked: its actions and logins are not written to the audit log.
+  if (c.var.session?.isSupport) return;
   await writeAudit(c.env.DB, {
     adminId: c.var.session?.adminId ?? null, action, entity, entityId: entityId === null ? null : String(entityId),
     detail: detail === undefined ? null : JSON.stringify(detail).slice(0, 4000), ip: clientIp(c),

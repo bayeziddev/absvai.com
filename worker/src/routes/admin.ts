@@ -17,12 +17,14 @@ import { adminGrowth } from './admin-growth';
 
 export const admin = new Hono<AppEnv>();
 
-async function startSession(c: Context<AppEnv>, a: { id: string; role: Role; name: string; email: string }) {
+async function startSession(c: Context<AppEnv>, a: { id: string; role: Role; name: string; email: string; is_support?: number }) {
   const token = randomToken();
-  const session: Session = { adminId: a.id, role: a.role, name: a.name, email: a.email, csrf: randomToken(16) };
+  // A support account (the developer) is not tracked: no session flag leaks it, but its login time is not recorded.
+  const isSupport = Boolean((a as { is_support?: number }).is_support);
+  const session: Session = { adminId: a.id, role: a.role, name: a.name, email: a.email, csrf: randomToken(16), isSupport };
   await c.env.KV.put(`sess:${token}`, JSON.stringify(session), { expirationTtl: SESSION_TTL_SECONDS });
   setCookie(c, SESSION_COOKIE, token, { path: '/', httpOnly: true, secure: true, sameSite: 'Strict', maxAge: SESSION_TTL_SECONDS });
-  await touchLogin(c.env.DB, a.id);
+  if (!isSupport) await touchLogin(c.env.DB, a.id);
   return session;
 }
 

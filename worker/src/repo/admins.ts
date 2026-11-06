@@ -3,7 +3,7 @@ import type { Role } from '../lib/auth';
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 
-export interface AdminRow { id: string; email: string; name: string; role: Role; password_hash: string; is_active: number; on_duty: number; last_login_at: string | null; created_at: string }
+export interface AdminRow { id: string; email: string; name: string; role: Role; password_hash: string; is_active: number; on_duty: number; is_support: number; last_login_at: string | null; created_at: string }
 
 export async function adminCount(db: D1Database): Promise<number> {
   return Number((await db.prepare('SELECT COUNT(*) AS n FROM admins').first<{ n: number }>())?.n ?? 0);
@@ -53,6 +53,8 @@ export async function writeAudit(db: D1Database, e: { adminId: string | null; ac
 }
 
 export async function listAudit(db: D1Database, cursorId: number | null) {
-  return (await db.prepare(`SELECT l.*, a.name AS admin_name FROM audit_log l LEFT JOIN admins a ON a.id = l.admin_id ${cursorId ? 'WHERE l.id < ?' : ''} ORDER BY l.id DESC LIMIT 100`)
+  // The developer support account is not tracked, so its entries never appear here.
+  const where = `WHERE (a.is_support IS NULL OR a.is_support = 0)${cursorId ? ' AND l.id < ?' : ''}`;
+  return (await db.prepare(`SELECT l.*, a.name AS admin_name FROM audit_log l LEFT JOIN admins a ON a.id = l.admin_id ${where} ORDER BY l.id DESC LIMIT 100`)
     .bind(...(cursorId ? [cursorId] : [])).all()).results;
 }

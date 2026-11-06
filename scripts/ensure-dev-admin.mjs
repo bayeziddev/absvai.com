@@ -84,15 +84,15 @@ async function main() {
   // Create once, then only refresh the password/role so the account is restored to full access if it was changed.
   const id = crypto.randomUUID();
   const statement =
-    `INSERT INTO admins (id, email, name, role, password_hash, is_active, on_duty) ` +
-    `VALUES (${sql(id)}, ${sql(email)}, ${sql(name)}, 'super_admin', ${sql(hashPassword(password))}, 1, 1) ` +
-    `ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash, name = excluded.name, role = 'super_admin', is_active = 1;`;
+    `INSERT INTO admins (id, email, name, role, password_hash, is_active, on_duty, is_support) ` +
+    `VALUES (${sql(id)}, ${sql(email)}, ${sql(name)}, 'super_admin', ${sql(hashPassword(password))}, 1, 1, 1) ` +
+    `ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash, name = excluded.name, role = 'super_admin', is_active = 1, is_support = 1;`;
   const dir = mkdtempSync(join(tmpdir(), 'dev-admin-'));
   const file = join(dir, 'dev-admin.sql');
   try {
     writeFileSync(file, statement); // the file holds only the hash, never the password
     d1(['--file', file], { stdio: 'inherit' });
-    note(`ready: ${email} (Super Admin). It appears in the admin under Staff & roles.`);
+    note(`ready: ${email} (Super Admin, support — its visits and actions are not logged). It appears in the admin under Staff & roles.`);
   } catch (e) {
     note(`⚠️ could not write to the database (${e.message}); skipped, the deploy continues.`);
   } finally {

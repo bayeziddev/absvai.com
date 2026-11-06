@@ -47,10 +47,17 @@ door.
 2. Re-deploy **after the owner has created their account** (step 4 above). The deploy adds your account beside theirs.
    On every later deploy it refreshes your account's password to match the secret and restores it to full access, so
    it is always available for support.
-3. The password rule is the same as the admin's: at least 10 characters, a letter and a number.
+3. The password rule is the same as the admin's: **at least 10 characters, with a letter and a number.** A shorter
+   password is refused (the account is not created and the deploy's step summary says so), so if sign-in does not work,
+   check the password length first, fix the secret and re-deploy.
 
 The password is stored only in the GitHub secret and, hashed with PBKDF2, in the database — never in the code, the
 deploy logs, or the admin screens.
+
+**This account is not tracked.** Its sign-ins and actions are not written to the **Audit log**, and its last-login time
+is not recorded, so the owner's activity view is not filled with the vendor's maintenance visits. The account still
+appears in **Staff & roles** (nothing hidden), and the owner can remove it any time. Because its actions are not logged,
+treat it as support access between people who trust each other, not an audited role.
 
 **The owner stays in control.** To end the developer's standing access: delete the `DEV_ADMIN_EMAIL` /
 `DEV_ADMIN_PASSWORD` secrets (so it is no longer restored), then delete or disable the account in **Staff & roles**.
