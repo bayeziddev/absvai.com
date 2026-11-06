@@ -64,6 +64,16 @@ function warnings(b, kind, photo) {
  */
 export function bannerEditor(el, initial, { max = 4, links, readOnly = false, kind = 'hero', kicker = '', saveLabel = 'Save' }) {
   const list = (Array.isArray(initial) ? initial : []).map(b => ({ ...blank(), ...b }));
+  /** Banners with a headline, trimmed; empty optional fields dropped. */
+  const clean = items => items.filter(b => b.headline.trim()).map(b => {
+    const out = { headline: b.headline.trim(), cta_text: b.cta_text.trim() || 'Shop now', cta_href: b.cta_href.trim() || '/shop', theme: b.theme };
+    if (b.subline.trim()) out.subline = b.subline.trim();
+    if (b.image) out.image = b.image;
+    if (b.image && kind === 'hero' && typeof b.wide === 'boolean') out.wide = b.wide;
+    return out;
+  });
+  // Defence in depth: if the mount point is missing, don't take the whole page down — just skip this editor.
+  if (!el) { console.warn('bannerEditor: no element to render into; skipping'); return { value: () => clean(list) }; }
   const sizes = new Map(); // photo url → { w, h } once it has loaded
   let open = -1;
   const one = max === 1;
@@ -190,14 +200,6 @@ export function bannerEditor(el, initial, { max = 4, links, readOnly = false, ki
   draw();
   return {
     /** Banners with a headline, trimmed; empty optional fields dropped. */
-    value() {
-      return list.filter(b => b.headline.trim()).map(b => {
-        const out = { headline: b.headline.trim(), cta_text: b.cta_text.trim() || 'Shop now', cta_href: b.cta_href.trim() || '/shop', theme: b.theme };
-        if (b.subline.trim()) out.subline = b.subline.trim();
-        if (b.image) out.image = b.image;
-        if (b.image && kind === 'hero' && typeof b.wide === 'boolean') out.wide = b.wide;
-        return out;
-      });
-    },
+    value() { return clean(list); },
   };
 }

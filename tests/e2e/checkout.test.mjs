@@ -414,3 +414,33 @@ describe('admin smart upload form', () => {
     await ctx.close();
   });
 });
+
+describe('admin Website & banners page', () => {
+  // Regression: a missing mount point (e.g. the Second banner card) once made bannerEditor crash the whole page.
+  // All three banner editors, the food-business band and Save must render, with no page error.
+  it('renders all three banner editors, the food-business band and Save', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${server.base}/admin/`);
+    await page.fill('input[name=email]', 'owner@absvai.test');
+    await page.fill('input[name=password]', 'correct-horse-42');
+    await page.click('#auth button');
+    await page.waitForSelector('.stages');
+
+    await page.goto(`${server.base}/admin/#/website`);
+    assert.match(await page.textContent('.page-head h1'), /Website & banners/);
+    // Each banner editor mounts and draws into its own list (a banner card, or the "+ Add" button when empty) —
+    // proving none got a null element and crashed. The demo seed ships a second banner, so #bn-promo shows a card.
+    await page.waitForSelector('#bn-home .bn-card, #bn-home .bn-add');
+    await page.waitForSelector('#bn-pop .bn-card, #bn-pop .bn-add');
+    await page.waitForSelector('#bn-promo .bn-card, #bn-promo .bn-add'); // the Second banner card that had gone missing
+    // The "For small food businesses" band and the Save button are there too.
+    assert.ok(await page.$('#biz-on'));
+    assert.ok(await page.$('#biz-kicker'));
+    assert.ok(await page.$('#save'));
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
+});

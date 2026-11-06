@@ -55,6 +55,11 @@ export async function website(v) {
         </div>
       </div>
 
+      <div class="card"><h2>Second banner</h2>
+        <p class="small muted">One banner further down the homepage, with a square photo on its right. It shows <b>right after you press Save</b>. Leave it empty to hide it.</p>
+        <div id="bn-promo" class="bn-list"></div>
+      </div>
+
       <div class="card"><h2>&ldquo;For small food businesses&rdquo; banner</h2>
         <p class="small muted">The dark banner further down the homepage with the machine photo. Change the picture, the words and the two buttons here. It shows <b>right after you press Save</b>, no dates needed.</p>
         <label class="check ws-switch"><input type="checkbox" id="biz-on" ${biz.enabled === false ? '' : 'checked'} ${dis}> Show this banner</label>
