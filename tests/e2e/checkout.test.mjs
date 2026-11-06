@@ -252,6 +252,19 @@ describe('storefront checkout', () => {
     await page.waitForFunction(() => /back in season/.test(document.querySelector('#notify [data-msg]').textContent));
     await ctx.close();
   });
+
+  it('the announcement shows once on a phone (no duplicated marquee copy)', async () => {
+    const { ctx, page, errors } = await phone();
+    await page.goto(`${server.base}/`);
+    await page.waitForSelector('.announce');
+    // The markup keeps two spans (one is an aria-hidden scroll aid). On a phone exactly one must be visible —
+    // the old mobile marquee showed both, so a short message like "অর্ডার করুন" appeared twice.
+    const visible = await page.$$eval('.announce-track span', els => els.filter(e => getComputedStyle(e).display !== 'none').length);
+    assert.equal(visible, 1);
+    assert.ok((await page.textContent('.announce-track span:not([aria-hidden])')).trim().length > 0);
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  });
 });
 
 describe('admin smart upload form', () => {
