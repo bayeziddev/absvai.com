@@ -419,6 +419,20 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
             <legend><span class="step-no">২</span>ডেলিভারি ঠিকানা</legend>
             <label class="field"><span>সম্পূর্ণ ঠিকানা <b class="req">*</b></span><textarea name="addressLine" rows={3} autocomplete="street-address" placeholder="বাসা/বাড়ি, রোড, এলাকা, থানা ও জেলা (বাংলা বা ইংরেজিতে), যেমন: বাসা ১২, রোড ৫, মিরপুর ১০, ঢাকা" maxlength={300} required /></label>
             <label class="field"><span>অতিরিক্ত নোট <small class="opt">ঐচ্ছিক</small></span><textarea name="note" rows={2} maxlength={500} placeholder="যেমন: বিকেলে ডেলিভারি দিলে ভালো হয়" /></label>
+            <div class="co-areas">
+              <h3>ডেলিভারি চার্জ <b class="req">*</b></h3>
+              <div class="area-options" role="radiogroup" aria-label="ডেলিভারি চার্জ" data-areas>
+                {p.areas.map(a => (
+                  <label class="area-option">
+                    <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
+                    <span class="area-text"><strong>{a.name}</strong>{a.note && a.note !== a.name && <small>{a.note}</small>}</span>
+                    <b class="area-charge" data-area-charge={String(a.id)}>{a.baseChargePaisa ? bnTaka(a.baseChargePaisa) : 'ফ্রি'}</b>
+                  </label>
+                ))}
+              </div>
+              <p class="field-note">আপনার ঠিকানা অনুযায়ী একটি অপশন বেছে নিন।</p>
+              <p class="co-delivery" data-co-delivery aria-live="polite" hidden />
+            </div>
           </fieldset>
           <fieldset class="co-step">
             <legend><span class="step-no">৩</span>পেমেন্ট</legend>
@@ -445,21 +459,6 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
           <p class="co-kicker">আপনার পছন্দ</p>
           <h2>অর্ডারের বিবরণ</h2>
           <div class="co-lines" data-co-lines><p class="muted">লোড হচ্ছে…</p></div>
-          <div class="co-areas">
-            <h3>ডেলিভারি চার্জ</h3>
-            <div class="area-options" role="radiogroup" aria-label="ডেলিভারি চার্জ" data-areas>
-              {p.areas.map(a => (
-                <label class="area-option">
-                  <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
-                  <span class="area-text"><strong>{a.name}</strong>{a.note && a.note !== a.name && <small>{a.note}</small>}</span>
-                  <b class="area-charge" data-area-charge={String(a.id)}>{a.baseChargePaisa ? bnTaka(a.baseChargePaisa) : 'ফ্রি'}</b>
-                  <span class="area-tick" aria-hidden="true"><Icon name="check" size={16} /></span>
-                </label>
-              ))}
-            </div>
-            <p class="field-note">আপনার ঠিকানা অনুযায়ী একটি অপশন নির্বাচন করুন।</p>
-            <p class="co-delivery" data-co-delivery aria-live="polite" hidden />
-          </div>
           <div class="coupon-box">
             <label class="field"><span>কুপন কোড <small class="opt">ঐচ্ছিক</small></span>
               <span class="coupon-row"><input name="couponCode" value={p.couponCode ?? ''} autocomplete="off" autocapitalize="characters" maxlength={30} placeholder="যেমন: EID100" /><button class="btn btn-outline" type="button" data-coupon-apply>প্রয়োগ</button></span>

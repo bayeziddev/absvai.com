@@ -36,6 +36,8 @@ import { accountById, accountOrders, memberOffers, type MemberOffer } from '../r
 import { publicAccount } from './account';
 import { signedInAccountId } from './context';
 import type { Banner } from '../views/components';
+import { bannerLayout } from '../views/components';
+import { SIZES, srcsetOf } from '../lib/images';
 import { Layout, type LayoutProps } from '../views/layout';
 import {
   AccountPage, type BizBand, CartPage, CategoriesPage, CheckoutPage, ContactPage, HomePage, ListingPage, NotFoundPage, OrderPage, ProductPage, productPageData, SellPage, SimplePage, TrackPage, WishlistPage,
@@ -105,9 +107,15 @@ pages.get('/', async c => {
   ]);
   const s = sh.settings;
   const tags = [TAG.home, TAG.listing, ...activeSeasons.map(x => TAG.season(x.slug)), ...cardTags(inSeason.items, featured.items, originals.items, deals.items, newest.items)];
+  // Preload the first hero banner's photo (the LCP) so it downloads with the CSS, not after the HTML is parsed.
+  const hero = banners[0];
+  const heroLayout = hero?.image ? bannerLayout(hero) : 'none';
+  const preloadImage = hero?.image && (heroLayout === 'wide' || heroLayout === 'side')
+    ? { href: hero.image, srcset: srcsetOf(hero.image), sizes: heroLayout === 'wide' ? SIZES.heroWide : SIZES.heroSide }
+    : undefined;
   return render(c, sh, {
     title: storeName(s), description: 'Seasonal food, masala, food-business machines, tools, clothing and gadgets. Cash on Delivery all over Bangladesh.',
-    path: '/', tab: 'home',
+    path: '/', tab: 'home', preloadImage,
     jsonLd: [
       { '@context': 'https://schema.org', '@type': 'Organization', name: companyName(s), url: c.env.SITE_URL, logo: `${c.env.SITE_URL}/favicon.svg` },
       { '@context': 'https://schema.org', '@type': 'WebSite', name: storeName(s), url: c.env.SITE_URL, potentialAction: { '@type': 'SearchAction', target: `${c.env.SITE_URL}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },

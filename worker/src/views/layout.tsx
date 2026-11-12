@@ -26,6 +26,8 @@ export interface LayoutProps {
   bodyClass?: string;
   /** The stylesheet, put inside the page (lib/page-css); without it the page links /css/app.css. */
   css?: string | null;
+  /** The page's largest above-the-fold image (hero/product photo): preloaded so it downloads first and LCP is fast. */
+  preloadImage?: { href: string; srcset?: string; sizes: string };
 }
 
 const json = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
@@ -105,6 +107,7 @@ export function Layout(p: LayoutProps) {
         {/* Headings and body text: both start downloading with the page, before the browser reaches the text. */}
         <link rel="preload" href="/fonts/poppins-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
         <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+        {p.preloadImage && <link rel="preload" as="image" href={p.preloadImage.href} imagesrcset={p.preloadImage.srcset} imagesizes={p.preloadImage.sizes} fetchpriority="high" />}
         {p.css ? <style dangerouslySetInnerHTML={{ __html: p.css }} /> : <link rel="stylesheet" href="/css/app.css" />}
         {(p.styles ?? []).map(href => <link rel="stylesheet" href={href} />)}
         {brandVars && <style dangerouslySetInnerHTML={{ __html: `:root{${brandVars}}` }} />}
