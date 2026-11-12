@@ -451,7 +451,7 @@ export function CheckoutForm(p: { wallets: Array<{ wallet: string; number: strin
               {p.areas.map(a => (
                 <label class="area-option">
                   <input type="radio" name="zoneId" value={String(a.id)} checked={p.areas.length === 1} />
-                  <span class="area-text"><strong>{a.name}</strong>{a.note && <small>{a.note}</small>}</span>
+                  <span class="area-text"><strong>{a.name}</strong>{a.note && a.note !== a.name && <small>{a.note}</small>}</span>
                   <b class="area-charge" data-area-charge={String(a.id)}>{a.baseChargePaisa ? bnTaka(a.baseChargePaisa) : 'ফ্রি'}</b>
                   <span class="area-tick" aria-hidden="true"><Icon name="check" size={16} /></span>
                 </label>
